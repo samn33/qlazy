@@ -1,0 +1,3 @@
+*.o
+py/*.egg-info
+py/qlazy/__pycache__
