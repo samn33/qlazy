@@ -5,7 +5,7 @@ import numpy as np
 from qlazypy.error import *
 from qlazypy.config import *
 
-lib = ctypes.CDLL('libqlazy.so',mode=ctypes.RTLD_GLOBAL)
+lib = ctypes.CDLL('libQlazy.so',mode=ctypes.RTLD_GLOBAL)
 try:
     libc = ctypes.CDLL('libc.so.6',mode=ctypes.RTLD_GLOBAL)
 except:

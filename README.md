@@ -3,24 +3,15 @@ qlazy
 
 Quantum Computer Simulator
 
-## Description
-
-    * command and library (qlazy,libqlazy.so)
-    * python package (qlazypy)
-
 ## Install
-
-### readline (for interactive mode)
-
-    $ sudo apt install readline-dev
 
 ### command and library (qlazy,libqlazy.so)
 
+    $ sudo apt install readline-dev
     $ git clone https://github.com/samn33/qlazy.git
     $ cd qlazy/c
-    $ make
-    $ mkdir ~/bin ~/lib ~/include
-    $ make install
+    $ mkdir build; cd build; cmake ..
+    $ mv libQlazy.so ~/lib; mv qlazy ~/bin
 
 ### python package (qlazypy)
 
@@ -31,31 +22,41 @@ Quantum Computer Simulator
 
 ### qlazy (read file)
 
-    $ cat foo.qc
-	init 2
+circuit file: foo.qc
+
+    init 2
     h 0
     cx 0 1
     m
+
+run circuit
+
     $ qlazy -qc foo.qc
+
+print help
 	
-    $ qlazy -h (print help)
+    $ qlazy -h
 
 ### qlazy (interactive mode)
 
     $ qlazy
+	
 	>> init 2
-	>> show
 	>> h 0
 	>> cx 0 1
-	>> show
+	>> show   # show the current quantume state
 	>> m
 	>> quit
 
-	>> help (print help)
+print help
+
+	>> help
+	>> help <item>
 
 ### qlazypy
 
-    $ cat foo.py
+foo.py
+	
     from qlazypy.basic import QState
     
     qs = QState(2)
@@ -68,7 +69,20 @@ Quantum Computer Simulator
     
     md.free()
     qs.free()
-	$ python foo.py
+
+execute 
+
+    $ python foo.py
+
+## ChangeLog
+
+### v0.0.1 (2019.4.1)
+
+initial version
+
+### v0.0.2 (2019.4.3)
+
+make -> cmake
 
 ## Licence
 

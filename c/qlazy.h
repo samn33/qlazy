@@ -14,7 +14,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
-#define VERSION "0.0.1"
+#define VERSION "0.0.2"
 
 /*====================================================================*/
 /*  Definitions & Macros                                              */
