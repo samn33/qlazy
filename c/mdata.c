@@ -5,7 +5,7 @@
 #include "qlazy.h"
 
 MData* mdata_init(int qubit_num, int state_num, int shot_num,
-		  int qubit_id[MAX_QUBIT_NUM])
+		  double angle, double phase, int qubit_id[MAX_QUBIT_NUM])
 {
   MData* mdata = NULL;
 
@@ -15,6 +15,8 @@ MData* mdata_init(int qubit_num, int state_num, int shot_num,
   mdata->qubit_num = qubit_num;
   mdata->state_num = state_num;
   mdata->shot_num = shot_num;
+  mdata->angle = angle;
+  mdata->phase = phase;
   memcpy(mdata->qubit_id, qubit_id, sizeof(int)*MAX_QUBIT_NUM);
 
   if (!(mdata->freq = (int*)malloc(sizeof(int)*state_num))) goto ERROR_EXIT;
@@ -34,6 +36,11 @@ int mdata_print(MData* mdata)
 
   if (mdata == NULL) goto ERROR_EXIT;
 
+  if ((mdata->angle != 0.0) || (mdata->phase != 0.0)) {
+    printf("direction of measurement: RX(%.3f*PI),RZ(%.3f*PI)\n",
+	   mdata->angle, mdata->phase);
+  }
+  
   for (int i=0; i<mdata->state_num; i++) {
     if (get_binstr_from_decimal(state, mdata->qubit_num, i) == FALSE)
       return FALSE;

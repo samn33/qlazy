@@ -87,6 +87,9 @@ void error_msg(ErrCode err)
   case ERROR_QSTATE_INIT:
     fprintf(stderr, "ERROR:qstate init failure !\n");
     break;
+  case ERROR_QSTATE_COPY:
+    fprintf(stderr, "ERROR:qstate copy failure !\n");
+    break;
   case ERROR_QSTATE_GET_CAMP:
     fprintf(stderr, "ERROR:qstate get camp failure !\n");
     break;

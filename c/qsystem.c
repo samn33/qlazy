@@ -116,7 +116,6 @@ static int qsystem_execute_one_line(QSystem* qsystem, char* line)
     if (qstate != NULL) { qstate_free(qstate); qstate = NULL; }
     if (qcirc != NULL) { qcirc_free(qcirc); qcirc = NULL; }
     if (!(qcirc = qcirc_init(qubit_num, DEF_QCIRC_STEPS))) goto CANT_INITIALIZE;
-    //    if (!(qstate = qstate_init(qubit_num, p_type))) goto CANT_INITIALIZE;
     if (!(qstate = qstate_init(qubit_num))) goto CANT_INITIALIZE;
     break;
   case MEASURE:
@@ -125,10 +124,24 @@ static int qsystem_execute_one_line(QSystem* qsystem, char* line)
     if (tnum > qubit_num + 1) goto TOO_MANY_ARGUMENTS;
     terminal_num = tnum - 1;  /* number of qubits to measure */
     if (anum == 1) {
-      para.shots = DEF_SHOTS;
+      para.mes.shots = DEF_SHOTS;
+      para.mes.angle = 0.0;
+      para.mes.phase = 0.0;
     }
     else if (anum == 2) {
-      para.shots = strtol(args[1], NULL, 10);
+      para.mes.shots = strtol(args[1], NULL, 10);
+      para.mes.angle = 0.0;
+      para.mes.phase = 0.0;
+    }
+    else if (anum == 3) {
+      para.mes.shots = strtol(args[1], NULL, 10);
+      para.mes.angle = strtod(args[2], NULL);
+      para.mes.phase = 0.0;
+    }
+    else if (anum == 4) {
+      para.mes.shots = strtol(args[1], NULL, 10);
+      para.mes.angle = strtod(args[2], NULL);
+      para.mes.phase = strtod(args[3], NULL);
     }
     else goto ERROR_EXIT;
     for (int i=0; i<terminal_num; i++) {

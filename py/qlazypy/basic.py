@@ -430,10 +430,10 @@ class QState(ctypes.Structure):
         self.__operate_qgate(kind=TOFFOLI, phase=DEF_PHASE, id=id)
         return self
 
-    def m(self, id=None, shots=DEF_SHOTS):
-        return self.M(id=id, shots=shots)
+    def m(self, id=None, shots=DEF_SHOTS, angle=0.0, phase=0.0):
+        return self.M(id=id, shots=shots, angle=angle, phase=phase)
         
-    def M(self, id=None, shots=DEF_SHOTS):
+    def M(self, id=None, shots=DEF_SHOTS, angle=0.0, phase=0.0):
         if id is None or id == []:
             id = [i for i in range(self.qubit_num)]
             
@@ -465,8 +465,10 @@ class QState(ctypes.Structure):
         
         lib.qstate_measure.restype = ctypes.POINTER(MData)
         lib.qstate_measure.argtypes = [ctypes.POINTER(QState), ctypes.c_int,
-                                             ctypes.c_int, IntArray]
+                                       ctypes.c_double, ctypes.c_double,
+                                       ctypes.c_int, IntArray]
         out = lib.qstate_measure(ctypes.byref(self), ctypes.c_int(shots),
+                                 ctypes.c_double(angle), ctypes.c_double(phase),
                                  ctypes.c_int(qubit_num), id_array)
 
         if not out:
@@ -503,6 +505,8 @@ class MData(ctypes.Structure):
         ('qubit_num', ctypes.c_int),
         ('state_num', ctypes.c_int),
         ('shot_num', ctypes.c_int),
+        ('angle', ctypes.c_double),
+        ('phase', ctypes.c_double),
         ('qubit_id', ctypes.c_int*MAX_QUBIT_NUM),
         ('freq', ctypes.POINTER(ctypes.c_int)),
         ('last', ctypes.c_int),

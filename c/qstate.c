@@ -4,6 +4,9 @@
 
 #include "qlazy.h"
 
+//#define DEBUG
+//#define DEBUG2
+
 static void qstate_set_0(QState* qstate)
 {
   for (int i=0; i<qstate->state_num; i++) {
@@ -29,8 +32,6 @@ QState* qstate_init(int qubit_num)
 
   if (!(qstate->camp = (CTYPE*)malloc(sizeof(CTYPE)*state_num))) goto ERROR_EXIT;
 
-  for (int i=0; i<MAX_QUBIT_NUM; i++) qstate->measured[i] = OFF;
-
   qstate->gbank = gbank_init();
 
   qstate_set_0(qstate);
@@ -39,6 +40,25 @@ QState* qstate_init(int qubit_num)
 
  ERROR_EXIT:
   g_Errno = ERROR_QSTATE_INIT;
+  return NULL;
+}
+
+QState* qstate_copy(QState* qstate_src)
+{
+  QState* qstate_dst = NULL;
+
+  g_Errno = NO_ERROR;
+
+  if (qstate_src == NULL) goto ERROR_EXIT;
+
+  if (!(qstate_dst = qstate_init(qstate_src->qubit_num))) goto ERROR_EXIT;
+
+  memcpy(qstate_dst->camp, qstate_src->camp, sizeof(CTYPE)*qstate_src->state_num);
+
+  return qstate_dst;
+  
+ ERROR_EXIT:
+  g_Errno = ERROR_QSTATE_COPY;
   return NULL;
 }
 
@@ -283,20 +303,60 @@ static int qstate_operate_qgate_3_ccx(QState* qstate, int q0, int q1, int q2)
   return FALSE;
 }
 
-static int qstate_measure_one_time(QState* qstate)
+static int qstate_transform_basis(QState* qstate, double angle, double phase, int n)
 {
-  double r = rand()/(double)RAND_MAX;
-  double prob_s = 0.0;
-  double prob_e = 0.0;
-  int value = qstate->state_num - 1;
+  /*
+     This function operate U+ to qstate
+     - |p> = U |0> = cos(theta/2) |0> + exp(i phi) sin(theta/2) |1>
+     - U = Rz(PI/2 + phi) H Rz(theta) H
+     - U+ = H Rz(-theta) H Rz(-PI/2 - phi)
+   */
+  double phs = -0.5 - phase;
+  double ang = -angle;
 
-  for (int i=0; i<qstate->state_num; i++) {
-    prob_s = prob_e;
-    prob_e += pow(cabs(qstate->camp[i]),2.0);
-    if (r >= prob_s && r < prob_e) value = i;
-  }
+  if (qstate == NULL) goto ERROR_EXIT;
+  
+  if (qstate_operate_qgate_1_rot(qstate, Z_AXIS, phs, M_PI, n) == FALSE)
+    goto ERROR_EXIT;
+  if (qstate_operate_qgate_1(qstate, HADAMARD, n) == FALSE)
+    goto ERROR_EXIT;
+  if (qstate_operate_qgate_1_rot(qstate, Z_AXIS, ang, M_PI, n) == FALSE)
+    goto ERROR_EXIT;
+  if (qstate_operate_qgate_1(qstate, HADAMARD, n) == FALSE)
+    goto ERROR_EXIT;
 
-  return value;
+  return TRUE;
+
+ ERROR_EXIT:
+  return FALSE;
+}
+
+static int qstate_transform_basis_inv(QState* qstate, double angle, double phase, int n)
+{
+  /* 
+     This function operate U to qstate
+     - |p> = U |0> = cos(theta/2) |0> + exp(i phi) sin(theta/2) |1>
+     - U = Rz(PI/2 + phi) H Rz(theta) H
+     - U+ = H Rz(-theta) H Rz(-PI/2 - phi)
+   */
+  double phs = 0.5 + phase;
+  double ang = angle;
+
+  if (qstate == NULL) goto ERROR_EXIT;
+  
+  if (qstate_operate_qgate_1(qstate, HADAMARD, n) == FALSE)
+    goto ERROR_EXIT;
+  if (qstate_operate_qgate_1_rot(qstate, Z_AXIS, ang, M_PI, n) == FALSE)
+    goto ERROR_EXIT;
+  if (qstate_operate_qgate_1(qstate, HADAMARD, n) == FALSE)
+    goto ERROR_EXIT;
+  if (qstate_operate_qgate_1_rot(qstate, Z_AXIS, phs, M_PI, n) == FALSE)
+    goto ERROR_EXIT;
+
+  return TRUE;
+
+ ERROR_EXIT:
+  return FALSE;
 }
 
 static int qstate_normalize(QState* qstate)
@@ -310,7 +370,11 @@ static int qstate_normalize(QState* qstate)
   }
   norm = sqrt(norm);
 
-  if (norm == 0.0) goto ERROR_EXIT;
+#ifdef DEBUG
+  printf("* norm = %f\n", norm);
+#endif
+
+    if (norm == 0.0) goto ERROR_EXIT;
 
   for (int i=0; i<qstate->state_num; i++) {
     qstate->camp[i] = qstate->camp[i] / norm;
@@ -322,13 +386,109 @@ static int qstate_normalize(QState* qstate)
   return FALSE;
 }
 
-MData* qstate_measure(QState* qstate, int shot_num, int qubit_num,
-		      int qubit_id[MAX_QUBIT_NUM])
+static int qstate_measure_one_time_without_change_state(QState* qstate_in, double angle,
+							double phase, int qubit_num,
+							int qubit_id[MAX_QUBIT_NUM])
+{
+  double	r      = rand()/(double)RAND_MAX;
+  double	prob_s = 0.0;
+  double	prob_e = 0.0;
+  int		value  = qstate_in->state_num - 1;
+  QState*	qstate = NULL;
+
+  /* copy qstate for measurement */
+  qstate = qstate_copy(qstate_in);
+
+  /* unitary transform, if measuremment base is not {|0><0|,|1><1|} */
+  if ((angle != 0.0) || (phase != 0.0)) {
+    for (int i=0; i<qstate->qubit_num; i++) {
+      qstate_transform_basis(qstate, angle, phase, qubit_id[i]);
+    }
+  }
+
+#ifdef DEBUG
+  printf("== debug ==\n");
+  qstate_print(qstate);
+#endif
+  
+#ifdef DEBUG
+  printf("* r = %f\n", r);
+#endif
+
+  for (int i=0; i<qstate->state_num; i++) {
+    prob_s = prob_e;
+    prob_e += pow(cabs(qstate->camp[i]),2.0);
+#ifdef DEBUG
+    printf("* prob_e = %f\n", prob_e);
+#endif
+    if (r >= prob_s && r < prob_e) value = i;
+  }
+
+  qstate_free(qstate);
+
+  return value;
+}
+
+static int qstate_measure_one_time(QState* qstate, double angle, double phase,
+				   int qubit_num, int qubit_id[MAX_QUBIT_NUM])
+{
+  double	r      = rand()/(double)RAND_MAX;
+  double	prob_s = 0.0;
+  double	prob_e = 0.0;
+  int		value  = qstate->state_num - 1;
+  int mes_id,x;
+
+  /* change basis, if measurement axis isn't Z */
+  if ((angle != 0.0) || (phase != 0.0)) {
+    for (int i=0; i<qstate->qubit_num; i++) {
+      qstate_transform_basis(qstate, angle, phase, qubit_id[i]);
+    }
+  }
+
+#ifdef DEBUG2
+  printf("== debug: state before last measurement ==\n");
+  qstate_print(qstate);
+#endif
+  
+#ifdef DEBUG
+  printf("* r = %f\n", r);
+#endif
+
+  for (int i=0; i<qstate->state_num; i++) {
+    prob_s = prob_e;
+    prob_e += pow(cabs(qstate->camp[i]),2.0);
+#ifdef DEBUG
+    printf("* prob_e = %f\n", prob_e);
+#endif
+    if (r >= prob_s && r < prob_e) value = i;
+  }
+
+  /* update quantum state by measurement (projection,normalize and change basis) */
+
+  /* projection*/
+  select_bits(&mes_id, value, qubit_num, qstate->qubit_num, qubit_id);
+  for (int i=0; i<qstate->state_num; i++) {
+    select_bits(&x, i, qubit_num, qstate->qubit_num, qubit_id);
+    if (x != mes_id) qstate->camp[i] = 0.0;
+  }
+  /* normalize */
+  qstate_normalize(qstate);
+  /* change basis (inverse), if measurement axis isn't Z */
+  if ((angle != 0.0) || (phase != 0.0)) {
+    for (int i=0; i<qstate->qubit_num; i++) {
+      qstate_transform_basis_inv(qstate, angle, phase, qubit_id[i]);
+    }
+  }
+
+  return value;
+}
+
+MData* qstate_measure(QState* qstate, int shot_num, double angle, double phase,
+		      int qubit_num, int qubit_id[MAX_QUBIT_NUM])
 {
   int		state_id;
   int		mes_id;
   int		mes_num = (1<<qubit_num);
-  int           x;
   MData*	mdata	= NULL;
   
   g_Errno = NO_ERROR;
@@ -336,13 +496,6 @@ MData* qstate_measure(QState* qstate, int shot_num, int qubit_num,
   if (qstate == NULL) goto ERROR_EXIT;
   if (shot_num < 1) goto ERROR_EXIT;
   if ((qubit_num < 0) || (qubit_num > qstate->qubit_num)) goto ERROR_EXIT;
-
-  /* check if qubits already measured */
-  for (int i=0; i<qubit_num; i++) {
-    if (qstate->measured[qubit_id[i]] == ON) {
-      printf("qubit:%d has already measured !\n",qubit_id[i]);
-    }
-  }
 
   /* measure all bits, if no parameter set */
   if (qubit_num == 0) {
@@ -354,29 +507,26 @@ MData* qstate_measure(QState* qstate, int shot_num, int qubit_num,
   }
 
   /* initialize mdata */
-  if (!(mdata = mdata_init(qubit_num, mes_num, shot_num, qubit_id))) goto ERROR_EXIT;
+  if (!(mdata = mdata_init(qubit_num, mes_num, shot_num, angle, phase, qubit_id)))
+    goto ERROR_EXIT;
 
   /* execute mesurement */
   for (int i=0; i<shot_num; i++) {
-    state_id = qstate_measure_one_time(qstate);
+    if (i == shot_num - 1) {  /* if last measurement -> change state */
+      state_id = qstate_measure_one_time(qstate, angle, phase, qubit_num, qubit_id);
+    }
+    else {  /* if not last measurement -> not change state */
+      state_id = qstate_measure_one_time_without_change_state(qstate, angle, phase,
+							      qubit_num, qubit_id);
+    }
+#ifdef DEBUG
+    printf("* state_id = %d\n", state_id);
+#endif
     if (select_bits(&mes_id, state_id, qubit_num, qstate->qubit_num, qubit_id) == FALSE)
       goto ERROR_EXIT;
     mdata->freq[mes_id]++;
   }
   mdata->last = mes_id;
-
-  /* udate quantum state (by last measurement) */
-  for (int i=0; i<qstate->state_num; i++) {
-    if (select_bits(&x, i, qubit_num, qstate->qubit_num, qubit_id) == FALSE)
-      goto ERROR_EXIT;
-    if (x != mdata->last) qstate->camp[i] = 0.0;
-  }
-  if (qstate_normalize(qstate) == FALSE) goto ERROR_EXIT;
-  
-  /* set measured flag */
-  for (int i=0; i<qubit_num; i++) {
-    qstate->measured[qubit_id[i]] = ON;
-  }
 
   return mdata;
 
@@ -409,36 +559,27 @@ int qstate_operate_qgate_param(QState* qstate, Kind kind, double phase,
   case PHASE_SHIFT_S:
   case PHASE_SHIFT_S_:
   case HADAMARD:
-    if (qstate->measured[q0] == ON) goto ERROR_EXIT;
     if (qstate_operate_qgate_1(qstate, kind, q0) == FALSE)
       goto ERROR_EXIT;
     break;
   case ROTATION_X:
-    if (qstate->measured[q0] == ON) goto ERROR_EXIT;
     if (qstate_operate_qgate_1_rot(qstate, X_AXIS, phase, M_PI, q0) == FALSE)
       goto ERROR_EXIT;
     break;
   case ROTATION_Y:
-    if (qstate->measured[q0] == ON) goto ERROR_EXIT;
     if (qstate_operate_qgate_1_rot(qstate, Y_AXIS, phase, M_PI, q0) == FALSE)
       goto ERROR_EXIT;
     break;
   case ROTATION_Z:
-    if (qstate->measured[q0] == ON) goto ERROR_EXIT;
     if (qstate_operate_qgate_1_rot(qstate, Z_AXIS, phase, M_PI, q0) == FALSE)
       goto ERROR_EXIT;
     break;
   case CONTROLLED_X:
   case CONTROLLED_Z:
-    if (qstate->measured[q0] == ON) goto ERROR_EXIT;
-    if (qstate->measured[q1] == ON) goto ERROR_EXIT;
     if (qstate_operate_qgate_2(qstate, kind, q0, q1) == FALSE)
       goto ERROR_EXIT;
     break;
   case TOFFOLI:
-    if (qstate->measured[q0] == ON) goto ERROR_EXIT;
-    if (qstate->measured[q1] == ON) goto ERROR_EXIT;
-    if (qstate->measured[q2] == ON) goto ERROR_EXIT;
     if (qstate_operate_qgate_3_ccx(qstate, q0, q1, q2) == FALSE) goto ERROR_EXIT;
     break;
   default:
@@ -466,7 +607,8 @@ int qstate_operate_qgate(QState* qstate, QGate* qgate)
   case INIT:
     break;
   case MEASURE:
-    if (!(mdata = qstate_measure(qstate, para->shots, terminal_num,
+    if (!(mdata = qstate_measure(qstate, para->mes.shots,
+				 para->mes.angle, para->mes.phase, terminal_num,
 				 qubit_id))) goto ERROR_EXIT;
     mdata_print(mdata);
     mdata_free(mdata); mdata = NULL;

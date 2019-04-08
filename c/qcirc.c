@@ -78,7 +78,9 @@ int qcirc_append_qgate(QCirc* qcirc, Kind kind, int terminal_num,
 
   switch (kind) {
   case MEASURE:
-    qcirc->qgate[qcirc->step_num].para.shots = para->shots;
+    qcirc->qgate[qcirc->step_num].para.mes.shots = para->mes.shots;
+    qcirc->qgate[qcirc->step_num].para.mes.angle = para->mes.angle;
+    qcirc->qgate[qcirc->step_num].para.mes.phase = para->mes.phase;
     break;
   case ROTATION_X:
   case ROTATION_Y:
@@ -202,7 +204,7 @@ int qcirc_print_qcirc(QCirc* qcirc)
   if (qcirc == NULL) goto ERROR_EXIT;
 
   for (int i=0; i<qcirc->qubit_num; i++) {
-    printf("%d %s\n", i, qcirc->cimage->ch[i]);
+    printf("q%02d %s\n", i, qcirc->cimage->ch[i]);
   }
 
   return TRUE;
@@ -253,7 +255,7 @@ int qcirc_write_file(QCirc* qcirc, char* fname)
       fprintf(fp, "%s %d\n", symbol, qcirc->qubit_num);
       break;
     case MEASURE:
-      fprintf(fp, "%s(%d) ", symbol, para->shots);
+      fprintf(fp, "%s(%d) ", symbol, para->mes.shots);
       for (int k=0; k<terminal_num; k++) {
 	printf("%d ",qubit_id[k]);
       }
@@ -349,11 +351,25 @@ QCirc* qcirc_read_file(char* fname)
       /* measurement */
       terminal_num = tnum - 1;  /* number of qubits to measure */
       if (anum == 1) {
-	para.shots = DEF_SHOTS;
+	para.mes.shots = DEF_SHOTS;
+	para.mes.angle = 0.0;
+	para.mes.phase = 0.0;
       }
       else if (anum == 2) {
-	para.shots = strtol(args[1], NULL, 10);
+	para.mes.shots = strtol(args[1], NULL, 10);
+	para.mes.angle = 0.0;
+	para.mes.phase = 0.0;
       }
+    else if (anum == 3) {
+      para.mes.shots = strtol(args[1], NULL, 10);
+      para.mes.angle = strtod(args[2], NULL);
+      para.mes.phase = 0.0;
+    }
+    else if (anum == 4) {
+      para.mes.shots = strtol(args[1], NULL, 10);
+      para.mes.angle = strtod(args[2], NULL);
+      para.mes.phase = strtod(args[3], NULL);
+    }
       else goto ERROR_EXIT;
       for (int i=0; i<terminal_num; i++) {
 	qubit_id[i] = strtol(token[1+i], NULL, 10);

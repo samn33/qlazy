@@ -14,7 +14,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
-#define VERSION "0.0.2"
+#define VERSION "0.0.3"
 
 /*====================================================================*/
 /*  Definitions & Macros                                              */
@@ -66,11 +66,12 @@ typedef enum _ErrCode {
   ERROR_QCIRC_PRINT_QCIRC     = 24,
   ERROR_QCIRC_PRINT_QGATES    = 25,
   ERROR_QSTATE_INIT	      = 30,
-  ERROR_QSTATE_GET_CAMP	      = 31,
-  ERROR_QSTATE_PRINT	      = 32,
-  ERROR_QSTATE_MEASURE        = 33,
-  ERROR_QSTATE_OPERATE        = 34,
-  ERROR_QSTATE_OPERATE_QGATE  = 35,
+  ERROR_QSTATE_COPY	      = 31,
+  ERROR_QSTATE_GET_CAMP	      = 32,
+  ERROR_QSTATE_PRINT	      = 33,
+  ERROR_QSTATE_MEASURE        = 34,
+  ERROR_QSTATE_OPERATE        = 35,
+  ERROR_QSTATE_OPERATE_QGATE  = 36,
   ERROR_MDATA_INIT	      = 40,
   ERROR_MDATA_PRINT	      = 41,
   ERROR_GBANK_INIT	      = 50,
@@ -134,9 +135,15 @@ typedef enum _Axis {
 
 typedef double _Complex CTYPE;
 
+typedef struct _ParaMes {
+  int		shots;
+  double	angle;
+  double	phase;
+} ParaMes;
+  
 typedef union _Para {
-  double	phase;  /* phase angle under unit PI (for RX,RY,RZ) */
-  int		shots;	/* number of measurement (for M) */
+  double	phase;		/* phase angle under unit PI (for RX,RY,RZ) */
+  ParaMes	mes;		/* measurement parameter (for M) */
 } Para;
   
 typedef struct _QGate {
@@ -178,17 +185,18 @@ typedef struct _QState {
   int		qubit_num;	/* number of qubits */
   int		state_num;	/* number of quantum state (dim = 2^num) */
   CTYPE*	camp;           /* complex amplitude of the quantum state */
-  int           measured[MAX_QUBIT_NUM];	/* measured flag */
   GBank*        gbank;
 } QState;
 
 typedef struct _MData {
-  int	qubit_num;
-  int	state_num;
-  int	shot_num;
-  int	qubit_id[MAX_QUBIT_NUM];
-  int*	freq;
-  int   last;
+  int		qubit_num;
+  int		state_num;
+  int		shot_num;
+  double	angle;
+  double	phase;
+  int		qubit_id[MAX_QUBIT_NUM];
+  int*		freq;
+  int		last;
 } MData;
 
 typedef struct _QSystem {
@@ -261,10 +269,11 @@ void	 qcirc_free(QCirc* qcirc);
 
 /* qstate.c */
 QState*	 qstate_init(int qubit_num);
+QState*	 qstate_copy(QState* qstate);
 double*  qstate_get_camp(QState* qstate);
 int	 qstate_print(QState* qstate);
-MData*	 qstate_measure(QState* qstate, int shot_num, int qubit_num,
-			int qubit_id[MAX_QUBIT_NUM]);
+MData*	 qstate_measure(QState* qstate, int shot_num, double angle, double phase,
+			int qubit_num, int qubit_id[MAX_QUBIT_NUM]);
 int	 qstate_operate_qgate_param(QState* qstate, Kind kind, double phase,
 				    int qubit_id[MAX_QUBIT_NUM]);
 int	 qstate_operate_qgate(QState* qstate, QGate* qgate);
@@ -272,7 +281,7 @@ void	 qstate_free(QState* qstate);
 
 /* mdata.c */
 MData*	 mdata_init(int qubit_num, int state_num, int shot_num,
-		    int qubit_id[MAX_QUBIT_NUM]);
+		    double angle, double phase, int qubit_id[MAX_QUBIT_NUM]);
 int	 mdata_print(MData* mdata);
 void	 mdata_free(MData* mdata);
 
