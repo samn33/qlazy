@@ -9,7 +9,7 @@ Quantum Computer Simulator
 
     $ git clone https://github.com/samn33/qlazy.git
     $ cd qlazy/c
-    $ mkdir build; cd build; cmake ..
+    $ mkdir build; cd build; cmake ..; make
     $ mv libQlazy.so ~/lib; mv qlazy ~/bin
 
 You may need to install 'readline-dev' ($ sudo apt install readline-dev).
