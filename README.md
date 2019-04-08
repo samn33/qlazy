@@ -5,7 +5,7 @@ Quantum Computer Simulator
 
 ## Install
 
-### command and library - qlazy,libqlazy.so
+### command and library - qlazy,libQlazy.so
 
     $ git clone https://github.com/samn33/qlazy.git
     $ cd qlazy/c
@@ -74,6 +74,11 @@ foo.py
 execute the program
 
     $ python foo.py
+
+## Requirements
+
+    * Linux(Ubuntu16.04)
+    * Python3.5
 
 ## ChangeLog
 
