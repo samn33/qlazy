@@ -4,8 +4,12 @@
 
 #include "qlazy.h"
 
-//#define DEBUG
-//#define DEBUG2
+static void qstate_set_none(QState* qstate)
+{
+  for (int i=0; i<qstate->state_num; i++) {
+    qstate->camp[i] = 0.0 + 0.0i;
+  }
+}
 
 static void qstate_set_0(QState* qstate)
 {
@@ -13,6 +17,52 @@ static void qstate_set_0(QState* qstate)
     qstate->camp[i] = 0.0 + 0.0i;
   }
   qstate->camp[0] = 1.0 + 0.0i;
+}
+
+static int qstate_remove_phase_factor(QState* qstate, CTYPE* phase_factor)
+{
+  CTYPE exp_i_phase = 1.0 + 0.0i;
+
+  if (qstate == NULL) goto ERROR_EXIT;
+
+  /* remove phase factor from whole state (if camp[0] have imaginary part) */
+  if (fabs(cimag(qstate->camp[0])) > MIN_DOUBLE) {
+    exp_i_phase = qstate->camp[0] / cabs(qstate->camp[0]);
+    for (int i=0; i<qstate->state_num; i++) {
+      qstate->camp[i] = qstate->camp[i] / exp_i_phase;
+    }
+  }
+
+  *phase_factor = exp_i_phase;
+
+  return TRUE;
+  
+ ERROR_EXIT:
+  return FALSE;
+}
+
+static int qstate_normalize(QState* qstate)
+{
+  double	norm	    = 0.0;
+  
+  if (qstate == NULL) goto ERROR_EXIT;
+
+  for (int i=0; i<qstate->state_num; i++) {
+    norm += pow(cabs(qstate->camp[i]),2.0);
+  }
+  norm = sqrt(norm);
+
+  if (norm == 0.0) goto ERROR_EXIT;
+
+  /* normalization */
+  for (int i=0; i<qstate->state_num; i++) {
+    qstate->camp[i] = qstate->camp[i] / norm;
+  }
+
+  return TRUE;
+  
+ ERROR_EXIT:
+  return FALSE;
 }
 
 QState* qstate_init(int qubit_num)
@@ -85,31 +135,63 @@ double* qstate_get_camp(QState* qstate)
   return NULL;
 }
 
-int qstate_print(QState* qstate)
+int qstate_print(QState* qstate_in, int qubit_num, int qubit_id[MAX_QUBIT_NUM])
 {
   double	qreal,qimag,prob;
   int		prob_level = 0;
   char		state[MAX_QUBIT_NUM+1];
+  QState*       qstate = NULL;  /* temporary in this function */
+  int           x;
+  CTYPE         phase_factor;
 
   g_Errno = NO_ERROR;
 
-  if (qstate == NULL) goto ERROR_EXIT;
+  if (qstate_in == NULL) goto ERROR_EXIT;
 
+  /* set temporal qstate */
+
+  if (qstate_in->qubit_num == qubit_num) {
+    qstate = qstate_copy(qstate_in);
+  }
+  else {  /* in the case of extracting sum qubits state */
+    if (!(qstate = qstate_init(qubit_num))) goto ERROR_EXIT;
+    qstate_set_none(qstate);
+    for (int i=0; i<qstate_in->state_num; i++) {
+      select_bits(&x, i, qubit_num, qstate_in->qubit_num, qubit_id);
+      qstate->camp[x] += qstate_in->camp[i];
+    }
+  }
+  if (qstate_normalize(qstate) == FALSE) goto ERROR_EXIT;
+
+  /* print qstate */
+
+  if (qstate_remove_phase_factor(qstate, &phase_factor) == FALSE)
+    goto ERROR_EXIT;
+  if (fabs(cimag(phase_factor)) > MIN_DOUBLE) {
+    printf("phase factor = exp(%+.4f*PI*i)\n",carg(phase_factor)/M_PI);
+  }
+  
   for (int i=0; i<qstate->state_num; i++) {
     qreal = creal(qstate->camp[i]);
     qimag = cimag(qstate->camp[i]);
 
-    get_binstr_from_decimal(state, qstate->qubit_num, i);
+    get_binstr_from_decimal(state, qstate->qubit_num, i, ON);
 
     prob = pow(cabs(qstate->camp[i]),2.0);
     if (fabs(prob) < MIN_DOUBLE) prob_level = 0;
-    else prob_level = (int)(prob/0.1 + 1.0);
+    //    else prob_level = (int)(prob/0.1 + 1.0);
+    else prob_level = (int)(prob/0.1 + 1.5);
     
     printf("c[%s] = %+.4f%+.4f*i : %.4f |", state, qreal, qimag, prob);
     for (int k=0; k<prob_level; k++) printf("+");
     printf("\n");
   }
 
+  /* free temporal qstate */
+
+  qstate_free(qstate);
+  qstate = NULL;
+  
   return TRUE;
 
  ERROR_EXIT:
@@ -359,33 +441,6 @@ static int qstate_transform_basis_inv(QState* qstate, double angle, double phase
   return FALSE;
 }
 
-static int qstate_normalize(QState* qstate)
-{
-  double norm = 0.0;
-  
-  if (qstate == NULL) goto ERROR_EXIT;
-
-  for (int i=0; i<qstate->state_num; i++) {
-    norm += pow(cabs(qstate->camp[i]),2.0);
-  }
-  norm = sqrt(norm);
-
-#ifdef DEBUG
-  printf("* norm = %f\n", norm);
-#endif
-
-    if (norm == 0.0) goto ERROR_EXIT;
-
-  for (int i=0; i<qstate->state_num; i++) {
-    qstate->camp[i] = qstate->camp[i] / norm;
-  }
-
-  return TRUE;
-  
- ERROR_EXIT:
-  return FALSE;
-}
-
 static int qstate_measure_one_time_without_change_state(QState* qstate_in, double angle,
 							double phase, int qubit_num,
 							int qubit_id[MAX_QUBIT_NUM])
@@ -406,21 +461,9 @@ static int qstate_measure_one_time_without_change_state(QState* qstate_in, doubl
     }
   }
 
-#ifdef DEBUG
-  printf("== debug ==\n");
-  qstate_print(qstate);
-#endif
-  
-#ifdef DEBUG
-  printf("* r = %f\n", r);
-#endif
-
   for (int i=0; i<qstate->state_num; i++) {
     prob_s = prob_e;
     prob_e += pow(cabs(qstate->camp[i]),2.0);
-#ifdef DEBUG
-    printf("* prob_e = %f\n", prob_e);
-#endif
     if (r >= prob_s && r < prob_e) value = i;
   }
 
@@ -445,21 +488,9 @@ static int qstate_measure_one_time(QState* qstate, double angle, double phase,
     }
   }
 
-#ifdef DEBUG2
-  printf("== debug: state before last measurement ==\n");
-  qstate_print(qstate);
-#endif
-  
-#ifdef DEBUG
-  printf("* r = %f\n", r);
-#endif
-
   for (int i=0; i<qstate->state_num; i++) {
     prob_s = prob_e;
     prob_e += pow(cabs(qstate->camp[i]),2.0);
-#ifdef DEBUG
-    printf("* prob_e = %f\n", prob_e);
-#endif
     if (r >= prob_s && r < prob_e) value = i;
   }
 
@@ -519,9 +550,6 @@ MData* qstate_measure(QState* qstate, int shot_num, double angle, double phase,
       state_id = qstate_measure_one_time_without_change_state(qstate, angle, phase,
 							      qubit_num, qubit_id);
     }
-#ifdef DEBUG
-    printf("* state_id = %d\n", state_id);
-#endif
     if (select_bits(&mes_id, state_id, qubit_num, qstate->qubit_num, qubit_id) == FALSE)
       goto ERROR_EXIT;
     mdata->freq[mes_id]++;
@@ -607,6 +635,9 @@ int qstate_operate_qgate(QState* qstate, QGate* qgate)
   case INIT:
     break;
   case MEASURE:
+  case MEASURE_X:
+  case MEASURE_Y:
+  case MEASURE_Z:
     if (!(mdata = qstate_measure(qstate, para->mes.shots,
 				 para->mes.angle, para->mes.phase, terminal_num,
 				 qubit_id))) goto ERROR_EXIT;

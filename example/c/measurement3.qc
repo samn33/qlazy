@@ -3,14 +3,21 @@ init 2
 @ == initial state ==
 show
 
-@ == measurement (basis |+>) ==
-m(100,0.5,0.0.0)
+@ == measurement (x-axis) ==
+m(100,0.5,0.0.0) 0
 
-@ == state 1 ==
+@ == state ==
 show
 
-@ == measurement (basis |+>) ==
-m(100,0.5,0.0)
+@ == measurement (y-axis) ==
+m(100,0.5,0.0.5) 0
 
-@ == state 2 ==
+@ == state ==
 show
+
+@ == measurement (some direction) ==
+m(100,0.3,0.2) 1
+
+@ == state ==
+show
+circ

@@ -78,6 +78,9 @@ int qcirc_append_qgate(QCirc* qcirc, Kind kind, int terminal_num,
 
   switch (kind) {
   case MEASURE:
+  case MEASURE_X:
+  case MEASURE_Y:
+  case MEASURE_Z:
     qcirc->qgate[qcirc->step_num].para.mes.shots = para->mes.shots;
     qcirc->qgate[qcirc->step_num].para.mes.angle = para->mes.angle;
     qcirc->qgate[qcirc->step_num].para.mes.phase = para->mes.phase;
@@ -127,6 +130,9 @@ int qcirc_set_cimage(QCirc* qcirc)
     case INIT:
       break;
     case MEASURE:
+    case MEASURE_X:
+    case MEASURE_Y:
+    case MEASURE_Z:
       for (int j=0; j<qcirc->qgate[i].terminal_num; j++) {
 	p = 0;
 	while (symbol[p] != '\0') {
@@ -255,6 +261,9 @@ int qcirc_write_file(QCirc* qcirc, char* fname)
       fprintf(fp, "%s %d\n", symbol, qcirc->qubit_num);
       break;
     case MEASURE:
+    case MEASURE_X:
+    case MEASURE_Y:
+    case MEASURE_Z:
       fprintf(fp, "%s(%d) ", symbol, para->mes.shots);
       for (int k=0; k<terminal_num; k++) {
 	printf("%d ",qubit_id[k]);
@@ -349,6 +358,9 @@ QCirc* qcirc_read_file(char* fname)
       break;
     case MEASURE:
       /* measurement */
+      //      if ((qcirc == NULL) || (qstate == NULL)) goto NEED_TO_INITIALIZE;
+      if (qcirc == NULL) goto ERROR_EXIT;
+      if (tnum > qubit_num + 1) goto ERROR_EXIT;
       terminal_num = tnum - 1;  /* number of qubits to measure */
       if (anum == 1) {
 	para.mes.shots = DEF_SHOTS;
@@ -360,17 +372,58 @@ QCirc* qcirc_read_file(char* fname)
 	para.mes.angle = 0.0;
 	para.mes.phase = 0.0;
       }
-    else if (anum == 3) {
-      para.mes.shots = strtol(args[1], NULL, 10);
-      para.mes.angle = strtod(args[2], NULL);
-      para.mes.phase = 0.0;
-    }
-    else if (anum == 4) {
-      para.mes.shots = strtol(args[1], NULL, 10);
-      para.mes.angle = strtod(args[2], NULL);
-      para.mes.phase = strtod(args[3], NULL);
-    }
+      else if (anum == 3) {
+	para.mes.shots = strtol(args[1], NULL, 10);
+	para.mes.angle = strtod(args[2], NULL);
+	para.mes.phase = 0.0;
+      }
+      else if (anum == 4) {
+	para.mes.shots = strtol(args[1], NULL, 10);
+	para.mes.angle = strtod(args[2], NULL);
+	para.mes.phase = strtod(args[3], NULL);
+      }
       else goto ERROR_EXIT;
+      for (int i=0; i<terminal_num; i++) {
+	qubit_id[i] = strtol(token[1+i], NULL, 10);
+	if (qubit_num < qubit_id[i] + 1) goto ERROR_EXIT;
+      }
+      if (terminal_num == 0) {  /* measure all qubits in order */
+	terminal_num = qubit_num;
+	for (int i=0; i<terminal_num; i++) {
+	  qubit_id[i] = i;
+	}
+      }
+      break;
+    case MEASURE_X:
+    case MEASURE_Y:
+    case MEASURE_Z:
+      /* measurement */
+      //      if ((qcirc == NULL) || (qstate == NULL)) goto NEED_TO_INITIALIZE;
+      if (qcirc == NULL) goto ERROR_EXIT;
+      if (tnum > qubit_num + 1) goto ERROR_EXIT;
+      terminal_num = tnum - 1;  /* number of qubits to measure */
+      if (anum == 1) {
+	para.mes.shots = DEF_SHOTS;
+      }
+      else if (anum == 2) {
+	para.mes.shots = strtol(args[1], NULL, 10);
+      }
+      else goto ERROR_EXIT;
+
+      if (kind == MEASURE_X) {
+	para.mes.angle = 0.5;
+	para.mes.phase = 0.0;
+      }
+      else if (kind == MEASURE_Y) {
+	para.mes.angle = 0.5;
+	para.mes.phase = 0.5;
+      }
+      else if (kind == MEASURE_Z) {
+	para.mes.angle = 0.0;
+	para.mes.phase = 0.0;
+      }
+      else goto ERROR_EXIT;
+
       for (int i=0; i<terminal_num; i++) {
 	qubit_id[i] = strtol(token[1+i], NULL, 10);
 	if (qubit_num < qubit_id[i] + 1) goto ERROR_EXIT;

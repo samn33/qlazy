@@ -48,10 +48,21 @@ static int qsystem_execute_one_line(QSystem* qsystem, char* line)
   switch (kind) {
   case SHOW:
     /* print quantum state */
-    if (tnum > 1) goto TOO_MANY_ARGUMENTS;
+    if (tnum > qubit_num + 1) goto TOO_MANY_ARGUMENTS;
+    terminal_num = tnum - 1;  /* number of qubits to measure */
     if (anum > 1) goto TOO_MANY_ARGUMENTS;
     if ((qcirc == NULL) || (qstate == NULL)) goto NEED_TO_INITIALIZE;
-    qstate_print(qstate);
+    for (int i=0; i<terminal_num; i++) {
+      qubit_id[i] = strtol(token[1+i], NULL, 10);
+      if (qubit_num < qubit_id[i] + 1) goto OUT_OF_BOUND;
+    }
+    if (terminal_num == 0) {  /* show all qubits in order */
+      terminal_num = qubit_num;
+      for (int i=0; i<terminal_num; i++) {
+	qubit_id[i] = i;
+      }
+    }
+    qstate_print(qstate, terminal_num, qubit_id);
     return TRUE;
   case CIRC:
     /* print quantum circuit */
@@ -144,6 +155,46 @@ static int qsystem_execute_one_line(QSystem* qsystem, char* line)
       para.mes.phase = strtod(args[3], NULL);
     }
     else goto ERROR_EXIT;
+    for (int i=0; i<terminal_num; i++) {
+      qubit_id[i] = strtol(token[1+i], NULL, 10);
+      if (qubit_num < qubit_id[i] + 1) goto OUT_OF_BOUND;
+    }
+    if (terminal_num == 0) {  /* measure all qubits in order */
+      terminal_num = qubit_num;
+      for (int i=0; i<terminal_num; i++) {
+	qubit_id[i] = i;
+      }
+    }
+    break;
+  case MEASURE_X:
+  case MEASURE_Y:
+  case MEASURE_Z:
+    /* measurement */
+    if ((qcirc == NULL) || (qstate == NULL)) goto NEED_TO_INITIALIZE;
+    if (tnum > qubit_num + 1) goto TOO_MANY_ARGUMENTS;
+    terminal_num = tnum - 1;  /* number of qubits to measure */
+    if (anum == 1) {
+      para.mes.shots = DEF_SHOTS;
+    }
+    else if (anum == 2) {
+      para.mes.shots = strtol(args[1], NULL, 10);
+    }
+    else goto ERROR_EXIT;
+
+    if (kind == MEASURE_X) {
+      para.mes.angle = 0.5;
+      para.mes.phase = 0.0;
+    }
+    else if (kind == MEASURE_Y) {
+      para.mes.angle = 0.5;
+      para.mes.phase = 0.5;
+    }
+    else if (kind == MEASURE_Z) {
+      para.mes.angle = 0.0;
+      para.mes.phase = 0.0;
+    }
+    else goto ERROR_EXIT;
+
     for (int i=0; i<terminal_num; i++) {
       qubit_id[i] = strtol(token[1+i], NULL, 10);
       if (qubit_num < qubit_id[i] + 1) goto OUT_OF_BOUND;

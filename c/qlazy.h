@@ -14,7 +14,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
-#define VERSION "0.0.3"
+#define VERSION "0.0.4"
 
 /*====================================================================*/
 /*  Definitions & Macros                                              */
@@ -124,6 +124,9 @@ typedef enum _Kind {
   CONTROLLED_Z	 = 61,		/* symbol: 'CZ','cz'    */
   TOFFOLI	 = 70,		/* symbol: 'CCX','ccx'  */
   MEASURE	 = 100,	 	/* symbol: 'M','m'      */
+  MEASURE_X	 = 101,	 	/* symbol: 'MX','mx'    */
+  MEASURE_Y	 = 102,	 	/* symbol: 'MY','my'    */
+  MEASURE_Z	 = 103,	 	/* symbol: 'MZ','mz'    */
   NOT_A_GATE	 = 1000,
 } Kind;
 
@@ -224,6 +227,7 @@ GLOBAL WrnCode  g_Wrnno;
 
 /* complex.h */
 double	 cabs(double _Complex z);
+double	 carg(double _Complex z);
 double	 creal(double _Complex z);
 double	 cimag(double _Complex z);
 
@@ -247,7 +251,7 @@ int	 line_getargs(char* str, char* args[]);
 int	 line_join_token(char* dst, char* token[], int ini, int fin);
 
 /* misc.c */
-int	 get_binstr_from_decimal(char* binstr, int qubit_num, int decimal);
+int	 get_binstr_from_decimal(char* binstr, int qubit_num, int decimal, int zflag);
 int      select_bits(int* bits_out, int bits_in, int digits_out, int digits_in,
 		     int digit_array[MAX_QUBIT_NUM]);
 
@@ -271,7 +275,8 @@ void	 qcirc_free(QCirc* qcirc);
 QState*	 qstate_init(int qubit_num);
 QState*	 qstate_copy(QState* qstate);
 double*  qstate_get_camp(QState* qstate);
-int	 qstate_print(QState* qstate);
+//int	 qstate_print(QState* qstate);
+int	 qstate_print(QState* qstate, int qubit_num, int qubit_id[MAX_QUBIT_NUM]);
 MData*	 qstate_measure(QState* qstate, int shot_num, double angle, double phase,
 			int qubit_num, int qubit_id[MAX_QUBIT_NUM]);
 int	 qstate_operate_qgate_param(QState* qstate, Kind kind, double phase,

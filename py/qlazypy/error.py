@@ -14,6 +14,10 @@ class QState_FailToShow(Exception):
     def __str__(self):
         return "QState: fail to show"
 
+class QState_FailToCirc(Exception):
+    def __str__(self):
+        return "QState: fail to circ"
+
 class QState_OutOfBound(Exception):
     def __str__(self):
         return "QState: out of bound"

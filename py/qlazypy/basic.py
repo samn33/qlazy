@@ -26,7 +26,11 @@ class QState(ctypes.Structure):
         self.camp = None
         self.measured = None
 
-        self._circ = ["{0:} -".format(i) for i in range(qubit_num)]
+        if qubit_num > MAX_QUBIT_NUM:
+            print("qubit number must be {0:d} or less.".format(MAX_QUBIT_NUM))
+            raise QState_FailToInitialize()
+
+        self._circ = ["q{0:02d} -".format(i) for i in range(qubit_num)]
 
         if seed is None:
             seed = random.randint(0,1000000)
@@ -42,27 +46,46 @@ class QState(ctypes.Structure):
         
         return out.contents
 
-    def show(self, kind="state"):
-        if kind == "state":
-            self.__show_state()
-        elif kind == "circ":
-            self.__show_circ()
-        else:
+    def show(self, id=None):
+
+        if id is None or id == []:
+            id = [i for i in range(self.qubit_num)]
+
+        # error check
+        if len(id) > self.qubit_num:
+            raise QState_TooManyArguments()
+        for i in range(len(id)):
+            if id[i] >= self.qubit_num:
+                raise QState_OutOfBound()
+            if id[i] < 0:
+                raise QState_OutOfBound()
+
+        try:
+            qubit_num = len(id)
+            qubit_id = [0 for _ in range(MAX_QUBIT_NUM)]
+            for i in range(len(id)):
+                qubit_id[i] = id[i]
+            IntArray = ctypes.c_int * MAX_QUBIT_NUM
+            id_array = IntArray(*qubit_id)
+            
+            lib.qstate_print.restype = ctypes.c_int
+            lib.qstate_print.argtypes = [ctypes.POINTER(QState),ctypes.c_int, IntArray]
+            ret = lib.qstate_print(ctypes.byref(self),ctypes.c_int(qubit_num), id_array)
+
+            if ret == FALSE:
+                raise QState_FailToShow()
+
+        except Exception:
             raise QState_FailToShow()
 
-    def __show_state(self):
+    def circ(self):
 
-        lib.qstate_print.restype = ctypes.c_int
-        lib.qstate_print.argtypes = [ctypes.POINTER(QState)]
-        ret = lib.qstate_print(ctypes.byref(self))
+        try:
+            for i in range(self.qubit_num):
+                print(self._circ[i])
 
-        if ret == FALSE:
-            raise QState_FailToShow()
-
-    def __show_circ(self):
-
-        for i in range(self.qubit_num):
-            print(self._circ[i])
+        except Exception:
+            raise QState_FailToCirc()
     
     @property
     def amp(self):
@@ -476,6 +499,24 @@ class QState(ctypes.Structure):
 
         return out.contents
 
+    def mx(self, id=None, shots=DEF_SHOTS):
+        return self.M(id=id, shots=shots, angle=0.5, phase=0.0)
+        
+    def MX(self, id=None, shots=DEF_SHOTS):
+        return self.M(id=id, shots=shots, angle=0.5, phase=0.0)
+        
+    def my(self, id=None, shots=DEF_SHOTS):
+        return self.M(id=id, shots=shots, angle=0.5, phase=0.5)
+        
+    def MY(self, id=None, shots=DEF_SHOTS):
+        return self.M(id=id, shots=shots, angle=0.5, phase=0.5)
+        
+    def mz(self, id=None, shots=DEF_SHOTS):
+        return self.M(id=id, shots=shots, angle=0.0, phase=0.0)
+        
+    def MZ(self, id=None, shots=DEF_SHOTS):
+        return self.M(id=id, shots=shots, angle=0.0, phase=0.0)
+        
     def free(self):
 
         lib.qstate_free.argtypes = [ctypes.POINTER(QState)]

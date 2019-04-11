@@ -18,7 +18,7 @@ print("* amplitude = ", qs.amp)
 md = qs.m(id=[0,1,2],shots=50)
 
 print("== circuit ==")
-qs.show("circ")
+qs.circ()
 
 print("== measurement ==")
 md.show()

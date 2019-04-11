@@ -6,9 +6,7 @@ framework to develope quantum computer application
 ## Description
 
 'qlazypy' is a quantum computer application framework for python
-developers.  The main feature is following ...
-
-    * simple description and easy to use.
+developers.  The feature is just "simple description and easy to use".
 
 ## Usage
 

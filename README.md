@@ -12,7 +12,7 @@ Quantum Computer Simulator
     $ mkdir build; cd build; cmake ..; make
     $ mv libQlazy.so ~/lib; mv qlazy ~/bin
 
-You may need to install 'readline-dev' ($ sudo apt install readline-dev).
+You may also need to install 'readline-dev' ($ sudo apt install readline-dev).
 
 ### python package - qlazypy
 
@@ -81,6 +81,11 @@ execute the program
     * Python3.5
 
 ## ChangeLog
+
+### v0.0.4 (2019.4.12)
+
+add option to 'show' (select some qubits and show).
+add new measurement gates (MX,MY,MZ).
 
 ### v0.0.3 (2019.4.8)
 

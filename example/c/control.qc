@@ -1,4 +1,5 @@
 init 2
+x 0
 
 @ == initial state ==
 show

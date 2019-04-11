@@ -82,6 +82,15 @@ void qgate_get_symbol(char* symbol, Kind kind)
   case MEASURE:
     strcpy(symbol,"M");
     break;
+  case MEASURE_X:
+    strcpy(symbol,"MX");
+    break;
+  case MEASURE_Y:
+    strcpy(symbol,"MY");
+    break;
+  case MEASURE_Z:
+    strcpy(symbol,"MZ");
+    break;
   default:
     break;
   }
@@ -141,6 +150,12 @@ Kind qgate_get_kind(char* symbol)
   else if (strcmp(symbol,"ccx")   == 0) kind = TOFFOLI;
   else if (strcmp(symbol,"M")     == 0) kind = MEASURE;
   else if (strcmp(symbol,"m")     == 0) kind = MEASURE;
+  else if (strcmp(symbol,"MX")    == 0) kind = MEASURE_X;
+  else if (strcmp(symbol,"mx")    == 0) kind = MEASURE_X;
+  else if (strcmp(symbol,"MY")    == 0) kind = MEASURE_Y;
+  else if (strcmp(symbol,"my")    == 0) kind = MEASURE_Y;
+  else if (strcmp(symbol,"MZ")    == 0) kind = MEASURE_Z;
+  else if (strcmp(symbol,"mz")    == 0) kind = MEASURE_Z;
   else kind = NOT_A_GATE;
 
   return kind;

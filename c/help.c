@@ -19,7 +19,7 @@ static void help_print_outline() {
 * 1-qubit gates:            X,Y,Z,XR,XR+,H,S,S+,T,T+,RX,RY,RZ\n\
 * 2-qubit gates:            CX,CZ\n\
 * 3-qubit gates:            CCX\n\
-* measurement:              M\n\
+* measurement:              M,MX,MY,MZ\n\
 [notes] \n\
 * see \'help <item>\', for more information\n\
 ");
@@ -33,10 +33,8 @@ static void help_print_init() {
   You must initialize before operating any quantum gate.\n\
 [usage] \n\
   >> input <qubit_num> \n\
-  >> %% <qubit_num> \n\
-[example] \n\
-  >> input 4 \n\
-  >> %% 3 \n\
+f[alias] \n\
+  %% \n\
 ");
 }
 
@@ -47,11 +45,8 @@ static void help_print_circ() {
   This command visualize quantum circuit with text.\n\
 [usage] \n\
   >> circ \n\
-  >> & \n\
-[example] \n\
-  >> circ \n\
-  0 -H-*--M--- \n\
-  1 ---CX---M- \n\
+[alias] \n\
+  & \n\
 ");
 }
 
@@ -62,12 +57,8 @@ static void help_print_gates() {
    This command print quantum gates in order of operation \n\
 [usage] \n\
   >> gates \n\
-  >> ! \n\
-[example] \n\
-  >> gates \n\
-  %% 2 \n\
-  H 0 \n\
-  CX 0 1 \n\
+[alias] \n\
+  ! \n\
 ");
 }
 
@@ -78,13 +69,9 @@ static void help_print_show() {
    This command shows the probability amplitude for each eigen state \n\
 [usage] \n\
   >> show \n\
-  >> - \n\
-[example] \n\
-  >> show \n\
-  c[00] = +0.7071+0.0000*i : 0.5000 |+++++ \n\
-  c[01] = +0.0000+0.0000*i : 0.0000 | \n\
-  c[10] = +0.0000+0.0000*i : 0.0000 | \n\
-  c[11] = +0.7071+0.0000*i : 0.5000 |+++++ \n\
+  >> show <qubit_id>...\n\
+[alias] \n\
+  - \n\
 ");
 }
 
@@ -95,10 +82,8 @@ static void help_print_echo() {
   This command print any strings you set folloing to 'echo' \n\
 [usage] \n\
   >> echo <strings>\n\
-  >> @ <strings>\n\
-[example] \n\
-  >> echo hello world. \n\
-  hello world.\n\
+[alias] \n\
+  @ \n\
 ");
 }
 
@@ -109,14 +94,8 @@ static void help_print_output() {
   This command outputs current quantum gates to quantum gates file.\n\
 [usage] \n\
   >> output <file>\n\
-  >> > <file>\n\
-[example] \n\
-  >> output foo \n\
-  >> quit \n\
-  $ cat foo \n\
-  %% 2 \n\
-  H 0 \n\
-  CX 0 1 \n\
+[alias] \n\
+  > \n\
 ");
 }
 
@@ -127,10 +106,8 @@ static void help_print_quit() {
   This command is to quit interactive mode and return to your shell. \n\
 [usage] \n\
   >> quit\n\
-  >> .\n\
-[example] \n\
-  >> quit \n\
-  $\n\
+[alias] \n\
+  . \n\
 ");
 }
 
@@ -138,27 +115,82 @@ static void help_print_m() {
   printf("\
 == M gate ==\n\
 [description] \n\
-  M gate is to measure the current quantum state.\n\
-  You can set number of mesurements (=shots), and set qubit id you want to measure.\n\
-  Default shots is %d, and default qubit id's are all\n\
+  M gate is to measure the current quantum state from any direction.\n\
+  You can set number of mesurements (=shots), mesurement direction (=angle,phase),\n\
+  and set qubit id you want to measure.\n\
+  Default shots is %d, default angle,phase is 0.0 (z-axis), \n\
+  and default qubit id's are all (all of the qubit id's are measured).\n\
+[note] \n\
+  Definition of 'angle' and 'phase' ... \n\
+  - angle ... angle formed by z-axis in bloch shere (unit: PI radian) \n\
+  - phase ... angle around z-axis in bloch shere (unit: PI radian) \n\
+  If angle,phase aren't zero value, then measured state is u/d instead of 0/1. \n\
+[usage] \n\
+  >> M \n\
+  >> M <qubit_id>...\n\
+  >> M(<shots>)\n\
+  >> M(<shots>,<angle>,<phase>)\n\
+  >> M(<shots>,<angle>,<phase>) <qubit_id>...\n\
+[alias] \n\
+  m \n\
+", DEF_SHOTS);
+}
+
+static void help_print_mx() {
+  printf("\
+== MX gate ==\n\
+[description] \n\
+  MX gate is to measure the current quantum state from x-direction in bloch shere.\n\
+  You can set number of mesurements (=shots) and set qubit id you want to measure.\n\
+  Default shots is %d, and default qubit id's are all \n\
+  (all of the qubit id's are measured).\n\
+[note] \n\
+  Measured state is u/d instead of 0/1. \n\
+[usage] \n\
+  >> MX \n\
+  >> MX <qubit_id>... \n\
+  >> MX(<shots>) \n\
+  >> MX(<shots>) <qubit_id>... \n\
+[alias] \n\
+  mx \n\
+", DEF_SHOTS);
+}
+
+static void help_print_my() {
+  printf("\
+== MY gate ==\n\
+[description] \n\
+  MY gate is to measure the current quantum state from y-direction in bloch shere.\n\
+  You can set number of mesurements (=shots) and set qubit id you want to measure.\n\
+  Default shots is %d, and default qubit id's are all \n\
+  (all of the qubit id's are measured).\n\
+[note] \n\
+  Measured state is u/d instead of 0/1. \n\
+[usage] \n\
+  >> MY \n\
+  >> MY <qubit_id>... \n\
+  >> MY(<shots>) \n\
+  >> MY(<shots>) <qubit_id>... \n\
+[alias] \n\
+  my \n\
+", DEF_SHOTS);
+}
+
+static void help_print_mz() {
+  printf("\
+== MZ gate ==\n\
+[description] \n\
+  MZ gate is to measure the current quantum state from z-direction in bloch shere.\n\
+  You can set number of mesurements (=shots) and set qubit id you want to measure.\n\
+  Default shots is %d, and default qubit id's are all \n\
   (all of the qubit id's are measured).\n\
 [usage] \n\
-  >> M\n\
-  >> M(<shots>)\n\
-  >> M(<shots>) <qubit_id> ...\n\
-[example] \n\
-  >> M \n\
-  frq[00] = 53 \n\
-  frq[11] = 47 \n\
-  last state => 11\n\
-  >> M(10) \n\
-  frq[00] = 4 \n\
-  frq[11] = 6 \n\
-  last state => 00\n\
-  >> M(10) 1 \n\
-  frq[0] = 5 \n\
-  frq[1] = 5 \n\
-  last state => 0\n\
+  >> MZ \n\
+  >> MZ <qubit_id>... \n\
+  >> MZ(<shots>) \n\
+  >> MZ(<shots>) <qubit_id>... \n\
+[alias] \n\
+  mz \n\
 ", DEF_SHOTS);
 }
 
@@ -172,8 +204,8 @@ static void help_print_x() {
     | 1 0 | \n\
 [usage] \n\
   >> X <qubit_id>\n\
-[example] \n\
-  >> X 0 \n\
+[alias] \n\
+  x \n\
 ");
 }
 
@@ -187,8 +219,8 @@ static void help_print_y() {
     | -i 0 | \n\
 [usage] \n\
   >> Y <qubit_id>\n\
-[example] \n\
-  >> Y 0 \n\
+[alias] \n\
+  y \n\
 ");
 }
 
@@ -202,8 +234,8 @@ static void help_print_z() {
     | 0 -1 | \n\
 [usage] \n\
   >> Z <qubit_id>\n\
-[example] \n\
-  >> Z 0 \n\
+[alias] \n\
+  z \n\
 ");
 }
 
@@ -217,8 +249,8 @@ static void help_print_xr() {
     | (1-i)/2 (1+i)/2 | \n\
 [usage] \n\
   >> XR <qubit_id>\n\
-[example] \n\
-  >> XR 0 \n\
+[alias] \n\
+  xr \n\
 ");
 }
 
@@ -232,8 +264,8 @@ static void help_print_xr_dagger() {
     | (1+i)/2 (1-i)/2 | \n\
 [usage] \n\
   >> XR+ <qubit_id>\n\
-[example] \n\
-  >> XR+ 0 \n\
+[alias] \n\
+  xr+ \n\
 ");
 }
 
@@ -247,8 +279,8 @@ static void help_print_h() {
     | 1/sqrt(2) -1/sqrt(2) | \n\
 [usage] \n\
   >> H <qubit_id>\n\
-[example] \n\
-  >> H 0 \n\
+[alias] \n\
+  h \n\
 ");
 }
 
@@ -263,8 +295,8 @@ static void help_print_s() {
     | 0 i | \n\
 [usage] \n\
   >> S <qubit_id>\n\
-[example] \n\
-  >> S 0 \n\
+[alias] \n\
+  s \n\
 ");
 }
 
@@ -278,8 +310,8 @@ static void help_print_s_dagger() {
     | 0 -i | \n\
 [usage] \n\
   >> S+ <qubit_id>\n\
-[example] \n\
-  >> S+ 0 \n\
+[alias] \n\
+  s+ \n\
 ");
 }
 
@@ -294,8 +326,8 @@ static void help_print_t() {
     | 0 (1+i)/sqrt(2) | \n\
 [usage] \n\
   >> T <qubit_id>\n\
-[example] \n\
-  >> T 0 \n\
+[alias] \n\
+  t \n\
 ");
 }
 
@@ -309,8 +341,8 @@ static void help_print_t_dagger() {
     | 0 (1-i)/sqrt(2) | \n\
 [usage] \n\
   >> T+ <qubit_id>\n\
-[example] \n\
-  >> T+ 0 \n\
+[alias] \n\
+  t+ \n\
 ");
 }
 
@@ -324,8 +356,8 @@ static void help_print_rx() {
     | -i*sin(phase*PI/2)  cos(phase*PI/2)   | \n\
 [usage] \n\
   >> RX(<phase>) <qubit_id>\n\
-[example] \n\
-  >> RX(0.5) 0 \n\
+[alias] \n\
+  rx \n\
 ");
 }
 
@@ -339,8 +371,8 @@ static void help_print_ry() {
     | sin(phase*PI/2)  cos(phase*PI/2) | \n\
 [usage] \n\
   >> RY(<phase>) <qubit_id>\n\
-[example] \n\
-  >> RY(0.5) 0 \n\
+[alias] \n\
+  ry \n\
 ");
 }
 
@@ -354,8 +386,8 @@ static void help_print_rz() {
     | 0 cos(phase*PI)+i*sin(phase*PI) | \n\
 [usage] \n\
   >> RZ(<phase>) <qubit_id>\n\
-[example] \n\
-  >> RZ(0.5) 0 \n\
+[alias] \n\
+  rz \n\
 ");
 }
 
@@ -372,8 +404,8 @@ static void help_print_cx() {
     | 0 0 1 0 | \n\
 [usage] \n\
   >> CX <qubit_id> <qubit_id>\n\
-[example] \n\
-  >> CX 0 1 \n\
+[alias] \n\
+  cx \n\
 ");
 }
 
@@ -390,8 +422,8 @@ static void help_print_cz() {
     | 0 0 0 -1 | \n\
 [usage] \n\
   >> CZ <qubit_id> <qubit_id>\n\
-[example] \n\
-  >> CZ 0 1 \n\
+[alias] \n\
+  cz \n\
 ");
 }
 
@@ -411,8 +443,8 @@ static void help_print_ccx() {
     2 --H-CX-T+-CX-T-CX-T+-CX---T-H------------- \n\
 [usage] \n\
   >> CCX <qubit_id> <qubit_id> <qubit_id>\n\
-[example] \n\
-  >> CCX 0 1 2\n\
+[alias] \n\
+  ccx \n\
 ");
 }
 
@@ -456,6 +488,15 @@ int help_print(char* item)
     break;
   case MEASURE:
     help_print_m();
+    break;
+  case MEASURE_X:
+    help_print_mx();
+    break;
+  case MEASURE_Y:
+    help_print_my();
+    break;
+  case MEASURE_Z:
+    help_print_mz();
     break;
   case PAULI_X:
     help_print_x();
