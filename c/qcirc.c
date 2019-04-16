@@ -81,6 +81,7 @@ int qcirc_append_qgate(QCirc* qcirc, Kind kind, int terminal_num,
   case MEASURE_X:
   case MEASURE_Y:
   case MEASURE_Z:
+  case MEASURE_BELL:
     qcirc->qgate[qcirc->step_num].para.mes.shots = para->mes.shots;
     qcirc->qgate[qcirc->step_num].para.mes.angle = para->mes.angle;
     qcirc->qgate[qcirc->step_num].para.mes.phase = para->mes.phase;
@@ -133,6 +134,7 @@ int qcirc_set_cimage(QCirc* qcirc)
     case MEASURE_X:
     case MEASURE_Y:
     case MEASURE_Z:
+    case MEASURE_BELL:
       for (int j=0; j<qcirc->qgate[i].terminal_num; j++) {
 	p = 0;
 	while (symbol[p] != '\0') {
@@ -264,6 +266,7 @@ int qcirc_write_file(QCirc* qcirc, char* fname)
     case MEASURE_X:
     case MEASURE_Y:
     case MEASURE_Z:
+    case MEASURE_BELL:
       fprintf(fp, "%s(%d) ", symbol, para->mes.shots);
       for (int k=0; k<terminal_num; k++) {
 	printf("%d ",qubit_id[k]);
@@ -358,7 +361,6 @@ QCirc* qcirc_read_file(char* fname)
       break;
     case MEASURE:
       /* measurement */
-      //      if ((qcirc == NULL) || (qstate == NULL)) goto NEED_TO_INITIALIZE;
       if (qcirc == NULL) goto ERROR_EXIT;
       if (tnum > qubit_num + 1) goto ERROR_EXIT;
       terminal_num = tnum - 1;  /* number of qubits to measure */
@@ -398,7 +400,6 @@ QCirc* qcirc_read_file(char* fname)
     case MEASURE_Y:
     case MEASURE_Z:
       /* measurement */
-      //      if ((qcirc == NULL) || (qstate == NULL)) goto NEED_TO_INITIALIZE;
       if (qcirc == NULL) goto ERROR_EXIT;
       if (tnum > qubit_num + 1) goto ERROR_EXIT;
       terminal_num = tnum - 1;  /* number of qubits to measure */
@@ -433,6 +434,25 @@ QCirc* qcirc_read_file(char* fname)
 	for (int i=0; i<terminal_num; i++) {
 	  qubit_id[i] = i;
 	}
+      }
+      break;
+    case MEASURE_BELL:
+      /* measurement */
+      if (qcirc == NULL) goto ERROR_EXIT;
+      if (tnum < 3) goto ERROR_EXIT;
+      if (tnum > 3) goto ERROR_EXIT;
+      terminal_num = 2;  /* number of qubits to measure */
+      if (anum == 1) {
+	para.mes.shots = DEF_SHOTS;
+      }
+      else if (anum == 2) {
+	para.mes.shots = strtol(args[1], NULL, 10);
+      }
+      else goto ERROR_EXIT;
+
+      for (int i=0; i<terminal_num; i++) {
+	qubit_id[i] = strtol(token[1+i], NULL, 10);
+	if (qubit_num < qubit_id[i] + 1) goto ERROR_EXIT;
       }
       break;
     case PAULI_X:

@@ -14,7 +14,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
-#define VERSION "0.0.4"
+#define VERSION "0.0.5"
 
 /*====================================================================*/
 /*  Definitions & Macros                                              */
@@ -42,6 +42,11 @@
 
 #define DEF_SHOTS 100
 #define DEF_PHASE  0.0
+
+#define BELL_PHI_PLUS  0
+#define BELL_PHI_MINUS 3
+#define BELL_PSI_PLUS  1
+#define BELL_PSI_MINUS 2
 
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
@@ -127,6 +132,7 @@ typedef enum _Kind {
   MEASURE_X	 = 101,	 	/* symbol: 'MX','mx'    */
   MEASURE_Y	 = 102,	 	/* symbol: 'MY','my'    */
   MEASURE_Z	 = 103,	 	/* symbol: 'MZ','mz'    */
+  MEASURE_BELL	 = 104,	 	/* symbol: 'MB','mb'    */
   NOT_A_GATE	 = 1000,
 } Kind;
 
@@ -274,11 +280,12 @@ void	 qcirc_free(QCirc* qcirc);
 /* qstate.c */
 QState*	 qstate_init(int qubit_num);
 QState*	 qstate_copy(QState* qstate);
-double*  qstate_get_camp(QState* qstate);
-//int	 qstate_print(QState* qstate);
+double*  qstate_get_camp(QState* qstate, int qubit_num, int qubit_id[MAX_QUBIT_NUM]);
 int	 qstate_print(QState* qstate, int qubit_num, int qubit_id[MAX_QUBIT_NUM]);
 MData*	 qstate_measure(QState* qstate, int shot_num, double angle, double phase,
 			int qubit_num, int qubit_id[MAX_QUBIT_NUM]);
+MData*   qstate_measure_bell(QState* qstate, int shot_num, int qubit_num,
+			     int qubit_id[MAX_QUBIT_NUM]);
 int	 qstate_operate_qgate_param(QState* qstate, Kind kind, double phase,
 				    int qubit_id[MAX_QUBIT_NUM]);
 int	 qstate_operate_qgate(QState* qstate, QGate* qgate);
@@ -288,6 +295,7 @@ void	 qstate_free(QState* qstate);
 MData*	 mdata_init(int qubit_num, int state_num, int shot_num,
 		    double angle, double phase, int qubit_id[MAX_QUBIT_NUM]);
 int	 mdata_print(MData* mdata);
+int	 mdata_print_bell(MData* mdata);
 void	 mdata_free(MData* mdata);
 
 /* gbank.c */

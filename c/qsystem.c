@@ -206,6 +206,24 @@ static int qsystem_execute_one_line(QSystem* qsystem, char* line)
       }
     }
     break;
+  case MEASURE_BELL:
+    /* measurement */
+    if ((qcirc == NULL) || (qstate == NULL)) goto NEED_TO_INITIALIZE;
+    if (tnum < 3) goto NEED_MORE_ARGUMENTS;
+    if (tnum > 3) goto TOO_MANY_ARGUMENTS;
+    terminal_num = 2;  /* number of qubits to measure */
+    if (anum == 1) {
+      para.mes.shots = DEF_SHOTS;
+    }
+    else if (anum == 2) {
+      para.mes.shots = strtol(args[1], NULL, 10);
+    }
+    else goto ERROR_EXIT;
+    for (int i=0; i<terminal_num; i++) {
+      qubit_id[i] = strtol(token[1+i], NULL, 10);
+      if (qubit_num < qubit_id[i] + 1) goto OUT_OF_BOUND;
+    }
+    break;
   case PAULI_X:
   case PAULI_Y:
   case PAULI_Z:

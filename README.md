@@ -58,17 +58,16 @@ print help
 
 foo.py
 	
-    from qlazypy.basic import QState
+    from qlazypy import QState
     
     qs = QState(2)
     qs.h(0)
     qs.cx(0,1)
     qs.show()
     
-    md = qs.m(shots=50)
+    md = qs.m()
     md.show()
     
-    md.free()
     qs.free()
 
 execute the program
@@ -80,30 +79,10 @@ execute the program
     * Linux(Ubuntu16.04)
     * Python3.5
 
-## ChangeLog
-
-### v0.0.4 (2019.4.12)
-
-add option to 'show' (select some qubits and show).
-add new measurement gates (MX,MY,MZ).
-
-### v0.0.3 (2019.4.8)
-
-measurement from any direction
-
-### v0.0.2 (2019.4.3)
-
-make -> cmake
-
-### v0.0.1 (2019.4.1)
-
-initial version
-
-
 ## Licence
 
 Apache License 2.0
 
 ## Author
 
-[samn33](http://github.com/samn33)
+[Sam.N](http://github.com/samn33)

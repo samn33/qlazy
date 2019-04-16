@@ -94,8 +94,13 @@ and measurement.
 
 ### show - print quantum state
 
-    [description] 
-      This command shows the probability amplitude for each eigen state 
+    [description] \n\
+      This command shows the probability amplitudes of current quantum state.
+    [note]
+      - Normalize that amplitude of |00..0> is real and positive value,
+        and eliminate the phase factor.
+      - If 'show' the qubit that entangled to other qubits,
+        then 'show' result is probabilistic.
     [usage] 
       >> show 
       >> show <qubit_id>...
@@ -154,12 +159,12 @@ and measurement.
       M gate is to measure the current quantum state from any direction.
       You can set number of mesurements (=shots), mesurement direction (=angle,phase),
       and set qubit id you want to measure.
-      Default shots is %d, default angle,phase is 0.0 (z-axis),
+      Default shots is 100, default angle,phase is 0.0 (z-axis),
       and default qubit id's are all (all of the qubit id's are measured).
     [note]
       Definition of 'angle' and 'phase' ...
-      - angle ... angle formed by z-axis in bloch shere (unit: PI radian) 
-      - phase ... angle around z-axis in bloch shere (unit: PI radian)
+      - angle ... angle formed by z-axis in bloch sphere (unit: PI radian) 
+      - phase ... angle around z-axis in bloch sphere (unit: PI radian)
       If angle,phase aren't zero value, then measured state is u/d instead of 0/1.
     [usage] 
       >> M
@@ -194,9 +199,9 @@ and measurement.
 ### MX - MX gate
 
     [description]
-      MX gate is to measure the current quantum state from x-direction in bloch shere.
+      MX gate is to measure the current quantum state from x-direction in bloch sphere.
       You can set number of mesurements (=shots) and set qubit id you want to measure.
-      Default shots is %d, and default qubit id's are all
+      Default shots is 100, and default qubit id's are all
       (all of the qubit id's are measured).
     [note]
       Measured state is u/d instead of 0/1.
@@ -227,9 +232,9 @@ and measurement.
 ### MY - MY gate
 
     [description]
-      MY gate is to measure the current quantum state from y-direction in bloch shere.
+      MY gate is to measure the current quantum state from y-direction in bloch sphere.
       You can set number of mesurements (=shots) and set qubit id you want to measure.
-      Default shots is %d, and default qubit id's are all
+      Default shots is 100, and default qubit id's are all
       (all of the qubit id's are measured).
     [note]
       Measured state is u/d instead of 0/1.
@@ -260,9 +265,9 @@ and measurement.
 ### MZ - MZ gate
 
     [description]
-      MZ gate is to measure the current quantum state from z-direction in bloch shere.
+      MZ gate is to measure the current quantum state from z-direction in bloch sphere.
       You can set number of mesurements (=shots) and set qubit id you want to measure.
-      Default shots is %d, and default qubit id's are all
+      Default shots is 100, and default qubit id's are all
       (all of the qubit id's are measured).
     [note]
       Measured state is u/d instead of 0/1.
@@ -289,6 +294,18 @@ and measurement.
       frq[0] = 5 
       frq[1] = 5 
       last state => 0
+
+### MB - MB gate
+
+    [description]
+      MB gate is to execute 2-qubit Bell-measurement.
+      You can set number of mesurements (=shots) 
+      and set 2 qubit id's you want to bell-measure. Default shots is 100.\n\
+    [usage] \n\
+      >> MB <qubit_id> <qubit_id>
+      >> MB(<shots>) <qubit_id> <qubit_id>
+    [alias] \n\
+      mb \n\
 
 ### X
 

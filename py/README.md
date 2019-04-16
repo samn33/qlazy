@@ -13,7 +13,7 @@ developers.  The feature is just "simple description and easy to use".
 import 'QState' module from 'qlazypy' package in your python program.
 simple example is following ...
 
-    from qlazypy.basic import QState
+    from qlazypy import QState
     
     # set qubit number
     N = 2
@@ -34,6 +34,5 @@ simple example is following ...
 	# last result of all measurements
     print("* last = ", md.lst)
 
-    # free objects
-    md.free()
+    # free object
     qs.free()

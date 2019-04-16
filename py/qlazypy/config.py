@@ -13,6 +13,11 @@ MAX_QUBIT_NUM = 30
 DEF_SHOTS = 100
 DEF_PHASE  = 0.0
 
+BELL_PHI_PLUS  = 0
+BELL_PHI_MINUS = 3
+BELL_PSI_PLUS  = 1
+BELL_PSI_MINUS = 2
+
 CIRC           = 1
 GATES          = 2
 SHOW           = 3

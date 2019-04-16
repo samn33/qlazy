@@ -88,15 +88,39 @@ class QState(ctypes.Structure):
             raise QState_FailToCirc()
     
     @property
-    def amp(self):
+    def amp(self, id=None):
+
+        return self.get_amp()
+        
+    def get_amp(self, id=None):
+
+        if id is None or id == []:
+            id = [i for i in range(self.qubit_num)]
+
+        # error check
+        if len(id) > self.qubit_num:
+            raise QState_TooManyArguments()
+        for i in range(len(id)):
+            if id[i] >= self.qubit_num:
+                raise QState_OutOfBound()
+            if id[i] < 0:
+                raise QState_OutOfBound()
 
         try:
+            qubit_num = len(id)
+            qubit_id = [0 for _ in range(MAX_QUBIT_NUM)]
+            for i in range(len(id)):
+                qubit_id[i] = id[i]
+            IntArray = ctypes.c_int * MAX_QUBIT_NUM
+            id_array = IntArray(*qubit_id)
+            
             lib.qstate_get_camp.restype = ctypes.POINTER(ctypes.c_double)
-            lib.qstate_get_camp.argtypes = [ctypes.POINTER(QState)]
-            ret = lib.qstate_get_camp(ctypes.byref(self))
+            lib.qstate_get_camp.argtypes = [ctypes.POINTER(QState),ctypes.c_int, IntArray]
+            ret = lib.qstate_get_camp(ctypes.byref(self),ctypes.c_int(qubit_num), id_array)
 
-            out = [0] * self.state_num
-            for i in range(self.state_num):
+            state_num = (1 << len(id))
+            out = [0] * state_num
+            for i in range(state_num):
                 out[i] = complex(ret[2*i],ret[2*i+1])
 
             libc.free.argtypes = [ctypes.POINTER(ctypes.c_double)]
@@ -497,7 +521,15 @@ class QState(ctypes.Structure):
         if not out:
             raise QState_FailToMeasure()
 
-        return out.contents
+        state_num = out.contents.state_num
+        last_state = out.contents.last
+        freq = ctypes.cast(out.contents.freq, ctypes.POINTER(ctypes.c_int*state_num))
+        freq_list = [freq.contents[i] for i in range(state_num)]
+        mdpy = MDataPy(freq_list=freq_list, last_state=last_state, qubit_num=qubit_num,
+                       state_num=state_num, angle=angle, phase=phase)
+        out.contents.free()
+
+        return mdpy
 
     def mx(self, id=None, shots=DEF_SHOTS):
         return self.M(id=id, shots=shots, angle=0.5, phase=0.0)
@@ -517,6 +549,59 @@ class QState(ctypes.Structure):
     def MZ(self, id=None, shots=DEF_SHOTS):
         return self.M(id=id, shots=shots, angle=0.0, phase=0.0)
         
+    def mb(self, id=None, shots=DEF_SHOTS):
+        return self.MB(id=id, shots=shots)
+    
+    def MB(self, id=None, shots=DEF_SHOTS):
+        # error check
+        if id is None or id == []:
+            raise QState_NeedMoreArguments()
+        if len(id) < 2:
+            raise QState_NeedMoreArguments()
+        if len(id) > 2:
+            raise QState_TooManyArguments()
+        for i in range(len(id)):
+            if id[i] >= self.qubit_num:
+                raise QState_OutOfBound()
+            if id[i] < 0:
+                raise QState_OutOfBound()
+
+        # join circ
+        # for i in range(self.qubit_num):
+        for i in range(len(id)):
+            for j in range(self.qubit_num):
+                if id[i] == j:
+                    self._circ[j] += "MB-"
+                else:
+                    self._circ[j] += "---"
+            
+        # operate
+        state_num = 4
+        qubit_num = 2
+        qubit_id = [0 for _ in range(MAX_QUBIT_NUM)]
+        for i in range(qubit_num):
+            qubit_id[i] = id[i]
+        IntArray = ctypes.c_int * MAX_QUBIT_NUM
+        id_array = IntArray(*qubit_id)
+        
+        lib.qstate_measure_bell.restype = ctypes.POINTER(MData)
+        lib.qstate_measure_bell.argtypes = [ctypes.POINTER(QState), ctypes.c_int,
+                                       ctypes.c_int, IntArray]
+        out = lib.qstate_measure_bell(ctypes.byref(self), ctypes.c_int(shots),
+                                      ctypes.c_int(qubit_num), id_array)
+
+        if not out:
+            raise QState_FailToMeasure()
+
+        last_state = out.contents.last
+        freq = ctypes.cast(out.contents.freq, ctypes.POINTER(ctypes.c_int*state_num))
+        freq_list = [freq.contents[i] for i in range(state_num)]
+        mdpy = MDataPy(freq_list=freq_list, last_state=last_state, qubit_num=qubit_num,
+                       state_num=state_num, angle=0.0, phase=0.0)
+        out.contents.free()
+
+        return mdpy
+
     def free(self):
 
         lib.qstate_free.argtypes = [ctypes.POINTER(QState)]
@@ -582,3 +667,40 @@ class MData(ctypes.Structure):
 
         lib.mdata_free.argtypes = [ctypes.POINTER(MData)]
         lib.mdata_free(ctypes.byref(self))
+
+class MDataPy:
+
+    def __init__(self, freq_list=None, last_state=0, state_num=0, qubit_num=0,
+                 angle=0.0, phase=0.0):
+        self.freq_list = freq_list
+        self.last_state = last_state
+        self.qubit_num = qubit_num
+        self.state_num = state_num
+        self.angle = angle
+        self.phase = phase
+
+    @property
+    def frq(self):
+        return self.freq_list
+
+    @property
+    def lst(self):
+        return self.last_state
+
+    def show(self):
+        if self.angle == 0.5 and self.phase == 0.0:
+            print("direction of measurement: x-axis")
+        elif self.angle == 0.5 and self.phase == 0.5:
+            print("direction of measurement: y-axis")
+        elif self.angle == 0.0 and self.phase == 0.0:
+            print("direction of measurement: z-axis")
+        else:
+            print("direction of measurement: theta={0:f}*PI, phi={1:f}*PI".
+                  format(self.angle, self.phase))
+            
+        for i in range(self.state_num):
+            if self.freq_list[i] != 0:
+                print("frq[{0:}] = {1:d}".
+                      format(format(i,'b').zfill(self.qubit_num),self.freq_list[i]))
+
+        print("last state =>", format(self.last_state,'b').zfill(self.qubit_num))

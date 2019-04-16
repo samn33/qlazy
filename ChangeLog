@@ -1,0 +1,32 @@
+2019-04-99  Sam.N  <saminriver33@gmail.com>
+
+	* v0.0.5
+	- bug fix of 'show' command.
+	- change specification of 'show' command.
+	  - normalize that amplitude of |00..0> is real and positive value.
+	  - eliminate phase factor.
+	- add 2-qubit Bell-measurement (mb).
+	- qlazypy: "from qlazypy import QState" available.
+	- qlazypy: add 'get_amp()' method
+	- qlazypy: no need to md.free()
+
+2019-04-12  Sam.N  <saminriver33@gmail.com>
+
+	* v0.0.4
+	- add option to 'show' command (select some qubits).
+	- add new measurement gates (mx,my,mz).
+
+2019-04-08  Sam.N  <saminriver33@gmail.com>
+
+	* v0.0.3
+	- measurement from any direction
+
+2019-04-03  Sam.N  <saminriver33@gmail.com>
+
+	* v0.0.2
+	- make -> cmake
+
+2019-04-01  Sam.N <saminriver33@gmail.com>
+
+	* v0.0.1
+	- initial version

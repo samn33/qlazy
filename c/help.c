@@ -19,7 +19,7 @@ static void help_print_outline() {
 * 1-qubit gates:            X,Y,Z,XR,XR+,H,S,S+,T,T+,RX,RY,RZ\n\
 * 2-qubit gates:            CX,CZ\n\
 * 3-qubit gates:            CCX\n\
-* measurement:              M,MX,MY,MZ\n\
+* measurement:              M,MX,MY,MZ,MB\n\
 [notes] \n\
 * see \'help <item>\', for more information\n\
 ");
@@ -66,7 +66,12 @@ static void help_print_show() {
   printf("\
 == print quantum state ==\n\
 [description] \n\
-   This command shows the probability amplitude for each eigen state \n\
+   This command shows the probability amplitudes of current quantum state.\n\
+[note] \n\
+   - Normalize that amplitude of |00..0> is real and positive value,\n\
+     and eliminate the phase factor.\n\
+   - If 'show' the qubit that entangled to other qubits,\n\
+     then result is probabilistic.\n\
 [usage] \n\
   >> show \n\
   >> show <qubit_id>...\n\
@@ -122,8 +127,8 @@ static void help_print_m() {
   and default qubit id's are all (all of the qubit id's are measured).\n\
 [note] \n\
   Definition of 'angle' and 'phase' ... \n\
-  - angle ... angle formed by z-axis in bloch shere (unit: PI radian) \n\
-  - phase ... angle around z-axis in bloch shere (unit: PI radian) \n\
+  - angle ... angle formed by z-axis in bloch sphere (unit: PI radian) \n\
+  - phase ... angle around z-axis in bloch sphere (unit: PI radian) \n\
   If angle,phase aren't zero value, then measured state is u/d instead of 0/1. \n\
 [usage] \n\
   >> M \n\
@@ -140,7 +145,7 @@ static void help_print_mx() {
   printf("\
 == MX gate ==\n\
 [description] \n\
-  MX gate is to measure the current quantum state from x-direction in bloch shere.\n\
+  MX gate is to measure the current quantum state from x-direction in bloch sphere.\n\
   You can set number of mesurements (=shots) and set qubit id you want to measure.\n\
   Default shots is %d, and default qubit id's are all \n\
   (all of the qubit id's are measured).\n\
@@ -160,7 +165,7 @@ static void help_print_my() {
   printf("\
 == MY gate ==\n\
 [description] \n\
-  MY gate is to measure the current quantum state from y-direction in bloch shere.\n\
+  MY gate is to measure the current quantum state from y-direction in bloch sphere.\n\
   You can set number of mesurements (=shots) and set qubit id you want to measure.\n\
   Default shots is %d, and default qubit id's are all \n\
   (all of the qubit id's are measured).\n\
@@ -180,7 +185,7 @@ static void help_print_mz() {
   printf("\
 == MZ gate ==\n\
 [description] \n\
-  MZ gate is to measure the current quantum state from z-direction in bloch shere.\n\
+  MZ gate is to measure the current quantum state from z-direction in bloch sphere.\n\
   You can set number of mesurements (=shots) and set qubit id you want to measure.\n\
   Default shots is %d, and default qubit id's are all \n\
   (all of the qubit id's are measured).\n\
@@ -191,6 +196,21 @@ static void help_print_mz() {
   >> MZ(<shots>) <qubit_id>... \n\
 [alias] \n\
   mz \n\
+", DEF_SHOTS);
+}
+
+static void help_print_mb() {
+  printf("\
+== MB gate ==\n\
+[description] \n\
+  MB gate is to execute 2-qubit Bell-measurement.\n\
+  You can set number of mesurements (=shots) and set 2 qubit ids you want to bell-measure.\n\
+  Default shots is %d.\n\
+[usage] \n\
+  >> MB <qubit_id> <qubit_id> \n\
+  >> MB(<shots>) <qubit_id> <qubit_id> \n\
+[alias] \n\
+  mb \n\
 ", DEF_SHOTS);
 }
 
@@ -497,6 +517,9 @@ int help_print(char* item)
     break;
   case MEASURE_Z:
     help_print_mz();
+    break;
+  case MEASURE_BELL:
+    help_print_mb();
     break;
   case PAULI_X:
     help_print_x();

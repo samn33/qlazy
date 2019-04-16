@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
-from .command import command
-def main():
-    command()
+from .basic import QState
+from . import config
+
+__all__ = ["QState","config"]

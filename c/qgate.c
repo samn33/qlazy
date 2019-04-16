@@ -91,6 +91,9 @@ void qgate_get_symbol(char* symbol, Kind kind)
   case MEASURE_Z:
     strcpy(symbol,"MZ");
     break;
+  case MEASURE_BELL:
+    strcpy(symbol,"MB");
+    break;
   default:
     break;
   }
@@ -156,6 +159,8 @@ Kind qgate_get_kind(char* symbol)
   else if (strcmp(symbol,"my")    == 0) kind = MEASURE_Y;
   else if (strcmp(symbol,"MZ")    == 0) kind = MEASURE_Z;
   else if (strcmp(symbol,"mz")    == 0) kind = MEASURE_Z;
+  else if (strcmp(symbol,"MB")    == 0) kind = MEASURE_BELL;
+  else if (strcmp(symbol,"mb")    == 0) kind = MEASURE_BELL;
   else kind = NOT_A_GATE;
 
   return kind;

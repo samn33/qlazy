@@ -1,4 +1,4 @@
-from qlazypy.basic import QState
+from qlazypy import QState
 
 # initialize
 qs = QState(3)
@@ -26,5 +26,4 @@ md.show()
 print("* freq = ", md.frq)
 print("* last = ", md.lst)
 
-md.free()
 qs.free()

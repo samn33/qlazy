@@ -1,22 +1,15 @@
-from qlazypy.basic import QState
+from qlazypy import QState
 
-# initialize
 qs = QState(1)
 
 print("== initial state ==")
 qs.show()
 
-md = qs.mx()
-md.show()
-
-md = qs.mx()
-md.show()
-
-md = qs.mz()
-md.show()
+qs.mx().show()
+qs.mx().show()
+qs.mz().show()
 
 print("== state ==")
 qs.show()
 
-md.free()
 qs.free()

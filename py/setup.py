@@ -2,7 +2,7 @@
 import os
 from setuptools import setup, find_packages
 
-VERSION = '0.0.4'
+VERSION = '0.0.5'
 
 try:
     with open('README.md') as f:
@@ -14,7 +14,7 @@ setup(
     name='qlazypy',
     version=VERSION,
     url='https://github.com/samn33/qlazy',
-    author='o.nakagawa',
+    author='Sam.N',
     author_email='saminriver33@gmail.com',
     description='quantum computer application framework',
     long_description=README,
