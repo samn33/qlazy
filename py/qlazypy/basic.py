@@ -690,17 +690,38 @@ class MDataPy:
     def show(self):
         if self.angle == 0.5 and self.phase == 0.0:
             print("direction of measurement: x-axis")
+            self.__show_any()
         elif self.angle == 0.5 and self.phase == 0.5:
             print("direction of measurement: y-axis")
+            self.__show_any()
         elif self.angle == 0.0 and self.phase == 0.0:
             print("direction of measurement: z-axis")
+            self.__show_z()
         else:
             print("direction of measurement: theta={0:f}*PI, phi={1:f}*PI".
                   format(self.angle, self.phase))
-            
+            self.__show_any()
+
+    def __show_z(self):
+        
         for i in range(self.state_num):
             if self.freq_list[i] != 0:
+                state_string = format(i,'b').zfill(self.qubit_num)
                 print("frq[{0:}] = {1:d}".
-                      format(format(i,'b').zfill(self.qubit_num),self.freq_list[i]))
+                      format(state_string, self.freq_list[i]))
+                
+        state_string = format(self.last_state,'b').zfill(self.qubit_num)
+        print("last state =>", state_string)
 
-        print("last state =>", format(self.last_state,'b').zfill(self.qubit_num))
+    def __show_any(self):
+        
+        for i in range(self.state_num):
+            if self.freq_list[i] != 0:
+                state_string = format(i,'b').zfill(self.qubit_num)\
+                                            .replace('0','u').replace('1','d')
+                print("frq[{0:}] = {1:d}".
+                      format(state_string, self.freq_list[i]))
+                
+        state_string = format(self.last_state,'b').zfill(self.qubit_num)\
+                                                  .replace('0','u').replace('1','d')
+        print("last state =>", state_string)

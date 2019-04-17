@@ -1,4 +1,9 @@
-2019-04-99  Sam.N  <saminriver33@gmail.com>
+2019-04-17  Sam.N  <saminriver33@gmail.com>
+
+	* v0.0.6
+	- bug fix (qlazypy: show() of measured data)
+
+2019-04-16  Sam.N  <saminriver33@gmail.com>
 
 	* v0.0.5
 	- bug fix of 'show' command.

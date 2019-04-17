@@ -21,7 +21,7 @@ qs.show(id=[2])
     
 # Alice execute Bell-measurement to her qubits 0,1
 print("== Bell measurement ==")
-result = qs.mb(id=[0,1]).lst
+result = qs.mb(id=[0,1],shots=1).lst
 
 # Bob operate his qubit (id=2) according to the result
 if result == BELL_PHI_PLUS:
