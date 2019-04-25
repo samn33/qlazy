@@ -26,4 +26,4 @@ md.show()
 print("* freq = ", md.frq)
 print("* last = ", md.lst)
 
-qs.free()
+del qs

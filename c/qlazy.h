@@ -14,7 +14,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
-#define VERSION "0.0.6"
+#define VERSION "0.0.7"
 
 /*====================================================================*/
 /*  Definitions & Macros                                              */
@@ -48,7 +48,7 @@
 #define BELL_PSI_PLUS  1
 #define BELL_PSI_MINUS 2
 
-/* comment out if you want to show the phase factor of quantum state */
+#define REMOVE_PHASE_FACTOR
 //#define SHOW_PHASE_FACTOR
 
 #define MAX(a, b) ((a) > (b) ? (a) : (b))

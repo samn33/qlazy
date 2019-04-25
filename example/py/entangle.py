@@ -9,4 +9,4 @@ qs.show()
 md = qs.m(id=[0],shots=50)
 md.show()
 
-qs.free()
+del qs

@@ -16,8 +16,8 @@ class QState(ctypes.Structure):
     _fields_ = [
         ('qubit_num', ctypes.c_int),
         ('state_num', ctypes.c_int),
-        ('camp', ctypes.POINTER(ctypes.c_int)),
-        ('measured', ctypes.POINTER(ctypes.c_int)),
+        ('camp', ctypes.c_void_p),
+        ('gbank', ctypes.c_void_p),
     ]
     
     def __new__(self, qubit_num, seed=None):
@@ -45,6 +45,10 @@ class QState(ctypes.Structure):
             raise QState_FailToInitialize()
         
         return out.contents
+
+    def __del__(self):
+
+        self.free()
 
     def show(self, id=None):
 
@@ -509,7 +513,7 @@ class QState(ctypes.Structure):
             qubit_id[i] = id[i]
         IntArray = ctypes.c_int * MAX_QUBIT_NUM
         id_array = IntArray(*qubit_id)
-        
+
         lib.qstate_measure.restype = ctypes.POINTER(MData)
         lib.qstate_measure.argtypes = [ctypes.POINTER(QState), ctypes.c_int,
                                        ctypes.c_double, ctypes.c_double,

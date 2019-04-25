@@ -4,7 +4,6 @@
 
 #include "qlazy.h"
 
-//int get_binstr_from_decimal(char* binstr, int qubit_num, int decimal)
 int get_binstr_from_decimal(char* binstr, int qubit_num, int decimal, int zflag)
 {
   /*
@@ -33,14 +32,11 @@ int get_binstr_from_decimal(char* binstr, int qubit_num, int decimal, int zflag)
     dn = 'd';
   }
   
-  //  for (int i=0; i<qubit_num; i++) binstr[i] = '0';
   for (int i=0; i<qubit_num; i++) binstr[i] = up;
   binstr[qubit_num] = '\0';
 
   while (d > 0) {
-    //    if (d%2 == 0) binstr[qubit_num-pos-1] = '0';
     if (d%2 == 0) binstr[qubit_num-pos-1] = up;
-    //    else binstr[qubit_num-pos-1] = '1';
     else binstr[qubit_num-pos-1] = dn;
     d = d/2;
     pos++;

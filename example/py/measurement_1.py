@@ -12,4 +12,4 @@ qs.mz().show()
 print("== state ==")
 qs.show()
 
-qs.free()
+del qs

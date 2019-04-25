@@ -20,4 +20,4 @@ qs.m(angle=0.5,phase=0.0).show()
 print("== state 2 ==")
 qs.show()
 
-qs.free()
+del qs

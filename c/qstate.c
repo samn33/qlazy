@@ -19,34 +19,6 @@ static void qstate_set_0(QState* qstate)
   qstate->camp[0] = 1.0 + 0.0i;
 }
 
-static int qstate_remove_phase_factor(QState* qstate, CTYPE* phase_factor)
-{
-  CTYPE exp_i_phase = 1.0 + 0.0i;
-
-  if (qstate == NULL) goto ERROR_EXIT;
-
-  /* remove phase factor from whole state */
-  if (fabs(cimag(qstate->camp[0])) > MIN_DOUBLE) {
-    exp_i_phase = qstate->camp[0] / cabs(qstate->camp[0]);
-    if (creal(qstate->camp[0]/exp_i_phase) < 0.0) {
-      exp_i_phase = -exp_i_phase;
-    }
-  }
-  else if (creal(qstate->camp[0]) < 0.0) {
-    exp_i_phase = -exp_i_phase;
-  }
-  for (int i=0; i<qstate->state_num; i++) {
-    qstate->camp[i] = qstate->camp[i] / exp_i_phase;
-  }
-
-  *phase_factor = exp_i_phase;
-
-  return TRUE;
-  
- ERROR_EXIT:
-  return FALSE;
-}
-
 static int qstate_normalize(QState* qstate)
 {
   double	norm	    = 0.0;
@@ -190,6 +162,36 @@ double* qstate_get_camp(QState* qstate, int qubit_num, int qubit_id[MAX_QUBIT_NU
   return NULL;
 }
 
+#ifdef REMOVE_PHASE_FACTOR
+static int qstate_remove_phase_factor(QState* qstate, CTYPE* phase_factor)
+{
+  CTYPE exp_i_phase = 1.0 + 0.0i;
+
+  if (qstate == NULL) goto ERROR_EXIT;
+
+  /* remove phase factor from whole state */
+  if (fabs(cimag(qstate->camp[0])) > MIN_DOUBLE) {
+    exp_i_phase = qstate->camp[0] / cabs(qstate->camp[0]);
+    if (creal(qstate->camp[0]/exp_i_phase) < 0.0) {
+      exp_i_phase = -exp_i_phase;
+    }
+  }
+  else if (creal(qstate->camp[0]) < 0.0) {
+    exp_i_phase = -exp_i_phase;
+  }
+  for (int i=0; i<qstate->state_num; i++) {
+    qstate->camp[i] = qstate->camp[i] / exp_i_phase;
+  }
+
+  *phase_factor = exp_i_phase;
+
+  return TRUE;
+  
+ ERROR_EXIT:
+  return FALSE;
+}
+#endif
+
 int qstate_print(QState* qstate_in, int qubit_num, int qubit_id[MAX_QUBIT_NUM])
 {
   double	qreal,qimag,prob;
@@ -197,7 +199,9 @@ int qstate_print(QState* qstate_in, int qubit_num, int qubit_id[MAX_QUBIT_NUM])
   char		state[MAX_QUBIT_NUM+1];
 
   /* for extracting phase factor */
+#ifdef REMOVE_PHASE_FACTOR
   CTYPE         phase_factor;
+#endif
 
   /* for selecting some qubit id */
   int           x;
@@ -229,6 +233,7 @@ int qstate_print(QState* qstate_in, int qubit_num, int qubit_id[MAX_QUBIT_NUM])
 
   /* print qstate */
 
+#ifdef REMOVE_PHASE_FACTOR
   if (qstate_remove_phase_factor(qstate, &phase_factor) == FALSE)
     goto ERROR_EXIT;
   
@@ -239,6 +244,8 @@ int qstate_print(QState* qstate_in, int qubit_num, int qubit_id[MAX_QUBIT_NUM])
   else if (creal(qstate->camp[0]) < 0.0) {
     printf("phase factor = %+.4f\n",creal(phase_factor));
   }
+#endif
+
 #endif
   
   for (int i=0; i<qstate->state_num; i++) {
@@ -305,7 +312,7 @@ static int qstate_operate_qgate_1(QState* qstate, Kind kind, int n)
 }
 
 static int qstate_operate_qgate_1_rot(QState* qstate, Axis axis, double phase,
-					  double unit, int n)
+				      double unit, int n)
 {
   int		i;
   QState*	qstate_tmp = NULL;
@@ -317,7 +324,7 @@ static int qstate_operate_qgate_1_rot(QState* qstate, Axis axis, double phase,
   
   /* set rotation matrix aroud the X,Y,Z-axis*/
   if (!(U = gbank_get_rotation(axis, phase, unit))) goto ERROR_EXIT;
- 
+
   if (!(qstate_tmp = qstate_init(qstate->qubit_num))) goto ERROR_EXIT;
   
   for (i=0; i<qstate->state_num; i++) {
@@ -458,7 +465,7 @@ static int qstate_operate_qgate_3_ccx(QState* qstate, int q0, int q1, int q2)
 static int qstate_transform_basis(QState* qstate, double angle, double phase, int n)
 {
   /*
-     This function operate U+ to qstate
+     This function operate U+ to the qstate
      - |p> = U |0> = cos(theta/2) |0> + exp(i phi) sin(theta/2) |1>
      - U = Rz(PI/2 + phi) H Rz(theta) H
      - U+ = H Rz(-theta) H Rz(-PI/2 - phi)
@@ -486,7 +493,7 @@ static int qstate_transform_basis(QState* qstate, double angle, double phase, in
 static int qstate_transform_basis_inv(QState* qstate, double angle, double phase, int n)
 {
   /* 
-     This function operate U to qstate
+     This function operate U to the qstate
      - |p> = U |0> = cos(theta/2) |0> + exp(i phi) sin(theta/2) |1>
      - U = Rz(PI/2 + phi) H Rz(theta) H
      - U+ = H Rz(-theta) H Rz(-PI/2 - phi)
@@ -526,7 +533,7 @@ static int qstate_measure_one_time_without_change_state(QState* qstate_in, doubl
 
   /* unitary transform, if measuremment base is not {|0><0|,|1><1|} */
   if ((angle != 0.0) || (phase != 0.0)) {
-    for (int i=0; i<qstate->qubit_num; i++) {
+    for (int i=0; i<qubit_num; i++) {
       qstate_transform_basis(qstate, angle, phase, qubit_id[i]);
     }
   }
@@ -553,7 +560,7 @@ static int qstate_measure_one_time(QState* qstate, double angle, double phase,
 
   /* change basis, if measurement axis isn't Z */
   if ((angle != 0.0) || (phase != 0.0)) {
-    for (int i=0; i<qstate->qubit_num; i++) {
+    for (int i=0; i<qubit_num; i++) {
       qstate_transform_basis(qstate, angle, phase, qubit_id[i]);
     }
   }
@@ -576,11 +583,11 @@ static int qstate_measure_one_time(QState* qstate, double angle, double phase,
   qstate_normalize(qstate);
   /* change basis (inverse), if measurement axis isn't Z */
   if ((angle != 0.0) || (phase != 0.0)) {
-    for (int i=0; i<qstate->qubit_num; i++) {
+    for (int i=0; i<qubit_num; i++) {
       qstate_transform_basis_inv(qstate, angle, phase, qubit_id[i]);
     }
   }
-
+  
   return value;
 }
 
@@ -606,6 +613,7 @@ MData* qstate_measure(QState* qstate, int shot_num, double angle, double phase,
       qubit_id[i] = i;
     }
   }
+  
 
   /* initialize mdata */
   if (!(mdata = mdata_init(qubit_num, mes_num, shot_num, angle, phase, qubit_id)))

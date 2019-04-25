@@ -68,7 +68,7 @@ foo.py
     md = qs.m()
     md.show()
     
-    qs.free()
+    del qs
 
 execute the program
 

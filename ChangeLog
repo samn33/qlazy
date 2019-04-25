@@ -1,7 +1,13 @@
+2019-04-26  Sam.N  <saminriver33@gmail.com>
+
+	* v0.0.7
+	- bug fix: measure some qubits
+	- qlazypy: implement destructor of QState
+
 2019-04-17  Sam.N  <saminriver33@gmail.com>
 
 	* v0.0.6
-	- bug fix (qlazypy: show() of measured data)
+	- bug fix: qlazypy ... show() of measured data
 
 2019-04-16  Sam.N  <saminriver33@gmail.com>
 
