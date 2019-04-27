@@ -12,26 +12,26 @@ def main():
     print("** one-way quantum computing")
 
     # graph state
-    qc_oneway = QState(2)
-    qc_oneway.ry(0, phase=a).rz(0, phase=b)  # input state (random)
-    qc_oneway.h(1)
-    qc_oneway.cz(0,1)
+    qs_oneway = QState(2)
+    qs_oneway.ry(0, phase=a).rz(0, phase=b)  # input state (random)
+    qs_oneway.h(1)
+    qs_oneway.cz(0,1)
 
     # measurement
-    s = qc_oneway.m(id=[0], shots=1, angle=0.5, phase=phi)
+    s = qs_oneway.m(id=[0], shots=1, angle=0.5, phase=phi)
 
     # result state
-    qc_oneway.show(id=[1])
+    qs_oneway.show(id=[1])
 
     print("** conventianal quantum gate")
 
-    qc_gate = QState(1)
-    qc_gate.ry(0, phase=a).rz(0, phase=b)  # input state (random)
-    qc_gate.rz(0, phase=-phi).h(0)
-    qc_gate.show()
+    qs_gate = QState(1)
+    qs_gate.ry(0, phase=a).rz(0, phase=b)  # input state (random)
+    qs_gate.rz(0, phase=-phi).h(0)
+    qs_gate.show()
 
-    del qc_oneway
-    del qc_gate
+    del qs_oneway
+    del qs_gate
 
 if __name__ == '__main__':
     main()
