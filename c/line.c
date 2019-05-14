@@ -101,3 +101,24 @@ int line_join_token(char* dst, char* token[], int ini, int fin)
 
   return TRUE;
 }
+
+int line_remove_space(char* str)
+{
+  int pos = 0;
+  int cnt = 0;
+
+  if (str == NULL) return FALSE;
+
+  while(str[pos] != '\0') {
+    if (str[pos] != ' ') {
+      str[cnt++] = str[pos++];
+    }
+    else {
+      pos++;
+      str[cnt++] = str[pos++];
+    }
+  }
+  str[cnt] = '\0';
+
+  return TRUE;
+}

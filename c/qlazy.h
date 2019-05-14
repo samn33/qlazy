@@ -14,7 +14,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
-#define VERSION "0.0.8"
+#define VERSION "0.0.9"
 
 /*====================================================================*/
 /*  Definitions & Macros                                              */
@@ -80,6 +80,9 @@ typedef enum _ErrCode {
   ERROR_QSTATE_MEASURE        = 34,
   ERROR_QSTATE_OPERATE        = 35,
   ERROR_QSTATE_OPERATE_QGATE  = 36,
+  ERROR_QSTATE_EVOLVE         = 37,
+  ERROR_QSTATE_INNER_PRODUCT  = 38,
+  ERROR_QSTATE_EXPECT_VALUE   = 39,
   ERROR_MDATA_INIT	      = 40,
   ERROR_MDATA_PRINT	      = 41,
   ERROR_GBANK_INIT	      = 50,
@@ -88,7 +91,9 @@ typedef enum _ErrCode {
   ERROR_LINE_OPERATE          = 70,
   ERROR_QSYSTEM_EXECUTE       = 80,
   ERROR_QSYSTEM_INTMODE       = 81,
-  ERROR_HELP_PRINT_MESSAGE    = 90,
+  ERROR_SPRO_INIT             = 90,
+  ERROR_OBSERVABLE_INIT       = 100,
+  ERROR_HELP_PRINT_MESSAGE    = 120,
 } ErrCode;
 
 typedef enum _WrnCode {
@@ -144,6 +149,13 @@ typedef enum _Axis {
   Y_AXIS = 1,
   Z_AXIS = 2,
 } Axis;
+
+typedef enum _SpinType {
+  NONE	  = 0,
+  SIGMA_X = 1,
+  SIGMA_Y = 2,
+  SIGMA_Z = 3,
+} SpinType;
 
 typedef double _Complex CTYPE;
 
@@ -217,6 +229,21 @@ typedef struct _QSystem {
   int           qubit_num;
 } QSystem;
 
+/* spin-product = tensor product of spins: [ex] "-2.0*X_0*Z_1*Y_2" */
+typedef struct _SPro {
+  double	coef;
+  int		spin_num;	                /* max of spin id + 1 */
+  SpinType	spin_type[MAX_QUBIT_NUM];	/* Pauli-X,Y,Z,or Identity*/
+} SPro;
+
+/* observable consist of pauli operators (= array of "SpinProduct") */
+/* ex) -2.0*X_0*Z_1*Y_2 + Z_1*X_2 + 4.0*Z_3 ... */
+typedef struct _Observable {
+  int		spin_num;
+  int		array_num;
+  SPro**	spro_array;
+} Observable;
+
 /*====================================================================*/
 /*  Global Variables                                                  */
 /*====================================================================*/
@@ -235,10 +262,11 @@ GLOBAL WrnCode  g_Wrnno;
 /*====================================================================*/
 
 /* complex.h */
-double	 cabs(double _Complex z);
-double	 carg(double _Complex z);
-double	 creal(double _Complex z);
-double	 cimag(double _Complex z);
+double	cabs(double _Complex z);
+double	carg(double _Complex z);
+double	creal(double _Complex z);
+double	cimag(double _Complex z);
+double _Complex conj(double _Complex z);
 
 /* init.c */
 void	 init_qlazy(unsigned int seed);
@@ -258,8 +286,11 @@ int	 line_chomp(char* str);
 int	 line_split(char* str, const char* delim, char* outlist[]);
 int	 line_getargs(char* str, char* args[]);
 int	 line_join_token(char* dst, char* token[], int ini, int fin);
+int      line_remove_space(char* str);
 
 /* misc.c */
+int      is_number(char* str);
+int      is_decimal(char* str);
 int	 get_binstr_from_decimal(char* binstr, int qubit_num, int decimal, int zflag);
 int      select_bits(int* bits_out, int bits_in, int digits_out, int digits_in,
 		     int digit_array[MAX_QUBIT_NUM]);
@@ -280,6 +311,14 @@ QCirc*	 qcirc_read_file(char* fname);
 int	 qcirc_write_file(QCirc* qcirc, char* fname);
 void	 qcirc_free(QCirc* qcirc);
 
+/* spro.c */
+SPro*    spro_init(char* str);
+void     spro_free(SPro* spro);
+
+/* observable.c */
+Observable*  observable_init(char* str);
+void         observable_free(Observable* observ);
+
 /* qstate.c */
 QState*	 qstate_init(int qubit_num);
 QState*	 qstate_copy(QState* qstate);
@@ -292,6 +331,10 @@ MData*   qstate_measure_bell(QState* qstate, int shot_num, int qubit_num,
 int	 qstate_operate_qgate_param(QState* qstate, Kind kind, double phase,
 				    int qubit_id[MAX_QUBIT_NUM]);
 int	 qstate_operate_qgate(QState* qstate, QGate* qgate);
+int      qstate_evolve(QState* qstate, Observable* observ, double time, int iter);
+//QState*  qstate_apply_observable(QState* qstate, Observable* observ);
+int      inner_product(QState* qstate_0, QState* qstate_1, double* real, double* imag);
+int      expect_value(QState* qstate, Observable* observ, double* value);
 void	 qstate_free(QState* qstate);
 
 /* mdata.c */

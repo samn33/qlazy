@@ -4,6 +4,44 @@
 
 #include "qlazy.h"
 
+int is_number(char* str)
+{
+  int pos = 0;
+  
+  if (str == NULL) return FALSE;
+
+  /* 1st character */
+  if (!(isdigit(str[pos])) && (str[pos]!='.') &&
+      (str[pos]!='+') && (str[pos]!='-')) return FALSE;
+  /* 2nd and subsequent */
+  pos++;
+  while ((str[pos] != '\0') && (pos < TOKEN_STRLEN)) {
+    if (!(isdigit(str[pos])) && (str[pos]!='.')) return FALSE;
+    pos++;
+  }
+
+  return TRUE;
+}
+
+int is_decimal(char* str)
+{
+  int pos = 0;
+  
+  if (str == NULL) return FALSE;
+
+  /* 1st character */
+  if (!(isdigit(str[pos])) && (str[pos]!='+') && (str[pos]!='-'))
+    return FALSE;
+  /* 2nd and subsequent */
+  pos++;
+  while ((str[pos] != '\0') && (pos < TOKEN_STRLEN)) {
+    if (!(isdigit(str[pos]))) return FALSE;
+    pos++;
+  }
+
+  return TRUE;
+}
+
 int get_binstr_from_decimal(char* binstr, int qubit_num, int decimal, int zflag)
 {
   /*

@@ -105,6 +105,15 @@ void error_msg(ErrCode err)
   case ERROR_QSTATE_OPERATE_QGATE:
     fprintf(stderr, "ERROR:qstate operate qgate failure !\n");
     break;
+  case ERROR_QSTATE_EVOLVE:
+    fprintf(stderr, "ERROR:qstate evalve failure !\n");
+    break;
+  case ERROR_QSTATE_INNER_PRODUCT:
+    fprintf(stderr, "ERROR:inner product failure !\n");
+    break;
+  case ERROR_QSTATE_EXPECT_VALUE:
+    fprintf(stderr, "ERROR:expect value failure !\n");
+    break;
   case ERROR_MDATA_INIT:
     fprintf(stderr, "ERROR:mdata init failure !\n");
     break;
@@ -128,6 +137,12 @@ void error_msg(ErrCode err)
     break;
   case ERROR_QSYSTEM_INTMODE:
     fprintf(stderr, "ERROR:qsystem intmode failure !\n");
+    break;
+  case ERROR_SPRO_INIT:
+    fprintf(stderr, "ERROR:spro init failure !\n");
+    break;
+  case ERROR_OBSERVABLE_INIT:
+    fprintf(stderr, "ERROR:observ init failure !\n");
     break;
   case ERROR_HELP_PRINT_MESSAGE:
     fprintf(stderr, "ERROR:help print message failure !\n");

@@ -808,6 +808,245 @@ int qstate_operate_qgate(QState* qstate, QGate* qgate)
   return FALSE;
 }
 
+static int qstate_evolve_spro(QState* qstate, SPro* spro, double time)
+{
+  int pre,now;
+  
+  if (qstate == NULL) return FALSE;
+  if (spro == NULL) return FALSE;
+
+  pre = -1; now = 0;
+  while (now < spro->spin_num) {
+    /* operate nothing */
+    if (spro->spin_type[now] == NONE) {
+      now++;
+      continue;
+    }
+    /* operate G: G=H (if PauliX), G=Rx(-0.5) (if PauliY), G=I (if PauliZ) */
+    if (spro->spin_type[now] == SIGMA_X) {
+      if (qstate_operate_qgate_1(qstate, HADAMARD, now) == FALSE)
+	return FALSE;
+    }
+    else if (spro->spin_type[now] == SIGMA_Y) {
+      if (qstate_operate_qgate_1_rot(qstate, X_AXIS, -0.5, M_PI, now) == FALSE)
+	return FALSE;
+    }
+    else if (spro->spin_type[now] == SIGMA_Z) {
+      ;
+    }
+    else {
+      return FALSE;
+    }
+    /* operate CX */
+    if (pre >= 0) {
+      if ((spro->spin_type[pre] != NONE) && (spro->spin_type[now] != NONE)) {
+	if (qstate_operate_qgate_2(qstate, CONTROLLED_X, pre, now) == FALSE)
+	  return FALSE;
+      }
+    }
+    pre = now; now++;
+  }
+  
+  /* operate Rz(-2.0*t) */
+  now = spro->spin_num-1;
+  if (qstate_operate_qgate_1_rot(qstate, Z_AXIS, -2.0*time, M_PI, now) == FALSE)
+    //  if (qstate_operate_qgate_1_rot(qstate, Z_AXIS, 2.0*time, M_PI, now) == FALSE)
+    //  if (qstate_operate_qgate_1_rot(qstate, Z_AXIS, time, M_PI, now) == FALSE)
+    return FALSE;
+
+  pre = now; now--;
+  while (pre >= 0) {
+    /* operate nothing */
+    if ((now >= 0) && (spro->spin_type[now] == NONE)) {
+      now--;
+      if (now >= 0) continue;
+    }
+    /* operate CX */
+    if (now >= 0) {
+      if ((spro->spin_type[pre] != NONE) && (spro->spin_type[now] != NONE)) {
+	if (qstate_operate_qgate_2(qstate, CONTROLLED_X, now, pre) == FALSE)
+	  return FALSE;
+      }
+    }
+    /* operate G+: G+=H (if PauliX), G+=Rx(+0.5) (if PauliY), G+=I (if PauliZ) */
+    if (spro->spin_type[pre] == SIGMA_X) {
+      if (qstate_operate_qgate_1(qstate, HADAMARD, pre) == FALSE)
+	return FALSE;
+    }
+    else if (spro->spin_type[pre] == SIGMA_Y) {
+      if (qstate_operate_qgate_1_rot(qstate, X_AXIS, 0.5, M_PI, pre) == FALSE)
+	return FALSE;
+    }
+    else if (spro->spin_type[pre] == SIGMA_Z) {
+      ;
+    }
+    else {
+      return FALSE;
+    }
+    pre = now; now--;
+  }
+  
+  return TRUE;
+}
+
+int qstate_evolve(QState* qstate, Observable* observ, double time, int iter)
+{
+  double t = time / iter;
+  
+  g_Errno = NO_ERROR;
+
+  if (qstate == NULL) goto ERROR_EXIT;
+  if (observ == NULL) goto ERROR_EXIT;
+  if (iter < 1) goto ERROR_EXIT;
+
+  for (int i=0; i<iter; i++) {
+    for (int j=0; j<observ->array_num; j++) {
+      if (qstate_evolve_spro(qstate, observ->spro_array[j], t) == FALSE)
+	goto ERROR_EXIT;
+    }
+  }
+
+  return TRUE;
+
+ ERROR_EXIT:
+  g_Errno = ERROR_QSTATE_EVOLVE;
+  return FALSE;
+}
+
+static int qstate_add(QState* qstate, QState* qstate_add)
+{
+  if (qstate == NULL) return FALSE;
+  if (qstate_add == NULL) return FALSE;
+
+  if (qstate->state_num != qstate_add->state_num) return FALSE;
+  for (int i=0; i<qstate->state_num; i++) {
+    qstate->camp[i] = qstate->camp[i] + qstate_add->camp[i];
+  }
+
+  return TRUE;
+}
+
+static int qstate_mul(QState* qstate, double mul)
+{
+  if (qstate == NULL) return FALSE;
+
+  for (int i=0; i<qstate->state_num; i++) {
+    qstate->camp[i] = mul * qstate->camp[i];
+  }
+
+  return TRUE;
+}
+
+static QState* qstate_apply_spro(QState* qstate, SPro* spro)
+{
+  QState* qstate_ob = NULL;
+  
+  if (qstate == NULL) return NULL;
+  if (spro == NULL) return NULL;
+
+  if (!(qstate_ob = qstate_copy(qstate))) return NULL;
+
+  for (int i=0; i<spro->spin_num; i++) {
+    if (spro->spin_type[i] == NONE) {
+      ;
+    }
+    else if (spro->spin_type[i] == SIGMA_X) {
+      if (qstate_operate_qgate_1(qstate_ob, PAULI_X, i) == FALSE)
+	return FALSE;
+    }
+    else if (spro->spin_type[i] == SIGMA_Y) {
+      if (qstate_operate_qgate_1(qstate_ob, PAULI_Y, i) == FALSE)
+	return FALSE;
+    }
+    else if (spro->spin_type[i] == SIGMA_Z) {
+      if (qstate_operate_qgate_1(qstate_ob, PAULI_Z, i) == FALSE)
+	return FALSE;
+    }
+    else {
+      return NULL;
+    }
+  }
+
+  if (qstate_mul(qstate_ob, spro->coef) == FALSE) return FALSE;
+  
+  return qstate_ob;
+}
+
+static QState* qstate_apply_observable(QState* qstate, Observable* observ)
+{
+  QState* qstate_ob = NULL;
+  QState* qstate_tmp = NULL;
+
+  if (qstate == NULL) return NULL;
+  
+  for (int i=0; i<observ->array_num; i++) {
+    if (!(qstate_tmp = qstate_apply_spro(qstate, observ->spro_array[i])))
+      return NULL;
+    if (qstate_ob == NULL) {
+      if (!(qstate_ob = qstate_init(qstate_tmp->qubit_num))) return NULL;
+      qstate_set_none(qstate_ob);
+    }
+    if (qstate_add(qstate_ob, qstate_tmp) == FALSE) return NULL;
+
+    qstate_free(qstate_tmp);
+    qstate_tmp = NULL;
+  }
+
+  return qstate_ob;
+}
+
+int qstate_inner_product(QState* qstate_0, QState* qstate_1,
+			 double* real, double* imag)
+{
+  CTYPE out = 0.0 + 0.0i;
+  
+  g_Errno = NO_ERROR;
+
+  if ((qstate_0 == NULL) || (qstate_1 == NULL)) goto ERROR_EXIT;
+  if (qstate_0->qubit_num != qstate_1->qubit_num) goto ERROR_EXIT;
+  if (qstate_0->state_num != qstate_1->state_num) goto ERROR_EXIT;
+  
+  for (int i=0; i<qstate_0->state_num; i++) {
+    out = out + conj(qstate_0->camp[i]) * qstate_1->camp[i];
+  }
+  *real = creal(out);
+  *imag = cimag(out);
+
+  return TRUE;
+
+ ERROR_EXIT:
+  g_Errno = ERROR_QSTATE_INNER_PRODUCT;
+  return FALSE;
+}
+
+int qstate_expect_value(QState* qstate, Observable* observ, double* value)
+{
+  QState*	qstate_ob = NULL;
+  double	real	  = 0.0;
+  double	imag	  = 0.0;
+
+  if (qstate == NULL) goto ERROR_EXIT;
+  if (observ == NULL) goto ERROR_EXIT;
+  
+  if (!(qstate_ob = qstate_apply_observable(qstate, observ))) goto ERROR_EXIT;
+      
+  if (qstate_inner_product(qstate, qstate_ob, &real, &imag) == FALSE)
+    goto ERROR_EXIT;
+  
+  if (fabs(imag) > MIN_DOUBLE) goto ERROR_EXIT;
+
+  qstate_free(qstate_ob);
+  qstate_ob = NULL;
+
+  *value = real;
+
+  return TRUE;
+  
+ ERROR_EXIT:
+  g_Errno = ERROR_QSTATE_EXPECT_VALUE;
+  return FALSE;
+}
+
 void qstate_free(QState* qstate)
 {
   if (qstate == NULL) return;

@@ -24,7 +24,7 @@ class QState(ctypes.Structure):
 
         self.qubit_num = qubit_num
         self.camp = None
-        self.measured = None
+        #self.measured = None
 
         if qubit_num > MAX_QUBIT_NUM:
             print("qubit number must be {0:d} or less.".format(MAX_QUBIT_NUM))
@@ -82,6 +82,97 @@ class QState(ctypes.Structure):
         except Exception:
             raise QState_FailToShow()
 
+    def clone(self):
+
+        try:
+            lib.qstate_copy.restype = ctypes.POINTER(QState)
+            lib.qstate_copy.argtypes = [ctypes.POINTER(QState)]
+            out = lib.qstate_copy(ctypes.byref(self))
+
+            if not out:
+                raise QState_FailToClone()
+
+            return out.contents
+            
+        except Exception:
+            raise QState_FailToClone()
+
+    def inpro(self, qstate):
+
+        try:
+            
+            real = 0.0
+            imag = 0.0
+            c_real = ctypes.c_double(real)
+            c_imag = ctypes.c_double(imag)
+            
+            lib.qstate_inner_product.restype = ctypes.c_int
+            lib.qstate_inner_product.argtypes = [ctypes.POINTER(QState),
+                                                 ctypes.POINTER(QState),
+                                                 ctypes.POINTER(ctypes.c_double),
+                                                 ctypes.POINTER(ctypes.c_double)]
+            ret = lib.qstate_inner_product(ctypes.byref(self),ctypes.byref(qstate),
+                                           ctypes.byref(c_real), ctypes.byref(c_imag))
+
+            if ret == FALSE:
+                raise QState_FailToInnerProduct()
+
+            real = c_real.value
+            imag = c_imag.value
+
+            return complex(real, imag)
+        
+        except Exception:
+            raise QState_FailToInnerProduct()
+        
+    def evolve(self, observable=None, time=0.0, iter=0):
+
+        if iter < 1:
+            raise QState_FailToEvolve()
+        
+        if observable is None:
+            raise QState_FailToEvolve()
+        
+        try:
+            lib.qstate_evolve.restype = ctypes.c_int
+            lib.qstate_evolve.argtypes = [ctypes.POINTER(QState),ctypes.POINTER(Observable),
+                                          ctypes.c_double, ctypes.c_int]
+            ret = lib.qstate_evolve(ctypes.byref(self), ctypes.byref(observable),
+                                    ctypes.c_double(time), ctypes.c_int(iter))
+
+            if ret == FALSE:
+                raise QState_FailToEvolve()
+            
+        except Exception:
+            raise QState_FailToEvolve()
+
+    def expect(self, observable=None):
+
+        if observable is None:
+            raise QState_FailToExpect()
+        
+        try:
+            val = 0.0
+            c_val = ctypes.c_double(val)
+            lib.qstate_expect_value.restype = ctypes.c_int
+            lib.qstate_expect_value.argtypes = [ctypes.POINTER(QState),
+                                                ctypes.POINTER(Observable),
+                                                ctypes.POINTER(ctypes.c_double)]
+            ret = lib.qstate_expect_value(ctypes.byref(self), ctypes.byref(observable),
+                                          ctypes.byref(c_val))
+            
+            if ret == FALSE:
+                raise QState_FailToExpect()
+
+            val = c_val.value
+            
+            return val
+            
+        except Exception:
+            raise QState_FailToExpect()
+
+        return out
+        
     def circ(self):
 
         try:
@@ -729,3 +820,35 @@ class MDataPy:
         state_string = format(self.last_state,'b').zfill(self.qubit_num)\
                                                   .replace('0','u').replace('1','d')
         print("last state =>", state_string)
+
+
+class Observable(ctypes.Structure):
+
+    _fields_ = [
+        ('spin_num', ctypes.c_int),
+        ('array_num', ctypes.c_int),
+        ('spro_array', ctypes.c_void_p),
+    ]
+
+    def __new__(self, str=None):
+
+        self.spin_num = 0
+        self.array_num = 0
+        self.spro_array = None
+    
+        c_str = ctypes.create_string_buffer(str.encode('utf-8'))
+        
+        lib.observable_init.restype = ctypes.POINTER(Observable)
+        lib.observable_init.argtypes = [ctypes.POINTER(ctypes.c_char)]
+        out = lib.observable_init(c_str)
+
+        if not out:
+            raise Observable_FailToInitialize()
+        
+        return out.contents
+
+    def __del__(self):
+
+        lib.observable_free.argtypes = [ctypes.POINTER(Observable)]
+        lib.observable_free(ctypes.byref(self))
+

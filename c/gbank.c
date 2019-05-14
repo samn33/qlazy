@@ -15,9 +15,14 @@ GBank* gbank_init(void)
   gbank->PauliX[2] = 1.0;
   gbank->PauliX[3] = 0.0;
 
+//  gbank->PauliY[0] =  0.0;
+//  gbank->PauliY[1] =  1.0i;
+//  gbank->PauliY[2] = -1.0i;
+//  gbank->PauliY[3] =  0.0;
+
   gbank->PauliY[0] =  0.0;
-  gbank->PauliY[1] =  1.0i;
-  gbank->PauliY[2] = -1.0i;
+  gbank->PauliY[1] = -1.0i;
+  gbank->PauliY[2] = 1.0i;
   gbank->PauliY[3] =  0.0;
 
   gbank->PauliZ[0] =  1.0;

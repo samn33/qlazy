@@ -235,8 +235,8 @@ static void help_print_y() {
 [description] \n\
   Y gate is 1-qubit gate called \'pauli Y gate\'. \n\
   - matrix expression:\n\
-    |  0 i | \n\
-    | -i 0 | \n\
+    | 0 -i | \n\
+    | i  0 | \n\
 [usage] \n\
   >> Y <qubit_id>\n\
 [alias] \n\

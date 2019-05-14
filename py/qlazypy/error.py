@@ -14,6 +14,14 @@ class QState_FailToShow(Exception):
     def __str__(self):
         return "QState: fail to show"
 
+class QState_FailToClone(Exception):
+    def __str__(self):
+        return "QState: fail to clone"
+
+class QState_FailToInnerProduct(Exception):
+    def __str__(self):
+        return "QState: fail to inner product"
+
 class QState_FailToCirc(Exception):
     def __str__(self):
         return "QState: fail to circ"
@@ -38,6 +46,14 @@ class QState_FailToOperateQgate(Exception):
     def __str__(self):
         return "QState: fail to operate qgate"
 
+class QState_FailToEvolve(Exception):
+    def __str__(self):
+        return "QState: fail to evolve"
+
+class QState_FailToExpect(Exception):
+    def __str__(self):
+        return "QState: fail to expect"
+
 # MData
 
 class MData_FailToGetFrq(Exception):
@@ -47,3 +63,9 @@ class MData_FailToGetFrq(Exception):
 class MData_FailToShow(Exception):
     def __str__(self):
         return "MData: fail to show"
+
+# Observable
+
+class Observable_FailToInitialize(Exception):
+    def __str__(self):
+        return "Observable: fail to initialize"
