@@ -14,7 +14,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
-#define VERSION "0.0.9"
+#define VERSION "0.0.10"
 
 /*====================================================================*/
 /*  Definitions & Macros                                              */
@@ -151,7 +151,7 @@ typedef enum _Axis {
 } Axis;
 
 typedef enum _SpinType {
-  NONE	  = 0,
+  NONE	  = 0, /* = Identity */
   SIGMA_X = 1,
   SIGMA_Y = 2,
   SIGMA_Z = 3,
@@ -332,7 +332,6 @@ int	 qstate_operate_qgate_param(QState* qstate, Kind kind, double phase,
 				    int qubit_id[MAX_QUBIT_NUM]);
 int	 qstate_operate_qgate(QState* qstate, QGate* qgate);
 int      qstate_evolve(QState* qstate, Observable* observ, double time, int iter);
-//QState*  qstate_apply_observable(QState* qstate, Observable* observ);
 int      inner_product(QState* qstate_0, QState* qstate_1, double* real, double* imag);
 int      expect_value(QState* qstate, Observable* observ, double* value);
 void	 qstate_free(QState* qstate);

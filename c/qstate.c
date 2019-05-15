@@ -850,8 +850,6 @@ static int qstate_evolve_spro(QState* qstate, SPro* spro, double time)
   /* operate Rz(-2.0*t) */
   now = spro->spin_num-1;
   if (qstate_operate_qgate_1_rot(qstate, Z_AXIS, -2.0*time, M_PI, now) == FALSE)
-    //  if (qstate_operate_qgate_1_rot(qstate, Z_AXIS, 2.0*time, M_PI, now) == FALSE)
-    //  if (qstate_operate_qgate_1_rot(qstate, Z_AXIS, time, M_PI, now) == FALSE)
     return FALSE;
 
   pre = now; now--;
@@ -878,6 +876,9 @@ static int qstate_evolve_spro(QState* qstate, SPro* spro, double time)
 	return FALSE;
     }
     else if (spro->spin_type[pre] == SIGMA_Z) {
+      ;
+    }
+    else if (spro->spin_type[pre] == NONE) {
       ;
     }
     else {

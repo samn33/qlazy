@@ -1,8 +1,14 @@
+2019-05-15  Sam.N  <saminriver33@gmail.com>
+
+	* v0.0.10
+	- bug fix: constant term of observable
+	- update: tutorials
+
 2019-05-14  Sam.N  <saminriver33@gmail.com>
 
 	* v0.0.9
 	- add function: time evolution, expectation value
-	- bug fix
+	- bug fix: definition of pauli Y
 
 2019-04-27  Sam.N  <saminriver33@gmail.com>
 
