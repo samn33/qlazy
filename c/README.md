@@ -113,6 +113,18 @@ and measurement.
       c[10] = +0.0000+0.0000*i : 0.0000 | 
       c[11] = +0.7071+0.0000*i : 0.5000 |+++++ 
 
+### bloch - print bloch angles
+
+    [description]
+      This command prints the bloch angles of current quantum state.
+    [note]
+      If no arguments are set, it prints the angles of 0-th qubit.
+    [usage]
+      >> bloch
+      >> bloch <qubit_id>
+    [alias]
+      |
+
 ### echo - echo strings
 
     [description] 

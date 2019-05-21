@@ -1,5 +1,5 @@
 #
-# followings must be equal to definitions in 'soga.h'
+# followings must be equal to definitions in 'qlazy.h'
 #
 
 TRUE  = 1
@@ -21,26 +21,31 @@ BELL_PSI_MINUS = 2
 CIRC           = 1
 GATES          = 2
 SHOW           = 3
-ECHO           = 4
-OUTPUT         = 5
-HELP           = 6
-QUIT           = 7
-INIT           = 10
-PAULI_X        = 20
-PAULI_Y        = 21
-PAULI_Z        = 22
-ROOT_PAULI_X   = 23
-ROOT_PAULI_X_  = 24
-HADAMARD       = 30
-PHASE_SHIFT_S  = 40
-PHASE_SHIFT_S_ = 41
-PHASE_SHIFT_T  = 42
-PHASE_SHIFT_T_ = 43
-ROTATION_X     = 50
-ROTATION_Y     = 51
-ROTATION_Z     = 52
-CONTROLLED_X   = 60
-CONTROLLED_Z   = 61
-TOFFOLI	       = 70
-MEASURE	       = 100
+BLOCH          = 4
+ECHO           = 5
+OUTPUT         = 6
+HELP           = 7
+QUIT	       = 8
+INIT           = 9
+PAULI_X        = 120
+PAULI_Y        = 121
+PAULI_Z        = 122
+ROOT_PAULI_X   = 123
+ROOT_PAULI_X_  = 124
+HADAMARD       = 130
+PHASE_SHIFT_S  = 140
+PHASE_SHIFT_S_ = 141
+PHASE_SHIFT_T  = 142
+PHASE_SHIFT_T_ = 143
+ROTATION_X     = 150
+ROTATION_Y     = 151
+ROTATION_Z     = 152
+CONTROLLED_X   = 160
+CONTROLLED_Z   = 161
+TOFFOLI        = 170
+MEASURE        = 200
+MEASURE_X      = 201
+MEASURE_Y      = 202
+MEASURE_Z      = 203
+MEASURE_BELL   = 204
 NOT_A_GATE     = 1000

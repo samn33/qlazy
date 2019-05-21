@@ -55,6 +55,7 @@ static int qsystem_execute_one_line(QSystem* qsystem, char* line)
     for (int i=0; i<terminal_num; i++) {
       qubit_id[i] = strtol(token[1+i], NULL, 10);
       if (qubit_num < qubit_id[i] + 1) goto OUT_OF_BOUND;
+      if (qubit_id[i] < 0) goto OUT_OF_BOUND;
     }
     if (terminal_num == 0) {  /* show all qubits in order */
       terminal_num = qubit_num;
@@ -62,7 +63,20 @@ static int qsystem_execute_one_line(QSystem* qsystem, char* line)
 	qubit_id[i] = i;
       }
     }
-    qstate_print(qstate, terminal_num, qubit_id);
+    if (qstate_print(qstate, terminal_num, qubit_id) == FALSE) goto CANT_PRINT_QSTATE;
+    return TRUE;
+  case BLOCH:
+    /* print bloch sphere (theta,phi) */
+    if (tnum > 2) goto TOO_MANY_ARGUMENTS;
+    else if (tnum == 2) {
+      qubit_id[0] = strtol(token[1], NULL, 10);
+    }
+    else if (tnum == 1) {
+      qubit_id[0] = 0;
+    }
+    if (qubit_num < qubit_id[0] + 1) goto OUT_OF_BOUND;
+    if (qubit_id[0] < 0) goto OUT_OF_BOUND;
+    if (qstate_print_bloch(qstate, qubit_id[0]) == FALSE) goto CANT_PRINT_BLOCH;
     return TRUE;
   case CIRC:
     /* print quantum circuit */
@@ -158,6 +172,7 @@ static int qsystem_execute_one_line(QSystem* qsystem, char* line)
     for (int i=0; i<terminal_num; i++) {
       qubit_id[i] = strtol(token[1+i], NULL, 10);
       if (qubit_num < qubit_id[i] + 1) goto OUT_OF_BOUND;
+      if (qubit_id[i] < 0) goto OUT_OF_BOUND;
     }
     if (terminal_num == 0) {  /* measure all qubits in order */
       terminal_num = qubit_num;
@@ -198,6 +213,7 @@ static int qsystem_execute_one_line(QSystem* qsystem, char* line)
     for (int i=0; i<terminal_num; i++) {
       qubit_id[i] = strtol(token[1+i], NULL, 10);
       if (qubit_num < qubit_id[i] + 1) goto OUT_OF_BOUND;
+      if (qubit_id[i] < 0) goto OUT_OF_BOUND;
     }
     if (terminal_num == 0) {  /* measure all qubits in order */
       terminal_num = qubit_num;
@@ -222,6 +238,7 @@ static int qsystem_execute_one_line(QSystem* qsystem, char* line)
     for (int i=0; i<terminal_num; i++) {
       qubit_id[i] = strtol(token[1+i], NULL, 10);
       if (qubit_num < qubit_id[i] + 1) goto OUT_OF_BOUND;
+      if (qubit_id[i] < 0) goto OUT_OF_BOUND;
     }
     break;
   case PAULI_X:
@@ -242,6 +259,7 @@ static int qsystem_execute_one_line(QSystem* qsystem, char* line)
     terminal_num = 1;
     qubit_id[0] = strtol(token[1], NULL, 10);
     if (qubit_num < qubit_id[0] + 1) goto OUT_OF_BOUND;
+    if (qubit_id[0] < 0) goto OUT_OF_BOUND;
     break;
   case ROTATION_X:
   case ROTATION_Y:
@@ -260,6 +278,7 @@ static int qsystem_execute_one_line(QSystem* qsystem, char* line)
     else goto ERROR_EXIT;
     qubit_id[0] = strtol(token[1], NULL, 10);
     if (qubit_num < qubit_id[0] + 1) goto OUT_OF_BOUND;
+    if (qubit_id[0] < 0) goto OUT_OF_BOUND;
     break;
   case CONTROLLED_X:
   case CONTROLLED_Z:
@@ -273,6 +292,8 @@ static int qsystem_execute_one_line(QSystem* qsystem, char* line)
     qubit_id[1] = strtol(token[2], NULL, 10);
     if (qubit_num < qubit_id[0] + 1) goto OUT_OF_BOUND;
     if (qubit_num < qubit_id[1] + 1) goto OUT_OF_BOUND;
+    if (qubit_id[0] < 0) goto OUT_OF_BOUND;
+    if (qubit_id[1] < 0) goto OUT_OF_BOUND;
     if (qubit_id[0] == qubit_id[1]) goto SAME_QUBIT_ID;
     break;
   case TOFFOLI:
@@ -288,6 +309,9 @@ static int qsystem_execute_one_line(QSystem* qsystem, char* line)
     if (qubit_num < qubit_id[0] + 1) goto OUT_OF_BOUND;
     if (qubit_num < qubit_id[1] + 1) goto OUT_OF_BOUND;
     if (qubit_num < qubit_id[2] + 1) goto OUT_OF_BOUND;
+    if (qubit_id[0] < 0) goto OUT_OF_BOUND;
+    if (qubit_id[1] < 0) goto OUT_OF_BOUND;
+    if (qubit_id[2] < 0) goto OUT_OF_BOUND;
     if (qubit_id[0] == qubit_id[1]) goto SAME_QUBIT_ID;
     if (qubit_id[1] == qubit_id[2]) goto SAME_QUBIT_ID;
     if (qubit_id[2] == qubit_id[0]) goto SAME_QUBIT_ID;
@@ -339,6 +363,14 @@ static int qsystem_execute_one_line(QSystem* qsystem, char* line)
 
  CANT_WRITE_FILE:
   warn_msg(WARN_CANT_WRITE_FILE);
+  return TRUE;
+
+ CANT_PRINT_QSTATE:
+  warn_msg(WARN_CANT_PRINT_QSTATE);
+  return TRUE;
+
+ CANT_PRINT_BLOCH:
+  warn_msg(WARN_CANT_PRINT_BLOCH);
   return TRUE;
 
  CANT_PRINT_CIRC:

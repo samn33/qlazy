@@ -43,53 +43,6 @@ static int qstate_normalize(QState* qstate)
   return FALSE;
 }
 
-QState* qstate_init(int qubit_num)
-{
-  QState	*qstate = NULL;
-  int		 state_num;
-
-  g_Errno = NO_ERROR;
-
-  if ((qubit_num < 1) || (qubit_num > MAX_QUBIT_NUM)) goto ERROR_EXIT;
-  
-  if (!(qstate = (QState*)malloc(sizeof(QState)))) goto ERROR_EXIT;
-
-  qstate->qubit_num = qubit_num;
-  state_num = (1 << qubit_num);
-  qstate->state_num = state_num;
-
-  if (!(qstate->camp = (CTYPE*)malloc(sizeof(CTYPE)*state_num))) goto ERROR_EXIT;
-
-  qstate->gbank = gbank_init();
-
-  qstate_set_0(qstate);
-
-  return qstate;
-
- ERROR_EXIT:
-  g_Errno = ERROR_QSTATE_INIT;
-  return NULL;
-}
-
-QState* qstate_copy(QState* qstate_src)
-{
-  QState* qstate_dst = NULL;
-
-  g_Errno = NO_ERROR;
-
-  if (qstate_src == NULL) goto ERROR_EXIT;
-
-  if (!(qstate_dst = qstate_init(qstate_src->qubit_num))) goto ERROR_EXIT;
-
-  memcpy(qstate_dst->camp, qstate_src->camp, sizeof(CTYPE)*qstate_src->state_num);
-
-  return qstate_dst;
-  
- ERROR_EXIT:
-  g_Errno = ERROR_QSTATE_COPY;
-  return NULL;
-}
-
 static QState* qstate_mask(QState* qstate_in, int qubit_num, int qubit_id[MAX_QUBIT_NUM])
 {
   MData*        mdata	    = NULL;	/* temporary in this function */
@@ -101,7 +54,7 @@ static QState* qstate_mask(QState* qstate_in, int qubit_num, int qubit_id[MAX_QU
 
   if (qstate_in == NULL) goto ERROR_EXIT;
 
-  /* set temporal qstate */
+  /* wave function collapse by mesurement */
 
   if (qstate_in->qubit_num == qubit_num) {
     mask_qstate = qstate_copy(qstate_in);
@@ -134,6 +87,112 @@ static QState* qstate_mask(QState* qstate_in, int qubit_num, int qubit_id[MAX_QU
   return NULL;
 }
 
+static QState* qstate_pickup(QState* qstate_in, int qubit_num, int qubit_id[MAX_QUBIT_NUM])
+{
+  QState*	qstate	    = NULL;
+  QState*	mask_qstate = NULL;
+  int		x;
+
+  if (qstate_in->qubit_num == qubit_num) {
+    qstate = qstate_copy(qstate_in);
+  }
+  else {  /* in the case of picking up some qubit states */
+    mask_qstate = qstate_mask(qstate_in, qubit_num, qubit_id);
+
+    /* selected qubits state (qstate) */
+    if (!(qstate = qstate_init(qubit_num))) return NULL;
+    qstate_set_none(qstate);
+    for (int i=0; i<mask_qstate->state_num; i++) {
+      select_bits(&x, i, qubit_num, qstate_in->qubit_num, qubit_id);
+      qstate->camp[x] += mask_qstate->camp[i];
+    }
+  }
+  if (qstate_normalize(qstate) == FALSE) return NULL;
+
+  qstate_free(mask_qstate); mask_qstate = NULL;
+
+  return qstate;
+}
+
+#ifdef REMOVE_PHASE_FACTOR
+
+static int qstate_remove_phase_factor(QState* qstate, COMPLEX* phase_factor)
+{
+  COMPLEX exp_i_phase = 1.0 + 0.0i;
+
+  if (qstate == NULL) goto ERROR_EXIT;
+
+  /* remove phase factor from whole state */
+  if (fabs(cimag(qstate->camp[0])) > MIN_DOUBLE) {
+    exp_i_phase = qstate->camp[0] / cabs(qstate->camp[0]);
+    if (creal(qstate->camp[0]/exp_i_phase) < 0.0) {
+      exp_i_phase = -exp_i_phase;
+    }
+  }
+  else if (creal(qstate->camp[0]) < 0.0) {
+    exp_i_phase = -exp_i_phase;
+  }
+  for (int i=0; i<qstate->state_num; i++) {
+    qstate->camp[i] = qstate->camp[i] / exp_i_phase;
+  }
+
+  *phase_factor = exp_i_phase;
+
+  return TRUE;
+  
+ ERROR_EXIT:
+  return FALSE;
+}
+
+#endif
+
+QState* qstate_init(int qubit_num)
+{
+  QState	*qstate = NULL;
+  int		 state_num;
+
+  g_Errno = NO_ERROR;
+
+  if ((qubit_num < 1) || (qubit_num > MAX_QUBIT_NUM)) goto ERROR_EXIT;
+  
+  if (!(qstate = (QState*)malloc(sizeof(QState)))) goto ERROR_EXIT;
+
+  qstate->qubit_num = qubit_num;
+  state_num = (1 << qubit_num);
+  qstate->state_num = state_num;
+
+  if (!(qstate->camp = (COMPLEX*)malloc(sizeof(COMPLEX)*state_num))) goto ERROR_EXIT;
+
+  qstate->gbank = gbank_init();
+
+  qstate_set_0(qstate);
+
+  return qstate;
+
+ ERROR_EXIT:
+  g_Errno = ERROR_QSTATE_INIT;
+  return NULL;
+}
+
+QState* qstate_copy(QState* qstate_src)
+{
+  QState* qstate_dst = NULL;
+
+  g_Errno = NO_ERROR;
+
+  if (qstate_src == NULL) goto ERROR_EXIT;
+
+  if (!(qstate_dst = qstate_init(qstate_src->qubit_num))) goto ERROR_EXIT;
+
+  memcpy(qstate_dst->camp, qstate_src->camp, sizeof(COMPLEX)*qstate_src->state_num);
+
+  return qstate_dst;
+  
+ ERROR_EXIT:
+  g_Errno = ERROR_QSTATE_COPY;
+  return NULL;
+}
+
 double* qstate_get_camp(QState* qstate, int qubit_num, int qubit_id[MAX_QUBIT_NUM])
 {
   QState*	mask_qstate = NULL;
@@ -162,36 +221,6 @@ double* qstate_get_camp(QState* qstate, int qubit_num, int qubit_id[MAX_QUBIT_NU
   return NULL;
 }
 
-#ifdef REMOVE_PHASE_FACTOR
-static int qstate_remove_phase_factor(QState* qstate, CTYPE* phase_factor)
-{
-  CTYPE exp_i_phase = 1.0 + 0.0i;
-
-  if (qstate == NULL) goto ERROR_EXIT;
-
-  /* remove phase factor from whole state */
-  if (fabs(cimag(qstate->camp[0])) > MIN_DOUBLE) {
-    exp_i_phase = qstate->camp[0] / cabs(qstate->camp[0]);
-    if (creal(qstate->camp[0]/exp_i_phase) < 0.0) {
-      exp_i_phase = -exp_i_phase;
-    }
-  }
-  else if (creal(qstate->camp[0]) < 0.0) {
-    exp_i_phase = -exp_i_phase;
-  }
-  for (int i=0; i<qstate->state_num; i++) {
-    qstate->camp[i] = qstate->camp[i] / exp_i_phase;
-  }
-
-  *phase_factor = exp_i_phase;
-
-  return TRUE;
-  
- ERROR_EXIT:
-  return FALSE;
-}
-#endif
-
 int qstate_print(QState* qstate_in, int qubit_num, int qubit_id[MAX_QUBIT_NUM])
 {
   double	qreal,qimag,prob;
@@ -200,36 +229,18 @@ int qstate_print(QState* qstate_in, int qubit_num, int qubit_id[MAX_QUBIT_NUM])
 
   /* for extracting phase factor */
 #ifdef REMOVE_PHASE_FACTOR
-  CTYPE         phase_factor;
+  COMPLEX       phase_factor;
 #endif
 
-  /* for selecting some qubit id */
-  int           x;
+  /* for picking up some qubit id */
   QState*       qstate	    = NULL;	/* temporary in this function */
   MData*        mdata	    = NULL;	/* temporary in this function */
-  QState*       mask_qstate = NULL;	/* temporary in this function */
 
   g_Errno = NO_ERROR;
 
   if (qstate_in == NULL) goto ERROR_EXIT;
 
-  /* set temporal qstate */
-
-  if (qstate_in->qubit_num == qubit_num) {
-    qstate = qstate_copy(qstate_in);
-  }
-  else {  /* in the case of extracting some qubit states */
-    mask_qstate = qstate_mask(qstate_in, qubit_num, qubit_id);
-
-    /* selected qubits state (qstate) */
-    if (!(qstate = qstate_init(qubit_num))) goto ERROR_EXIT;
-    qstate_set_none(qstate);
-    for (int i=0; i<mask_qstate->state_num; i++) {
-      select_bits(&x, i, qubit_num, qstate_in->qubit_num, qubit_id);
-      qstate->camp[x] += mask_qstate->camp[i];
-    }
-  }
-  if (qstate_normalize(qstate) == FALSE) goto ERROR_EXIT;
+  if (!(qstate = qstate_pickup(qstate_in, qubit_num, qubit_id))) goto ERROR_EXIT;
 
   /* print qstate */
 
@@ -265,7 +276,6 @@ int qstate_print(QState* qstate_in, int qubit_num, int qubit_id[MAX_QUBIT_NUM])
 
   /* free temporal qstate and mdata */
 
-  qstate_free(mask_qstate); mask_qstate = NULL;
   qstate_free(qstate); qstate = NULL;
   mdata_free(mdata); mdata = NULL;
   
@@ -276,12 +286,65 @@ int qstate_print(QState* qstate_in, int qubit_num, int qubit_id[MAX_QUBIT_NUM])
   return FALSE;
 }
 
+int qstate_bloch(QState* qstate, int qid, double* theta, double* phi)
+{
+  int           qubit_num;
+  int           qubit_id[MAX_QUBIT_NUM];
+  QState*	qstate_tmp = NULL;
+  COMPLEX	alpha, beta;
+  
+  g_Errno = NO_ERROR;
+
+  if (qstate == NULL) goto ERROR_EXIT;
+  if (qid < 0) goto ERROR_EXIT;
+
+  /* qstate of qid-th qubit -> qstate_mask */
+  qubit_num = 1;
+  qubit_id[0] = qid;
+
+  if (!(qstate_tmp = qstate_pickup(qstate, qubit_num, qubit_id))) goto ERROR_EXIT;
+
+  /* get theta and phi from alpha and beta */
+  alpha = qstate_tmp->camp[0];
+  beta = qstate_tmp->camp[1];
+
+  if (bloch_get_angle(alpha, beta, theta, phi) == FALSE) goto ERROR_EXIT;
+
+  qstate_free(qstate_tmp);
+  qstate_tmp = NULL;
+  
+  return TRUE;
+  
+ ERROR_EXIT:
+  g_Errno = ERROR_QSTATE_BLOCH;
+  return FALSE;
+}
+
+int qstate_print_bloch(QState* qstate, int qid)
+{
+  double theta, phi;
+  
+  g_Errno = NO_ERROR;
+
+  if (qstate == NULL) goto ERROR_EXIT;
+
+  if (qstate_bloch(qstate, qid, &theta, &phi) == FALSE) goto ERROR_EXIT;
+
+  printf("theta = %+.4f, phi = %+.4f\n", theta, phi);
+
+  return TRUE;
+  
+ ERROR_EXIT:
+  g_Errno = ERROR_QSTATE_PRINT_BLOCH;
+  return FALSE;
+}
+
 static int qstate_operate_qgate_1(QState* qstate, Kind kind, int n)
 {
   int i;
   QState* qstate_tmp = NULL;
   int nn = qstate->qubit_num - n - 1;
-  CTYPE* U = NULL;
+  COMPLEX* U = NULL;
 
   if (!(U = gbank_get(qstate->gbank, kind))) goto ERROR_EXIT;
 
@@ -302,7 +365,7 @@ static int qstate_operate_qgate_1(QState* qstate, Kind kind, int n)
 	+ U[IDX2(1,1)] * qstate->camp[i];
     }
   }
-  memcpy(qstate->camp, qstate_tmp->camp, sizeof(CTYPE)*qstate->state_num);
+  memcpy(qstate->camp, qstate_tmp->camp, sizeof(COMPLEX)*qstate->state_num);
   qstate_free(qstate_tmp); qstate_tmp = NULL;
 
   return TRUE;
@@ -317,7 +380,7 @@ static int qstate_operate_qgate_1_rot(QState* qstate, Axis axis, double phase,
   int		i;
   QState*	qstate_tmp = NULL;
   int		nn	   = qstate->qubit_num - n - 1;
-  CTYPE*	U	   = NULL;
+  COMPLEX*	U	   = NULL;
 
   if (qstate == NULL) goto ERROR_EXIT;
   if (nn < 0 || nn >= qstate->qubit_num) goto ERROR_EXIT;
@@ -339,7 +402,7 @@ static int qstate_operate_qgate_1_rot(QState* qstate, Axis axis, double phase,
 	+ U[IDX2(1,1)] * qstate->camp[i];
     }
   }
-  memcpy(qstate->camp, qstate_tmp->camp, sizeof(CTYPE)*qstate->state_num);
+  memcpy(qstate->camp, qstate_tmp->camp, sizeof(COMPLEX)*qstate->state_num);
   qstate_free(qstate_tmp); qstate_tmp = NULL;
 
   free(U); U = NULL;
@@ -356,7 +419,7 @@ static int qstate_operate_qgate_2(QState* qstate, Kind kind, int m, int n)
   QState* qstate_tmp = NULL;
   int mm = qstate->qubit_num - m - 1;
   int nn = qstate->qubit_num - n - 1;
-  CTYPE* U = NULL;
+  COMPLEX* U = NULL;
 
   if (!(U = gbank_get(qstate->gbank, kind))) goto ERROR_EXIT;
 
@@ -396,7 +459,7 @@ static int qstate_operate_qgate_2(QState* qstate, Kind kind, int m, int n)
 	+ U[IDX4(3,3)] * qstate->camp[i];
     }
   }
-  memcpy(qstate->camp, qstate_tmp->camp, sizeof(CTYPE)*qstate->state_num);
+  memcpy(qstate->camp, qstate_tmp->camp, sizeof(COMPLEX)*qstate->state_num);
   qstate_free(qstate_tmp); qstate_tmp = NULL;
 
   return TRUE;
@@ -999,7 +1062,7 @@ static QState* qstate_apply_observable(QState* qstate, Observable* observ)
 int qstate_inner_product(QState* qstate_0, QState* qstate_1,
 			 double* real, double* imag)
 {
-  CTYPE out = 0.0 + 0.0i;
+  COMPLEX out = 0.0 + 0.0i;
   
   g_Errno = NO_ERROR;
 

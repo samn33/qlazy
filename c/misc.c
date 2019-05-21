@@ -111,3 +111,18 @@ int select_bits(int* bits_out, int bits_in, int digits_out, int digits_in,
   
   return TRUE;
 }
+
+int complex_division(COMPLEX a, COMPLEX b, COMPLEX* c)
+{
+  /* c = a / b */
+  COMPLEX	denom;
+  double	numer;
+
+  denom = a * conj(b);	                /* denom = a b* */
+  numer = cabs(b); numer *= numer;	/* numer = b b* */
+
+  if (fabs(numer) < MIN_DOUBLE) return FALSE;
+  *c = denom/numer;
+
+  return TRUE;
+}

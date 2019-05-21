@@ -14,7 +14,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
-#define VERSION "0.0.10"
+#define VERSION "0.0.11"
 
 /*====================================================================*/
 /*  Definitions & Macros                                              */
@@ -48,6 +48,7 @@
 #define BELL_PSI_PLUS  1
 #define BELL_PSI_MINUS 2
 
+/* phase factor for 'show' command */
 #define REMOVE_PHASE_FACTOR
 //#define SHOW_PHASE_FACTOR
 
@@ -83,17 +84,20 @@ typedef enum _ErrCode {
   ERROR_QSTATE_EVOLVE         = 37,
   ERROR_QSTATE_INNER_PRODUCT  = 38,
   ERROR_QSTATE_EXPECT_VALUE   = 39,
-  ERROR_MDATA_INIT	      = 40,
-  ERROR_MDATA_PRINT	      = 41,
-  ERROR_GBANK_INIT	      = 50,
-  ERROR_GBANK_GET	      = 51,
-  ERROR_CIMAGE_INIT	      = 60,
-  ERROR_LINE_OPERATE          = 70,
-  ERROR_QSYSTEM_EXECUTE       = 80,
-  ERROR_QSYSTEM_INTMODE       = 81,
-  ERROR_SPRO_INIT             = 90,
-  ERROR_OBSERVABLE_INIT       = 100,
-  ERROR_HELP_PRINT_MESSAGE    = 120,
+  ERROR_QSTATE_BLOCH          = 40,
+  ERROR_QSTATE_PRINT_BLOCH    = 41,
+  ERROR_MDATA_INIT	      = 50,
+  ERROR_MDATA_PRINT	      = 51,
+  ERROR_GBANK_INIT	      = 60,
+  ERROR_GBANK_GET	      = 61,
+  ERROR_CIMAGE_INIT	      = 70,
+  ERROR_LINE_OPERATE          = 80,
+  ERROR_QSYSTEM_EXECUTE       = 90,
+  ERROR_QSYSTEM_INTMODE       = 91,
+  ERROR_SPRO_INIT             = 100,
+  ERROR_OBSERVABLE_INIT       = 110,
+  ERROR_BLOCH_GET_ANGLE       = 120,
+  ERROR_HELP_PRINT_MESSAGE    = 130,
 } ErrCode;
 
 typedef enum _WrnCode {
@@ -106,41 +110,44 @@ typedef enum _WrnCode {
   WARN_NEED_MORE_ARGUMENTS    = 6,
   WARN_CANT_INITIALIZE        = 7,
   WARN_CANT_WRITE_FILE        = 8,
-  WARN_CANT_PRINT_CIRC        = 9,
-  WARN_CANT_PRINT_GATES       = 10,
-  WARN_CANT_PRINT_HELP        = 11,
+  WARN_CANT_PRINT_QSTATE      = 9,
+  WARN_CANT_PRINT_BLOCH       = 10,
+  WARN_CANT_PRINT_CIRC        = 11,
+  WARN_CANT_PRINT_GATES       = 12,
+  WARN_CANT_PRINT_HELP        = 13,
 } WrnCode;
 
 typedef enum _Kind {
   CIRC  	 = 1,	 	/* symbol: '&','circ'   */
   GATES  	 = 2,	 	/* symbol: '!','gates'  */
   SHOW   	 = 3,	 	/* symbol: '-','show'   */
-  ECHO   	 = 4,	 	/* symbol: '@','echo'   */
-  OUTPUT	 = 5,	 	/* symbol: '>','output' */
-  HELP    	 = 6,	 	/* symbol: '?','help'   */
-  QUIT	         = 7,	 	/* symbol: '.','quit'   */
-  INIT  	 = 10,	 	/* symbol: '%','init'   */
-  PAULI_X	 = 20,		/* symbol: 'X','x'      */
-  PAULI_Y	 = 21,		/* symbol: 'Y','y'      */
-  PAULI_Z	 = 22,		/* symbol: 'Z','z'      */
-  ROOT_PAULI_X	 = 23,		/* symbol: 'XR','xr'    */
-  ROOT_PAULI_X_	 = 24,		/* symbol: 'XR+','xr'   */
-  HADAMARD	 = 30,		/* symbol: 'H','h'      */
-  PHASE_SHIFT_S	 = 40,		/* symbol: 'S','s'      */
-  PHASE_SHIFT_S_ = 41,		/* symbol: 'S+','s+'    */
-  PHASE_SHIFT_T	 = 42,		/* symbol: 'T','t'      */
-  PHASE_SHIFT_T_ = 43,		/* symbol: 'T+','t+'    */
-  ROTATION_X	 = 50,		/* symbol: 'RX','rx'    */
-  ROTATION_Y	 = 51,		/* symbol: 'RY','ry'    */
-  ROTATION_Z	 = 52,		/* symbol: 'RZ','rz'    */
-  CONTROLLED_X	 = 60,		/* symbol: 'CX','cx'    */
-  CONTROLLED_Z	 = 61,		/* symbol: 'CZ','cz'    */
-  TOFFOLI	 = 70,		/* symbol: 'CCX','ccx'  */
-  MEASURE	 = 100,	 	/* symbol: 'M','m'      */
-  MEASURE_X	 = 101,	 	/* symbol: 'MX','mx'    */
-  MEASURE_Y	 = 102,	 	/* symbol: 'MY','my'    */
-  MEASURE_Z	 = 103,	 	/* symbol: 'MZ','mz'    */
-  MEASURE_BELL	 = 104,	 	/* symbol: 'MB','mb'    */
+  BLOCH   	 = 4,	 	/* symbol: '|','bloch'  */
+  ECHO   	 = 5,	 	/* symbol: '@','echo'   */
+  OUTPUT	 = 6,	 	/* symbol: '>','output' */
+  HELP    	 = 7,	 	/* symbol: '?','help'   */
+  QUIT	         = 8,	 	/* symbol: '.','quit'   */
+  INIT  	 = 9,	 	/* symbol: '%','init'   */
+  PAULI_X	 = 120,		/* symbol: 'X','x'      */
+  PAULI_Y	 = 121,		/* symbol: 'Y','y'      */
+  PAULI_Z	 = 122,		/* symbol: 'Z','z'      */
+  ROOT_PAULI_X	 = 123,		/* symbol: 'XR','xr'    */
+  ROOT_PAULI_X_	 = 124,		/* symbol: 'XR+','xr'   */
+  HADAMARD	 = 130,		/* symbol: 'H','h'      */
+  PHASE_SHIFT_S	 = 140,		/* symbol: 'S','s'      */
+  PHASE_SHIFT_S_ = 141,		/* symbol: 'S+','s+'    */
+  PHASE_SHIFT_T	 = 142,		/* symbol: 'T','t'      */
+  PHASE_SHIFT_T_ = 143,		/* symbol: 'T+','t+'    */
+  ROTATION_X	 = 150,		/* symbol: 'RX','rx'    */
+  ROTATION_Y	 = 151,		/* symbol: 'RY','ry'    */
+  ROTATION_Z	 = 152,		/* symbol: 'RZ','rz'    */
+  CONTROLLED_X	 = 160,		/* symbol: 'CX','cx'    */
+  CONTROLLED_Z	 = 161,		/* symbol: 'CZ','cz'    */
+  TOFFOLI	 = 170,		/* symbol: 'CCX','ccx'  */
+  MEASURE	 = 200,	 	/* symbol: 'M','m'      */
+  MEASURE_X	 = 201,	 	/* symbol: 'MX','mx'    */
+  MEASURE_Y	 = 202,	 	/* symbol: 'MY','my'    */
+  MEASURE_Z	 = 203,	 	/* symbol: 'MZ','mz'    */
+  MEASURE_BELL	 = 204,	 	/* symbol: 'MB','mb'    */
   NOT_A_GATE	 = 1000,
 } Kind;
 
@@ -157,7 +164,7 @@ typedef enum _SpinType {
   SIGMA_Z = 3,
 } SpinType;
 
-typedef double _Complex CTYPE;
+typedef double _Complex COMPLEX;
 
 typedef struct _ParaMes {
   int		shots;
@@ -183,18 +190,18 @@ typedef struct _CImage {
 } CImage;
 
 typedef struct _GBank {
-  CTYPE PauliX[4];
-  CTYPE PauliY[4];
-  CTYPE PauliZ[4];
-  CTYPE RootPauliX[4];
-  CTYPE RootPauliX_[4];
-  CTYPE Hadamard[4];
-  CTYPE PhaseShiftS[4];
-  CTYPE PhaseShiftS_[4];
-  CTYPE PhaseShiftT[4];
-  CTYPE PhaseShiftT_[4];
-  CTYPE ControlledX[16];
-  CTYPE ControlledZ[16];
+  COMPLEX PauliX[4];
+  COMPLEX PauliY[4];
+  COMPLEX PauliZ[4];
+  COMPLEX RootPauliX[4];
+  COMPLEX RootPauliX_[4];
+  COMPLEX Hadamard[4];
+  COMPLEX PhaseShiftS[4];
+  COMPLEX PhaseShiftS_[4];
+  COMPLEX PhaseShiftT[4];
+  COMPLEX PhaseShiftT_[4];
+  COMPLEX ControlledX[16];
+  COMPLEX ControlledZ[16];
 } GBank;
 
 typedef struct _QCirc {
@@ -208,7 +215,7 @@ typedef struct _QCirc {
 typedef struct _QState {
   int		qubit_num;	/* number of qubits */
   int		state_num;	/* number of quantum state (dim = 2^num) */
-  CTYPE*	camp;           /* complex amplitude of the quantum state */
+  COMPLEX*	camp;           /* complex amplitude of the quantum state */
   GBank*        gbank;
 } QState;
 
@@ -237,7 +244,7 @@ typedef struct _SPro {
 } SPro;
 
 /* observable consist of pauli operators (= array of "SpinProduct") */
-/* ex) -2.0*X_0*Z_1*Y_2 + Z_1*X_2 + 4.0*Z_3 ... */
+/* ex) 3.0-2.0*X_0*Z_1*Y_2 + Z_1*X_2 + 4.0*Z_3 ... */
 typedef struct _Observable {
   int		spin_num;
   int		array_num;
@@ -294,6 +301,10 @@ int      is_decimal(char* str);
 int	 get_binstr_from_decimal(char* binstr, int qubit_num, int decimal, int zflag);
 int      select_bits(int* bits_out, int bits_in, int digits_out, int digits_in,
 		     int digit_array[MAX_QUBIT_NUM]);
+int      complex_division(COMPLEX a, COMPLEX b, COMPLEX* c);
+
+/* bloch.c */
+int      bloch_get_angle(COMPLEX alpha, COMPLEX beta, double* theta, double* phi);
 
 /* qgate.c */
 void	 qgate_init(void);
@@ -324,6 +335,8 @@ QState*	 qstate_init(int qubit_num);
 QState*	 qstate_copy(QState* qstate);
 double*  qstate_get_camp(QState* qstate, int qubit_num, int qubit_id[MAX_QUBIT_NUM]);
 int	 qstate_print(QState* qstate, int qubit_num, int qubit_id[MAX_QUBIT_NUM]);
+int      qstate_bloch(QState* qstate, int qid, double* theta, double* phi);
+int      qstate_print_bloch(QState* qstate, int qid);
 MData*	 qstate_measure(QState* qstate, int shot_num, double angle, double phase,
 			int qubit_num, int qubit_id[MAX_QUBIT_NUM]);
 MData*   qstate_measure_bell(QState* qstate, int shot_num, int qubit_num,
@@ -332,8 +345,9 @@ int	 qstate_operate_qgate_param(QState* qstate, Kind kind, double phase,
 				    int qubit_id[MAX_QUBIT_NUM]);
 int	 qstate_operate_qgate(QState* qstate, QGate* qgate);
 int      qstate_evolve(QState* qstate, Observable* observ, double time, int iter);
-int      inner_product(QState* qstate_0, QState* qstate_1, double* real, double* imag);
-int      expect_value(QState* qstate, Observable* observ, double* value);
+int      qstate_inner_product(QState* qstate_0, QState* qstate_1, double* real,
+			      double* imag);
+int      qstate_expect_value(QState* qstate, Observable* observ, double* value);
 void	 qstate_free(QState* qstate);
 
 /* mdata.c */
@@ -345,8 +359,8 @@ void	 mdata_free(MData* mdata);
 
 /* gbank.c */
 GBank*	 gbank_init(void);
-CTYPE*	 gbank_get(GBank* gbank, Kind kind);
-CTYPE*	 gbank_get_rotation(Axis axis, double phase, double unit);
+COMPLEX* gbank_get(GBank* gbank, Kind kind);
+COMPLEX* gbank_get_rotation(Axis axis, double phase, double unit);
 
 /* cimage.c */
 CImage*	 cimage_init(int qubit_num, int step_num);

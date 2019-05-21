@@ -15,11 +15,6 @@ GBank* gbank_init(void)
   gbank->PauliX[2] = 1.0;
   gbank->PauliX[3] = 0.0;
 
-//  gbank->PauliY[0] =  0.0;
-//  gbank->PauliY[1] =  1.0i;
-//  gbank->PauliY[2] = -1.0i;
-//  gbank->PauliY[3] =  0.0;
-
   gbank->PauliY[0] =  0.0;
   gbank->PauliY[1] = -1.0i;
   gbank->PauliY[2] = 1.0i;
@@ -106,12 +101,12 @@ GBank* gbank_init(void)
   return NULL;
 }
 
-CTYPE* gbank_get_rotation(Axis axis, double phase, double unit)
+COMPLEX* gbank_get_rotation(Axis axis, double phase, double unit)
 {
-  CTYPE* matrix = NULL;
+  COMPLEX* matrix = NULL;
   double theta = phase * unit;
 
-  if (!(matrix = (CTYPE*)malloc(sizeof(CTYPE)*4))) return NULL;
+  if (!(matrix = (COMPLEX*)malloc(sizeof(COMPLEX)*4))) return NULL;
 
   switch (axis) {
   case X_AXIS:
@@ -139,9 +134,9 @@ CTYPE* gbank_get_rotation(Axis axis, double phase, double unit)
   return matrix;
 }
 
-CTYPE* gbank_get(GBank* gbank, Kind kind)
+COMPLEX* gbank_get(GBank* gbank, Kind kind)
 {
-  CTYPE* matrix = NULL;
+  COMPLEX* matrix = NULL;
 
   switch (kind) {
   case PAULI_X:

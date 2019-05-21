@@ -7,5 +7,5 @@ h 2
 @ == final state ==
 show
 
-@ == select some qubits(1,2) and show ==
+@ == select some qubits(0,1) and show ==
 show 0 1

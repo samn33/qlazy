@@ -33,6 +33,12 @@ void warn_msg(WrnCode wrn)
   case WARN_CANT_WRITE_FILE:
     fprintf(stderr, "Warning: can't write file !\n");
     break;
+  case WARN_CANT_PRINT_QSTATE:
+    fprintf(stderr, "Warning: can't print quantum state !\n");
+    break;
+  case WARN_CANT_PRINT_BLOCH:
+    fprintf(stderr, "Warning: can't print bloch angles !\n");
+    break;
   case WARN_CANT_PRINT_CIRC:
     fprintf(stderr, "Warning: can't print quantum circit !\n");
     break;
@@ -113,6 +119,12 @@ void error_msg(ErrCode err)
     break;
   case ERROR_QSTATE_EXPECT_VALUE:
     fprintf(stderr, "ERROR:expect value failure !\n");
+    break;
+  case ERROR_QSTATE_BLOCH:
+    fprintf(stderr, "ERROR:bloch failure !\n");
+    break;
+  case ERROR_QSTATE_PRINT_BLOCH:
+    fprintf(stderr, "ERROR:bloch print failure !\n");
     break;
   case ERROR_MDATA_INIT:
     fprintf(stderr, "ERROR:mdata init failure !\n");

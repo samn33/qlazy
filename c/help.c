@@ -11,6 +11,7 @@ static void help_print_outline() {
 * print quantum circuitt:   &,circ \n\
 * print quantum gates:      !,gates \n\
 * print quantum state:      -,show \n\
+* print bloch angles:       |,bloch \n\
 * echo input string:        @,echo \n\
 * output quantum gates:     >,output \n\
 * quit:                     .,quit \n\
@@ -80,11 +81,26 @@ static void help_print_show() {
 ");
 }
 
+static void help_print_bloch() {
+  printf("\
+== print bloch angles ==\n\
+[description] \n\
+   This command prints the bloch angles of current quantum state.\n\
+[note] \n\
+   If no arguments are set, it prints the angles of 0-th qubit.\n\
+[usage] \n\
+  >> bloch \n\
+  >> bloch <qubit_id> \n\
+[alias] \n\
+  | \n\
+");
+}
+
 static void help_print_echo() {
   printf("\
 == echo strings ==\n\
 [description] \n\
-  This command print any strings you set folloing to 'echo' \n\
+  This command prints any strings you set. \n\
 [usage] \n\
   >> echo <strings>\n\
 [alias] \n\
@@ -493,6 +509,9 @@ int help_print(char* item)
     break;
   case SHOW:
     help_print_show();
+    break;
+  case BLOCH:
+    help_print_bloch();
     break;
   case ECHO:
     help_print_echo();

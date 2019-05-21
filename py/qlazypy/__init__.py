@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from .basic import QState,Observable
+from .QState import QState
+from .Observable import Observable
 from . import config
 
 __all__ = ["QState","Observable","config"]

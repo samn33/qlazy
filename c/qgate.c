@@ -19,6 +19,9 @@ void qgate_get_symbol(char* symbol, Kind kind)
   case SHOW:
     strcpy(symbol,"-");
     break;
+  case BLOCH:
+    strcpy(symbol,"|");
+    break;
   case ECHO:
     strcpy(symbol,"@");
     break;
@@ -111,6 +114,8 @@ Kind qgate_get_kind(char* symbol)
   else if (strcmp(symbol,"gates") == 0) kind = GATES;
   else if (strcmp(symbol,"-")     == 0) kind = SHOW;
   else if (strcmp(symbol,"show")  == 0) kind = SHOW;
+  else if (strcmp(symbol,"|")     == 0) kind = BLOCH;
+  else if (strcmp(symbol,"bloch") == 0) kind = BLOCH;
   else if (strcmp(symbol,"@")     == 0) kind = ECHO;
   else if (strcmp(symbol,"echo")  == 0) kind = ECHO;
   else if (strcmp(symbol,">")     == 0) kind = OUTPUT;

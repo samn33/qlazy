@@ -4,6 +4,7 @@ import random
 import numpy as np
 from qlazypy.error import *
 from qlazypy.config import *
+from qlazypy.Observable import *
 
 lib = ctypes.CDLL('libQlazy.so',mode=ctypes.RTLD_GLOBAL)
 try:
@@ -96,6 +97,36 @@ class QState(ctypes.Structure):
             
         except Exception:
             raise QState_FailToClone()
+
+    def bloch(self, qid=0):
+
+        # error check
+        if qid < 0 or qid >= self.qubit_num:
+            raise QState_OutOfBound()
+
+        try:
+            theta = 0.0
+            phi = 0.0
+            c_theta = ctypes.c_double(theta)
+            c_phi = ctypes.c_double(phi)
+            
+            lib.qstate_bloch.restype = ctypes.c_int
+            lib.qstate_bloch.argtypes = [ctypes.POINTER(QState),ctypes.c_int,
+                                         ctypes.POINTER(ctypes.c_double),
+                                         ctypes.POINTER(ctypes.c_double)]
+            ret = lib.qstate_bloch(ctypes.byref(self),ctypes.c_int(qid),
+                                   ctypes.byref(c_theta), ctypes.byref(c_phi))
+
+            if ret == FALSE:
+                raise QState_FailToBloch()
+
+            theta = c_theta.value
+            phi = c_phi.value
+
+            return theta,phi
+
+        except Exception:
+            raise QState_FailToBloch()
 
     def inpro(self, qstate):
 
@@ -820,35 +851,3 @@ class MDataPy:
         state_string = format(self.last_state,'b').zfill(self.qubit_num)\
                                                   .replace('0','u').replace('1','d')
         print("last state =>", state_string)
-
-
-class Observable(ctypes.Structure):
-
-    _fields_ = [
-        ('spin_num', ctypes.c_int),
-        ('array_num', ctypes.c_int),
-        ('spro_array', ctypes.c_void_p),
-    ]
-
-    def __new__(self, str=None):
-
-        self.spin_num = 0
-        self.array_num = 0
-        self.spro_array = None
-    
-        c_str = ctypes.create_string_buffer(str.encode('utf-8'))
-        
-        lib.observable_init.restype = ctypes.POINTER(Observable)
-        lib.observable_init.argtypes = [ctypes.POINTER(ctypes.c_char)]
-        out = lib.observable_init(c_str)
-
-        if not out:
-            raise Observable_FailToInitialize()
-        
-        return out.contents
-
-    def __del__(self):
-
-        lib.observable_free.argtypes = [ctypes.POINTER(Observable)]
-        lib.observable_free(ctypes.byref(self))
-
