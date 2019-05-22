@@ -57,11 +57,11 @@ static QState* qstate_mask(QState* qstate_in, int qubit_num, int qubit_id[MAX_QU
   /* wave function collapse by mesurement */
 
   if (qstate_in->qubit_num == qubit_num) {
-    mask_qstate = qstate_copy(qstate_in);
+    qstate_copy(qstate_in, (void**)&mask_qstate);
   }
   else {  /* in the case of extracting some qubit states */
     /* mask qstate by measurement */
-    mask_qstate = qstate_copy(qstate_in);
+    qstate_copy(qstate_in, (void**)&mask_qstate);
     mask_qubit_num = qstate_in->qubit_num - qubit_num;
     int cnt = 0;
     for (int i=0; i<qstate_in->qubit_num; i++) {
@@ -73,8 +73,8 @@ static QState* qstate_mask(QState* qstate_in, int qubit_num, int qubit_id[MAX_QU
 	mask_qubit_id[cnt++] = i;
       }
     }
-    if (!(mdata = qstate_measure(mask_qstate, 1, 0.0, 0.0,
-				 mask_qubit_num, mask_qubit_id))) goto ERROR_EXIT;
+    if (qstate_measure(mask_qstate, 1, 0.0, 0.0, mask_qubit_num,
+		       mask_qubit_id, (void**)&mdata) == FALSE) goto ERROR_EXIT;
   }
 
   /* free temporal mdata */
@@ -94,13 +94,13 @@ static QState* qstate_pickup(QState* qstate_in, int qubit_num, int qubit_id[MAX_
   int		x;
 
   if (qstate_in->qubit_num == qubit_num) {
-    qstate = qstate_copy(qstate_in);
+    qstate_copy(qstate_in, (void**)&qstate);
   }
   else {  /* in the case of picking up some qubit states */
     mask_qstate = qstate_mask(qstate_in, qubit_num, qubit_id);
 
     /* selected qubits state (qstate) */
-    if (!(qstate = qstate_init(qubit_num))) return NULL;
+    if (qstate_init(qubit_num, (void**)&qstate) == FALSE) return NULL;
     qstate_set_none(qstate);
     for (int i=0; i<mask_qstate->state_num; i++) {
       select_bits(&x, i, qubit_num, qstate_in->qubit_num, qubit_id);
@@ -146,7 +146,7 @@ static int qstate_remove_phase_factor(QState* qstate, COMPLEX* phase_factor)
 
 #endif
 
-QState* qstate_init(int qubit_num)
+int qstate_init(int qubit_num, void** qstate_out)
 {
   QState	*qstate = NULL;
   int		 state_num;
@@ -163,40 +163,46 @@ QState* qstate_init(int qubit_num)
 
   if (!(qstate->camp = (COMPLEX*)malloc(sizeof(COMPLEX)*state_num))) goto ERROR_EXIT;
 
-  qstate->gbank = gbank_init();
+  if (gbank_init((void**)&(qstate->gbank)) == FALSE) goto ERROR_EXIT;
 
   qstate_set_0(qstate);
 
-  return qstate;
+  *qstate_out = qstate;
+  
+  return TRUE;
 
  ERROR_EXIT:
   g_Errno = ERROR_QSTATE_INIT;
-  return NULL;
+  return FALSE;
 }
 
-QState* qstate_copy(QState* qstate_src)
+int qstate_copy(QState* qstate_in, void** qstate_out)
 {
-  QState* qstate_dst = NULL;
+  QState* qstate = NULL;
 
   g_Errno = NO_ERROR;
 
-  if (qstate_src == NULL) goto ERROR_EXIT;
+  if (qstate_in == NULL) goto ERROR_EXIT;
 
-  if (!(qstate_dst = qstate_init(qstate_src->qubit_num))) goto ERROR_EXIT;
+  if (qstate_init(qstate_in->qubit_num, (void**)&qstate) == FALSE)
+    goto ERROR_EXIT;
 
-  memcpy(qstate_dst->camp, qstate_src->camp, sizeof(COMPLEX)*qstate_src->state_num);
+  memcpy(qstate->camp, qstate_in->camp, sizeof(COMPLEX)*qstate_in->state_num);
 
-  return qstate_dst;
+  *qstate_out = qstate;
+
+  return TRUE;
   
  ERROR_EXIT:
   g_Errno = ERROR_QSTATE_COPY;
-  return NULL;
+  return FALSE;
 }
 
-double* qstate_get_camp(QState* qstate, int qubit_num, int qubit_id[MAX_QUBIT_NUM])
+int qstate_get_camp(QState* qstate, int qubit_num, int qubit_id[MAX_QUBIT_NUM],
+		    void** camp_out)
 {
   QState*	mask_qstate = NULL;
-  double*	out	    = NULL;
+  double*	camp	    = NULL;
 
   g_Errno = NO_ERROR;
 
@@ -204,21 +210,23 @@ double* qstate_get_camp(QState* qstate, int qubit_num, int qubit_id[MAX_QUBIT_NU
 
   if (!(mask_qstate = qstate_mask(qstate, qubit_num, qubit_id))) goto ERROR_EXIT;
 
-  if (!(out = (double*)malloc(sizeof(double)*2*mask_qstate->state_num)))
+  if (!(camp = (double*)malloc(sizeof(double)*2*mask_qstate->state_num)))
     goto ERROR_EXIT;
 
   for (int i=0; i<mask_qstate->state_num; i++) {
-    out[2*i] = creal(qstate->camp[i]);
-    out[2*i+1] = cimag(qstate->camp[i]);
+    camp[2*i] = creal(qstate->camp[i]);
+    camp[2*i+1] = cimag(qstate->camp[i]);
   }
 
   qstate_free(mask_qstate); mask_qstate = NULL;
+
+  *camp_out = camp;
   
-  return out;
+  return TRUE;
   
  ERROR_EXIT:
   g_Errno = ERROR_QSTATE_GET_CAMP;
-  return NULL;
+  return FALSE;
 }
 
 int qstate_print(QState* qstate_in, int qubit_num, int qubit_id[MAX_QUBIT_NUM])
@@ -346,12 +354,13 @@ static int qstate_operate_qgate_1(QState* qstate, Kind kind, int n)
   int nn = qstate->qubit_num - n - 1;
   COMPLEX* U = NULL;
 
-  if (!(U = gbank_get(qstate->gbank, kind))) goto ERROR_EXIT;
+  if (gbank_get(qstate->gbank, kind, (void**)&U) == FALSE) goto ERROR_EXIT;
 
   if (qstate == NULL) goto ERROR_EXIT;
   if (nn < 0 || nn >= qstate->qubit_num) goto ERROR_EXIT;
   
-  if (!(qstate_tmp = qstate_init(qstate->qubit_num))) goto ERROR_EXIT;
+  if (qstate_init(qstate->qubit_num, (void**)&qstate_tmp) == FALSE)
+    goto ERROR_EXIT;
   
   for (i=0; i<qstate->state_num; i++) {
     if ((i >> nn) %2 == 0) {
@@ -386,9 +395,11 @@ static int qstate_operate_qgate_1_rot(QState* qstate, Axis axis, double phase,
   if (nn < 0 || nn >= qstate->qubit_num) goto ERROR_EXIT;
   
   /* set rotation matrix aroud the X,Y,Z-axis*/
-  if (!(U = gbank_get_rotation(axis, phase, unit))) goto ERROR_EXIT;
+  if (gbank_get_rotation(axis, phase, unit, (void**)&U) == FALSE)
+    goto ERROR_EXIT;
 
-  if (!(qstate_tmp = qstate_init(qstate->qubit_num))) goto ERROR_EXIT;
+  if (qstate_init(qstate->qubit_num, (void**)&qstate_tmp) == FALSE)
+    goto ERROR_EXIT;
   
   for (i=0; i<qstate->state_num; i++) {
     if ((i >> nn) %2 == 0) {
@@ -421,13 +432,14 @@ static int qstate_operate_qgate_2(QState* qstate, Kind kind, int m, int n)
   int nn = qstate->qubit_num - n - 1;
   COMPLEX* U = NULL;
 
-  if (!(U = gbank_get(qstate->gbank, kind))) goto ERROR_EXIT;
+  if (gbank_get(qstate->gbank, kind, (void**)&U) == FALSE) goto ERROR_EXIT;
 
   if (qstate == NULL) goto ERROR_EXIT;
   if (m < 0 || m >= qstate->qubit_num) goto ERROR_EXIT;
   if (n < 0 || n >= qstate->qubit_num) goto ERROR_EXIT;
   
-  if (!(qstate_tmp = qstate_init(qstate->qubit_num))) goto ERROR_EXIT;
+  if (qstate_init(qstate->qubit_num, (void**)&qstate_tmp) == FALSE)
+    goto ERROR_EXIT;
   
   for (i=0; i<qstate->state_num; i++) {
     if (((i >> mm) % 2 == 0) && ((i >> nn) % 2 == 0)) {
@@ -592,7 +604,7 @@ static int qstate_measure_one_time_without_change_state(QState* qstate_in, doubl
   QState*	qstate = NULL;
 
   /* copy qstate for measurement */
-  qstate = qstate_copy(qstate_in);
+  qstate_copy(qstate_in, (void**)&qstate);
 
   /* unitary transform, if measuremment base is not {|0><0|,|1><1|} */
   if ((angle != 0.0) || (phase != 0.0)) {
@@ -654,8 +666,8 @@ static int qstate_measure_one_time(QState* qstate, double angle, double phase,
   return value;
 }
 
-MData* qstate_measure(QState* qstate, int shot_num, double angle, double phase,
-		      int qubit_num, int qubit_id[MAX_QUBIT_NUM])
+int qstate_measure(QState* qstate, int shot_num, double angle, double phase,
+		   int qubit_num, int qubit_id[MAX_QUBIT_NUM], void** mdata_out)
 {
   int		state_id;
   int		mes_id;
@@ -676,11 +688,10 @@ MData* qstate_measure(QState* qstate, int shot_num, double angle, double phase,
       qubit_id[i] = i;
     }
   }
-  
 
   /* initialize mdata */
-  if (!(mdata = mdata_init(qubit_num, mes_num, shot_num, angle, phase, qubit_id)))
-    goto ERROR_EXIT;
+  if (mdata_init(qubit_num, mes_num, shot_num, angle, phase, qubit_id,
+		 (void**)&mdata) == FALSE) goto ERROR_EXIT;
 
   /* execute mesurement */
   for (int i=0; i<shot_num; i++) {
@@ -697,15 +708,17 @@ MData* qstate_measure(QState* qstate, int shot_num, double angle, double phase,
   }
   mdata->last = mes_id;
 
-  return mdata;
+  *mdata_out = mdata;
+  
+  return TRUE;
 
  ERROR_EXIT:
   g_Errno = ERROR_QSTATE_MEASURE;
-  return NULL;
+  return FALSE;
 }
 
-MData* qstate_measure_bell(QState* qstate, int shot_num, int qubit_num,
-			   int qubit_id[MAX_QUBIT_NUM])
+int qstate_measure_bell(QState* qstate, int shot_num, int qubit_num,
+			int qubit_id[MAX_QUBIT_NUM], void** mdata_out)
 {
   MData*	mdata  = NULL;
   int		q0     = qubit_id[0];
@@ -729,8 +742,8 @@ MData* qstate_measure_bell(QState* qstate, int shot_num, int qubit_num,
     goto ERROR_EXIT;
 
   /* execute Bell-mesurement */
-  if (!(mdata = qstate_measure(qstate, shot_num, 0.0, 0.0, qubit_num, qubit_id)))
-    goto ERROR_EXIT;
+  if (qstate_measure(qstate, shot_num, 0.0, 0.0, qubit_num, qubit_id,
+		     (void**)&mdata) == FALSE) goto ERROR_EXIT;
 
   /* equivalent transform to bell-basis (inverse) */
   /* CX 0 1 */
@@ -743,11 +756,12 @@ MData* qstate_measure_bell(QState* qstate, int shot_num, int qubit_num,
   if (qstate_operate_qgate_2(qstate, CONTROLLED_X, q0, q1) == FALSE)
     goto ERROR_EXIT;
 
-  return mdata;
+  *mdata_out = mdata;
+  return TRUE;
 
  ERROR_EXIT:
   g_Errno = ERROR_QSTATE_MEASURE;
-  return NULL;
+  return FALSE;
 }
 
 int qstate_operate_qgate_param(QState* qstate, Kind kind, double phase,
@@ -829,15 +843,15 @@ int qstate_operate_qgate(QState* qstate, QGate* qgate)
   case MEASURE_X:
   case MEASURE_Y:
   case MEASURE_Z:
-    if (!(mdata = qstate_measure(qstate, para->mes.shots,
-				 para->mes.angle, para->mes.phase, terminal_num,
-				 qubit_id))) goto ERROR_EXIT;
+    if (qstate_measure(qstate, para->mes.shots,
+		       para->mes.angle, para->mes.phase, terminal_num,
+		       qubit_id, (void**)&mdata) == FALSE) goto ERROR_EXIT;
     mdata_print(mdata);
     mdata_free(mdata); mdata = NULL;
     break;
   case MEASURE_BELL:
-    if (!(mdata = qstate_measure_bell(qstate, para->mes.shots, terminal_num, qubit_id)))
-      goto ERROR_EXIT;
+    if (qstate_measure_bell(qstate, para->mes.shots, terminal_num, qubit_id,
+			    (void**)&mdata) == FALSE) goto ERROR_EXIT;
     mdata_print_bell(mdata);
     mdata_free(mdata); mdata = NULL;
     break;
@@ -1008,7 +1022,7 @@ static QState* qstate_apply_spro(QState* qstate, SPro* spro)
   if (qstate == NULL) return NULL;
   if (spro == NULL) return NULL;
 
-  if (!(qstate_ob = qstate_copy(qstate))) return NULL;
+  if (qstate_copy(qstate, (void**)&qstate_ob) == FALSE) return NULL;
 
   for (int i=0; i<spro->spin_num; i++) {
     if (spro->spin_type[i] == NONE) {
@@ -1047,7 +1061,8 @@ static QState* qstate_apply_observable(QState* qstate, Observable* observ)
     if (!(qstate_tmp = qstate_apply_spro(qstate, observ->spro_array[i])))
       return NULL;
     if (qstate_ob == NULL) {
-      if (!(qstate_ob = qstate_init(qstate_tmp->qubit_num))) return NULL;
+      if (qstate_init(qstate_tmp->qubit_num, (void**)&qstate_ob) == FALSE)
+	return NULL;
       qstate_set_none(qstate_ob);
     }
     if (qstate_add(qstate_ob, qstate_tmp) == FALSE) return NULL;

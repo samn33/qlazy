@@ -4,7 +4,7 @@
 
 #include "qlazy.h"
 
-CImage* cimage_init(int qubit_num, int step_num)
+int cimage_init(int qubit_num, int step_num, void** cimage_out)
 {
   CImage* cimage = NULL;
   int     glen = 20;
@@ -22,11 +22,13 @@ CImage* cimage_init(int qubit_num, int step_num)
     cimage->ch[i][step_num*glen] = '\0';
   }
 
-  return cimage;
+  *cimage_out = cimage;
+
+  return TRUE;
 
  ERROR_EXIT:
   g_Errno = ERROR_CIMAGE_INIT;
-  return NULL;
+  return FALSE;
 }
 
 void cimage_free(CImage* cimage)

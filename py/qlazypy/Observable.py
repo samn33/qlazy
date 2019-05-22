@@ -26,14 +26,20 @@ class Observable(ctypes.Structure):
         self.spro_array = None
     
         c_str = ctypes.create_string_buffer(str.encode('utf-8'))
-        
-        lib.observable_init.restype = ctypes.POINTER(Observable)
-        lib.observable_init.argtypes = [ctypes.POINTER(ctypes.c_char)]
-        out = lib.observable_init(c_str)
 
-        if not out:
+        observ = None
+        c_observ = ctypes.c_void_p(observ)
+        
+        lib.observable_init.restype = ctypes.c_int
+        lib.observable_init.argtypes = [ctypes.POINTER(ctypes.c_char),
+                                        ctypes.POINTER(ctypes.c_void_p)]
+        ret = lib.observable_init(c_str, c_observ)
+
+        if ret == FALSE:
             raise Observable_FailToInitialize()
         
+        out = ctypes.cast(c_observ.value, ctypes.POINTER(Observable))
+
         return out.contents
 
     def __del__(self):

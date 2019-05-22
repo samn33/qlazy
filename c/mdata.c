@@ -4,8 +4,9 @@
 
 #include "qlazy.h"
 
-MData* mdata_init(int qubit_num, int state_num, int shot_num,
-		  double angle, double phase, int qubit_id[MAX_QUBIT_NUM])
+int mdata_init(int qubit_num, int state_num, int shot_num,
+		    double angle, double phase, int qubit_id[MAX_QUBIT_NUM],
+		    void** mdata_out)
 {
   MData* mdata = NULL;
 
@@ -22,11 +23,13 @@ MData* mdata_init(int qubit_num, int state_num, int shot_num,
   if (!(mdata->freq = (int*)malloc(sizeof(int)*state_num))) goto ERROR_EXIT;
   for (int i=0; i<state_num; i++) mdata->freq[i] = 0;
 
-  return mdata;
+  *mdata_out = mdata;
+
+  return TRUE;
 
  ERROR_EXIT:
   g_Errno = ERROR_MDATA_INIT;
-  return NULL;
+  return FALSE;
 }
 
 int mdata_print(MData* mdata)

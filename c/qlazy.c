@@ -87,7 +87,7 @@ int main(int argc, char** argv)
 
   init_qlazy(seed);
 
-  qsystem = qsystem_init();
+  if (qsystem_init((void**)&qsystem) == FALSE) goto ERROR_EXIT;
   
   if (pr == ON) {  /* print quantum circuit only */
     if (!(qcirc = qcirc_read_file(fname_qc))) goto ERROR_EXIT;

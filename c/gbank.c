@@ -4,7 +4,7 @@
 
 #include "qlazy.h"
 
-GBank* gbank_init(void)
+int gbank_init(void** gbank_out)
 {
   GBank* gbank = NULL;
 
@@ -93,20 +93,22 @@ GBank* gbank_init(void)
   gbank->ControlledZ[13] =  0.0;
   gbank->ControlledZ[14] =  0.0;
   gbank->ControlledZ[15] = -1.0;
+
+  *gbank_out = gbank;
   
-  return gbank;
+  return TRUE;
 
  ERROR_EXIT:
   g_Errno = ERROR_GBANK_INIT;
-  return NULL;
+  return FALSE;
 }
 
-COMPLEX* gbank_get_rotation(Axis axis, double phase, double unit)
+int gbank_get_rotation(Axis axis, double phase, double unit, void** matrix_out)
 {
   COMPLEX* matrix = NULL;
   double theta = phase * unit;
 
-  if (!(matrix = (COMPLEX*)malloc(sizeof(COMPLEX)*4))) return NULL;
+  if (!(matrix = (COMPLEX*)malloc(sizeof(COMPLEX)*4))) goto ERROR_EXIT;;
 
   switch (axis) {
   case X_AXIS:
@@ -128,13 +130,19 @@ COMPLEX* gbank_get_rotation(Axis axis, double phase, double unit)
     matrix[IDX2(1,1)] = cos(theta) + 1.0i * sin(theta);
     break;
   default:
-    return NULL;
+    goto ERROR_EXIT;
   }
 
-  return matrix;
+  *matrix_out = matrix;
+
+  return TRUE;
+
+ ERROR_EXIT:
+  g_Errno = ERROR_GBANK_GET_ROTATION;
+  return FALSE;
 }
 
-COMPLEX* gbank_get(GBank* gbank, Kind kind)
+int gbank_get(GBank* gbank, Kind kind, void** matrix_out)
 {
   COMPLEX* matrix = NULL;
 
@@ -179,10 +187,12 @@ COMPLEX* gbank_get(GBank* gbank, Kind kind)
     goto ERROR_EXIT;
     break;
   }
+
+  *matrix_out = matrix;
   
-  return matrix;
+  return TRUE;
 
  ERROR_EXIT:
   g_Errno = ERROR_GBANK_GET;
-  return NULL;
+  return FALSE;
 }

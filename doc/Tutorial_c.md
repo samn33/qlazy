@@ -86,6 +86,7 @@ frq[xx]は、測定の結果、|xx>だった回数を表しています。測定
     * print quantum circuitt:   &,circ                                                       
     * print quantum gates:      !,gates
     * print quantum state:      -,show
+    * print bloch angles:       |,bloch
     * echo input string:        @,echo
     * output quantum gates:     >,output
     * quit:                     .,quit

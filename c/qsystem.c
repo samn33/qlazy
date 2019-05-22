@@ -4,14 +4,22 @@
 
 #include "qlazy.h"
 
-QSystem* qsystem_init()
+int qsystem_init(void** qsystem_out)
 {
   QSystem* qsystem = NULL;
-  if (!(qsystem = (QSystem*)malloc(sizeof(QSystem)))) return NULL;
+
+  if (!(qsystem = (QSystem*)malloc(sizeof(QSystem)))) goto ERROR_EXIT;
   qsystem->qcirc = NULL;
   qsystem->qstate = NULL;
   qsystem->qubit_num = 0;
-  return qsystem;
+
+  *qsystem_out = qsystem;
+  
+  return TRUE;
+
+ ERROR_EXIT:
+  g_Errno = ERROR_QSYSTEM_INIT;
+  return FALSE;
 }
 
 static int qsystem_execute_one_line(QSystem* qsystem, char* line)
@@ -141,7 +149,7 @@ static int qsystem_execute_one_line(QSystem* qsystem, char* line)
     if (qstate != NULL) { qstate_free(qstate); qstate = NULL; }
     if (qcirc != NULL) { qcirc_free(qcirc); qcirc = NULL; }
     if (!(qcirc = qcirc_init(qubit_num, DEF_QCIRC_STEPS))) goto CANT_INITIALIZE;
-    if (!(qstate = qstate_init(qubit_num))) goto CANT_INITIALIZE;
+    if (qstate_init(qubit_num, (void**)&qstate) == FALSE) goto CANT_INITIALIZE;
     break;
   case MEASURE:
     /* measurement */

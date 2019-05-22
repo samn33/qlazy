@@ -14,7 +14,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
-#define VERSION "0.0.11"
+#define VERSION "0.0.12"
 
 /*====================================================================*/
 /*  Definitions & Macros                                              */
@@ -90,10 +90,12 @@ typedef enum _ErrCode {
   ERROR_MDATA_PRINT	      = 51,
   ERROR_GBANK_INIT	      = 60,
   ERROR_GBANK_GET	      = 61,
+  ERROR_GBANK_GET_ROTATION    = 62,
   ERROR_CIMAGE_INIT	      = 70,
   ERROR_LINE_OPERATE          = 80,
-  ERROR_QSYSTEM_EXECUTE       = 90,
-  ERROR_QSYSTEM_INTMODE       = 91,
+  ERROR_QSYSTEM_INIT          = 90,
+  ERROR_QSYSTEM_EXECUTE       = 91,
+  ERROR_QSYSTEM_INTMODE       = 92,
   ERROR_SPRO_INIT             = 100,
   ERROR_OBSERVABLE_INIT       = 110,
   ERROR_BLOCH_GET_ANGLE       = 120,
@@ -323,24 +325,25 @@ int	 qcirc_write_file(QCirc* qcirc, char* fname);
 void	 qcirc_free(QCirc* qcirc);
 
 /* spro.c */
-SPro*    spro_init(char* str);
+int      spro_init(char* str, void** spro_out);
 void     spro_free(SPro* spro);
 
 /* observable.c */
-Observable*  observable_init(char* str);
-void         observable_free(Observable* observ);
+int      observable_init(char* str, void** observ_out);
+void     observable_free(Observable* observ);
 
 /* qstate.c */
-QState*	 qstate_init(int qubit_num);
-QState*	 qstate_copy(QState* qstate);
-double*  qstate_get_camp(QState* qstate, int qubit_num, int qubit_id[MAX_QUBIT_NUM]);
+int	 qstate_init(int qubit_num, void** qstate_out);
+int	 qstate_copy(QState* qstate, void** qstate_out);
+int      qstate_get_camp(QState* qstate, int qubit_num, int qubit_id[MAX_QUBIT_NUM],
+			 void** camp_out);
 int	 qstate_print(QState* qstate, int qubit_num, int qubit_id[MAX_QUBIT_NUM]);
 int      qstate_bloch(QState* qstate, int qid, double* theta, double* phi);
 int      qstate_print_bloch(QState* qstate, int qid);
-MData*	 qstate_measure(QState* qstate, int shot_num, double angle, double phase,
-			int qubit_num, int qubit_id[MAX_QUBIT_NUM]);
-MData*   qstate_measure_bell(QState* qstate, int shot_num, int qubit_num,
-			     int qubit_id[MAX_QUBIT_NUM]);
+int	 qstate_measure(QState* qstate, int shot_num, double angle, double phase,
+			int qubit_num, int qubit_id[MAX_QUBIT_NUM], void** mdata_out);
+int      qstate_measure_bell(QState* qstate, int shot_num, int qubit_num,
+			     int qubit_id[MAX_QUBIT_NUM], void** mdata_out);
 int	 qstate_operate_qgate_param(QState* qstate, Kind kind, double phase,
 				    int qubit_id[MAX_QUBIT_NUM]);
 int	 qstate_operate_qgate(QState* qstate, QGate* qgate);
@@ -351,23 +354,24 @@ int      qstate_expect_value(QState* qstate, Observable* observ, double* value);
 void	 qstate_free(QState* qstate);
 
 /* mdata.c */
-MData*	 mdata_init(int qubit_num, int state_num, int shot_num,
-		    double angle, double phase, int qubit_id[MAX_QUBIT_NUM]);
+int      mdata_init(int qubit_num, int state_num, int shot_num,
+		    double angle, double phase, int qubit_id[MAX_QUBIT_NUM],
+		    void** mdata_out);
 int	 mdata_print(MData* mdata);
 int	 mdata_print_bell(MData* mdata);
 void	 mdata_free(MData* mdata);
 
 /* gbank.c */
-GBank*	 gbank_init(void);
-COMPLEX* gbank_get(GBank* gbank, Kind kind);
-COMPLEX* gbank_get_rotation(Axis axis, double phase, double unit);
+int	 gbank_init(void** gbank_out);
+int      gbank_get(GBank* gbank, Kind kind, void** matrix_out);
+int      gbank_get_rotation(Axis axis, double phase, double unit, void** matrix_out);
 
 /* cimage.c */
-CImage*	 cimage_init(int qubit_num, int step_num);
+int      cimage_init(int qubit_num, int step_num, void** cimage_out);
 void	 cimage_free(CImage* cimage);
 
 /* qsystem.c */
-QSystem* qsystem_init(void);
+int      qsystem_init(void** qsystem_out);
 int	 qsystem_execute(QSystem* qsystem, char* fname);
 int	 qsystem_intmode(QSystem* qsystem, char* fnmae_ini);
 void	 qsystem_free(QSystem* qsystem);

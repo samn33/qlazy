@@ -4,7 +4,7 @@
 
 #include "qlazy.h"
 
-SPro* spro_init(char* str)
+int spro_init(char* str, void** spro_out)
 /*
   [input string format (example)]
   "3.0-2.0*Z_0*X_1*Y_3"
@@ -104,11 +104,13 @@ SPro* spro_init(char* str)
   spro->coef *= sign;
   spro->spin_num += 1;
 
-  return spro;
+  *spro_out = spro;
+  
+  return TRUE;
 
  ERROR_EXIT:
   g_Errno = ERROR_SPRO_INIT;
-  return NULL;
+  return FALSE;
 }
 
 void spro_free(SPro* spro)

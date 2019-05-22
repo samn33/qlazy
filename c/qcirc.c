@@ -119,7 +119,7 @@ int qcirc_set_cimage(QCirc* qcirc)
 
   /* allocate cimage and set initial character '-' */
   
-  if (!(qcirc->cimage = cimage_init(qcirc->qubit_num, qcirc->step_num)))
+  if (cimage_init(qcirc->qubit_num, qcirc->step_num, (void**)&(qcirc->cimage)) == FALSE)
     return FALSE;
   
   /* set gate charactor */

@@ -16,7 +16,7 @@ static int get_term_num(char* str)
   return num;
 }
 
-Observable* observable_init(char* str)
+int observable_init(char* str, void** observ_out)
 /*
   [input string format (example)]
   "5.0+2.0*Z_0*X_1*Y_3+3.0*X_0*Z_1-Y_1"
@@ -64,19 +64,22 @@ Observable* observable_init(char* str)
     goto ERROR_EXIT;
 
   for (int i=0; i<observ->array_num; i++) {
-    if (!(observ->spro_array[i] = spro_init(token[i]))) goto ERROR_EXIT;
+    if (spro_init(token[i], (void**)&(observ->spro_array[i])) == FALSE)
+      goto ERROR_EXIT;
     spin_num = MAX(spin_num, observ->spro_array[i]->spin_num);
   }
   observ->spin_num = spin_num;
   
   free(exp_str);
   exp_str = NULL;
+
+  *observ_out = observ;
   
-  return observ;
+  return TRUE;
 
  ERROR_EXIT:
   g_Errno = ERROR_OBSERVABLE_INIT;
-  return NULL;
+  return FALSE;
 }
 
 void observable_free(Observable* observ)

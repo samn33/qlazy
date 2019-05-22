@@ -25,7 +25,6 @@ class QState(ctypes.Structure):
 
         self.qubit_num = qubit_num
         self.camp = None
-        #self.measured = None
 
         if qubit_num > MAX_QUBIT_NUM:
             print("qubit number must be {0:d} or less.".format(MAX_QUBIT_NUM))
@@ -38,12 +37,17 @@ class QState(ctypes.Structure):
 
         lib.init_qlazy(ctypes.c_int(seed))
         
-        lib.qstate_init.restype = ctypes.POINTER(QState)
-        lib.qstate_init.argtypes = [ctypes.c_int]
-        out = lib.qstate_init(ctypes.c_int(self.qubit_num))
+        qstate = None
+        c_qstate = ctypes.c_void_p(qstate)
 
-        if not out:
+        lib.qstate_init.restype = ctypes.c_int
+        lib.qstate_init.argtypes = [ctypes.c_int, ctypes.POINTER(ctypes.c_void_p)]
+        ret = lib.qstate_init(ctypes.c_int(self.qubit_num), c_qstate)
+
+        if ret == FALSE:
             raise QState_FailToInitialize()
+
+        out = ctypes.cast(c_qstate.value, ctypes.POINTER(QState))
         
         return out.contents
 
@@ -86,15 +90,21 @@ class QState(ctypes.Structure):
     def clone(self):
 
         try:
-            lib.qstate_copy.restype = ctypes.POINTER(QState)
-            lib.qstate_copy.argtypes = [ctypes.POINTER(QState)]
-            out = lib.qstate_copy(ctypes.byref(self))
+            qstate = None
+            c_qstate = ctypes.c_void_p(qstate)
+            
+            lib.qstate_copy.restype = ctypes.c_int
+            lib.qstate_copy.argtypes = [ctypes.POINTER(QState),
+                                        ctypes.POINTER(ctypes.c_void_p)]
+            ret = lib.qstate_copy(ctypes.byref(self), c_qstate)
 
-            if not out:
+            if ret == FALSE:
                 raise QState_FailToClone()
 
+            out = ctypes.cast(c_qstate.value, ctypes.POINTER(QState))
+        
             return out.contents
-            
+        
         except Exception:
             raise QState_FailToClone()
 
@@ -239,18 +249,27 @@ class QState(ctypes.Structure):
                 qubit_id[i] = id[i]
             IntArray = ctypes.c_int * MAX_QUBIT_NUM
             id_array = IntArray(*qubit_id)
-            
-            lib.qstate_get_camp.restype = ctypes.POINTER(ctypes.c_double)
-            lib.qstate_get_camp.argtypes = [ctypes.POINTER(QState),ctypes.c_int, IntArray]
-            ret = lib.qstate_get_camp(ctypes.byref(self),ctypes.c_int(qubit_num), id_array)
 
+            camp = None
+            c_camp = ctypes.c_void_p(camp)
+            lib.qstate_get_camp.restype = ctypes.c_int
+            lib.qstate_get_camp.argtypes = [ctypes.POINTER(QState),ctypes.c_int, IntArray,
+                                            ctypes.POINTER(ctypes.c_void_p)]
+            ret = lib.qstate_get_camp(ctypes.byref(self),ctypes.c_int(qubit_num),
+                                      id_array, c_camp)
+
+            if ret == FALSE:
+                raise QState_FailToGetAmp()
+                
+            o = ctypes.cast(c_camp.value, ctypes.POINTER(ctypes.c_double))
+            
             state_num = (1 << len(id))
             out = [0] * state_num
             for i in range(state_num):
-                out[i] = complex(ret[2*i],ret[2*i+1])
+                out[i] = complex(o[2*i],o[2*i+1])
 
             libc.free.argtypes = [ctypes.POINTER(ctypes.c_double)]
-            libc.free(ret)
+            libc.free(o)
 
         except Exception:
             raise QState_FailToGetCmp()
@@ -620,7 +639,6 @@ class QState(ctypes.Structure):
                 raise QState_OutOfBound()
 
         # join circ
-        # for i in range(self.qubit_num):
         for i in range(len(id)):
             for j in range(self.qubit_num):
                 if id[i] == j:
@@ -636,17 +654,23 @@ class QState(ctypes.Structure):
         IntArray = ctypes.c_int * MAX_QUBIT_NUM
         id_array = IntArray(*qubit_id)
 
-        lib.qstate_measure.restype = ctypes.POINTER(MData)
+        mdata = None
+        c_mdata = ctypes.c_void_p(mdata)
+        
+        lib.qstate_measure.restype = ctypes.c_int
         lib.qstate_measure.argtypes = [ctypes.POINTER(QState), ctypes.c_int,
                                        ctypes.c_double, ctypes.c_double,
-                                       ctypes.c_int, IntArray]
-        out = lib.qstate_measure(ctypes.byref(self), ctypes.c_int(shots),
+                                       ctypes.c_int, IntArray,
+                                       ctypes.POINTER(ctypes.c_void_p)]
+        ret = lib.qstate_measure(ctypes.byref(self), ctypes.c_int(shots),
                                  ctypes.c_double(angle), ctypes.c_double(phase),
-                                 ctypes.c_int(qubit_num), id_array)
+                                 ctypes.c_int(qubit_num), id_array, c_mdata)
 
-        if not out:
+        if ret == FALSE:
             raise QState_FailToMeasure()
 
+        out = ctypes.cast(c_mdata.value, ctypes.POINTER(MData))
+        
         state_num = out.contents.state_num
         last_state = out.contents.last
         freq = ctypes.cast(out.contents.freq, ctypes.POINTER(ctypes.c_int*state_num))
@@ -710,15 +734,22 @@ class QState(ctypes.Structure):
         IntArray = ctypes.c_int * MAX_QUBIT_NUM
         id_array = IntArray(*qubit_id)
         
-        lib.qstate_measure_bell.restype = ctypes.POINTER(MData)
-        lib.qstate_measure_bell.argtypes = [ctypes.POINTER(QState), ctypes.c_int,
-                                       ctypes.c_int, IntArray]
-        out = lib.qstate_measure_bell(ctypes.byref(self), ctypes.c_int(shots),
-                                      ctypes.c_int(qubit_num), id_array)
+        mdata = None
+        c_mdata = ctypes.c_void_p(mdata)
 
-        if not out:
+        lib.qstate_measure_bell.restype = ctypes.c_int
+        lib.qstate_measure_bell.argtypes = [ctypes.POINTER(QState), ctypes.c_int,
+                                            ctypes.c_int, IntArray,
+                                            ctypes.POINTER(ctypes.c_void_p)]
+
+        ret = lib.qstate_measure_bell(ctypes.byref(self), ctypes.c_int(shots),
+                                      ctypes.c_int(qubit_num), id_array, c_mdata)
+
+        if ret == FALSE:
             raise QState_FailToMeasure()
 
+        out = ctypes.cast(c_mdata.value, ctypes.POINTER(MData))
+        
         last_state = out.contents.last
         freq = ctypes.cast(out.contents.freq, ctypes.POINTER(ctypes.c_int*state_num))
         freq_list = [freq.contents[i] for i in range(state_num)]
