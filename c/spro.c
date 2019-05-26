@@ -4,7 +4,7 @@
 
 #include "qlazy.h"
 
-int spro_init(char* str, void** spro_out)
+bool spro_init(char* str, void** spro_out)
 /*
   [input string format (example)]
   "3.0-2.0*Z_0*X_1*Y_3"
@@ -19,84 +19,85 @@ int spro_init(char* str, void** spro_out)
   int		spin_id;
   int           flg[MAX_QUBIT_NUM];
 
-  g_Errno = NO_ERROR;
-
   for (int i=0; i<MAX_QUBIT_NUM; i++) flg[i] = OFF;
 
-  if (line_check_length(str) == FALSE) goto ERROR_EXIT;
-  line_chomp(str);
-  line_remove_space(str);
+  if (!line_check_length(str)) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+  if (!line_chomp(str)) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+  if (!line_remove_space(str)) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
   /* eliminate 1st '+/-' character and set sign */
   if (str[0]=='+') { sign = 1.0; str++; }
   else if (str[0]=='-') { sign = -1.0; str++; }
   else { sign = 1.0; }
 
-  tnum = line_split(str, "*", token);
+  if (!line_split(str, "*", token, &tnum))
+    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
   
-  if (!(spro = (SPro*)malloc(sizeof(SPro)))) goto ERROR_EXIT;
+  if (!(spro = (SPro*)malloc(sizeof(SPro))))
+    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
   for (int i=0; i<MAX_QUBIT_NUM; i++) spro->spin_type[i] = NONE;
 
   spro->coef = 1.0;
   spro->spin_num = 0;
   for (int i=0; i<tnum; i++) {
-    if ((i==0) && (is_number(token[i])==TRUE)) {
+    if ((i==0) && (is_number(token[i])==true)) {
       spro->coef = strtod(token[0], NULL);
     }
     else {
-      anum = line_split(token[i], "_", args);
-      if (anum != 2) goto ERROR_EXIT;
+      if (!line_split(token[i], "_", args, &anum))
+	ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+      if (anum != 2) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
       if (strcmp(args[0], "X") == 0) {
-	if (is_decimal(args[1]) == FALSE) goto ERROR_EXIT;
+	if (!(is_decimal(args[1]))) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 	spin_id = strtol(args[1], NULL, 10);
-	if (spin_id >= MAX_QUBIT_NUM) goto ERROR_EXIT;
-	if (flg[spin_id] == ON) goto ERROR_EXIT;
+	if (spin_id >= MAX_QUBIT_NUM) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+	if (flg[spin_id] == ON) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 	flg[spin_id] = ON;
 	spro->spin_type[spin_id] = SIGMA_X;
       }
       else if (strcmp(args[0], "x") == 0) {
-	if (is_decimal(args[1]) == FALSE) goto ERROR_EXIT;
+	if (!(is_decimal(args[1]))) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 	spin_id = strtol(args[1], NULL, 10);
-	if (spin_id >= MAX_QUBIT_NUM) goto ERROR_EXIT;
-	if (flg[spin_id] == ON) goto ERROR_EXIT;
+	if (spin_id >= MAX_QUBIT_NUM) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+	if (flg[spin_id] == ON) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 	flg[spin_id] = ON;
 	spro->spin_type[spin_id] = SIGMA_X;
       }
       else if (strcmp(args[0], "Y") == 0) {
-	if (is_decimal(args[1]) == FALSE) goto ERROR_EXIT;
+	if (!(is_decimal(args[1]))) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 	spin_id = strtol(args[1], NULL, 10);
-	if (spin_id >= MAX_QUBIT_NUM) goto ERROR_EXIT;
-	if (flg[spin_id] == ON) goto ERROR_EXIT;
+	if (spin_id >= MAX_QUBIT_NUM) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+	if (flg[spin_id] == ON) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 	flg[spin_id] = ON;
 	spro->spin_type[spin_id] = SIGMA_Y;
       }
       else if (strcmp(args[0], "y") == 0) {
-	if (is_decimal(args[1]) == FALSE) goto ERROR_EXIT;
+	if (!(is_decimal(args[1]))) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 	spin_id = strtol(args[1], NULL, 10);
-	if (spin_id >= MAX_QUBIT_NUM) goto ERROR_EXIT;
-	if (flg[spin_id] == ON) goto ERROR_EXIT;
+	if (spin_id >= MAX_QUBIT_NUM) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+	if (flg[spin_id] == ON) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 	flg[spin_id] = ON;
 	spro->spin_type[spin_id] = SIGMA_Y;
       }
       else if (strcmp(args[0], "Z") == 0) {
-	if (is_decimal(args[1]) == FALSE) goto ERROR_EXIT;
+	if (!(is_decimal(args[1]))) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 	spin_id = strtol(args[1], NULL, 10);
-	if (spin_id >= MAX_QUBIT_NUM) goto ERROR_EXIT;
-	if (flg[spin_id] == ON) goto ERROR_EXIT;
+	if (spin_id >= MAX_QUBIT_NUM) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+	if (flg[spin_id] == ON) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 	flg[spin_id] = ON;
 	spro->spin_type[spin_id] = SIGMA_Z;
       }
       else if (strcmp(args[0], "z") == 0) {
-	if (is_decimal(args[1]) == FALSE) goto ERROR_EXIT;
+	if (!(is_decimal(args[1]))) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 	spin_id = strtol(args[1], NULL, 10);
-	if (spin_id >= MAX_QUBIT_NUM) goto ERROR_EXIT;
-	if (flg[spin_id] == ON) goto ERROR_EXIT;
+	if (spin_id >= MAX_QUBIT_NUM) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+	if (flg[spin_id] == ON) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 	flg[spin_id] = ON;
 	spro->spin_type[spin_id] = SIGMA_Z;
       }
       else {
-	goto ERROR_EXIT;
+	ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
       }
       spro->spin_num = MAX(spro->spin_num, spin_id);
     }
@@ -106,11 +107,7 @@ int spro_init(char* str, void** spro_out)
 
   *spro_out = spro;
   
-  return TRUE;
-
- ERROR_EXIT:
-  g_Errno = ERROR_SPRO_INIT;
-  return FALSE;
+  SUC_RETURN(true);
 }
 
 void spro_free(SPro* spro)

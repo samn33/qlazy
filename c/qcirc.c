@@ -4,72 +4,64 @@
 
 #include "qlazy.h"
 
-static QCirc* qcirc_alloc(int buf_length)
+static QCirc* _qcirc_alloc(int buf_length)
 {
   QCirc* qcirc = NULL;
 
-  if (!(qcirc = (QCirc*)malloc(sizeof(QCirc)))) goto ERROR_EXIT;
+  if (!(qcirc = (QCirc*)malloc(sizeof(QCirc))))
+    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,NULL);
 
   qcirc->step_num = 0;
   qcirc->qubit_num = 0;
   qcirc->buf_length = buf_length;
 
-  if (!(qcirc->qgate = (QGate*)malloc(sizeof(QGate)*buf_length)))
-    goto ERROR_EXIT;
-
+  if (!(qcirc->qgate = (QGate*)malloc(sizeof(QGate)*buf_length))) {
+    qcirc_free(qcirc); qcirc = NULL;
+    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,NULL);
+  }
   qcirc->cimage = NULL;
 
-  return qcirc;
-  
- ERROR_EXIT:
-  return NULL;
+  SUC_RETURN(qcirc);
 }
 
-static int qcirc_realloc(QCirc* qcirc)
+static bool _qcirc_realloc(QCirc* qcirc)
 {
   QGate* qgate = NULL;
   
-  if (qcirc == NULL) goto ERROR_EXIT;
+  if (qcirc == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
   qcirc->buf_length *= 2;
 
   qgate = (QGate*)realloc(qcirc->qgate, sizeof(QGate)*qcirc->buf_length);
-  if (qgate == NULL) goto ERROR_EXIT;
+  if (qgate == NULL) ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
   if (qgate != qcirc->qgate) qcirc->qgate = qgate;
 
-  return TRUE;
-
- ERROR_EXIT:
-  return FALSE;
+  SUC_RETURN(true);
 }
 
-QCirc* qcirc_init(int qubit_num, int buf_length)
+bool qcirc_init(int qubit_num, int buf_length, void** qcirc_out)
 {
   QCirc* qcirc = NULL;
-  
-  g_Errno = NO_ERROR;
 
-  if ((qubit_num < 1) || (qubit_num > MAX_QUBIT_NUM)) goto ERROR_EXIT;
+  if ((qubit_num < 1) || (qubit_num > MAX_QUBIT_NUM))
+    ERR_RETURN(ERROR_OUT_OF_BOUND,false);
 
-  if (!(qcirc = qcirc_alloc(buf_length))) goto ERROR_EXIT;
+  if (!(qcirc = _qcirc_alloc(buf_length)))
+    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
   qcirc->qubit_num = qubit_num;
 
-  return qcirc;
+  *qcirc_out = qcirc;
   
- ERROR_EXIT:
-  g_Errno = ERROR_QCIRC_INIT;
-  return NULL;
+  SUC_RETURN(true);
 }
 
-int qcirc_append_qgate(QCirc* qcirc, Kind kind, int terminal_num,
+bool qcirc_append_qgate(QCirc* qcirc, Kind kind, int terminal_num,
 		       Para* para, int qubit_id[MAX_QUBIT_NUM])
 {
-  g_Errno = NO_ERROR;
-
-  if (qcirc == NULL) goto ERROR_EXIT;
+  if (qcirc == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
   if (qcirc->step_num >= qcirc->buf_length) {
-    if (qcirc_realloc(qcirc) == FALSE) goto ERROR_EXIT;
+    if (!(_qcirc_realloc(qcirc))) ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
   }
 
   qcirc->qgate[qcirc->step_num].kind = kind;
@@ -97,21 +89,17 @@ int qcirc_append_qgate(QCirc* qcirc, Kind kind, int terminal_num,
 
   (qcirc->step_num)++;
   
-  return TRUE;
-
- ERROR_EXIT:
-  g_Errno = ERROR_QCIRC_APPEND_QGATE;
-  return FALSE;
+  SUC_RETURN(true);
 }
 
-int qcirc_set_cimage(QCirc* qcirc)
+bool qcirc_set_cimage(QCirc* qcirc)
 {
   char	symbol[TOKEN_STRLEN];
   char	parastr[TOKEN_STRLEN];
   int	pos = 1;
   int	p;
-  
-  if (qcirc == NULL) return FALSE;
+
+  if (qcirc == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
   if (qcirc->cimage != NULL) {
     cimage_free(qcirc->cimage); qcirc->cimage = NULL;
@@ -119,12 +107,13 @@ int qcirc_set_cimage(QCirc* qcirc)
 
   /* allocate cimage and set initial character '-' */
   
-  if (cimage_init(qcirc->qubit_num, qcirc->step_num, (void**)&(qcirc->cimage)) == FALSE)
-    return FALSE;
+  if (!(cimage_init(qcirc->qubit_num, qcirc->step_num, (void**)&(qcirc->cimage))))
+    ERR_RETURN(ERROR_CIMAGE_INIT,false);
   
   /* set gate charactor */
   for (int i=0; i<qcirc->step_num; i++) {
-    qgate_get_symbol(symbol, qcirc->qgate[i].kind);
+    if (!(qgate_get_symbol(symbol, qcirc->qgate[i].kind)))
+      ERR_RETURN(ERROR_QGATE_GET_SYMBOL,false);
     p = 0;
 
     switch (qcirc->qgate[i].kind) {
@@ -202,40 +191,29 @@ int qcirc_set_cimage(QCirc* qcirc)
     qcirc->cimage->ch[i][pos] = '\0';
   }
 
-  return TRUE;
+  SUC_RETURN(true);
 }
 
-int qcirc_print_qcirc(QCirc* qcirc)
+bool qcirc_print_qcirc(QCirc* qcirc)
 {
-  g_Errno = NO_ERROR;
-
-  if (qcirc == NULL) goto ERROR_EXIT;
+  if (qcirc == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
   for (int i=0; i<qcirc->qubit_num; i++) {
     printf("q%02d %s\n", i, qcirc->cimage->ch[i]);
   }
 
-  return TRUE;
-
- ERROR_EXIT:
-  g_Errno = ERROR_QCIRC_PRINT_QCIRC;
-  return FALSE;
+  SUC_RETURN(true);
 }
  
-int qcirc_print_qgates(QCirc* qcirc)
+bool qcirc_print_qgates(QCirc* qcirc)
 {
-  g_Errno = NO_ERROR;
-
-  if (qcirc_write_file(qcirc, NULL) == FALSE) goto ERROR_EXIT;
-
-  return TRUE;
-
- ERROR_EXIT:
-  g_Errno = ERROR_QCIRC_PRINT_QGATES;
-  return FALSE;
+  if (!(qcirc_write_file(qcirc, NULL)))
+    ERR_RETURN(ERROR_QCIRC_WRITE_FILE,false);
+  
+  SUC_RETURN(true);
 }
 
-int qcirc_write_file(QCirc* qcirc, char* fname)
+bool qcirc_write_file(QCirc* qcirc, char* fname)
 {
   FILE* fp = NULL;
   char	symbol[TOKEN_STRLEN];
@@ -243,20 +221,20 @@ int qcirc_write_file(QCirc* qcirc, char* fname)
   int   terminal_num;
   Para* para;
   int*  qubit_id;
-  
-  g_Errno = NO_ERROR;
 
-  if (qcirc == NULL) goto ERROR_EXIT;
+  if (qcirc == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
   if (fname == NULL) fp = stdout;
-  else if (!(fp = fopen(fname, "w"))) goto ERROR_EXIT;
+  else if (!(fp = fopen(fname, "w")))
+    ERR_RETURN(ERROR_CANT_OPEN_FILE,false);
 
   for (int i=0; i<qcirc->step_num; i++) {
     kind = qcirc->qgate[i].kind;
     terminal_num = qcirc->qgate[i].terminal_num;
     para = &(qcirc->qgate[i].para);
     qubit_id = qcirc->qgate[i].qubit_id;
-    qgate_get_symbol(symbol, kind);
+    if (!(qgate_get_symbol(symbol, kind)))
+      ERR_RETURN(ERROR_QGATE_GET_SYMBOL,false);
 
     switch (kind) {
     case INIT:
@@ -302,67 +280,62 @@ int qcirc_write_file(QCirc* qcirc, char* fname)
     }
   }
 
-  return TRUE;
-
- ERROR_EXIT:
-  g_Errno = ERROR_QCIRC_WRITE_FILE;
-  return FALSE;
+  SUC_RETURN(true);
 }
 
-QCirc* qcirc_read_file(char* fname)
+bool qcirc_read_file(char* fname, void** qcirc_out)
 {
-  FILE*         fp = NULL;
+  FILE*         fp	     = NULL;
   char*		line;
   char*		token[TOKEN_NUM];
   char*		args[TOKEN_NUM];
   int           tnum,anum;
-  int		qubit_num = 0;
-  Kind	kind;
+  int		qubit_num    = 0;
+  Kind		kind;
   Para          para;
   int           terminal_num = 0;
   int           qubit_id[MAX_QUBIT_NUM];
-  QCirc*	qcirc = NULL;
-
-  g_Errno = NO_ERROR;
+  QCirc*	qcirc	     = NULL;
 
   /* file open */
 
   if (fname != NULL) {
-    if (!(fp = fopen(fname,"r"))) goto ERROR_EXIT;
+    if (!(fp = fopen(fname,"r")))
+      ERR_RETURN(ERROR_CANT_OPEN_FILE,false);
   }
-  else goto ERROR_EXIT;
+  else ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
   /* read lines */
 
-  if (!(line = (char*)malloc(sizeof(char)*LINE_STRLEN))) goto ERROR_EXIT;
+  if (!(line = (char*)malloc(sizeof(char)*LINE_STRLEN)))
+    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
 
   /* read lines */
 
   while (fgets(line, LINE_STRLEN, fp) != NULL) {
 
-    if (line_check_length(line) == FALSE) goto ERROR_EXIT;
+    if (!line_check_length(line)) ERR_RETURN(ERROR_CANT_READ_LINE,false);
+    if (!line_chomp(line)) ERR_RETURN(ERROR_CANT_READ_LINE,false);
 
-    line_chomp(line);
+    if (line_is_blank(line) || line_is_comment(line)) continue;
 
-    if ((line_is_blank(line) == TRUE) ||
-	(line_is_comment(line) == TRUE)) continue;
+    if (!line_split(line, " ", token, &tnum)) ERR_RETURN(ERROR_CANT_READ_LINE,false);
+    if (!line_getargs(token[0], args, &anum)) ERR_RETURN(ERROR_CANT_READ_LINE,false);
 
-    tnum = line_split(line, " ", token);
-    anum = line_getargs(token[0], args);
-
-    kind = qgate_get_kind(args[0]);
+    qgate_get_kind(args[0], &kind);
 
     switch (kind) {
     case INIT:
       /* initialize quantum state (or reset quantum state) */
       qubit_num = strtol(token[1], NULL, 10);
       if (qcirc != NULL) { qcirc_free(qcirc); qcirc = NULL; }
-      if (!(qcirc = qcirc_init(qubit_num, DEF_QCIRC_STEPS))) goto ERROR_EXIT;
+      if (!(qcirc_init(qubit_num, DEF_QCIRC_STEPS, (void**)&qcirc)))
+	ERR_RETURN(ERROR_QCIRC_INIT,false);
       break;
     case MEASURE:
       /* measurement */
-      if (qcirc == NULL) goto ERROR_EXIT;
-      if (tnum > qubit_num + 1) goto ERROR_EXIT;
+      if (qcirc == NULL) ERR_RETURN(ERROR_CANT_READ_LINE,false);
+      if (tnum > qubit_num + 1) ERR_RETURN(ERROR_CANT_READ_LINE,false);
       terminal_num = tnum - 1;  /* number of qubits to measure */
       if (anum == 1) {
 	para.mes.shots = DEF_SHOTS;
@@ -384,10 +357,10 @@ QCirc* qcirc_read_file(char* fname)
 	para.mes.angle = strtod(args[2], NULL);
 	para.mes.phase = strtod(args[3], NULL);
       }
-      else goto ERROR_EXIT;
+      else ERR_RETURN(ERROR_CANT_READ_LINE,false);
       for (int i=0; i<terminal_num; i++) {
 	qubit_id[i] = strtol(token[1+i], NULL, 10);
-	if (qubit_num < qubit_id[i] + 1) goto ERROR_EXIT;
+	if (qubit_num < qubit_id[i] + 1) ERR_RETURN(ERROR_CANT_READ_LINE,false);
       }
       if (terminal_num == 0) {  /* measure all qubits in order */
 	terminal_num = qubit_num;
@@ -400,8 +373,8 @@ QCirc* qcirc_read_file(char* fname)
     case MEASURE_Y:
     case MEASURE_Z:
       /* measurement */
-      if (qcirc == NULL) goto ERROR_EXIT;
-      if (tnum > qubit_num + 1) goto ERROR_EXIT;
+      if (qcirc == NULL) ERR_RETURN(ERROR_CANT_READ_LINE,false);
+      if (tnum > qubit_num + 1) ERR_RETURN(ERROR_CANT_READ_LINE,false);
       terminal_num = tnum - 1;  /* number of qubits to measure */
       if (anum == 1) {
 	para.mes.shots = DEF_SHOTS;
@@ -409,7 +382,7 @@ QCirc* qcirc_read_file(char* fname)
       else if (anum == 2) {
 	para.mes.shots = strtol(args[1], NULL, 10);
       }
-      else goto ERROR_EXIT;
+      else ERR_RETURN(ERROR_CANT_READ_LINE,false);
 
       if (kind == MEASURE_X) {
 	para.mes.angle = 0.5;
@@ -423,11 +396,11 @@ QCirc* qcirc_read_file(char* fname)
 	para.mes.angle = 0.0;
 	para.mes.phase = 0.0;
       }
-      else goto ERROR_EXIT;
+      else ERR_RETURN(ERROR_CANT_READ_LINE,false);;
 
       for (int i=0; i<terminal_num; i++) {
 	qubit_id[i] = strtol(token[1+i], NULL, 10);
-	if (qubit_num < qubit_id[i] + 1) goto ERROR_EXIT;
+	if (qubit_num < qubit_id[i] + 1) ERR_RETURN(ERROR_CANT_READ_LINE,false);
       }
       if (terminal_num == 0) {  /* measure all qubits in order */
 	terminal_num = qubit_num;
@@ -438,9 +411,9 @@ QCirc* qcirc_read_file(char* fname)
       break;
     case MEASURE_BELL:
       /* measurement */
-      if (qcirc == NULL) goto ERROR_EXIT;
-      if (tnum < 3) goto ERROR_EXIT;
-      if (tnum > 3) goto ERROR_EXIT;
+      if (qcirc == NULL) ERR_RETURN(ERROR_CANT_READ_LINE,false);
+      if (tnum < 3) ERR_RETURN(ERROR_CANT_READ_LINE,false);
+      if (tnum > 3) ERR_RETURN(ERROR_CANT_READ_LINE,false);
       terminal_num = 2;  /* number of qubits to measure */
       if (anum == 1) {
 	para.mes.shots = DEF_SHOTS;
@@ -448,11 +421,11 @@ QCirc* qcirc_read_file(char* fname)
       else if (anum == 2) {
 	para.mes.shots = strtol(args[1], NULL, 10);
       }
-      else goto ERROR_EXIT;
+      else ERR_RETURN(ERROR_CANT_READ_LINE,false);
 
       for (int i=0; i<terminal_num; i++) {
 	qubit_id[i] = strtol(token[1+i], NULL, 10);
-	if (qubit_num < qubit_id[i] + 1) goto ERROR_EXIT;
+	if (qubit_num < qubit_id[i] + 1) ERR_RETURN(ERROR_CANT_READ_LINE,false);
       }
       break;
     case PAULI_X:
@@ -468,7 +441,7 @@ QCirc* qcirc_read_file(char* fname)
       /* 1-qubit gate */
       terminal_num = 1;
       qubit_id[0] = strtol(token[1], NULL, 10);
-      if (qubit_num < qubit_id[0] + 1) goto ERROR_EXIT;
+      if (qubit_num < qubit_id[0] + 1) ERR_RETURN(ERROR_CANT_READ_LINE,false);
       break;
     case ROTATION_X:
     case ROTATION_Y:
@@ -481,9 +454,9 @@ QCirc* qcirc_read_file(char* fname)
       else if (anum == 2) {
 	para.phase = strtod(args[1], NULL);
       }
-      else goto ERROR_EXIT;
+      else ERR_RETURN(ERROR_CANT_READ_LINE,false);
       qubit_id[0] = strtol(token[1], NULL, 10);
-      if (qubit_num < qubit_id[0] + 1) goto ERROR_EXIT;
+      if (qubit_num < qubit_id[0] + 1) ERR_RETURN(ERROR_CANT_READ_LINE,false);
       break;
     case CONTROLLED_X:
     case CONTROLLED_Z:
@@ -491,8 +464,8 @@ QCirc* qcirc_read_file(char* fname)
       terminal_num = 2;
       qubit_id[0] = strtol(token[1], NULL, 10);
       qubit_id[1] = strtol(token[2], NULL, 10);
-      if (qubit_num < qubit_id[0] + 1) goto ERROR_EXIT;
-      if (qubit_num < qubit_id[1] + 1) goto ERROR_EXIT;
+      if (qubit_num < qubit_id[0] + 1) ERR_RETURN(ERROR_CANT_READ_LINE,false);
+      if (qubit_num < qubit_id[1] + 1) ERR_RETURN(ERROR_CANT_READ_LINE,false);
       break;
     case TOFFOLI:
       /* 3-qubit gate */
@@ -500,30 +473,28 @@ QCirc* qcirc_read_file(char* fname)
       qubit_id[0] = strtol(token[1], NULL, 10);
       qubit_id[1] = strtol(token[2], NULL, 10);
       qubit_id[2] = strtol(token[3], NULL, 10);
-      if (qubit_num < qubit_id[0] + 1) goto ERROR_EXIT;
-      if (qubit_num < qubit_id[1] + 1) goto ERROR_EXIT;
-      if (qubit_num < qubit_id[2] + 1) goto ERROR_EXIT;
+      if (qubit_num < qubit_id[0] + 1) ERR_RETURN(ERROR_CANT_READ_LINE,false);
+      if (qubit_num < qubit_id[1] + 1) ERR_RETURN(ERROR_CANT_READ_LINE,false);
+      if (qubit_num < qubit_id[2] + 1) ERR_RETURN(ERROR_CANT_READ_LINE,false);
       break;
     default:
       break;
     }
 
-    if (qcirc_append_qgate(qcirc, kind, terminal_num, &para, qubit_id) == FALSE)
-      goto ERROR_EXIT;
-
+    if (!(qcirc_append_qgate(qcirc, kind, terminal_num, &para, qubit_id)))
+      ERR_RETURN(ERROR_QCIRC_APPEND_QGATE,false);
   }
 
   /* set cimage */
-  if (qcirc_set_cimage(qcirc) == FALSE) goto ERROR_EXIT;
+  if (!(qcirc_set_cimage(qcirc)))
+    ERR_RETURN(ERROR_QCIRC_SET_CIMAGE,false);
   
   free(line); line = NULL;
   fclose(fp);
 
-  return qcirc;
-
- ERROR_EXIT:
-  g_Errno = ERROR_QCIRC_READ_FILE;
-  return NULL;
+  *qcirc_out = qcirc;
+  
+  SUC_RETURN(true);
 }
 
 void qcirc_free(QCirc* qcirc)

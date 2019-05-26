@@ -4,15 +4,14 @@
 
 #include "qlazy.h"
 
-int mdata_init(int qubit_num, int state_num, int shot_num,
-		    double angle, double phase, int qubit_id[MAX_QUBIT_NUM],
-		    void** mdata_out)
+bool mdata_init(int qubit_num, int state_num, int shot_num,
+		double angle, double phase, int qubit_id[MAX_QUBIT_NUM],
+		void** mdata_out)
 {
   MData* mdata = NULL;
 
-  g_Errno = NO_ERROR;
-  
-  if (!(mdata = (MData*)malloc(sizeof(MData)))) goto ERROR_EXIT;
+  if (!(mdata = (MData*)malloc(sizeof(MData))))
+    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
   mdata->qubit_num = qubit_num;
   mdata->state_num = state_num;
   mdata->shot_num = shot_num;
@@ -20,27 +19,22 @@ int mdata_init(int qubit_num, int state_num, int shot_num,
   mdata->phase = phase;
   memcpy(mdata->qubit_id, qubit_id, sizeof(int)*MAX_QUBIT_NUM);
 
-  if (!(mdata->freq = (int*)malloc(sizeof(int)*state_num))) goto ERROR_EXIT;
+  if (!(mdata->freq = (int*)malloc(sizeof(int)*state_num)))
+    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
   for (int i=0; i<state_num; i++) mdata->freq[i] = 0;
 
   *mdata_out = mdata;
 
-  return TRUE;
-
- ERROR_EXIT:
-  g_Errno = ERROR_MDATA_INIT;
-  return FALSE;
+  SUC_RETURN(true);
 }
 
-int mdata_print(MData* mdata)
+bool mdata_print(MData* mdata)
 {
   char	state[MAX_QUBIT_NUM+1];
   char	last_state[MAX_QUBIT_NUM+1];
   int   zflag = ON;
 
-  g_Errno = NO_ERROR;
-
-  if (mdata == NULL) goto ERROR_EXIT;
+  if (mdata == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
   if ((mdata->angle != 0.0) || (mdata->phase != 0.0)) zflag = OFF;
   else zflag = ON;
@@ -60,30 +54,24 @@ int mdata_print(MData* mdata)
   }
   
   for (int i=0; i<mdata->state_num; i++) {
-    if (get_binstr_from_decimal(state, mdata->qubit_num, i, zflag) == FALSE)
-      return FALSE;
+    if (!(binstr_from_decimal(state, mdata->qubit_num, i, zflag)))
+      ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
     if (mdata->freq[i] > 0) {
       printf("frq[%s] = %d\n", state, mdata->freq[i]);
     }
   }
 
-  if (get_binstr_from_decimal(last_state, mdata->qubit_num,
-			      mdata->last, zflag) == FALSE) return FALSE;
+  if (!(binstr_from_decimal(last_state, mdata->qubit_num, mdata->last, zflag)))
+    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
   printf("last state => %s\n", last_state);
 
-  return TRUE;
-
- ERROR_EXIT:
-  g_Errno = ERROR_MDATA_PRINT;
-  return FALSE;
+  SUC_RETURN(true);
 }
 
-int mdata_print_bell(MData* mdata)
+bool mdata_print_bell(MData* mdata)
 {
-  g_Errno = NO_ERROR;
-
-  if (mdata == NULL) goto ERROR_EXIT;
-  if (mdata->state_num != 4) goto ERROR_EXIT;
+  if ((mdata == NULL) || (mdata->state_num != 4))
+    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
   printf("bell-measurement\n");
   
@@ -93,7 +81,7 @@ int mdata_print_bell(MData* mdata)
       else if (i == BELL_PSI_PLUS)  printf("frq[psi+] = %d\n", mdata->freq[i]);
       else if (i == BELL_PSI_MINUS) printf("frq[psi-] = %d\n", mdata->freq[i]);
       else if (i == BELL_PHI_MINUS) printf("frq[phi-] = %d\n", mdata->freq[i]);
-      else goto ERROR_EXIT;
+      else ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
     }
   }
 
@@ -101,13 +89,9 @@ int mdata_print_bell(MData* mdata)
   else if (mdata->last == BELL_PSI_PLUS)  printf("last state => psi+\n");
   else if (mdata->last == BELL_PSI_MINUS) printf("last state => psi-\n");
   else if (mdata->last == BELL_PHI_MINUS) printf("last state => phi-\n");
-  else goto ERROR_EXIT;
+  else ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
   
-  return TRUE;
-  
- ERROR_EXIT:
-  g_Errno = ERROR_MDATA_PRINT;
-  return FALSE;
+  SUC_RETURN(true);
 }
 
 void mdata_free(MData* mdata)

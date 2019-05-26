@@ -4,7 +4,7 @@
 
 #include "qlazy.h"
 
-static void qlazy_print_help()
+static void _qlazy_print_help()
 {
   fprintf(stderr,"\
 == qlazy - quantum computer simulator ==\n\
@@ -30,7 +30,7 @@ static void qlazy_print_help()
 ");
 }
 
-static void qlazy_print_version()
+static void _qlazy_print_version()
 {
   const char date[] = __DATE__;
   const char time[] = __TIME__;
@@ -53,17 +53,15 @@ int main(int argc, char** argv)
   QSystem*      qsystem		     = NULL;
   char          fname_ini[FNAME_LEN] = DEF_QLAZYINIT;
 
-  g_Errno = NO_ERROR;
-
   /* get command line arguments */
 
   for (int n=1; n<argc; n++) {
     if (strcmp(argv[n],"-v") == 0) {
-      qlazy_print_version();
+      _qlazy_print_version();
       exit(0);
     }
     else if (strcmp(argv[n],"-h") == 0) {
-      qlazy_print_help();
+      _qlazy_print_help();
       exit(0);
     }
     else if (strcmp(argv[n],"-sd") == 0) {
@@ -80,27 +78,29 @@ int main(int argc, char** argv)
       tm = ON;
     }
     else {
-      g_Errno = INVALID_ARGUMENT;
-      goto ERROR_EXIT;
+      ERR_RETURN(ERROR_INVALID_ARGUMENT,1);
     }
   }
 
   init_qlazy(seed);
 
-  if (qsystem_init((void**)&qsystem) == FALSE) goto ERROR_EXIT;
+  if (!qsystem_init((void**)&qsystem)) ERR_RETURN(ERROR_QSYSTEM_INIT,1);
   
   if (pr == ON) {  /* print quantum circuit only */
-    if (!(qcirc = qcirc_read_file(fname_qc))) goto ERROR_EXIT;
+    if (!(qcirc_read_file(fname_qc, (void**)&qcirc)))
+      ERR_RETURN(ERROR_QCIRC_READ_FILE,1);
     qcirc_print_qcirc(qcirc);
     qcirc_free(qcirc); qcirc = NULL;
   }
   else if (im == ON) {  /* execute in interactive mode */
     printf("interactive mode\n");
-    if (qsystem_intmode(qsystem, fname_ini) == FALSE) goto ERROR_EXIT;
+    if (!(qsystem_intmode(qsystem, fname_ini)))
+      ERR_RETURN(ERROR_QSYSTEM_INTMODE,1);
   }
   else {  /* execute quantum circuit file */
     c_start = clock();
-    if (qsystem_execute(qsystem, fname_qc) == FALSE) goto ERROR_EXIT;
+    if (!(qsystem_execute(qsystem, fname_qc)))
+      ERR_RETURN(ERROR_QSYSTEM_EXECUTE,1);
     c_end = clock();
     proc_time = (double)(c_end-c_start)/CLOCKS_PER_SEC;
     if (tm == ON) printf("[[ time = %f sec ]]\n", proc_time);
@@ -110,7 +110,4 @@ int main(int argc, char** argv)
   qsystem = NULL;
   
   return 0;
-
- ERROR_EXIT:
-  error_msg(g_Errno); exit(1);
 }

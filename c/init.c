@@ -7,8 +7,6 @@
 
 void init_qlazy(unsigned int seed)
 {
-  g_Errno = NO_ERROR;
-  g_Wrnno = NO_WARN;
-  
+  g_Errno = SUCCESS;
   srand(seed);
 }

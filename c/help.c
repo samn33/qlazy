@@ -4,7 +4,7 @@
 
 #include "qlazy.h"
 
-static void help_print_outline() {
+static void _help_print_outline() {
   printf("\
 [commands]\n\
 * initialize quantum state: %%,init \n\
@@ -26,7 +26,7 @@ static void help_print_outline() {
 ");
 }
 
-static void help_print_init() {
+static void _help_print_init() {
   printf("\
 == initialize quantum state ==\n\
 [description] \n\
@@ -39,7 +39,7 @@ f[alias] \n\
 ");
 }
 
-static void help_print_circ() {
+static void _help_print_circ() {
   printf("\
 == print quantum circuit ==\n\
 [description] \n\
@@ -51,7 +51,7 @@ static void help_print_circ() {
 ");
 }
 
-static void help_print_gates() {
+static void _help_print_gates() {
   printf("\
 == print quantum gates ==\n\
 [description] \n\
@@ -63,7 +63,7 @@ static void help_print_gates() {
 ");
 }
 
-static void help_print_show() {
+static void _help_print_show() {
   printf("\
 == print quantum state ==\n\
 [description] \n\
@@ -81,7 +81,7 @@ static void help_print_show() {
 ");
 }
 
-static void help_print_bloch() {
+static void _help_print_bloch() {
   printf("\
 == print bloch angles ==\n\
 [description] \n\
@@ -96,7 +96,7 @@ static void help_print_bloch() {
 ");
 }
 
-static void help_print_echo() {
+static void _help_print_echo() {
   printf("\
 == echo strings ==\n\
 [description] \n\
@@ -108,7 +108,7 @@ static void help_print_echo() {
 ");
 }
 
-static void help_print_output() {
+static void _help_print_output() {
   printf("\
 == output quantum gates ==\n\
 [description] \n\
@@ -120,7 +120,7 @@ static void help_print_output() {
 ");
 }
 
-static void help_print_quit() {
+static void _help_print_quit() {
   printf("\
 == quit interactive mode ==\n\
 [description] \n\
@@ -132,7 +132,7 @@ static void help_print_quit() {
 ");
 }
 
-static void help_print_m() {
+static void _help_print_m() {
   printf("\
 == M gate ==\n\
 [description] \n\
@@ -157,7 +157,7 @@ static void help_print_m() {
 ", DEF_SHOTS);
 }
 
-static void help_print_mx() {
+static void _help_print_mx() {
   printf("\
 == MX gate ==\n\
 [description] \n\
@@ -177,7 +177,7 @@ static void help_print_mx() {
 ", DEF_SHOTS);
 }
 
-static void help_print_my() {
+static void _help_print_my() {
   printf("\
 == MY gate ==\n\
 [description] \n\
@@ -197,7 +197,7 @@ static void help_print_my() {
 ", DEF_SHOTS);
 }
 
-static void help_print_mz() {
+static void _help_print_mz() {
   printf("\
 == MZ gate ==\n\
 [description] \n\
@@ -215,7 +215,7 @@ static void help_print_mz() {
 ", DEF_SHOTS);
 }
 
-static void help_print_mb() {
+static void _help_print_mb() {
   printf("\
 == MB gate ==\n\
 [description] \n\
@@ -230,7 +230,7 @@ static void help_print_mb() {
 ", DEF_SHOTS);
 }
 
-static void help_print_x() {
+static void _help_print_x() {
   printf("\
 == X gate ==\n\
 [description] \n\
@@ -245,7 +245,7 @@ static void help_print_x() {
 ");
 }
 
-static void help_print_y() {
+static void _help_print_y() {
   printf("\
 == Y gate ==\n\
 [description] \n\
@@ -260,7 +260,7 @@ static void help_print_y() {
 ");
 }
 
-static void help_print_z() {
+static void _help_print_z() {
   printf("\
 == Z gate ==\n\
 [description] \n\
@@ -275,7 +275,7 @@ static void help_print_z() {
 ");
 }
 
-static void help_print_xr() {
+static void _help_print_xr() {
   printf("\
 == XR gate ==\n\
 [description] \n\
@@ -290,7 +290,7 @@ static void help_print_xr() {
 ");
 }
 
-static void help_print_xr_dagger() {
+static void _help_print_xr_dagger() {
   printf("\
 == XR+ gate ==\n\
 [description] \n\
@@ -305,7 +305,7 @@ static void help_print_xr_dagger() {
 ");
 }
 
-static void help_print_h() {
+static void _help_print_h() {
   printf("\
 == H gate ==\n\
 [description] \n\
@@ -320,7 +320,7 @@ static void help_print_h() {
 ");
 }
 
-static void help_print_s() {
+static void _help_print_s() {
   printf("\
 == S gate ==\n\
 [description] \n\
@@ -336,7 +336,7 @@ static void help_print_s() {
 ");
 }
 
-static void help_print_s_dagger() {
+static void _help_print_s_dagger() {
   printf("\
 == S+ gate ==\n\
 [description] \n\
@@ -351,7 +351,7 @@ static void help_print_s_dagger() {
 ");
 }
 
-static void help_print_t() {
+static void _help_print_t() {
   printf("\
 == T gate ==\n\
 [description] \n\
@@ -367,7 +367,7 @@ static void help_print_t() {
 ");
 }
 
-static void help_print_t_dagger() {
+static void _help_print_t_dagger() {
   printf("\
 == T+ gate ==\n\
 [description] \n\
@@ -382,7 +382,7 @@ static void help_print_t_dagger() {
 ");
 }
 
-static void help_print_rx() {
+static void _help_print_rx() {
   printf("\
 == RX gate ==\n\
 [description] \n\
@@ -397,7 +397,7 @@ static void help_print_rx() {
 ");
 }
 
-static void help_print_ry() {
+static void _help_print_ry() {
   printf("\
 == RY gate ==\n\
 [description] \n\
@@ -412,7 +412,7 @@ static void help_print_ry() {
 ");
 }
 
-static void help_print_rz() {
+static void _help_print_rz() {
   printf("\
 == RZ gate ==\n\
 [description] \n\
@@ -427,7 +427,7 @@ static void help_print_rz() {
 ");
 }
 
-static void help_print_cx() {
+static void _help_print_cx() {
   printf("\
 == CX gate ==\n\
 [description] \n\
@@ -445,7 +445,7 @@ static void help_print_cx() {
 ");
 }
 
-static void help_print_cz() {
+static void _help_print_cz() {
   printf("\
 == CZ gate ==\n\
 [description] \n\
@@ -463,7 +463,7 @@ static void help_print_cz() {
 ");
 }
 
-static void help_print_ccx() {
+static void _help_print_ccx() {
   printf("\
 == CCX gate ==\n\
 [description] \n\
@@ -484,117 +484,111 @@ static void help_print_ccx() {
 ");
 }
 
-int help_print(char* item)
+bool help_print(char* item)
 {
   Kind kind;
 
-  g_Errno = NO_ERROR;
-
   if (item == NULL) {
-    help_print_outline();
-    return TRUE;
+    _help_print_outline();
+    SUC_RETURN(true);
   }
   
-  kind = qgate_get_kind(item);
+  qgate_get_kind(item, &kind);
 
   switch (kind) {
   case INIT:
-    help_print_init();
+    _help_print_init();
     break;
   case CIRC:
-    help_print_circ();
+    _help_print_circ();
     break;
   case GATES:
-    help_print_gates();
+    _help_print_gates();
     break;
   case SHOW:
-    help_print_show();
+    _help_print_show();
     break;
   case BLOCH:
-    help_print_bloch();
+    _help_print_bloch();
     break;
   case ECHO:
-    help_print_echo();
+    _help_print_echo();
     break;
   case OUTPUT:
-    help_print_output();
+    _help_print_output();
     break;
   case HELP:
-    help_print_outline();
+    _help_print_outline();
     break;
   case QUIT:
-    help_print_quit();
+    _help_print_quit();
     break;
   case MEASURE:
-    help_print_m();
+    _help_print_m();
     break;
   case MEASURE_X:
-    help_print_mx();
+    _help_print_mx();
     break;
   case MEASURE_Y:
-    help_print_my();
+    _help_print_my();
     break;
   case MEASURE_Z:
-    help_print_mz();
+    _help_print_mz();
     break;
   case MEASURE_BELL:
-    help_print_mb();
+    _help_print_mb();
     break;
   case PAULI_X:
-    help_print_x();
+    _help_print_x();
     break;
   case PAULI_Y:
-    help_print_y();
+    _help_print_y();
     break;
   case PAULI_Z:
-    help_print_z();
+    _help_print_z();
     break;
   case ROOT_PAULI_X:
-    help_print_xr();
+    _help_print_xr();
     break;
   case ROOT_PAULI_X_:
-    help_print_xr_dagger();
+    _help_print_xr_dagger();
     break;
   case HADAMARD:
-    help_print_h();
+    _help_print_h();
     break;
   case PHASE_SHIFT_S:
-    help_print_s();
+    _help_print_s();
     break;
   case PHASE_SHIFT_S_:
-    help_print_s_dagger();
+    _help_print_s_dagger();
     break;
   case PHASE_SHIFT_T:
-    help_print_t();
+    _help_print_t();
     break;
   case PHASE_SHIFT_T_:
-    help_print_t_dagger();
+    _help_print_t_dagger();
     break;
   case ROTATION_X:
-    help_print_rx();
+    _help_print_rx();
     break;
   case ROTATION_Y:
-    help_print_ry();
+    _help_print_ry();
     break;
   case ROTATION_Z:
-    help_print_rz();
+    _help_print_rz();
     break;
   case CONTROLLED_X:
-    help_print_cx();
+    _help_print_cx();
     break;
   case CONTROLLED_Z:
-    help_print_cz();
+    _help_print_cz();
     break;
   case TOFFOLI:
-    help_print_ccx();
+    _help_print_ccx();
     break;
   default:
-    goto ERROR_EXIT;
+    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
   }
 
-  return TRUE;
-
- ERROR_EXIT:
-  g_Errno = ERROR_HELP_PRINT_MESSAGE;
-  return FALSE;
+  SUC_RETURN(true);
 }

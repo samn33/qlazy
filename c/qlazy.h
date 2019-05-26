@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <math.h>
 #include <time.h>
 #include <string.h>
@@ -14,14 +15,11 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
-#define VERSION "0.0.12"
+#define VERSION "0.0.13"
 
 /*====================================================================*/
 /*  Definitions & Macros                                              */
 /*====================================================================*/
-
-#define TRUE  1
-#define FALSE 0
 
 #define ON  1
 #define OFF 0
@@ -58,66 +56,92 @@
 #define IDX2(i,j) ((i<<1)+j)
 #define IDX4(i,j) ((i<<2)+j)
 
+#define SUC_RETURN(ret) do {						\
+    g_Errno = SUCCESS;							\
+    return ret;								\
+  } while(0)
+
+#ifdef DEV
+
+#define ERR_RETURN(err,ret) do {					\
+    fprintf(stderr, "%s,%s,%d - ", __FILE__, __FUNCTION__, __LINE__);	\
+    error_msg(err);							\
+    g_Errno = err;							\
+    return ret;								\
+  } while(0)
+
+#else
+
+#define ERR_RETURN(err,ret) do {					\
+    g_Errno = err;							\
+    return ret;								\
+  } while(0)
+
+#endif
+
 /*====================================================================*/
 /*  Structures                                                        */
 /*====================================================================*/
 
 typedef enum _ErrCode {
-  NO_ERROR		      = 0,
-  INVALID_ARGUMENT	      = 1,
-  CANT_ALLOC_MEMORY	      = 2,
-  OUT_OF_QUBIT_NUM	      = 3,
-  ERROR_QGATE_PRINT	      = 10,
-  ERROR_QCIRC_INIT	      = 20,
-  ERROR_QCIRC_APPEND_QGATE    = 21,
-  ERROR_QCIRC_READ_FILE	      = 22,
-  ERROR_QCIRC_WRITE_FILE      = 23,
-  ERROR_QCIRC_PRINT_QCIRC     = 24,
-  ERROR_QCIRC_PRINT_QGATES    = 25,
-  ERROR_QSTATE_INIT	      = 30,
-  ERROR_QSTATE_COPY	      = 31,
-  ERROR_QSTATE_GET_CAMP	      = 32,
-  ERROR_QSTATE_PRINT	      = 33,
-  ERROR_QSTATE_MEASURE        = 34,
-  ERROR_QSTATE_OPERATE        = 35,
-  ERROR_QSTATE_OPERATE_QGATE  = 36,
-  ERROR_QSTATE_EVOLVE         = 37,
-  ERROR_QSTATE_INNER_PRODUCT  = 38,
-  ERROR_QSTATE_EXPECT_VALUE   = 39,
-  ERROR_QSTATE_BLOCH          = 40,
-  ERROR_QSTATE_PRINT_BLOCH    = 41,
-  ERROR_MDATA_INIT	      = 50,
-  ERROR_MDATA_PRINT	      = 51,
-  ERROR_GBANK_INIT	      = 60,
-  ERROR_GBANK_GET	      = 61,
-  ERROR_GBANK_GET_ROTATION    = 62,
-  ERROR_CIMAGE_INIT	      = 70,
-  ERROR_LINE_OPERATE          = 80,
-  ERROR_QSYSTEM_INIT          = 90,
-  ERROR_QSYSTEM_EXECUTE       = 91,
-  ERROR_QSYSTEM_INTMODE       = 92,
-  ERROR_SPRO_INIT             = 100,
-  ERROR_OBSERVABLE_INIT       = 110,
-  ERROR_BLOCH_GET_ANGLE       = 120,
-  ERROR_HELP_PRINT_MESSAGE    = 130,
-} ErrCode;
+  SUCCESS,
+  ERROR_INVALID_ARGUMENT,
+  ERROR_CANT_ALLOC_MEMORY,
+  ERROR_CANT_OPEN_FILE,
+  ERROR_CANT_READ_LINE,
 
-typedef enum _WrnCode {
-  NO_WARN		      = 0,
-  WARN_NEED_TO_INITIALIZE     = 1,
-  WARN_UNKNOWN_GATE	      = 2,
-  WARN_OUT_OF_BOUND	      = 3,
-  WARN_SAME_QUBIT_ID	      = 4,
-  WARN_TOO_MANY_ARGUMENTS     = 5,
-  WARN_NEED_MORE_ARGUMENTS    = 6,
-  WARN_CANT_INITIALIZE        = 7,
-  WARN_CANT_WRITE_FILE        = 8,
-  WARN_CANT_PRINT_QSTATE      = 9,
-  WARN_CANT_PRINT_BLOCH       = 10,
-  WARN_CANT_PRINT_CIRC        = 11,
-  WARN_CANT_PRINT_GATES       = 12,
-  WARN_CANT_PRINT_HELP        = 13,
-} WrnCode;
+  /* qlazy functions */
+  ERROR_HELP_PRINT,
+  ERROR_QGATE_GET_SYMBOL,
+  ERROR_QGATE_GET_KIND,
+  ERROR_QCIRC_INIT,
+  ERROR_QCIRC_APPEND_QGATE,
+  ERROR_QCIRC_SET_CIMAGE,
+  ERROR_QCIRC_PRINT_QCIRC,
+  ERROR_QCIRC_PRINT_QGATES,
+  ERROR_QCIRC_READ_FILE,
+  ERROR_QCIRC_WRITE_FILE,
+  ERROR_GBANK_INIT,
+  ERROR_GBANK_GET,
+  ERROR_GBANK_GET_ROTATION,
+  ERROR_CIMAGE_INIT,
+  ERROR_QSTATE_INIT,
+  ERROR_QSTATE_COPY,
+  ERROR_QSTATE_GET_CAMP,
+  ERROR_QSTATE_PRINT,
+  ERROR_QSTATE_BLOCH,
+  ERROR_QSTATE_PRINT_BLOCH,
+  ERROR_QSTATE_MEASURE,
+  ERROR_QSTATE_MEASURE_BELL,
+  ERROR_QSTATE_OPERATE_QGATE,
+  ERROR_QSTATE_OPERATE_QGATE_PARAM,
+  ERROR_QSTATE_EVOLVE,
+  ERROR_QSTATE_INNER_PRODUCT,
+  ERROR_QSTATE_EXPECT_VALUE,
+  ERROR_MDATA_INIT,
+  ERROR_MDATA_PRINT,
+  ERROR_MDATA_PRINT_BELL,
+  ERROR_QSYSTEM_INIT,
+  ERROR_QSYSTEM_EXECUTE,
+  ERROR_QSYSTEM_INTMODE,
+  ERROR_SPRO_INIT,
+  ERROR_OBSERVABLE_INIT,
+
+  /* qlazy interactive mode */
+  ERROR_NEED_TO_INITIALIZE,
+  ERROR_UNKNOWN_GATE,
+  ERROR_OUT_OF_BOUND,
+  ERROR_SAME_QUBIT_ID,
+  ERROR_TOO_MANY_ARGUMENTS,
+  ERROR_NEED_MORE_ARGUMENTS,
+  ERROR_CANT_INITIALIZE,
+  ERROR_CANT_WRITE_FILE,
+  ERROR_CANT_PRINT_QSTATE,
+  ERROR_CANT_PRINT_BLOCH,
+  ERROR_CANT_PRINT_CIRC,
+  ERROR_CANT_PRINT_GATES,
+  ERROR_CANT_PRINT_HELP,
+} ErrCode;
 
 typedef enum _Kind {
   CIRC  	 = 1,	 	/* symbol: '&','circ'   */
@@ -264,116 +288,105 @@ typedef struct _Observable {
 #endif
 
 GLOBAL ErrCode  g_Errno;
-GLOBAL WrnCode  g_Wrnno;
 
 /*====================================================================*/
 /*  Functions                                                         */
 /*====================================================================*/
 
 /* complex.h */
-double	cabs(double _Complex z);
-double	carg(double _Complex z);
-double	creal(double _Complex z);
-double	cimag(double _Complex z);
+double	 cabs(double _Complex z);
+double	 carg(double _Complex z);
+double	 creal(double _Complex z);
+double	 cimag(double _Complex z);
 double _Complex conj(double _Complex z);
+
+/* misc.c */
+bool	 line_check_length(char* str);
+bool	 line_is_blank(char* str);
+bool	 line_is_comment(char* str);
+bool	 line_chomp(char* str);
+bool	 line_split(char* str, const char* delim, char* outlist[], int* tnum);
+bool	 line_getargs(char* str, char* args[], int* anum);
+bool	 line_join_token(char* dst, char* token[], int ini, int fin);
+bool     line_remove_space(char* str);
+bool     is_number(char* str);
+bool     is_decimal(char* str);
+bool	 binstr_from_decimal(char* binstr, int qubit_num, int decimal, int zflag);
 
 /* init.c */
 void	 init_qlazy(unsigned int seed);
 
 /* message.c */
 void	 error_msg(ErrCode err);
-void	 warn_msg(WrnCode wrn);
 
 /* help.c */
-int	 help_print(char* item);
-
-/* line.c */
-int	 line_check_length(char* str);
-int	 line_is_blank(char* str);
-int	 line_is_comment(char* str);
-int	 line_chomp(char* str);
-int	 line_split(char* str, const char* delim, char* outlist[]);
-int	 line_getargs(char* str, char* args[]);
-int	 line_join_token(char* dst, char* token[], int ini, int fin);
-int      line_remove_space(char* str);
-
-/* misc.c */
-int      is_number(char* str);
-int      is_decimal(char* str);
-int	 get_binstr_from_decimal(char* binstr, int qubit_num, int decimal, int zflag);
-int      select_bits(int* bits_out, int bits_in, int digits_out, int digits_in,
-		     int digit_array[MAX_QUBIT_NUM]);
-int      complex_division(COMPLEX a, COMPLEX b, COMPLEX* c);
-
-/* bloch.c */
-int      bloch_get_angle(COMPLEX alpha, COMPLEX beta, double* theta, double* phi);
+bool	 help_print(char* item);
 
 /* qgate.c */
-void	 qgate_init(void);
-void	 qgate_get_symbol(char* symbol, Kind kind);
-Kind	 qgate_get_kind(char* symbol);
+bool	 qgate_get_symbol(char* symbol, Kind kind);
+bool	 qgate_get_kind(char* symbol, Kind* kind_out);
 
 /* qcirc.c */
-QCirc*	 qcirc_init(int qubit_num, int buf_length);
-int	 qcirc_append_qgate(QCirc* qcirc, Kind kind, int terminal_num,
+bool	 qcirc_init(int qubit_num, int buf_length, void** qcirc_out);
+bool	 qcirc_append_qgate(QCirc* qcirc, Kind kind, int terminal_num,
 			    Para* para, int qubit_id[MAX_QUBIT_NUM]);
-int	 qcirc_set_cimage(QCirc* qcirc);
-int	 qcirc_print_qcirc(QCirc* qcirc);
-int	 qcirc_print_qgates(QCirc* qcirc);
-QCirc*	 qcirc_read_file(char* fname);
-int	 qcirc_write_file(QCirc* qcirc, char* fname);
+bool	 qcirc_set_cimage(QCirc* qcirc);
+bool	 qcirc_print_qcirc(QCirc* qcirc);
+bool	 qcirc_print_qgates(QCirc* qcirc);
+bool	 qcirc_read_file(char* fname, void** qcirc_out);
+bool	 qcirc_write_file(QCirc* qcirc, char* fname);
 void	 qcirc_free(QCirc* qcirc);
 
-/* spro.c */
-int      spro_init(char* str, void** spro_out);
-void     spro_free(SPro* spro);
+/* gbank.c */
+bool	 gbank_init(void** gbank_out);
+bool     gbank_get(GBank* gbank, Kind kind, void** matrix_out);
+bool     gbank_get_rotation(Axis axis, double phase, double unit, void** matrix_out);
 
-/* observable.c */
-int      observable_init(char* str, void** observ_out);
-void     observable_free(Observable* observ);
+/* cimage.c */
+bool     cimage_init(int qubit_num, int step_num, void** cimage_out);
+void	 cimage_free(CImage* cimage);
 
 /* qstate.c */
-int	 qstate_init(int qubit_num, void** qstate_out);
-int	 qstate_copy(QState* qstate, void** qstate_out);
-int      qstate_get_camp(QState* qstate, int qubit_num, int qubit_id[MAX_QUBIT_NUM],
+bool	 qstate_init(int qubit_num, void** qstate_out);
+bool	 qstate_copy(QState* qstate, void** qstate_out);
+bool     qstate_get_camp(QState* qstate, int qubit_num, int qubit_id[MAX_QUBIT_NUM],
 			 void** camp_out);
-int	 qstate_print(QState* qstate, int qubit_num, int qubit_id[MAX_QUBIT_NUM]);
-int      qstate_bloch(QState* qstate, int qid, double* theta, double* phi);
-int      qstate_print_bloch(QState* qstate, int qid);
-int	 qstate_measure(QState* qstate, int shot_num, double angle, double phase,
+bool	 qstate_print(QState* qstate, int qubit_num, int qubit_id[MAX_QUBIT_NUM]);
+bool     qstate_bloch(QState* qstate, int qid, double* theta, double* phi);
+bool     qstate_print_bloch(QState* qstate, int qid);
+bool	 qstate_measure(QState* qstate, int shot_num, double angle, double phase,
 			int qubit_num, int qubit_id[MAX_QUBIT_NUM], void** mdata_out);
-int      qstate_measure_bell(QState* qstate, int shot_num, int qubit_num,
+bool     qstate_measure_bell(QState* qstate, int shot_num, int qubit_num,
 			     int qubit_id[MAX_QUBIT_NUM], void** mdata_out);
-int	 qstate_operate_qgate_param(QState* qstate, Kind kind, double phase,
+bool	 qstate_operate_qgate(QState* qstate, QGate* qgate);
+bool	 qstate_operate_qgate_param(QState* qstate, Kind kind, double phase,
 				    int qubit_id[MAX_QUBIT_NUM]);
-int	 qstate_operate_qgate(QState* qstate, QGate* qgate);
-int      qstate_evolve(QState* qstate, Observable* observ, double time, int iter);
-int      qstate_inner_product(QState* qstate_0, QState* qstate_1, double* real,
+bool     qstate_evolve(QState* qstate, Observable* observ, double time, int iter);
+bool     qstate_inner_product(QState* qstate_0, QState* qstate_1, double* real,
 			      double* imag);
-int      qstate_expect_value(QState* qstate, Observable* observ, double* value);
+bool     qstate_expect_value(QState* qstate, Observable* observ, double* value);
 void	 qstate_free(QState* qstate);
 
 /* mdata.c */
-int      mdata_init(int qubit_num, int state_num, int shot_num,
+bool     mdata_init(int qubit_num, int state_num, int shot_num,
 		    double angle, double phase, int qubit_id[MAX_QUBIT_NUM],
 		    void** mdata_out);
-int	 mdata_print(MData* mdata);
-int	 mdata_print_bell(MData* mdata);
+bool	 mdata_print(MData* mdata);
+bool	 mdata_print_bell(MData* mdata);
 void	 mdata_free(MData* mdata);
 
-/* gbank.c */
-int	 gbank_init(void** gbank_out);
-int      gbank_get(GBank* gbank, Kind kind, void** matrix_out);
-int      gbank_get_rotation(Axis axis, double phase, double unit, void** matrix_out);
-
-/* cimage.c */
-int      cimage_init(int qubit_num, int step_num, void** cimage_out);
-void	 cimage_free(CImage* cimage);
-
 /* qsystem.c */
-int      qsystem_init(void** qsystem_out);
-int	 qsystem_execute(QSystem* qsystem, char* fname);
-int	 qsystem_intmode(QSystem* qsystem, char* fnmae_ini);
+bool     qsystem_init(void** qsystem_out);
+bool	 qsystem_execute(QSystem* qsystem, char* fname);
+bool	 qsystem_intmode(QSystem* qsystem, char* fnmae_ini);
 void	 qsystem_free(QSystem* qsystem);
+
+/* spro.c */
+bool     spro_init(char* str, void** spro_out);
+void     spro_free(SPro* spro);
+
+/* observable.c */
+bool     observable_init(char* str, void** observ_out);
+void     observable_free(Observable* observ);
 
 #endif

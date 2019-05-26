@@ -4,7 +4,7 @@
 
 #include "qlazy.h"
 
-static int get_term_num(char* str)
+static int _get_term_num(char* str)
 {
   int pos = 1;
   int num = 1;
@@ -13,10 +13,10 @@ static int get_term_num(char* str)
     if ((str[pos]=='+') || (str[pos]=='-')) num++;
     pos++;
   }
-  return num;
+  SUC_RETURN(num);
 }
 
-int observable_init(char* str, void** observ_out)
+bool observable_init(char* str, void** observ_out)
 /*
   [input string format (example)]
   "5.0+2.0*Z_0*X_1*Y_3+3.0*X_0*Z_1-Y_1"
@@ -29,15 +29,14 @@ int observable_init(char* str, void** observ_out)
   int		term_num = 0;
   int           spin_num = 0;
 
-  g_Errno = NO_ERROR;
-
   /* expand string buffer: str -> exp_str */
-  if (line_check_length(str) == FALSE) goto ERROR_EXIT;
-  line_chomp(str);
-  line_remove_space(str);
+  if (!line_check_length(str)) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+  if (!line_chomp(str)) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+  if (!line_remove_space(str)) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
   str_len = strlen(str);
-  str_len += get_term_num(str);
-  if (!(exp_str = (char*)malloc(sizeof(char)*str_len))) goto ERROR_EXIT;
+  str_len += _get_term_num(str);
+  if (!(exp_str = (char*)malloc(sizeof(char)*str_len)))
+    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
 
   /* insert ',' to the end of terms except last term */
   int pos = 0;
@@ -55,17 +54,20 @@ int observable_init(char* str, void** observ_out)
   exp_str[cnt] = '\0';
 
   /* split terms */
-  term_num = line_split(exp_str, ",", token);
-
+  if (!line_split(exp_str, ",", token, &term_num))
+    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+    
   /* set observ */
-  if (!(observ = (Observable*)malloc(sizeof(Observable)))) goto ERROR_EXIT;
+  if (!(observ = (Observable*)malloc(sizeof(Observable))))
+    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
   observ->array_num = term_num;
   if (!(observ->spro_array = (SPro**)malloc(sizeof(SPro*)*observ->array_num)))
-    goto ERROR_EXIT;
+    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
 
   for (int i=0; i<observ->array_num; i++) {
-    if (spro_init(token[i], (void**)&(observ->spro_array[i])) == FALSE)
-      goto ERROR_EXIT;
+    if (!(spro_init(token[i], (void**)&(observ->spro_array[i]))))
+      ERR_RETURN(ERROR_SPRO_INIT,false);
+    
     spin_num = MAX(spin_num, observ->spro_array[i]->spin_num);
   }
   observ->spin_num = spin_num;
@@ -74,12 +76,8 @@ int observable_init(char* str, void** observ_out)
   exp_str = NULL;
 
   *observ_out = observ;
-  
-  return TRUE;
 
- ERROR_EXIT:
-  g_Errno = ERROR_OBSERVABLE_INIT;
-  return FALSE;
+  SUC_RETURN(true);
 }
 
 void observable_free(Observable* observ)

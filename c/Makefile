@@ -6,9 +6,9 @@ INC = qlazy.h
 
 LIB = libQlazy.so
 LIB_OBJ_BASE = qsystem.o init.o cimage.o qgate.o qcirc.o qstate.o mdata.o gbank.o spro.o \
-        observable.o bloch.o misc.o line.o message.o help.o
+        observable.o misc.o message.o help.o
 LIB_SRC_BASE = qsystem.c init.c cimage.c qgate.c qcirc.c qstate.c mdata.c gbank.c spro.c \
-        observable.c bloch.c misc.c line.c message.c help.c
+        observable.c misc.c message.c help.c
 
 # install directory (edit here to your environment)
 INSTALL_BIN_DIR = ~/bin
@@ -21,7 +21,8 @@ LIB_SRC = $(LIB_SRC_BASE)
 CC = gcc
 CC_LINK = gcc
 
-CFLAG_CC = -fPIC -Wall -O2
+CFLAG_CC = -fPIC -Wall -O2 -DDEV
+#CFLAG_CC = -fPIC -Wall -O2
 CFLAG_LINK = $(CFLAG_CC)
 
 IFLAG = -I.

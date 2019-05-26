@@ -4,35 +4,35 @@
 
 #include "qlazy.h"
 
-void qgate_get_symbol(char* symbol, Kind kind)
+bool qgate_get_symbol(char* symbol, Kind kind)
 {
   switch (kind) {
   case INIT:
-    strcpy(symbol,"%");
+    strcpy(symbol,"init");
     break;
   case CIRC:
-    strcpy(symbol,"&");
+    strcpy(symbol,"circ");
     break;
   case GATES:
-    strcpy(symbol,"!");
+    strcpy(symbol,"gates");
     break;
   case SHOW:
-    strcpy(symbol,"-");
+    strcpy(symbol,"show");
     break;
   case BLOCH:
-    strcpy(symbol,"|");
+    strcpy(symbol,"block");
     break;
   case ECHO:
-    strcpy(symbol,"@");
+    strcpy(symbol,"echo");
     break;
   case OUTPUT:
-    strcpy(symbol,">");
+    strcpy(symbol,"output");
     break;
   case HELP:
-    strcpy(symbol,"?");
+    strcpy(symbol,"help");
     break;
   case QUIT:
-    strcpy(symbol,".");
+    strcpy(symbol,"quit");
     break;
   case PAULI_X:
     strcpy(symbol,"X");
@@ -98,14 +98,16 @@ void qgate_get_symbol(char* symbol, Kind kind)
     strcpy(symbol,"MB");
     break;
   default:
-    break;
+    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
   }
+
+  SUC_RETURN(true);
 }
 
-Kind qgate_get_kind(char* symbol)
+bool qgate_get_kind(char* symbol, Kind* kind_out)
 {
   Kind kind;
-  
+
   if (strcmp(symbol,"%")          == 0) kind = INIT;
   else if (strcmp(symbol,"init")  == 0) kind = INIT;
   else if (strcmp(symbol,"&")     == 0) kind = CIRC;
@@ -168,5 +170,7 @@ Kind qgate_get_kind(char* symbol)
   else if (strcmp(symbol,"mb")    == 0) kind = MEASURE_BELL;
   else kind = NOT_A_GATE;
 
-  return kind;
+  *kind_out = kind;
+  
+  SUC_RETURN(true);
 }
