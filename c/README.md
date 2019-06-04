@@ -41,15 +41,16 @@ and measurement.
     print quantum circuitt:   &,circ
     print quantum gates:      !,gates
     print quantum state:      -,show
+    print bloch angles:       |,bloch
     echo input string:        @,echo
     output quantum gates:     >,output
     quit:                     .,quit
     help:                     ?,help
     [quantum gates]
-    1-qubit gates:            X,Y,Z,XR,XR+,H,S,S+,T,T+,RX,RY,RZ
-    2-qubit gates:            CX,CZ
+    1-qubit gates:            X,Y,Z,XR,XR+,H,S,S+,T,T+,P,RX,RY,RZ
+    2-qubit gates:            CX,CY,CZ,CH,CP,CRX,CRY,CRZ
     3-qubit gates:            CCX
-    measurement:              M,MX,MY,MZ
+    measurement:              M,MX,MY,MZ,MB
     [notes]
     see 'help <item>', for more information
 
@@ -461,6 +462,18 @@ and measurement.
     [example] 
       >> T+ 0 
 
+### P
+
+    [description]
+      P gate is 1-qubit gate, It transform phase.
+      - matrix expression:
+        | 1 0               |
+        | 0 exp(i*phase*PI) |
+    [usage]
+      >> P(<phase>) <qubit_id>
+    [alias]
+      p
+
 ### RX
 
     [description] 
@@ -494,8 +507,8 @@ and measurement.
     [description] 
       RZ gate is 1-qubit gate, It rotate through any phase around z-axis in bloch spere.
       - matrix expression:
-          | 1 0                             | 
-          | 0 cos(phase*PI)+i*sin(phase*PI) | 
+          | exp(-i*phase*PI/2) 0                 | 
+          | 0                  exp(i*phase*PI/2) | 
     [usage] 
       >> RZ(<phase>) <qubit_id>
     [alias]
@@ -520,6 +533,22 @@ and measurement.
     [example] 
       >> CX 0 1 
 
+### CY
+
+    [description] 
+      CY gate is 2-qubit gate called 'controlled Y gate'.
+      - matrix expression:
+        | 1 0 0 0  | 
+        | 0 1 0 0  | 
+        | 0 0 0 -i | 
+        | 0 0 i 0  | 
+    [usage] 
+      >> CY <qubit_id> <qubit_id>
+    [alias]
+      cy
+    [example] 
+      >> CY 0 1 
+
 ### CZ
 
     [description] 
@@ -536,6 +565,56 @@ and measurement.
       cz
     [example] 
       >> CZ 0 1 
+
+### CP
+
+    [description]
+      CP gate is 2-qubit gate called \'controlled Phase Shift gate\'.
+      It operate P gate to the second qubit if and only if the first qubit is |1>.
+    [usage]
+      >> CP(<phase>) <qubit_id> <qubit_id>
+    [alias]
+      cp
+
+### CRX
+
+    [description]
+      CRX gate is 2-qubit gate called \'controlled RX gate\'.
+      It operate RX gate to the second qubit if and only if the first qubit is |1>.
+    [usage]
+      >> CRX(<phase>) <qubit_id> <qubit_id>
+    [alias]
+      crx
+
+### CRY
+
+    [description]
+      CRY gate is 2-qubit gate called \'controlled RY gate\'.
+      It operate RY gate to the second qubit if and only if the first qubit is |1>.
+    [usage]
+      >> CRY(<phase>) <qubit_id> <qubit_id>
+    [alias]
+      cry
+
+### CRZ
+
+    [description]
+      CRZ gate is 2-qubit gate called \'controlled RZ gate\'.
+      It operate RZ gate to the second qubit if and only if the first qubit is |1>.
+    [usage]
+      >> CRZ(<phase>) <qubit_id> <qubit_id>
+    [alias]
+      crz
+
+### CH
+
+    [description]
+      CH gate is 2-qubit gate called \'controlled H gate\'.
+      It operate H gate to the second qubit if and only if the first qubit is |1>.
+    [usage]
+      >> CH <qubit_id> <qubit_id>
+    [alias]
+      ch
 
 ### CCX
 

@@ -15,7 +15,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
-#define VERSION "0.0.13"
+#define VERSION "0.0.14"
 
 /*====================================================================*/
 /*  Definitions & Macros                                              */
@@ -163,11 +163,18 @@ typedef enum _Kind {
   PHASE_SHIFT_S_ = 141,		/* symbol: 'S+','s+'    */
   PHASE_SHIFT_T	 = 142,		/* symbol: 'T','t'      */
   PHASE_SHIFT_T_ = 143,		/* symbol: 'T+','t+'    */
+  PHASE_SHIFT    = 144,		/* symbol: 'P','p'      */
   ROTATION_X	 = 150,		/* symbol: 'RX','rx'    */
   ROTATION_Y	 = 151,		/* symbol: 'RY','ry'    */
   ROTATION_Z	 = 152,		/* symbol: 'RZ','rz'    */
   CONTROLLED_X	 = 160,		/* symbol: 'CX','cx'    */
-  CONTROLLED_Z	 = 161,		/* symbol: 'CZ','cz'    */
+  CONTROLLED_Y	 = 161,		/* symbol: 'CX','cx'    */
+  CONTROLLED_Z	 = 162,		/* symbol: 'CZ','cz'    */
+  CONTROLLED_H	 = 163,		/* symbol: 'CH','ch'    */
+  CONTROLLED_P	 = 164,		/* symbol: 'CP','cp'    */
+  CONTROLLED_RX	 = 165,		/* symbol: 'CRX','crx'  */
+  CONTROLLED_RY	 = 166,		/* symbol: 'CRY','cry'  */
+  CONTROLLED_RZ	 = 167,		/* symbol: 'CRZ','crz'  */
   TOFFOLI	 = 170,		/* symbol: 'CCX','ccx'  */
   MEASURE	 = 200,	 	/* symbol: 'M','m'      */
   MEASURE_X	 = 201,	 	/* symbol: 'MX','mx'    */
@@ -227,7 +234,9 @@ typedef struct _GBank {
   COMPLEX PhaseShiftT[4];
   COMPLEX PhaseShiftT_[4];
   COMPLEX ControlledX[16];
+  COMPLEX ControlledY[16];
   COMPLEX ControlledZ[16];
+  COMPLEX ControlledH[16];
 } GBank;
 
 typedef struct _QCirc {
@@ -341,6 +350,9 @@ void	 qcirc_free(QCirc* qcirc);
 bool	 gbank_init(void** gbank_out);
 bool     gbank_get(GBank* gbank, Kind kind, void** matrix_out);
 bool     gbank_get_rotation(Axis axis, double phase, double unit, void** matrix_out);
+bool     gbank_get_phase_shift(double phase, double unit, void** matrix_out);
+bool     gbank_get_ctr_rotation(Axis axis, double phase, double unit, void** matrix_out);
+bool     gbank_get_ctr_phase_shift(double phase, double unit, void** matrix_out);
 
 /* cimage.c */
 bool     cimage_init(int qubit_num, int step_num, void** cimage_out);
@@ -364,6 +376,7 @@ bool	 qstate_operate_qgate_param(QState* qstate, Kind kind, double phase,
 bool     qstate_evolve(QState* qstate, Observable* observ, double time, int iter);
 bool     qstate_inner_product(QState* qstate_0, QState* qstate_1, double* real,
 			      double* imag);
+bool     qstate_tensor_product(QState* qstate_0, QState* qstate_1, void** qstate_out);
 bool     qstate_expect_value(QState* qstate, Observable* observ, double* value);
 void	 qstate_free(QState* qstate);
 

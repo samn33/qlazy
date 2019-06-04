@@ -22,7 +22,7 @@ def set_hamiltonian_str():
 
 def ExpectVal(hm,qs):
 
-    return qs.expect(observable=hm)
+    return qs.expect(observable=hm).real
 
 def cost(phi):
 
@@ -38,7 +38,7 @@ def cost(phi):
 
     exp = ExpectVal(M, qs)
 
-    del qs
+    qs.free()
 
     return exp
     
@@ -61,4 +61,4 @@ init = np.random.rand(6)
 callback(init)
 res = scipy.optimize.minimize(cost, init,
                               method='Powell', callback=callback)
-del M
+M.free()

@@ -19,10 +19,10 @@ def main():
     v = qs.inpro(qs_ini)
     print("** inner product = ", v)
     
-    del qs
-    del qs_ini
-    del hm
-    del ob
+    qs.free()
+    qs_ini.free()
+    hm.free()
+    ob.free()
     
 if __name__ == '__main__':
     main()

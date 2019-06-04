@@ -23,14 +23,9 @@ class QState(ctypes.Structure):
     
     def __new__(self, qubit_num, seed=None):
 
-        self.qubit_num = qubit_num
-        self.camp = None
-
         if qubit_num > MAX_QUBIT_NUM:
             print("qubit number must be {0:d} or less.".format(MAX_QUBIT_NUM))
             raise QState_FailToInitialize()
-
-        self._circ = ["q{0:02d} -".format(i) for i in range(qubit_num)]
 
         if seed is None:
             seed = random.randint(0,1000000)
@@ -42,7 +37,7 @@ class QState(ctypes.Structure):
 
         lib.qstate_init.restype = ctypes.c_int
         lib.qstate_init.argtypes = [ctypes.c_int, ctypes.POINTER(ctypes.c_void_p)]
-        ret = lib.qstate_init(ctypes.c_int(self.qubit_num), c_qstate)
+        ret = lib.qstate_init(ctypes.c_int(qubit_num), c_qstate)
 
         if ret == FALSE:
             raise QState_FailToInitialize()
@@ -50,10 +45,6 @@ class QState(ctypes.Structure):
         out = ctypes.cast(c_qstate.value, ctypes.POINTER(QState))
         
         return out.contents
-
-    def __del__(self):
-
-        self.free()
 
     def show(self, id=None):
 
@@ -102,7 +93,7 @@ class QState(ctypes.Structure):
                 raise QState_FailToClone()
 
             out = ctypes.cast(c_qstate.value, ctypes.POINTER(QState))
-        
+
             return out.contents
         
         except Exception:
@@ -166,6 +157,29 @@ class QState(ctypes.Structure):
         except Exception:
             raise QState_FailToInnerProduct()
         
+    def tenspro(self, qstate):
+
+        try:
+            qstate_out = None
+            c_qstate_out = ctypes.c_void_p(qstate_out)
+
+            lib.qstate_tensor_product.restype = ctypes.c_int
+            lib.qstate_tensor_product.argtypes = [ctypes.POINTER(QState),
+                                                  ctypes.POINTER(QState),
+                                                  ctypes.POINTER(ctypes.c_void_p)]
+            ret = lib.qstate_tensor_product(ctypes.byref(self),ctypes.byref(qstate),
+                                            c_qstate_out)
+
+            if ret == FALSE:
+                raise QState_FailToTensorProduct()
+
+            out = ctypes.cast(c_qstate_out.value, ctypes.POINTER(QState))
+
+            return out.contents
+
+        except Exception:
+            raise QState_FailToTensorProduct()
+        
     def evolve(self, observable=None, time=0.0, iter=0):
 
         if iter < 1:
@@ -199,7 +213,8 @@ class QState(ctypes.Structure):
             lib.qstate_expect_value.argtypes = [ctypes.POINTER(QState),
                                                 ctypes.POINTER(Observable),
                                                 ctypes.POINTER(ctypes.c_double)]
-            ret = lib.qstate_expect_value(ctypes.byref(self), ctypes.byref(observable),
+            ret = lib.qstate_expect_value(ctypes.byref(self),
+                                          ctypes.byref(observable),
                                           ctypes.byref(c_val))
             
             if ret == FALSE:
@@ -207,22 +222,13 @@ class QState(ctypes.Structure):
 
             val = c_val.value
             
-            return val
+            return complex(val,0.0)
             
         except Exception:
             raise QState_FailToExpect()
 
         return out
-        
-    def circ(self):
 
-        try:
-            for i in range(self.qubit_num):
-                print(self._circ[i])
-
-        except Exception:
-            raise QState_FailToCirc()
-    
     @property
     def amp(self, id=None):
 
@@ -277,19 +283,9 @@ class QState(ctypes.Structure):
         return np.array(out)
         
     def x(self, q0):
-        return self.X(q0)
-        
-    def X(self, q0):
         # error check
         if q0 >= self.qubit_num:
             raise QState_OutOfBound()
-            
-        # join circ
-        for i in range(self.qubit_num):
-            if i == q0:
-                self._circ[i] += "X-"
-            else:
-                self._circ[i] += "--"
             
         # operate
         id = [q0]
@@ -297,19 +293,9 @@ class QState(ctypes.Structure):
         return self
 
     def y(self, q0):
-        return self.Y(q0)
-    
-    def Y(self, q0):
         # error check
         if q0 >= self.qubit_num:
             raise QState_OutOfBound()
-            
-        # join circ
-        for i in range(self.qubit_num):
-            if i == q0:
-                self._circ[i] += "Y-"
-            else:
-                self._circ[i] += "--"
             
         # operate
         id = [q0]
@@ -317,19 +303,9 @@ class QState(ctypes.Structure):
         return self
 
     def z(self, q0):
-        return self.Z(q0)
-    
-    def Z(self, q0):
         # error check
         if q0 >= self.qubit_num:
             raise QState_OutOfBound()
-            
-        # join circ
-        for i in range(self.qubit_num):
-            if i == q0:
-                self._circ[i] += "Z-"
-            else:
-                self._circ[i] += "--"
             
         # operate
         id = [q0]
@@ -337,19 +313,9 @@ class QState(ctypes.Structure):
         return self
 
     def xr(self, q0):
-        return self.XR(q0)
-    
-    def XR(self, q0):
         # error check
         if q0 >= self.qubit_num:
             raise QState_OutOfBound()
-            
-        # join circ
-        for i in range(self.qubit_num):
-            if i == q0:
-                self._circ[i] += "XR-"
-            else:
-                self._circ[i] += "---"
             
         # operate
         id = [q0]
@@ -357,59 +323,29 @@ class QState(ctypes.Structure):
         return self
 
     def xr_dg(self, q0):
-        return self.XR_DG(q0)
-    
-    def XR_DG(self, q0):
         # error check
         if q0 >= self.qubit_num:
             raise QState_OutOfBound()
 
-        # join circ
-        for i in range(self.qubit_num):
-            if i == q0:
-                self._circ[i] += "XR+-"
-            else:
-                self._circ[i] += "----"
-            
         # operate
         id = [q0]
         self.__operate_qgate(kind=ROOT_PAULI_X_, phase=DEF_PHASE, id=id)
         return self
 
     def h(self, q0):
-        return self.H(q0)
-    
-    def H(self, q0):
         # error check
         if q0 >= self.qubit_num:
             raise QState_OutOfBound()
 
-        # join circ
-        for i in range(self.qubit_num):
-            if i == q0:
-                self._circ[i] += "H-"
-            else:
-                self._circ[i] += "--"
-            
         # operate
         id = [q0]
         self.__operate_qgate(kind=HADAMARD, phase=DEF_PHASE, id=id)
         return self
 
     def s(self, q0):
-        return self.S(q0)
-    
-    def S(self, q0):
         # error check
         if q0 >= self.qubit_num:
             raise QState_OutOfBound()
-            
-        # join circ
-        for i in range(self.qubit_num):
-            if i == q0:
-                self._circ[i] += "S-"
-            else:
-                self._circ[i] += "--"
             
         # operate
         id = [q0]
@@ -417,19 +353,9 @@ class QState(ctypes.Structure):
         return self
 
     def s_dg(self, q0):
-        return self.S_DG(q0)
-    
-    def S_DG(self, q0):
         # error check
         if q0 >= self.qubit_num:
             raise QState_OutOfBound()
-            
-        # join circ
-        for i in range(self.qubit_num):
-            if i == q0:
-                self._circ[i] += "S+-"
-            else:
-                self._circ[i] += "---"
             
         # operate
         id = [q0]
@@ -437,19 +363,9 @@ class QState(ctypes.Structure):
         return self
 
     def t(self, q0):
-        return self.T(q0)
-    
-    def T(self, q0):
         # error check
         if q0 >= self.qubit_num:
             raise QState_OutOfBound()
-            
-        # join circ
-        for i in range(self.qubit_num):
-            if i == q0:
-                self._circ[i] += "T-"
-            else:
-                self._circ[i] += "--"
             
         # operate
         id = [q0]
@@ -457,19 +373,9 @@ class QState(ctypes.Structure):
         return self
 
     def t_dg(self, q0):
-        return self.T_DG(q0)
-    
-    def T_DG(self, q0):
         # error check
         if q0 >= self.qubit_num:
             raise QState_OutOfBound()
-            
-        # join circ
-        for i in range(self.qubit_num):
-            if i == q0:
-                self._circ[i] += "T+-"
-            else:
-                self._circ[i] += "---"
             
         # operate
         id = [q0]
@@ -477,19 +383,9 @@ class QState(ctypes.Structure):
         return self
 
     def rx(self, q0, phase=DEF_PHASE):
-        return self.RX(q0,phase=phase)
-    
-    def RX(self, q0, phase=DEF_PHASE):
         # error check
         if q0 >= self.qubit_num:
             raise QState_OutOfBound()
-            
-        # join circ
-        for i in range(self.qubit_num):
-            if i == q0:
-                self._circ[i] += "RX({0:1.3f})-".format(phase)
-            else:
-                self._circ[i] += "----------"
             
         # operate
         id = [q0]
@@ -497,19 +393,9 @@ class QState(ctypes.Structure):
         return self
 
     def ry(self, q0, phase=DEF_PHASE):
-        return self.RY(q0,phase=phase)
-    
-    def RY(self, q0, phase=DEF_PHASE):
         # error check
         if q0 >= self.qubit_num:
             raise QState_OutOfBound()
-            
-        # join circ
-        for i in range(self.qubit_num):
-            if i == q0:
-                self._circ[i] += "RY({0:1.3f})-".format(phase)
-            else:
-                self._circ[i] += "----------"
             
         # operate
         id = [q0]
@@ -517,29 +403,26 @@ class QState(ctypes.Structure):
         return self
 
     def rz(self, q0, phase=DEF_PHASE):
-        return self.RZ(q0,phase=phase)
-    
-    def RZ(self, q0, phase=DEF_PHASE):
         # error check
         if q0 >= self.qubit_num:
             raise QState_OutOfBound()
-            
-        # join circ
-        for i in range(self.qubit_num):
-            if i == q0:
-                self._circ[i] += "RZ({0:1.3f})-".format(phase)
-            else:
-                self._circ[i] += "----------"
             
         # operate
         id = [q0]
         self.__operate_qgate(kind=ROTATION_Z, phase=phase, id=id)
         return self
 
+    def p(self, q0, phase=DEF_PHASE):
+        # error check
+        if q0 >= self.qubit_num:
+            raise QState_OutOfBound()
+            
+        # operate
+        id = [q0]
+        self.__operate_qgate(kind=PHASE_SHIFT, phase=phase, id=id)
+        return self
+
     def cx(self, q0, q1):
-        return self.CX(q0, q1)
-    
-    def CX(self, q0, q1):
         # error check
         if q0 >= self.qubit_num:
             raise QState_OutOfBound()
@@ -547,25 +430,27 @@ class QState(ctypes.Structure):
             raise QState_OutOfBound()
         if q0 == q1:
             raise QState_SameQubitID()
-            
-        # join circ
-        for i in range(self.qubit_num):
-            if i == q0:
-                self._circ[i] += "*--"
-            elif i == q1:
-                self._circ[i] += "CX-"
-            else:
-                self._circ[i] += "---"
             
         # operate
         id = [q0,q1]
         self.__operate_qgate(kind=CONTROLLED_X, phase=DEF_PHASE, id=id)
         return self
 
+    def cy(self, q0, q1):
+        # error check
+        if q0 >= self.qubit_num:
+            raise QState_OutOfBound()
+        if q1 >= self.qubit_num:
+            raise QState_OutOfBound()
+        if q0 == q1:
+            raise QState_SameQubitID()
+            
+        # operate
+        id = [q0,q1]
+        self.__operate_qgate(kind=CONTROLLED_Y, phase=DEF_PHASE, id=id)
+        return self
+
     def cz(self, q0, q1):
-        return self.CZ(q0, q1)
-    
-    def CZ(self, q0, q1):
         # error check
         if q0 >= self.qubit_num:
             raise QState_OutOfBound()
@@ -574,24 +459,82 @@ class QState(ctypes.Structure):
         if q0 == q1:
             raise QState_SameQubitID()
 
-        # join circ
-        for i in range(self.qubit_num):
-            if i == q0:
-                self._circ[i] += "*--"
-            elif i == q1:
-                self._circ[i] += "CZ-"
-            else:
-                self._circ[i] += "---"
-            
         # operate
         id = [q0,q1]
         self.__operate_qgate(kind=CONTROLLED_Z, phase=DEF_PHASE, id=id)
         return self
 
+    def ch(self, q0, q1):
+        # error check
+        if q0 >= self.qubit_num:
+            raise QState_OutOfBound()
+        if q1 >= self.qubit_num:
+            raise QState_OutOfBound()
+        if q0 == q1:
+            raise QState_SameQubitID()
+
+        # operate
+        id = [q0,q1]
+        self.__operate_qgate(kind=CONTROLLED_H, phase=DEF_PHASE, id=id)
+        return self
+
+    def cp(self, q0, q1, phase=DEF_PHASE):
+        # error check
+        if q0 >= self.qubit_num:
+            raise QState_OutOfBound()
+        if q1 >= self.qubit_num:
+            raise QState_OutOfBound()
+        if q0 == q1:
+            raise QState_SameQubitID()
+
+        # operate
+        id = [q0,q1]
+        self.__operate_qgate(kind=CONTROLLED_P, phase=phase, id=id)
+        return self
+
+    def crx(self, q0, q1, phase=DEF_PHASE):
+        # error check
+        if q0 >= self.qubit_num:
+            raise QState_OutOfBound()
+        if q1 >= self.qubit_num:
+            raise QState_OutOfBound()
+        if q0 == q1:
+            raise QState_SameQubitID()
+
+        # operate
+        id = [q0,q1]
+        self.__operate_qgate(kind=CONTROLLED_RX, phase=phase, id=id)
+        return self
+
+    def cry(self, q0, q1, phase=DEF_PHASE):
+        # error check
+        if q0 >= self.qubit_num:
+            raise QState_OutOfBound()
+        if q1 >= self.qubit_num:
+            raise QState_OutOfBound()
+        if q0 == q1:
+            raise QState_SameQubitID()
+
+        # operate
+        id = [q0,q1]
+        self.__operate_qgate(kind=CONTROLLED_RY, phase=phase, id=id)
+        return self
+
+    def crz(self, q0, q1, phase=DEF_PHASE):
+        # error check
+        if q0 >= self.qubit_num:
+            raise QState_OutOfBound()
+        if q1 >= self.qubit_num:
+            raise QState_OutOfBound()
+        if q0 == q1:
+            raise QState_SameQubitID()
+
+        # operate
+        id = [q0,q1]
+        self.__operate_qgate(kind=CONTROLLED_RZ, phase=phase, id=id)
+        return self
+
     def ccx(self, q0, q1, q2):
-        return self.CCX(q0, q1, q2)
-    
-    def CCX(self, q0, q1, q2):
         # error check
         if q0 >= self.qubit_num:
             raise QState_OutOfBound()
@@ -606,26 +549,12 @@ class QState(ctypes.Structure):
         if q2 == q0:
             raise QState_SameQubitID()
 
-        # join circ
-        for i in range(self.qubit_num):
-            if i == q0:
-                self._circ[i] += "*---"
-            elif i == q1:
-                self._circ[i] += "*---"
-            elif i == q2:
-                self._circ[i] += "CCX-"
-            else:
-                self._circ[i] += "----"
-                
         # operate
         id = [q0,q1,q2]
         self.__operate_qgate(kind=TOFFOLI, phase=DEF_PHASE, id=id)
         return self
 
     def m(self, id=None, shots=DEF_SHOTS, angle=0.0, phase=0.0):
-        return self.M(id=id, shots=shots, angle=angle, phase=phase)
-        
-    def M(self, id=None, shots=DEF_SHOTS, angle=0.0, phase=0.0):
         if id is None or id == []:
             id = [i for i in range(self.qubit_num)]
             
@@ -638,14 +567,6 @@ class QState(ctypes.Structure):
             if id[i] < 0:
                 raise QState_OutOfBound()
 
-        # join circ
-        for i in range(len(id)):
-            for j in range(self.qubit_num):
-                if id[i] == j:
-                    self._circ[j] += "M-"
-                else:
-                    self._circ[j] += "--"
-            
         # operate
         qubit_num = len(id)
         qubit_id = [0 for _ in range(MAX_QUBIT_NUM)]
@@ -682,27 +603,15 @@ class QState(ctypes.Structure):
         return mdpy
 
     def mx(self, id=None, shots=DEF_SHOTS):
-        return self.M(id=id, shots=shots, angle=0.5, phase=0.0)
-        
-    def MX(self, id=None, shots=DEF_SHOTS):
-        return self.M(id=id, shots=shots, angle=0.5, phase=0.0)
+        return self.m(id=id, shots=shots, angle=0.5, phase=0.0)
         
     def my(self, id=None, shots=DEF_SHOTS):
-        return self.M(id=id, shots=shots, angle=0.5, phase=0.5)
-        
-    def MY(self, id=None, shots=DEF_SHOTS):
-        return self.M(id=id, shots=shots, angle=0.5, phase=0.5)
+        return self.m(id=id, shots=shots, angle=0.5, phase=0.5)
         
     def mz(self, id=None, shots=DEF_SHOTS):
-        return self.M(id=id, shots=shots, angle=0.0, phase=0.0)
-        
-    def MZ(self, id=None, shots=DEF_SHOTS):
-        return self.M(id=id, shots=shots, angle=0.0, phase=0.0)
+        return self.m(id=id, shots=shots, angle=0.0, phase=0.0)
         
     def mb(self, id=None, shots=DEF_SHOTS):
-        return self.MB(id=id, shots=shots)
-    
-    def MB(self, id=None, shots=DEF_SHOTS):
         # error check
         if id is None or id == []:
             raise QState_NeedMoreArguments()
@@ -716,15 +625,6 @@ class QState(ctypes.Structure):
             if id[i] < 0:
                 raise QState_OutOfBound()
 
-        # join circ
-        # for i in range(self.qubit_num):
-        for i in range(len(id)):
-            for j in range(self.qubit_num):
-                if id[i] == j:
-                    self._circ[j] += "MB-"
-                else:
-                    self._circ[j] += "---"
-            
         # operate
         state_num = 4
         qubit_num = 2

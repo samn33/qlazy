@@ -42,8 +42,8 @@ def main():
     qs_gate.rx(0, phase=alpha).rz(0, phase=beta).rx(0, phase=gamma)
     qs_gate.show()
 
-    del qs_oneway
-    del qs_gate
+    qs_oneway.free()
+    qs_gate.free()
     
 if __name__ == '__main__':
     main()

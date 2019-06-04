@@ -1,10 +1,10 @@
 init 2
-x 0
 
-@ == initial state ==
+@ == initial state: h 0, h 1 ==
+h 0
+h 1
 show
 
-cx 0 1
-
-@ == final state ==
+@ == final state: cry(0.1) 0 1 ==
+cry(0.1) 0 1
 show

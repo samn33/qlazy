@@ -30,8 +30,8 @@ def main():
     qs_gate.rz(0, phase=-phi).h(0)
     qs_gate.show()
 
-    del qs_oneway
-    del qs_gate
+    qs_oneway.free()
+    qs_gate.free()
 
 if __name__ == '__main__':
     main()

@@ -15,8 +15,8 @@ def main():
         qs.evolve(observable=hm, time=t, iter=100)
 
         # expectation values of Observable Y,Z
-        exp_y = qs.expect(observable=ob_y)
-        exp_z = qs.expect(observable=ob_z)
+        exp_y = qs.expect(observable=ob_y).real
+        exp_z = qs.expect(observable=ob_z).real
 
         # argument
         if abs(exp_z)<0.00001: # exp_theta = 0.5*PI, if exp_z = 0.0 
@@ -27,9 +27,9 @@ def main():
         print("time = {0:.2f}, <y> = {1:.2f}, <z> = {2:.2f}, <theta> = {3:.2f}*PI"
               .format(t, exp_y, exp_z, exp_theta))
 
-        del qs
+        qs.free()
     
-    del hm
+    hm.free()
     
 if __name__ == '__main__':
     main()

@@ -35,4 +35,4 @@ simple example is following ...
     print("* last = ", md.lst)
 
     # free object
-    del qs
+    qs.free()

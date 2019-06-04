@@ -78,6 +78,23 @@ bool gbank_init(void** gbank_out)
   gbank->ControlledX[14] = 1.0;
   gbank->ControlledX[15] = 0.0;
 
+  gbank->ControlledY[0] = 1.0;
+  gbank->ControlledY[1] = 0.0;
+  gbank->ControlledY[2] = 0.0;
+  gbank->ControlledY[3] = 0.0;
+  gbank->ControlledY[4] = 0.0;
+  gbank->ControlledY[5] = 1.0;
+  gbank->ControlledY[6] = 0.0;
+  gbank->ControlledY[7] = 0.0;
+  gbank->ControlledY[8] = 0.0;
+  gbank->ControlledY[9] = 0.0;
+  gbank->ControlledY[10] = 0.0;
+  gbank->ControlledY[11] = -1.0i;
+  gbank->ControlledY[12] = 0.0;
+  gbank->ControlledY[13] = 0.0;
+  gbank->ControlledY[14] = 1.0i;
+  gbank->ControlledY[15] = 0.0;
+
   gbank->ControlledZ[0] =  1.0;
   gbank->ControlledZ[1] =  0.0;
   gbank->ControlledZ[2] =  0.0;
@@ -94,6 +111,23 @@ bool gbank_init(void** gbank_out)
   gbank->ControlledZ[13] =  0.0;
   gbank->ControlledZ[14] =  0.0;
   gbank->ControlledZ[15] = -1.0;
+
+  gbank->ControlledH[0] =  1.0;
+  gbank->ControlledH[1] =  0.0;
+  gbank->ControlledH[2] =  0.0;
+  gbank->ControlledH[3] =  0.0;
+  gbank->ControlledH[4] =  0.0;
+  gbank->ControlledH[5] =  1.0;
+  gbank->ControlledH[6] =  0.0;
+  gbank->ControlledH[7] =  0.0;
+  gbank->ControlledH[8] =  0.0;
+  gbank->ControlledH[9] =  0.0;
+  gbank->ControlledH[10] =  1.0/sqrt(2.0);
+  gbank->ControlledH[11] =  1.0/sqrt(2.0);
+  gbank->ControlledH[12] =  0.0;
+  gbank->ControlledH[13] =  0.0;
+  gbank->ControlledH[14] =  1.0/sqrt(2.0);
+  gbank->ControlledH[15] = -1.0/sqrt(2.0);
 
   *gbank_out = gbank;
   
@@ -122,14 +156,95 @@ bool gbank_get_rotation(Axis axis, double phase, double unit, void** matrix_out)
     matrix[IDX2(1,1)] = cos(theta/2.0);
     break;
   case Z_AXIS:
-    matrix[IDX2(0,0)] = 1.0 + 0.0i;
+    matrix[IDX2(0,0)] = cos(theta/2.0) - 1.0i * sin(theta/2.0);
     matrix[IDX2(0,1)] = 0.0 + 0.0i;
     matrix[IDX2(1,0)] = 0.0 + 0.0i;
-    matrix[IDX2(1,1)] = cos(theta) + 1.0i * sin(theta);
+    matrix[IDX2(1,1)] = cos(theta/2.0) + 1.0i * sin(theta/2.0);
     break;
   default:
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
   }
+
+  *matrix_out = matrix;
+
+  SUC_RETURN(true);
+}
+
+bool gbank_get_ctr_rotation(Axis axis, double phase, double unit, void** matrix_out)
+{
+  COMPLEX* matrix = NULL;
+  double theta = phase * unit;
+
+  if (!(matrix = (COMPLEX*)malloc(sizeof(COMPLEX)*16)))
+    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
+
+  for (int i=0; i<16; i++) matrix[i] = 0.0 + 0.0i;
+  
+  switch (axis) {
+  case X_AXIS:
+    matrix[IDX4(0,0)] = 1.0 + 0.0i;
+    matrix[IDX4(1,1)] = 1.0 + 0.0i;
+    matrix[IDX4(2,2)] = cos(theta/2.0);
+    matrix[IDX4(2,3)] = - 1.0i * sin(theta/2.0);
+    matrix[IDX4(3,2)] = - 1.0i * sin(theta/2.0);
+    matrix[IDX4(3,3)] = cos(theta/2.0);
+    break;
+  case Y_AXIS:
+    matrix[IDX4(0,0)] = 1.0 + 0.0i;
+    matrix[IDX4(1,1)] = 1.0 + 0.0i;
+    matrix[IDX4(2,2)] = cos(theta/2.0);
+    matrix[IDX4(2,3)] = -sin(theta/2.0);
+    matrix[IDX4(3,2)] = sin(theta/2.0);
+    matrix[IDX4(3,3)] = cos(theta/2.0);
+    break;
+  case Z_AXIS:
+    matrix[IDX4(0,0)] = 1.0 + 0.0i;
+    matrix[IDX4(1,1)] = 1.0 + 0.0i;
+    matrix[IDX4(2,2)] = cos(theta/2.0) - 1.0i * sin(theta/2.0);
+    matrix[IDX4(2,3)] = 0.0 + 0.0i;
+    matrix[IDX4(3,2)] = 0.0 + 0.0i;
+    matrix[IDX4(3,3)] = cos(theta/2.0) + 1.0i * sin(theta/2.0);
+    break;
+  default:
+    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+  }
+
+  *matrix_out = matrix;
+
+  SUC_RETURN(true);
+}
+
+bool gbank_get_phase_shift(double phase, double unit, void** matrix_out)
+{
+  COMPLEX* matrix = NULL;
+  double theta = phase * unit;
+
+  if (!(matrix = (COMPLEX*)malloc(sizeof(COMPLEX)*4)))
+    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
+
+  matrix[IDX2(0,0)] = 1.0 + 0.0i;
+  matrix[IDX2(0,1)] = 0.0 + 0.0i;
+  matrix[IDX2(1,0)] = 0.0 + 0.0i;
+  matrix[IDX2(1,1)] = cos(theta) + 1.0i * sin(theta);
+
+  *matrix_out = matrix;
+
+  SUC_RETURN(true);
+}
+
+bool gbank_get_ctr_phase_shift(double phase, double unit, void** matrix_out)
+{
+  COMPLEX* matrix = NULL;
+  double theta = phase * unit;
+
+  if (!(matrix = (COMPLEX*)malloc(sizeof(COMPLEX)*16)))
+    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
+
+  for (int i=0; i<16; i++) matrix[i] = 0.0 + 0.0i;
+  matrix[IDX4(0,0)] = 1.0 + 0.0i;
+  matrix[IDX4(1,1)] = 1.0 + 0.0i;
+  matrix[IDX4(2,2)] = 1.0 + 0.0i;
+  matrix[IDX4(3,3)] = cos(theta) + 1.0i * sin(theta);
 
   *matrix_out = matrix;
 
@@ -177,8 +292,14 @@ bool gbank_get(GBank* gbank, Kind kind, void** matrix_out)
   case CONTROLLED_X:
     matrix = gbank->ControlledX;
     break;
+  case CONTROLLED_Y:
+    matrix = gbank->ControlledY;
+    break;
   case CONTROLLED_Z:
     matrix = gbank->ControlledZ;
+    break;
+  case CONTROLLED_H:
+    matrix = gbank->ControlledH;
     break;
   default:
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);

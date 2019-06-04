@@ -81,6 +81,11 @@ bool qcirc_append_qgate(QCirc* qcirc, Kind kind, int terminal_num,
   case ROTATION_X:
   case ROTATION_Y:
   case ROTATION_Z:
+  case PHASE_SHIFT:
+  case CONTROLLED_RX:
+  case CONTROLLED_RY:
+  case CONTROLLED_RZ:
+  case CONTROLLED_P:
     qcirc->qgate[qcirc->step_num].para.phase = para->phase;
     break;
   default:
@@ -101,12 +106,12 @@ bool qcirc_set_cimage(QCirc* qcirc)
 
   if (qcirc == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
+  /* free previous cimage */
   if (qcirc->cimage != NULL) {
     cimage_free(qcirc->cimage); qcirc->cimage = NULL;
   }
 
   /* allocate cimage and set initial character '-' */
-  
   if (!(cimage_init(qcirc->qubit_num, qcirc->step_num, (void**)&(qcirc->cimage))))
     ERR_RETURN(ERROR_CIMAGE_INIT,false);
   
@@ -152,6 +157,7 @@ bool qcirc_set_cimage(QCirc* qcirc)
     case ROTATION_X:
     case ROTATION_Y:
     case ROTATION_Z:
+    case PHASE_SHIFT:
       while (symbol[p] != '\0') {
 	qcirc->cimage->ch[qcirc->qgate[i].qubit_id[0]][pos] = symbol[p];
 	pos++; p++;
@@ -165,10 +171,29 @@ bool qcirc_set_cimage(QCirc* qcirc)
       pos++;
       break;
     case CONTROLLED_X:
+    case CONTROLLED_Y:
     case CONTROLLED_Z:
+    case CONTROLLED_H:
       qcirc->cimage->ch[qcirc->qgate[i].qubit_id[0]][pos] = '*';
       while (symbol[p] != '\0') {
 	qcirc->cimage->ch[qcirc->qgate[i].qubit_id[1]][pos] = symbol[p];
+	pos++; p++;
+      }
+      pos++;
+      break;
+    case CONTROLLED_P:
+    case CONTROLLED_RX:
+    case CONTROLLED_RY:
+    case CONTROLLED_RZ:
+      qcirc->cimage->ch[qcirc->qgate[i].qubit_id[0]][pos] = '*';
+      while (symbol[p] != '\0') {
+	qcirc->cimage->ch[qcirc->qgate[i].qubit_id[1]][pos] = symbol[p];
+	pos++; p++;
+      }
+      p = 0;
+      sprintf(parastr, "(%.3f)", qcirc->qgate[i].para.phase);
+      while (parastr[p] != '\0') {
+	qcirc->cimage->ch[qcirc->qgate[i].qubit_id[1]][pos] = parastr[p];
 	pos++; p++;
       }
       pos++;
@@ -266,11 +291,20 @@ bool qcirc_write_file(QCirc* qcirc, char* fname)
     case ROTATION_X:
     case ROTATION_Y:
     case ROTATION_Z:
+    case PHASE_SHIFT:
       fprintf(fp, "%s(%f) %d\n", symbol, para->phase, qubit_id[0]);
       break;
     case CONTROLLED_X:
+    case CONTROLLED_Y:
     case CONTROLLED_Z:
+    case CONTROLLED_H:
       fprintf(fp, "%s %d %d\n", symbol, qubit_id[0], qubit_id[1]);
+      break;
+    case CONTROLLED_RX:
+    case CONTROLLED_RY:
+    case CONTROLLED_RZ:
+    case CONTROLLED_P:
+      fprintf(fp, "%s(%f) %d %d\n", symbol, para->phase, qubit_id[0], qubit_id[1]);
       break;
     case TOFFOLI:
       fprintf(fp, "%s %d %d %d\n", symbol, qubit_id[0], qubit_id[1], qubit_id[2]);
@@ -446,6 +480,7 @@ bool qcirc_read_file(char* fname, void** qcirc_out)
     case ROTATION_X:
     case ROTATION_Y:
     case ROTATION_Z:
+    case PHASE_SHIFT:
       /* 1-qubit 1-parameter gate */
       terminal_num = 1;
       if (anum == 1) {
@@ -459,13 +494,39 @@ bool qcirc_read_file(char* fname, void** qcirc_out)
       if (qubit_num < qubit_id[0] + 1) ERR_RETURN(ERROR_CANT_READ_LINE,false);
       break;
     case CONTROLLED_X:
+    case CONTROLLED_Y:
     case CONTROLLED_Z:
+    case CONTROLLED_H:
       /* 2-qubit gate */
       terminal_num = 2;
       qubit_id[0] = strtol(token[1], NULL, 10);
       qubit_id[1] = strtol(token[2], NULL, 10);
       if (qubit_num < qubit_id[0] + 1) ERR_RETURN(ERROR_CANT_READ_LINE,false);
       if (qubit_num < qubit_id[1] + 1) ERR_RETURN(ERROR_CANT_READ_LINE,false);
+      if (qubit_id[0] < 0) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
+      if (qubit_id[1] < 0) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
+      if (qubit_id[0] == qubit_id[1]) ERR_RETURN(ERROR_SAME_QUBIT_ID,false);
+      break;
+    case CONTROLLED_RX:
+    case CONTROLLED_RY:
+    case CONTROLLED_RZ:
+    case CONTROLLED_P:
+      /* 2-qubit, 1-parameter gate */
+      terminal_num = 2;
+      if (anum == 1) {
+	para.phase = DEF_PHASE;
+      }
+      else if (anum == 2) {
+	para.phase = strtod(args[1], NULL);
+      }
+      else ERR_RETURN(ERROR_CANT_READ_LINE,false);
+      qubit_id[0] = strtol(token[1], NULL, 10);
+      qubit_id[1] = strtol(token[2], NULL, 10);
+      if (qubit_num < qubit_id[0] + 1) ERR_RETURN(ERROR_CANT_READ_LINE,false);
+      if (qubit_num < qubit_id[1] + 1) ERR_RETURN(ERROR_CANT_READ_LINE,false);
+      if (qubit_id[0] < 0) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
+      if (qubit_id[1] < 0) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
+      if (qubit_id[0] == qubit_id[1]) ERR_RETURN(ERROR_SAME_QUBIT_ID,false);
       break;
     case TOFFOLI:
       /* 3-qubit gate */

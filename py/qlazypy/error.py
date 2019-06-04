@@ -22,9 +22,9 @@ class QState_FailToInnerProduct(Exception):
     def __str__(self):
         return "QState: fail to inner product"
 
-class QState_FailToCirc(Exception):
+class QState_FailToTensorProduct(Exception):
     def __str__(self):
-        return "QState: fail to circ"
+        return "QState: fail to tensor product"
 
 class QState_OutOfBound(Exception):
     def __str__(self):
@@ -57,6 +57,10 @@ class QState_FailToExpect(Exception):
 class QState_FailToBloch(Exception):
     def __str__(self):
         return "QState: fail to bloch"
+
+class QState_FailToOperate(Exception):
+    def __str__(self):
+        return "QState: fail to operate"
 
 # MData
 

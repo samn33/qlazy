@@ -17,13 +17,10 @@ print("* amplitude = ", qs.amp)
 # measurement
 md = qs.m(id=[0,1,2],shots=50)
 
-print("== circuit ==")
-qs.circ()
-
 print("== measurement ==")
 md.show()
 
 print("* freq = ", md.frq)
 print("* last = ", md.lst)
 
-del qs
+qs.free()

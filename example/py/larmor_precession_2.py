@@ -17,9 +17,9 @@ def main():
         print("time = {0:.2f}, theta = {1:.2f}*PI, phi = {2:.2f}*PI"
               .format(t,theta,phi))
 
-        del qs
+        qs.free()
     
-    del hm
+    hm.free()
     
 if __name__ == '__main__':
     main()

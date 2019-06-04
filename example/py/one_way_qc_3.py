@@ -40,8 +40,8 @@ def main():
     qs_gate.cx(0,1)
     qs_gate.show()
 
-    del qs_oneway
-    del qs_gate
+    qs_oneway.free()
+    qs_gate.free()
     
 if __name__ == '__main__':
     main()

@@ -42,4 +42,4 @@ qs.show(id=[0])
 print("== Bob (final) ==")
 qs.show(id=[2])
 
-del qs
+qs.free()

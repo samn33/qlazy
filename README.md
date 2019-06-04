@@ -11,6 +11,11 @@ Quantum Computer Simulator
     $ cd qlazy/c
     $ mkdir build; cd build; cmake ..; make
     $ mv libQlazy.so ~/lib; mv qlazy ~/bin
+	
+add followings to your ~/.bashrc
+
+    export PATH=$PATH:~/bin
+    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/lib
 
 You may also need to install 'readline-dev' ($ sudo apt install readline-dev).
 
@@ -68,7 +73,7 @@ foo.py
     md = qs.m()
     md.show()
     
-    del qs
+    qs.free()
 
 execute the program
 

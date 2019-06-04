@@ -42,8 +42,7 @@ class Observable(ctypes.Structure):
 
         return out.contents
 
-    def __del__(self):
+    def free(self):
 
         lib.observable_free.argtypes = [ctypes.POINTER(Observable)]
         lib.observable_free(ctypes.byref(self))
-

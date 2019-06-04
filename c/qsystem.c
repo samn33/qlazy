@@ -271,6 +271,7 @@ static bool _qsystem_execute_one_line(QSystem* qsystem, char* line)
   case ROTATION_X:
   case ROTATION_Y:
   case ROTATION_Z:
+  case PHASE_SHIFT:
     /* 1-qubit 1-parameter gate */
     if ((qcirc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
     if (tnum > 2) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
@@ -288,13 +289,40 @@ static bool _qsystem_execute_one_line(QSystem* qsystem, char* line)
     if (qubit_id[0] < 0) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
     break;
   case CONTROLLED_X:
+  case CONTROLLED_Y:
   case CONTROLLED_Z:
+  case CONTROLLED_H:
     /* 2-qubit gate */
     if ((qcirc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
     if (tnum > 3) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
     if (tnum < 3) ERR_RETURN(ERROR_NEED_MORE_ARGUMENTS,false);
+
     if (anum > 1) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
     terminal_num = 2;
+    qubit_id[0] = strtol(token[1], NULL, 10);
+    qubit_id[1] = strtol(token[2], NULL, 10);
+    if (qubit_num < qubit_id[0] + 1) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
+    if (qubit_num < qubit_id[1] + 1) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
+    if (qubit_id[0] < 0) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
+    if (qubit_id[1] < 0) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
+    if (qubit_id[0] == qubit_id[1]) ERR_RETURN(ERROR_SAME_QUBIT_ID,false);
+    break;
+  case CONTROLLED_P:
+  case CONTROLLED_RX:
+  case CONTROLLED_RY:
+  case CONTROLLED_RZ:
+    /* 2-qubit, 1-parameter gate */
+    if ((qcirc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
+    if (tnum > 3) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
+    if (tnum < 3) ERR_RETURN(ERROR_NEED_MORE_ARGUMENTS,false);
+    terminal_num = 2;
+    if (anum == 1) {
+      para.phase = DEF_PHASE;
+    }
+    else if (anum == 2) {
+      para.phase = strtod(args[1], NULL);
+    }
+    else ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
     qubit_id[0] = strtol(token[1], NULL, 10);
     qubit_id[1] = strtol(token[2], NULL, 10);
     if (qubit_num < qubit_id[0] + 1) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
@@ -327,7 +355,7 @@ static bool _qsystem_execute_one_line(QSystem* qsystem, char* line)
     ERR_RETURN(ERROR_UNKNOWN_GATE,false);
   }
 
-  if (!(qcirc_append_qgate(qcirc, kind, terminal_num, &para, qubit_id)))
+  if (!(qcirc_append_qgate(qcirc, kind, terminal_num, &para, qubit_id))) /* set para */
     ERR_RETURN(ERROR_QCIRC_APPEND_QGATE,false);
 
   qgate = &(qcirc->qgate[qcirc->step_num - 1]);

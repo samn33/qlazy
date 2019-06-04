@@ -475,6 +475,43 @@ static bool _qstate_operate_qgate_1_rot(QState* qstate, Axis axis, double phase,
   SUC_RETURN(true);
 }
 
+static bool _qstate_operate_qgate_1_phase_shift(QState* qstate, double phase,
+						double unit, int n)
+{
+  int		i;
+  QState*	qstate_tmp = NULL;
+  int		nn	   = qstate->qubit_num - n - 1;
+  COMPLEX*	U	   = NULL;
+
+  if ((qstate == NULL) || (nn < 0) || (nn >= qstate->qubit_num))
+    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+  
+  if (!(gbank_get_phase_shift(phase, unit, (void**)&U)))
+    ERR_RETURN(ERROR_GBANK_GET_ROTATION,false);
+
+  if (!(qstate_init(qstate->qubit_num, (void**)&qstate_tmp)))
+    ERR_RETURN(ERROR_QSTATE_INIT,false);
+  
+  for (i=0; i<qstate->state_num; i++) {
+    if ((i >> nn) %2 == 0) {
+      qstate_tmp->camp[i]
+	= U[IDX2(0,0)] * qstate->camp[i]
+	+ U[IDX2(0,1)] * qstate->camp[i + (1 << nn)];
+    }
+    else {
+      qstate_tmp->camp[i]
+	= U[IDX2(1,0)] * qstate->camp[i - (1 << nn)]
+	+ U[IDX2(1,1)] * qstate->camp[i];
+    }
+  }
+  memcpy(qstate->camp, qstate_tmp->camp, sizeof(COMPLEX)*qstate->state_num);
+  qstate_free(qstate_tmp); qstate_tmp = NULL;
+
+  free(U); U = NULL;
+
+  SUC_RETURN(true);
+}
+
 static bool _qstate_operate_qgate_2(QState* qstate, Kind kind, int m, int n)
 {
   int i;
@@ -484,6 +521,118 @@ static bool _qstate_operate_qgate_2(QState* qstate, Kind kind, int m, int n)
   COMPLEX* U = NULL;
 
   if (!(gbank_get(qstate->gbank, kind, (void**)&U)))
+    ERR_RETURN(ERROR_GBANK_GET,false);
+
+  if ((qstate == NULL) ||
+      (m < 0) || (m >= qstate->qubit_num) ||
+      (n < 0) || (n >= qstate->qubit_num))
+    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+  
+  if (!(qstate_init(qstate->qubit_num, (void**)&qstate_tmp)))
+    ERR_RETURN(ERROR_QSTATE_INIT,false);
+  
+  for (i=0; i<qstate->state_num; i++) {
+    if (((i >> mm) % 2 == 0) && ((i >> nn) % 2 == 0)) {
+      qstate_tmp->camp[i]
+	= U[IDX4(0,0)] * qstate->camp[i]
+	+ U[IDX4(0,1)] * qstate->camp[i + (1 << nn)]
+	+ U[IDX4(0,2)] * qstate->camp[i + (1 << mm)]
+	+ U[IDX4(0,3)] * qstate->camp[i + (1 << nn) + (1 << mm)];
+    }
+    else if (((i >> mm) % 2 == 0) && ((i >> nn) % 2 == 1)) {
+      qstate_tmp->camp[i]
+	= U[IDX4(1,0)] * qstate->camp[i - (1 << nn)]
+	+ U[IDX4(1,1)] * qstate->camp[i]
+	+ U[IDX4(1,2)] * qstate->camp[i - (1 << nn) + (1 << mm)]
+	+ U[IDX4(1,3)] * qstate->camp[i + (1 << mm)];
+    }
+    else if (((i >> mm) % 2 == 1) && ((i >> nn) % 2 == 0)) {
+      qstate_tmp->camp[i]
+	= U[IDX4(2,0)] * qstate->camp[i - (1 << mm)]
+	+ U[IDX4(2,1)] * qstate->camp[i + (1 << nn) - (1 << mm)]
+	+ U[IDX4(2,2)] * qstate->camp[i]
+	+ U[IDX4(2,3)] * qstate->camp[i + (1 << nn)];
+    }
+    else {
+      qstate_tmp->camp[i]
+	= U[IDX4(3,0)] * qstate->camp[i - (1 << nn) - (1 << mm)]
+	+ U[IDX4(3,1)] * qstate->camp[i - (1 << mm)]
+	+ U[IDX4(3,2)] * qstate->camp[i - (1 << nn)]
+	+ U[IDX4(3,3)] * qstate->camp[i];
+    }
+  }
+  memcpy(qstate->camp, qstate_tmp->camp, sizeof(COMPLEX)*qstate->state_num);
+  qstate_free(qstate_tmp); qstate_tmp = NULL;
+
+  SUC_RETURN(true);
+}
+
+static bool _qstate_operate_qgate_2_ctr_rot(QState* qstate, Axis axis, double phase,
+					    double unit, int m, int n)
+{
+  int i;
+  QState* qstate_tmp = NULL;
+  int mm = qstate->qubit_num - m - 1;
+  int nn = qstate->qubit_num - n - 1;
+  COMPLEX* U = NULL;
+
+  if (!(gbank_get_ctr_rotation(axis, phase, unit, (void**)&U)))
+    ERR_RETURN(ERROR_GBANK_GET,false);
+
+  if ((qstate == NULL) ||
+      (m < 0) || (m >= qstate->qubit_num) ||
+      (n < 0) || (n >= qstate->qubit_num))
+    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+  
+  if (!(qstate_init(qstate->qubit_num, (void**)&qstate_tmp)))
+    ERR_RETURN(ERROR_QSTATE_INIT,false);
+  
+  for (i=0; i<qstate->state_num; i++) {
+    if (((i >> mm) % 2 == 0) && ((i >> nn) % 2 == 0)) {
+      qstate_tmp->camp[i]
+	= U[IDX4(0,0)] * qstate->camp[i]
+	+ U[IDX4(0,1)] * qstate->camp[i + (1 << nn)]
+	+ U[IDX4(0,2)] * qstate->camp[i + (1 << mm)]
+	+ U[IDX4(0,3)] * qstate->camp[i + (1 << nn) + (1 << mm)];
+    }
+    else if (((i >> mm) % 2 == 0) && ((i >> nn) % 2 == 1)) {
+      qstate_tmp->camp[i]
+	= U[IDX4(1,0)] * qstate->camp[i - (1 << nn)]
+	+ U[IDX4(1,1)] * qstate->camp[i]
+	+ U[IDX4(1,2)] * qstate->camp[i - (1 << nn) + (1 << mm)]
+	+ U[IDX4(1,3)] * qstate->camp[i + (1 << mm)];
+    }
+    else if (((i >> mm) % 2 == 1) && ((i >> nn) % 2 == 0)) {
+      qstate_tmp->camp[i]
+	= U[IDX4(2,0)] * qstate->camp[i - (1 << mm)]
+	+ U[IDX4(2,1)] * qstate->camp[i + (1 << nn) - (1 << mm)]
+	+ U[IDX4(2,2)] * qstate->camp[i]
+	+ U[IDX4(2,3)] * qstate->camp[i + (1 << nn)];
+    }
+    else {
+      qstate_tmp->camp[i]
+	= U[IDX4(3,0)] * qstate->camp[i - (1 << nn) - (1 << mm)]
+	+ U[IDX4(3,1)] * qstate->camp[i - (1 << mm)]
+	+ U[IDX4(3,2)] * qstate->camp[i - (1 << nn)]
+	+ U[IDX4(3,3)] * qstate->camp[i];
+    }
+  }
+  memcpy(qstate->camp, qstate_tmp->camp, sizeof(COMPLEX)*qstate->state_num);
+  qstate_free(qstate_tmp); qstate_tmp = NULL;
+
+  SUC_RETURN(true);
+}
+
+static bool _qstate_operate_qgate_2_ctr_phase_shift(QState* qstate, double phase,
+						    double unit, int m, int n)
+{
+  int i;
+  QState* qstate_tmp = NULL;
+  int mm = qstate->qubit_num - m - 1;
+  int nn = qstate->qubit_num - n - 1;
+  COMPLEX* U = NULL;
+
+  if (!(gbank_get_ctr_phase_shift(phase, unit, (void**)&U)))
     ERR_RETURN(ERROR_GBANK_GET,false);
 
   if ((qstate == NULL) ||
@@ -846,9 +995,31 @@ bool qstate_operate_qgate_param(QState* qstate, Kind kind, double phase,
     if (!(_qstate_operate_qgate_1_rot(qstate, Z_AXIS, phase, M_PI, q0)))
       ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
     break;
+  case PHASE_SHIFT:
+    if (!(_qstate_operate_qgate_1_phase_shift(qstate, phase, M_PI, q0)))
+      ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+    break;
   case CONTROLLED_X:
+  case CONTROLLED_Y:
   case CONTROLLED_Z:
+  case CONTROLLED_H:
     if (!(_qstate_operate_qgate_2(qstate, kind, q0, q1)))
+      ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+    break;
+  case CONTROLLED_RX:
+    if (!(_qstate_operate_qgate_2_ctr_rot(qstate, X_AXIS, phase, M_PI, q0, q1)))
+      ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+    break;
+  case CONTROLLED_RY:
+    if (!(_qstate_operate_qgate_2_ctr_rot(qstate, Y_AXIS, phase, M_PI, q0, q1)))
+      ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+    break;
+  case CONTROLLED_RZ:
+    if (!(_qstate_operate_qgate_2_ctr_rot(qstate, Z_AXIS, phase, M_PI, q0, q1)))
+      ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+    break;
+  case CONTROLLED_P:
+    if (!(_qstate_operate_qgate_2_ctr_phase_shift(qstate, phase, M_PI, q0, q1)))
       ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
     break;
   case TOFFOLI:
@@ -903,12 +1074,19 @@ bool qstate_operate_qgate(QState* qstate, QGate* qgate)
   case PHASE_SHIFT_T_:
   case PHASE_SHIFT_S:
   case PHASE_SHIFT_S_:
+  case PHASE_SHIFT:
   case HADAMARD:
   case ROTATION_X:
   case ROTATION_Y:
   case ROTATION_Z:
   case CONTROLLED_X:
+  case CONTROLLED_Y:
   case CONTROLLED_Z:
+  case CONTROLLED_H:
+  case CONTROLLED_RX:
+  case CONTROLLED_RY:
+  case CONTROLLED_RZ:
+  case CONTROLLED_P:
   case TOFFOLI:
     if (!(qstate_operate_qgate_param(qstate, kind, para->phase, qubit_id)))
       ERR_RETURN(ERROR_QSTATE_OPERATE_QGATE_PARAM,false);
@@ -1131,6 +1309,30 @@ bool qstate_inner_product(QState* qstate_0, QState* qstate_1,
   }
   *real = creal(out);
   *imag = cimag(out);
+
+  SUC_RETURN(true);
+}
+
+bool qstate_tensor_product(QState* qstate_0, QState* qstate_1, void** qstate_out)
+{
+  int		qubit_num;
+  QState*	qstate = NULL;
+
+  if ((qstate_0 == NULL) || (qstate_1 == NULL))
+    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+
+  qubit_num = qstate_0->qubit_num + qstate_1->qubit_num;
+  if (!(qstate_init(qubit_num, (void**)&qstate)))
+    ERR_RETURN(ERROR_QSTATE_INIT,false);
+
+  int cnt = 0;
+  for (int i=0; i<qstate_0->state_num; i++) {
+    for (int j=0; j<qstate_1->state_num; j++) {
+      qstate->camp[cnt++] = qstate_0->camp[i] * qstate_1->camp[j];
+    }
+  }
+
+  *qstate_out = qstate;
 
   SUC_RETURN(true);
 }

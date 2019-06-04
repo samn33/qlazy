@@ -17,11 +17,6 @@ def main():
     qs_oneway.my(id=[2], shots=1)
     qs_oneway.my(id=[3], shots=1)
 
-#    qs_oneway.m(id=[0], shots=1, angle=0.5, phase=0.0)
-#    qs_oneway.m(id=[1], shots=1, angle=0.5, phase=0.5)
-#    qs_oneway.m(id=[2], shots=1, angle=0.5, phase=0.5)
-#    qs_oneway.m(id=[3], shots=1, angle=0.5, phase=0.5)
-
     # result state
     qs_oneway.show(id=[4])
 
@@ -31,8 +26,8 @@ def main():
     qs_gate.h(0)
     qs_gate.show()
 
-    del qs_oneway
-    del qs_gate
+    qs_oneway.free()
+    qs_gate.free()
     
 if __name__ == '__main__':
     main()

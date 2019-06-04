@@ -64,6 +64,9 @@ bool qgate_get_symbol(char* symbol, Kind kind)
   case PHASE_SHIFT_T_:
     strcpy(symbol,"T+");
     break;
+  case PHASE_SHIFT:
+    strcpy(symbol,"P");
+    break;
   case ROTATION_X:
     strcpy(symbol,"RX");
     break;
@@ -76,8 +79,26 @@ bool qgate_get_symbol(char* symbol, Kind kind)
   case CONTROLLED_X:
     strcpy(symbol,"CX");
     break;
+  case CONTROLLED_Y:
+    strcpy(symbol,"CY");
+    break;
   case CONTROLLED_Z:
     strcpy(symbol,"CZ");
+    break;
+  case CONTROLLED_H:
+    strcpy(symbol,"CH");
+    break;
+  case CONTROLLED_P:
+    strcpy(symbol,"CP");
+    break;
+  case CONTROLLED_RX:
+    strcpy(symbol,"CRX");
+    break;
+  case CONTROLLED_RY:
+    strcpy(symbol,"CRY");
+    break;
+  case CONTROLLED_RZ:
+    strcpy(symbol,"CRZ");
     break;
   case TOFFOLI:
     strcpy(symbol,"CCX");
@@ -146,6 +167,8 @@ bool qgate_get_kind(char* symbol, Kind* kind_out)
   else if (strcmp(symbol,"t")     == 0) kind = PHASE_SHIFT_T; 
   else if (strcmp(symbol,"T+")    == 0) kind = PHASE_SHIFT_T_; 
   else if (strcmp(symbol,"t+")    == 0) kind = PHASE_SHIFT_T_; 
+  else if (strcmp(symbol,"P")     == 0) kind = PHASE_SHIFT; 
+  else if (strcmp(symbol,"p")     == 0) kind = PHASE_SHIFT; 
   else if (strcmp(symbol,"RX")    == 0) kind = ROTATION_X;
   else if (strcmp(symbol,"rx")    == 0) kind = ROTATION_X;
   else if (strcmp(symbol,"RY")    == 0) kind = ROTATION_Y;
@@ -154,8 +177,20 @@ bool qgate_get_kind(char* symbol, Kind* kind_out)
   else if (strcmp(symbol,"rz")    == 0) kind = ROTATION_Z;
   else if (strcmp(symbol,"CX")    == 0) kind = CONTROLLED_X;
   else if (strcmp(symbol,"cx")    == 0) kind = CONTROLLED_X;
+  else if (strcmp(symbol,"CY")    == 0) kind = CONTROLLED_Y;
+  else if (strcmp(symbol,"cy")    == 0) kind = CONTROLLED_Y;
   else if (strcmp(symbol,"CZ")    == 0) kind = CONTROLLED_Z;
   else if (strcmp(symbol,"cz")    == 0) kind = CONTROLLED_Z;
+  else if (strcmp(symbol,"CH")    == 0) kind = CONTROLLED_H;
+  else if (strcmp(symbol,"ch")    == 0) kind = CONTROLLED_H;
+  else if (strcmp(symbol,"CP")    == 0) kind = CONTROLLED_P;
+  else if (strcmp(symbol,"cp")    == 0) kind = CONTROLLED_P;
+  else if (strcmp(symbol,"CRX")   == 0) kind = CONTROLLED_RX;
+  else if (strcmp(symbol,"crx")   == 0) kind = CONTROLLED_RX;
+  else if (strcmp(symbol,"CRY")   == 0) kind = CONTROLLED_RY;
+  else if (strcmp(symbol,"cry")   == 0) kind = CONTROLLED_RY;
+  else if (strcmp(symbol,"CRZ")   == 0) kind = CONTROLLED_RZ;
+  else if (strcmp(symbol,"crz")   == 0) kind = CONTROLLED_RZ;
   else if (strcmp(symbol,"CCX")   == 0) kind = TOFFOLI;
   else if (strcmp(symbol,"ccx")   == 0) kind = TOFFOLI;
   else if (strcmp(symbol,"M")     == 0) kind = MEASURE;

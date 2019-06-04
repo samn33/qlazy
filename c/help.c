@@ -17,8 +17,8 @@ static void _help_print_outline() {
 * quit:                     .,quit \n\
 * help:                     ?,help \n\
 [quantum gates]\n\
-* 1-qubit gates:            X,Y,Z,XR,XR+,H,S,S+,T,T+,RX,RY,RZ\n\
-* 2-qubit gates:            CX,CZ\n\
+* 1-qubit gates:            X,Y,Z,XR,XR+,H,S,S+,T,T+,P,RX,RY,RZ\n\
+* 2-qubit gates:            CX,CY,CZ,CH,CP,CRX,CRY,CRZ\n\
 * 3-qubit gates:            CCX\n\
 * measurement:              M,MX,MY,MZ,MB\n\
 [notes] \n\
@@ -382,6 +382,21 @@ static void _help_print_t_dagger() {
 ");
 }
 
+static void _help_print_p() {
+  printf("\
+== P gate ==\n\
+[description] \n\
+  P gate is 1-qubit gate, It transform phase.\n\
+  - matrix expression:\n\
+    | 1 0               | \n\
+    | 0 exp(i*phase*PI) | \n\
+[usage] \n\
+  >> P(<phase>) <qubit_id>\n\
+[alias] \n\
+  p \n\
+");
+}
+
 static void _help_print_rx() {
   printf("\
 == RX gate ==\n\
@@ -418,8 +433,8 @@ static void _help_print_rz() {
 [description] \n\
   RZ gate is 1-qubit gate, It rotate through any phase around z-axis in bloch sphere.\n\
   - matrix expression:\n\
-    | 1 0                             | \n\
-    | 0 cos(phase*PI)+i*sin(phase*PI) | \n\
+    | exp(-i*phase/2) 0              | \n\
+    | 0               exp(i*phase/2) | \n\
 [usage] \n\
   >> RZ(<phase>) <qubit_id>\n\
 [alias] \n\
@@ -445,6 +460,23 @@ static void _help_print_cx() {
 ");
 }
 
+static void _help_print_cy() {
+  printf("\
+== CY gate ==\n\
+[description] \n\
+  CY gate is 2-qubit gate called \'controlled Y gate\'.\n\
+  - matrix expression:\n\
+    | 1 0 0 0  | \n\
+    | 0 1 0 0  | \n\
+    | 0 0 0 -i | \n\
+    | 0 0 i 0  | \n\
+[usage] \n\
+  >> CY <qubit_id> <qubit_id>\n\
+[alias] \n\
+  cy \n\
+");
+}
+
 static void _help_print_cz() {
   printf("\
 == CZ gate ==\n\
@@ -460,6 +492,71 @@ static void _help_print_cz() {
   >> CZ <qubit_id> <qubit_id>\n\
 [alias] \n\
   cz \n\
+");
+}
+
+static void _help_print_ch() {
+  printf("\
+== CH gate ==\n\
+[description] \n\
+  CH gate is 2-qubit gate called \'controlled H gate\'.\n\
+  It operate H gate to the second qubit if and only if the first qubit is |1>.\n\
+[usage] \n\
+  >> CH <qubit_id> <qubit_id>\n\
+[alias] \n\
+  ch \n\
+");
+}
+
+static void _help_print_cp() {
+  printf("\
+== CP gate ==\n\
+[description] \n\
+  CP gate is 2-qubit gate called \'controlled Phase Shift gate\'.\n\
+  It operate P gate to the second qubit if and only if the first qubit is |1>.\n\
+[usage] \n\
+  >> CP(<phase>) <qubit_id> <qubit_id>\n\
+[alias] \n\
+  cp \n\
+");
+}
+
+static void _help_print_crx() {
+  printf("\
+== CRX gate ==\n\
+[description] \n\
+  CRX gate is 2-qubit gate called \'controlled RX gate\'.\n\
+  It operate RX gate to the second qubit if and only if the first qubit is |1>.\n\
+[usage] \n\
+  >> CRX(<phase>) <qubit_id> <qubit_id>\n\
+[alias] \n\
+  crx \n\
+");
+}
+
+static void _help_print_cry() {
+  printf("\
+== CRY gate ==\n\
+[description] \n\
+  CRY gate is 2-qubit gate called \'controlled RY gate\'.\n\
+  It operate RY gate to the second qubit if and only if the first qubit is |1>.\n\
+[usage] \n\
+  >> CRY(<phase>) <qubit_id> <qubit_id>\n\
+[alias] \n\
+  cry \n\
+");
+}
+
+static void _help_print_crz() {
+  printf("\
+== CRZ gate ==\n\
+[description] \n\
+  CRZ gate is 2-qubit gate called \'controlled RZ gate\'.\n\
+  It operate RZ gate to the second qubit if and only if the first qubit is |1>.\n\
+[usage] \n\
+  >> CRZ(<phase>) <qubit_id> <qubit_id>\n\
+[alias] \n\
+  crz \n\
 ");
 }
 
@@ -568,6 +665,9 @@ bool help_print(char* item)
   case PHASE_SHIFT_T_:
     _help_print_t_dagger();
     break;
+  case PHASE_SHIFT:
+    _help_print_p();
+    break;
   case ROTATION_X:
     _help_print_rx();
     break;
@@ -580,8 +680,26 @@ bool help_print(char* item)
   case CONTROLLED_X:
     _help_print_cx();
     break;
+  case CONTROLLED_Y:
+    _help_print_cy();
+    break;
   case CONTROLLED_Z:
     _help_print_cz();
+    break;
+  case CONTROLLED_H:
+    _help_print_ch();
+    break;
+  case CONTROLLED_P:
+    _help_print_cp();
+    break;
+  case CONTROLLED_RX:
+    _help_print_crx();
+    break;
+  case CONTROLLED_RY:
+    _help_print_cry();
+    break;
+  case CONTROLLED_RZ:
+    _help_print_crz();
     break;
   case TOFFOLI:
     _help_print_ccx();
