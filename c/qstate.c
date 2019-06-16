@@ -117,23 +117,17 @@ static QState* _qstate_pickup(QState* qstate_in, int qubit_num, int qubit_id[MAX
   QState*	mask_qstate = NULL;
   int		x;
 
-  if (qstate_in->qubit_num == qubit_num) {
-    if (!(qstate_copy(qstate_in, (void**)&qstate)))
-      ERR_RETURN(ERROR_QSTATE_COPY,NULL);
-  }
-  else {  /* in the case of picking up some qubit states */
-    if (!(mask_qstate = _qstate_mask(qstate_in, qubit_num, qubit_id)))
-      ERR_RETURN(ERROR_INVALID_ARGUMENT,NULL);
+  if (!(mask_qstate = _qstate_mask(qstate_in, qubit_num, qubit_id)))
+    ERR_RETURN(ERROR_INVALID_ARGUMENT,NULL);
 
-    /* selected qubits state (qstate) */
-    if (!(qstate_init(qubit_num, (void**)&qstate)))
-      ERR_RETURN(ERROR_QSTATE_INIT,NULL);
-    _qstate_set_none(qstate);
-    for (int i=0; i<mask_qstate->state_num; i++) {
-      if (!(_select_bits(&x, i, qubit_num, qstate_in->qubit_num, qubit_id)))
-	ERR_RETURN(ERROR_INVALID_ARGUMENT,NULL);
-      qstate->camp[x] += mask_qstate->camp[i];
-    }
+  /* selected qubits state (qstate) */
+  if (!(qstate_init(qubit_num, (void**)&qstate)))
+    ERR_RETURN(ERROR_QSTATE_INIT,NULL);
+  _qstate_set_none(qstate);
+  for (int i=0; i<mask_qstate->state_num; i++) {
+    if (!(_select_bits(&x, i, qubit_num, qstate_in->qubit_num, qubit_id)))
+      ERR_RETURN(ERROR_INVALID_ARGUMENT,NULL);
+    qstate->camp[x] += mask_qstate->camp[i];
   }
   if (!(_qstate_normalize(qstate)))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,NULL);
