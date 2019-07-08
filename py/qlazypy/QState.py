@@ -21,7 +21,7 @@ class QState(ctypes.Structure):
         ('gbank', ctypes.c_void_p),
     ]
     
-    def __new__(self, qubit_num, seed=None):
+    def __new__(cls, qubit_num, seed=None):
 
         if qubit_num > MAX_QUBIT_NUM:
             print("qubit number must be {0:d} or less.".format(MAX_QUBIT_NUM))

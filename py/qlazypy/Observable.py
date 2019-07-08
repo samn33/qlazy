@@ -19,11 +19,11 @@ class Observable(ctypes.Structure):
         ('spro_array', ctypes.c_void_p),
     ]
 
-    def __new__(self, str=None):
+    def __new__(cls, str=None):
 
-        self.spin_num = 0
-        self.array_num = 0
-        self.spro_array = None
+        cls.spin_num = 0
+        cls.array_num = 0
+        cls.spro_array = None
     
         c_str = ctypes.create_string_buffer(str.encode('utf-8'))
 
