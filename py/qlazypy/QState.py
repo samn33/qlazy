@@ -229,6 +229,39 @@ class QState(ctypes.Structure):
 
         return out
 
+    def apply(self, matrix=None):
+
+        if matrix is None:
+            raise QState_FailToApply()
+        
+        try:
+            dim = len(matrix) # dimension of the unitary matrix
+            size = 2*dim*dim   # array size
+
+            # set array of matrix
+            mat_complex = list(matrix.flatten())
+            mat = [0.0 for _ in range(size)]
+            for i in range(dim*dim):
+                mat[2*i] = mat_complex[i].real
+                mat[2*i+1] = mat_complex[i].imag
+                
+            DoubleArray = ctypes.c_double * size
+            c_matrix = DoubleArray(*mat)
+            
+            lib.qstate_apply_matrix.restype = ctypes.c_int
+            lib.qstate_apply_matrix.argtypes = [ctypes.POINTER(QState),
+                                                DoubleArray, ctypes.c_int]
+            ret = lib.qstate_apply_matrix(ctypes.byref(self),
+                                          c_matrix, ctypes.c_int(dim))
+
+            if ret == FALSE:
+                raise QState_FailToApply()
+
+            return self
+
+        except Exception:
+            raise QState_FailToApply()
+
     @property
     def amp(self, id=None):
 

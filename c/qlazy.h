@@ -15,7 +15,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
-#define VERSION "0.0.17"
+#define VERSION "0.0.18"
 
 /*====================================================================*/
 /*  Definitions & Macros                                              */
@@ -118,6 +118,7 @@ typedef enum _ErrCode {
   ERROR_QSTATE_EVOLVE,
   ERROR_QSTATE_INNER_PRODUCT,
   ERROR_QSTATE_EXPECT_VALUE,
+  ERROR_QSTATE_APPLY_MATRIX,
   ERROR_MDATA_INIT,
   ERROR_MDATA_PRINT,
   ERROR_MDATA_PRINT_BELL,
@@ -378,6 +379,7 @@ bool     qstate_inner_product(QState* qstate_0, QState* qstate_1, double* real,
 			      double* imag);
 bool     qstate_tensor_product(QState* qstate_0, QState* qstate_1, void** qstate_out);
 bool     qstate_expect_value(QState* qstate, Observable* observ, double* value);
+bool     qstate_apply_matrix(QState* qstate, double* matrix, int dim);
 void	 qstate_free(QState* qstate);
 
 /* mdata.c */

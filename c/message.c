@@ -110,6 +110,9 @@ void error_msg(ErrCode err)
   case ERROR_QSTATE_EXPECT_VALUE:
     fprintf(stderr, "ERROR: expect value failure !\n");
     break;
+  case ERROR_QSTATE_APPLY_MATRIX:
+    fprintf(stderr, "ERROR: apply matrix failure !\n");
+    break;
 
   case ERROR_MDATA_INIT:
     fprintf(stderr, "ERROR: mdata init failure !\n");

@@ -1,6 +1,12 @@
+2019-07-18  Sam.N  <saminriver33@gmail.com>
+
+	* v0.0.18
+	- add function: apply matrix
+	- add example: shor's algorithm
+
 2019-07-08  Sam.N  <saminriver33@gmail.com>
 
-	* v0.0.16
+	* v0.0.17
 	- add examples: arithmetic operators
 
 2019-06-17  Sam.N  <saminriver33@gmail.com>

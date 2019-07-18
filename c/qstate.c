@@ -1356,6 +1356,36 @@ bool qstate_expect_value(QState* qstate, Observable* observ, double* value)
   SUC_RETURN(true);
 }
 
+bool qstate_apply_matrix(QState* qstate, double* matrix, int dim)
+/*
+  matrix: array length = dim*dim*2, array order = real,imag,real,imag,... 
+ */
+{
+  QState*	qstate_tmp = NULL;
+  COMPLEX	coef	   = 0.0 + 0.0i;
+  int		idx;
+
+  if ((qstate == NULL) || (matrix == NULL) || (qstate->state_num != dim))
+    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+
+  if (!(qstate_copy(qstate, (void**)&qstate_tmp)))
+    ERR_RETURN(ERROR_QSTATE_COPY,false);
+
+  for (int i=0; i<dim; i++) {
+    qstate->camp[i] = 0.0 + 0.0i;
+    idx = 2*i*dim;
+    for (int j=0; j<dim; j++) {
+      coef = matrix[idx+2*j] + 1.0i * matrix[idx+2*j+1];
+      qstate->camp[i] += (coef * qstate_tmp->camp[j]);
+    }
+  }
+
+  qstate_free(qstate_tmp);
+  qstate_tmp = NULL;
+
+  SUC_RETURN(true);
+}
+
 void qstate_free(QState* qstate)
 {
   if (qstate == NULL) return;

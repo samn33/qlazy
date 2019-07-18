@@ -54,6 +54,10 @@ class QState_FailToExpect(Exception):
     def __str__(self):
         return "QState: fail to expect"
 
+class QState_FailToApply(Exception):
+    def __str__(self):
+        return "QState: fail to apply"
+
 class QState_FailToBloch(Exception):
     def __str__(self):
         return "QState: fail to bloch"
