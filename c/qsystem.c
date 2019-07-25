@@ -291,7 +291,13 @@ static bool _qsystem_execute_one_line(QSystem* qsystem, char* line)
   case CONTROLLED_X:
   case CONTROLLED_Y:
   case CONTROLLED_Z:
+  case CONTROLLED_XR:
+  case CONTROLLED_XR_:
   case CONTROLLED_H:
+  case CONTROLLED_S:
+  case CONTROLLED_S_:
+  case CONTROLLED_T:
+  case CONTROLLED_T_:
     /* 2-qubit gate */
     if ((qcirc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
     if (tnum > 3) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);

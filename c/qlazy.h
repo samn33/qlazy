@@ -15,7 +15,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
-#define VERSION "0.0.18"
+#define VERSION "0.0.19"
 
 /*====================================================================*/
 /*  Definitions & Macros                                              */
@@ -145,43 +145,49 @@ typedef enum _ErrCode {
 } ErrCode;
 
 typedef enum _Kind {
-  CIRC  	 = 1,	 	/* symbol: '&','circ'   */
-  GATES  	 = 2,	 	/* symbol: '!','gates'  */
-  SHOW   	 = 3,	 	/* symbol: '-','show'   */
-  BLOCH   	 = 4,	 	/* symbol: '|','bloch'  */
-  ECHO   	 = 5,	 	/* symbol: '@','echo'   */
-  OUTPUT	 = 6,	 	/* symbol: '>','output' */
-  HELP    	 = 7,	 	/* symbol: '?','help'   */
-  QUIT	         = 8,	 	/* symbol: '.','quit'   */
-  INIT  	 = 9,	 	/* symbol: '%','init'   */
-  PAULI_X	 = 120,		/* symbol: 'X','x'      */
-  PAULI_Y	 = 121,		/* symbol: 'Y','y'      */
-  PAULI_Z	 = 122,		/* symbol: 'Z','z'      */
-  ROOT_PAULI_X	 = 123,		/* symbol: 'XR','xr'    */
-  ROOT_PAULI_X_	 = 124,		/* symbol: 'XR+','xr'   */
-  HADAMARD	 = 130,		/* symbol: 'H','h'      */
-  PHASE_SHIFT_S	 = 140,		/* symbol: 'S','s'      */
-  PHASE_SHIFT_S_ = 141,		/* symbol: 'S+','s+'    */
-  PHASE_SHIFT_T	 = 142,		/* symbol: 'T','t'      */
-  PHASE_SHIFT_T_ = 143,		/* symbol: 'T+','t+'    */
-  PHASE_SHIFT    = 144,		/* symbol: 'P','p'      */
-  ROTATION_X	 = 150,		/* symbol: 'RX','rx'    */
-  ROTATION_Y	 = 151,		/* symbol: 'RY','ry'    */
-  ROTATION_Z	 = 152,		/* symbol: 'RZ','rz'    */
-  CONTROLLED_X	 = 160,		/* symbol: 'CX','cx'    */
-  CONTROLLED_Y	 = 161,		/* symbol: 'CX','cx'    */
-  CONTROLLED_Z	 = 162,		/* symbol: 'CZ','cz'    */
-  CONTROLLED_H	 = 163,		/* symbol: 'CH','ch'    */
-  CONTROLLED_P	 = 164,		/* symbol: 'CP','cp'    */
-  CONTROLLED_RX	 = 165,		/* symbol: 'CRX','crx'  */
-  CONTROLLED_RY	 = 166,		/* symbol: 'CRY','cry'  */
-  CONTROLLED_RZ	 = 167,		/* symbol: 'CRZ','crz'  */
-  TOFFOLI	 = 170,		/* symbol: 'CCX','ccx'  */
-  MEASURE	 = 200,	 	/* symbol: 'M','m'      */
-  MEASURE_X	 = 201,	 	/* symbol: 'MX','mx'    */
-  MEASURE_Y	 = 202,	 	/* symbol: 'MY','my'    */
-  MEASURE_Z	 = 203,	 	/* symbol: 'MZ','mz'    */
-  MEASURE_BELL	 = 204,	 	/* symbol: 'MB','mb'    */
+  CIRC  	 = 1,	 	/* symbol: '&','circ'    */
+  GATES  	 = 2,	 	/* symbol: '!','gates'   */
+  SHOW   	 = 3,	 	/* symbol: '-','show'    */
+  BLOCH   	 = 4,	 	/* symbol: '|','bloch'   */
+  ECHO   	 = 5,	 	/* symbol: '@','echo'    */
+  OUTPUT	 = 6,	 	/* symbol: '>','output'  */
+  HELP    	 = 7,	 	/* symbol: '?','help'    */
+  QUIT	         = 8,	 	/* symbol: '.','quit'    */
+  INIT  	 = 9,	 	/* symbol: '%','init'    */
+  PAULI_X	 = 120,		/* symbol: 'X','x'       */
+  PAULI_Y	 = 121,		/* symbol: 'Y','y'       */
+  PAULI_Z	 = 122,		/* symbol: 'Z','z'       */
+  ROOT_PAULI_X	 = 123,		/* symbol: 'XR','xr'     */
+  ROOT_PAULI_X_	 = 124,		/* symbol: 'XR+','xr'    */
+  HADAMARD	 = 130,		/* symbol: 'H','h'       */
+  PHASE_SHIFT_S	 = 140,		/* symbol: 'S','s'       */
+  PHASE_SHIFT_S_ = 141,		/* symbol: 'S+','s+'     */
+  PHASE_SHIFT_T	 = 142,		/* symbol: 'T','t'       */
+  PHASE_SHIFT_T_ = 143,		/* symbol: 'T+','t+'     */
+  PHASE_SHIFT    = 144,		/* symbol: 'P','p'       */
+  ROTATION_X	 = 150,		/* symbol: 'RX','rx'     */
+  ROTATION_Y	 = 151,		/* symbol: 'RY','ry'     */
+  ROTATION_Z	 = 152,		/* symbol: 'RZ','rz'     */
+  CONTROLLED_X	 = 160,		/* symbol: 'CX','cx'     */
+  CONTROLLED_Y	 = 161,		/* symbol: 'CX','cx'     */
+  CONTROLLED_Z	 = 162,		/* symbol: 'CZ','cz'     */
+  CONTROLLED_XR	 = 163,		/* symbol: 'CXR','cxr'   */
+  CONTROLLED_XR_ = 164,		/* symbol: 'CXR+','cxr+' */
+  CONTROLLED_H	 = 165,		/* symbol: 'CH','ch'     */
+  CONTROLLED_S	 = 166,		/* symbol: 'CS','cs'     */
+  CONTROLLED_S_	 = 167,		/* symbol: 'CS_','cs_'   */
+  CONTROLLED_T	 = 168,		/* symbol: 'CT','ct'     */
+  CONTROLLED_T_	 = 169,		/* symbol: 'CT_','ct_'   */
+  CONTROLLED_P	 = 170,		/* symbol: 'CP','cp'     */
+  CONTROLLED_RX	 = 171,		/* symbol: 'CRX','crx'   */
+  CONTROLLED_RY	 = 172,		/* symbol: 'CRY','cry'   */
+  CONTROLLED_RZ	 = 173,		/* symbol: 'CRZ','crz'   */
+  TOFFOLI	 = 180,		/* symbol: 'CCX','ccx'   */
+  MEASURE	 = 200,	 	/* symbol: 'M','m'       */
+  MEASURE_X	 = 201,	 	/* symbol: 'MX','mx'     */
+  MEASURE_Y	 = 202,	 	/* symbol: 'MY','my'     */
+  MEASURE_Z	 = 203,	 	/* symbol: 'MZ','mz'     */
+  MEASURE_BELL	 = 204,	 	/* symbol: 'MB','mb'     */
   NOT_A_GATE	 = 1000,
 } Kind;
 
@@ -237,7 +243,13 @@ typedef struct _GBank {
   COMPLEX ControlledX[16];
   COMPLEX ControlledY[16];
   COMPLEX ControlledZ[16];
+  COMPLEX ControlledXR[16];
+  COMPLEX ControlledXR_[16];
   COMPLEX ControlledH[16];
+  COMPLEX ControlledS[16];
+  COMPLEX ControlledS_[16];
+  COMPLEX ControlledT[16];
+  COMPLEX ControlledT_[16];
 } GBank;
 
 typedef struct _QCirc {

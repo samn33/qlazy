@@ -497,6 +497,34 @@ class QState(ctypes.Structure):
         self.__operate_qgate(kind=CONTROLLED_Z, phase=DEF_PHASE, id=id)
         return self
 
+    def cxr(self, q0, q1):
+        # error check
+        if q0 >= self.qubit_num:
+            raise QState_OutOfBound()
+        if q1 >= self.qubit_num:
+            raise QState_OutOfBound()
+        if q0 == q1:
+            raise QState_SameQubitID()
+
+        # operate
+        id = [q0,q1]
+        self.__operate_qgate(kind=CONTROLLED_XR, phase=DEF_PHASE, id=id)
+        return self
+
+    def cxr_dg(self, q0, q1):
+        # error check
+        if q0 >= self.qubit_num:
+            raise QState_OutOfBound()
+        if q1 >= self.qubit_num:
+            raise QState_OutOfBound()
+        if q0 == q1:
+            raise QState_SameQubitID()
+
+        # operate
+        id = [q0,q1]
+        self.__operate_qgate(kind=CONTROLLED_XR_, phase=DEF_PHASE, id=id)
+        return self
+
     def ch(self, q0, q1):
         # error check
         if q0 >= self.qubit_num:
@@ -509,6 +537,62 @@ class QState(ctypes.Structure):
         # operate
         id = [q0,q1]
         self.__operate_qgate(kind=CONTROLLED_H, phase=DEF_PHASE, id=id)
+        return self
+
+    def cs(self, q0, q1):
+        # error check
+        if q0 >= self.qubit_num:
+            raise QState_OutOfBound()
+        if q1 >= self.qubit_num:
+            raise QState_OutOfBound()
+        if q0 == q1:
+            raise QState_SameQubitID()
+
+        # operate
+        id = [q0,q1]
+        self.__operate_qgate(kind=CONTROLLED_S, phase=DEF_PHASE, id=id)
+        return self
+
+    def cs_dg(self, q0, q1):
+        # error check
+        if q0 >= self.qubit_num:
+            raise QState_OutOfBound()
+        if q1 >= self.qubit_num:
+            raise QState_OutOfBound()
+        if q0 == q1:
+            raise QState_SameQubitID()
+
+        # operate
+        id = [q0,q1]
+        self.__operate_qgate(kind=CONTROLLED_S_, phase=DEF_PHASE, id=id)
+        return self
+
+    def ct(self, q0, q1):
+        # error check
+        if q0 >= self.qubit_num:
+            raise QState_OutOfBound()
+        if q1 >= self.qubit_num:
+            raise QState_OutOfBound()
+        if q0 == q1:
+            raise QState_SameQubitID()
+
+        # operate
+        id = [q0,q1]
+        self.__operate_qgate(kind=CONTROLLED_T, phase=DEF_PHASE, id=id)
+        return self
+
+    def ct_dg(self, q0, q1):
+        # error check
+        if q0 >= self.qubit_num:
+            raise QState_OutOfBound()
+        if q1 >= self.qubit_num:
+            raise QState_OutOfBound()
+        if q0 == q1:
+            raise QState_SameQubitID()
+
+        # operate
+        id = [q0,q1]
+        self.__operate_qgate(kind=CONTROLLED_T_, phase=DEF_PHASE, id=id)
         return self
 
     def cp(self, q0, q1, phase=DEF_PHASE):

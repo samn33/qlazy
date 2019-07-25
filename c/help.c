@@ -18,7 +18,7 @@ static void _help_print_outline() {
 * help:                     ?,help \n\
 [quantum gates]\n\
 * 1-qubit gates:            X,Y,Z,XR,XR+,H,S,S+,T,T+,P,RX,RY,RZ\n\
-* 2-qubit gates:            CX,CY,CZ,CH,CP,CRX,CRY,CRZ\n\
+* 2-qubit gates:            CX,CY,CZ,CXR,CXR+,H,CS,CS+,CT,CT+,CP,CRX,CRY,CRZ\n\
 * 3-qubit gates:            CCX\n\
 * measurement:              M,MX,MY,MZ,MB\n\
 [notes] \n\
@@ -495,6 +495,42 @@ static void _help_print_cz() {
 ");
 }
 
+static void _help_print_cxr() {
+  printf("\
+== CXR gate ==\n\
+[description] \n\
+  CXR gate is 2-qubit gate called \'controlled XR gate\'.\n\
+  It operate XR gate to the second qubit if and only if the first qubit is |1>.\n\
+  - matrix expression:\n\
+    | 1 0 0              0              | \n\
+    | 0 1 0              0              | \n\
+    | 0 0 (1.0+1.0i)/2.0 (1.0-1.0i)/2.0 | \n\
+    | 0 0 (1.0-1.0i)/2.0 (1.0+1.0i)/2.0 | \n\
+[usage] \n\
+  >> CXR <qubit_id> <qubit_id>\n\
+[alias] \n\
+  cxr \n\
+");
+}
+
+static void _help_print_cxr_dagger() {
+  printf("\
+== CXR+ gate ==\n\
+[description] \n\
+  CXR+ gate is 2-qubit gate called \'controlled XR+ gate\'.\n\
+  It operate XR+ gate to the second qubit if and only if the first qubit is |1>.\n\
+  - matrix expression:\n\
+    | 1 0 0              0              | \n\
+    | 0 1 0              0              | \n\
+    | 0 0 (1.0-1.0i)/2.0 (1.0+1.0i)/2.0 | \n\
+    | 0 0 (1.0+1.0i)/2.0 (1.0-1.0i)/2.0 | \n\
+[usage] \n\
+  >> CXR+ <qubit_id> <qubit_id>\n\
+[alias] \n\
+  cxr+ \n\
+");
+}
+
 static void _help_print_ch() {
   printf("\
 == CH gate ==\n\
@@ -505,6 +541,78 @@ static void _help_print_ch() {
   >> CH <qubit_id> <qubit_id>\n\
 [alias] \n\
   ch \n\
+");
+}
+
+static void _help_print_cs() {
+  printf("\
+== CS gate ==\n\
+[description] \n\
+  CS gate is 2-qubit gate called \'controlled S gate\'.\n\
+  It operate S gate to the second qubit if and only if the first qubit is |1>.\n\
+  - matrix expression:\n\
+    | 1 0 0 0 | \n\
+    | 0 1 0 0 | \n\
+    | 0 0 1 0 | \n\
+    | 0 0 0 i | \n\
+[usage] \n\
+  >> CS <qubit_id> <qubit_id>\n\
+[alias] \n\
+  cs \n\
+");
+}
+
+static void _help_print_cs_dagger() {
+  printf("\
+== CS+ gate ==\n\
+[description] \n\
+  CS+ gate is 2-qubit gate called \'controlled S+ gate\'.\n\
+  It operate S+ gate to the second qubit if and only if the first qubit is |1>.\n\
+  - matrix expression:\n\
+    | 1 0 0  0 | \n\
+    | 0 1 0  0 | \n\
+    | 0 0 1  0 | \n\
+    | 0 0 0 -i | \n\
+[usage] \n\
+  >> CS+ <qubit_id> <qubit_id>\n\
+[alias] \n\
+  cs+ \n\
+");
+}
+
+static void _help_print_ct() {
+  printf("\
+== CT gate ==\n\
+[description] \n\
+  CT gate is 2-qubit gate called \'controlled T gate\'.\n\
+  It operate T gate to the second qubit if and only if the first qubit is |1>.\n\
+  - matrix expression:\n\
+    | 1 0 0 0                    | \n\
+    | 0 1 0 0                    | \n\
+    | 0 0 1 0                    | \n\
+    | 0 0 0 (1.0+1.0i)/sqrt(2.0) | \n\
+[usage] \n\
+  >> CT <qubit_id> <qubit_id>\n\
+[alias] \n\
+  ct \n\
+");
+}
+
+static void _help_print_ct_dagger() {
+  printf("\
+== CT+ gate ==\n\
+[description] \n\
+  CT+ gate is 2-qubit gate called \'controlled T+ gate\'.\n\
+  It operate T+ gate to the second qubit if and only if the first qubit is |1>.\n\
+  - matrix expression:\n\
+    | 1 0 0 0                    | \n\
+    | 0 1 0 0                    | \n\
+    | 0 0 1 0                    | \n\
+    | 0 0 0 (1.0-1.0i)/sqrt(2.0) | \n\
+[usage] \n\
+  >> CT+ <qubit_id> <qubit_id>\n\
+[alias] \n\
+  ct+ \n\
 ");
 }
 
@@ -686,8 +794,26 @@ bool help_print(char* item)
   case CONTROLLED_Z:
     _help_print_cz();
     break;
+  case CONTROLLED_XR:
+    _help_print_cxr();
+    break;
+  case CONTROLLED_XR_:
+    _help_print_cxr_dagger();
+    break;
   case CONTROLLED_H:
     _help_print_ch();
+    break;
+  case CONTROLLED_S:
+    _help_print_cs();
+    break;
+  case CONTROLLED_S_:
+    _help_print_cs_dagger();
+    break;
+  case CONTROLLED_T:
+    _help_print_ct();
+    break;
+  case CONTROLLED_T_:
+    _help_print_ct_dagger();
     break;
   case CONTROLLED_P:
     _help_print_cp();

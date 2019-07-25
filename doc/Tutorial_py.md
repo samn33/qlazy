@@ -160,10 +160,19 @@ phase（実数値）が指定されなければ0ラジアンとみなされま�
 
 #### 制御ユニタリゲート
 
+パウリX,Y,Zゲート、ルートパウリXゲート、アダマールゲート、位相シフトゲー
+ト、回転ゲートを各々制御ユニタリ化したゲートです。
+
     qs.cx(id_0,id_1)              # 制御Xゲート（制御NOT,CNOT）
     qs.cy(id_0,id_1)              # 制御Xゲート
     qs.cz(id_0,id_1)              # 制御Zゲート
+    qs.cxr(id_0,id_1)             # 制御XR(ルートパウリX)ゲート
+    qs.cxr_dg(id_0,id_1)          # 制御XR+(ルートパウリX)ゲート (エルミート共役)
     qs.ch(id_0,id_1)              # 制御Hゲート
+    qs.cs(id_0,id_1)              # 制御Sゲート
+    qs.cs_dg(id_0,id_1)           # 制御S+ゲート (エルミート共役)
+    qs.ct(id_0,id_1)              # 制御Tゲート
+    qs.ct_dg(id_0,id_1)           # 制御T+ゲート (エルミート共役)
 	qs.cp(id_0,id_1, phase=xxx)   # 制御位相シフトゲート
 	qs.crx(id_0,id_1, phase=xxx)  # 制御X軸回転ゲート
 	qs.cry(id_0,id_1, phase=xxx)  # 制御Y軸回転ゲート

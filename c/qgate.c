@@ -20,7 +20,7 @@ bool qgate_get_symbol(char* symbol, Kind kind)
     strcpy(symbol,"show");
     break;
   case BLOCH:
-    strcpy(symbol,"block");
+    strcpy(symbol,"bloch");
     break;
   case ECHO:
     strcpy(symbol,"echo");
@@ -85,8 +85,26 @@ bool qgate_get_symbol(char* symbol, Kind kind)
   case CONTROLLED_Z:
     strcpy(symbol,"CZ");
     break;
+  case CONTROLLED_XR:
+    strcpy(symbol,"CXR");
+    break;
+  case CONTROLLED_XR_:
+    strcpy(symbol,"CXR+");
+    break;
   case CONTROLLED_H:
     strcpy(symbol,"CH");
+    break;
+  case CONTROLLED_S:
+    strcpy(symbol,"CS");
+    break;
+  case CONTROLLED_S_:
+    strcpy(symbol,"CS+");
+    break;
+  case CONTROLLED_T:
+    strcpy(symbol,"CT");
+    break;
+  case CONTROLLED_T_:
+    strcpy(symbol,"CT+");
     break;
   case CONTROLLED_P:
     strcpy(symbol,"CP");
@@ -181,8 +199,20 @@ bool qgate_get_kind(char* symbol, Kind* kind_out)
   else if (strcmp(symbol,"cy")    == 0) kind = CONTROLLED_Y;
   else if (strcmp(symbol,"CZ")    == 0) kind = CONTROLLED_Z;
   else if (strcmp(symbol,"cz")    == 0) kind = CONTROLLED_Z;
+  else if (strcmp(symbol,"CXR")   == 0) kind = CONTROLLED_XR;
+  else if (strcmp(symbol,"cxr")   == 0) kind = CONTROLLED_XR;
+  else if (strcmp(symbol,"CXR+")  == 0) kind = CONTROLLED_XR_;
+  else if (strcmp(symbol,"cxr+")  == 0) kind = CONTROLLED_XR_;
   else if (strcmp(symbol,"CH")    == 0) kind = CONTROLLED_H;
   else if (strcmp(symbol,"ch")    == 0) kind = CONTROLLED_H;
+  else if (strcmp(symbol,"CS")    == 0) kind = CONTROLLED_S;
+  else if (strcmp(symbol,"cs")    == 0) kind = CONTROLLED_S;
+  else if (strcmp(symbol,"CS+")   == 0) kind = CONTROLLED_S_;
+  else if (strcmp(symbol,"cs+")   == 0) kind = CONTROLLED_S_;
+  else if (strcmp(symbol,"CT")    == 0) kind = CONTROLLED_T;
+  else if (strcmp(symbol,"ct")    == 0) kind = CONTROLLED_T;
+  else if (strcmp(symbol,"CT+")   == 0) kind = CONTROLLED_T_;
+  else if (strcmp(symbol,"ct+")   == 0) kind = CONTROLLED_T_;
   else if (strcmp(symbol,"CP")    == 0) kind = CONTROLLED_P;
   else if (strcmp(symbol,"cp")    == 0) kind = CONTROLLED_P;
   else if (strcmp(symbol,"CRX")   == 0) kind = CONTROLLED_RX;

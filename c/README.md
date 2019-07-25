@@ -48,7 +48,7 @@ and measurement.
     help:                     ?,help
     [quantum gates]
     1-qubit gates:            X,Y,Z,XR,XR+,H,S,S+,T,T+,P,RX,RY,RZ
-    2-qubit gates:            CX,CY,CZ,CH,CP,CRX,CRY,CRZ
+    2-qubit gates:            CX,CY,CZ,CXR,CXR+,CH,CS,CS+,CT,CT+,CP,CRX,CRY,CRZ
     3-qubit gates:            CCX
     measurement:              M,MX,MY,MZ,MB
     [notes]
@@ -566,6 +566,106 @@ and measurement.
     [example] 
       >> CZ 0 1 
 
+### CXR
+
+    [description]
+      CXR gate is 2-qubit gate called \'controlled XR gate\'.
+      It operate XR gate to the second qubit if and only if the first qubit is |1>.
+      - matrix expression:
+        | 1 0 0              0              |
+        | 0 1 0              0              |
+        | 0 0 (1.0+1.0i)/2.0 (1.0-1.0i)/2.0 |
+        | 0 0 (1.0-1.0i)/2.0 (1.0+1.0i)/2.0 |
+    [usage]
+      >> CXR <qubit_id> <qubit_id>
+    [alias]
+      cxr
+  
+### CXR+
+
+    [description]
+      CXR+ gate is 2-qubit gate called \'controlled XR+ gate\'.
+      It operate XR+ gate to the second qubit if and only if the first qubit is |1>.
+      - matrix expression:
+        | 1 0 0              0              |
+        | 0 1 0              0              |
+        | 0 0 (1.0-1.0i)/2.0 (1.0+1.0i)/2.0 |
+        | 0 0 (1.0+1.0i)/2.0 (1.0-1.0i)/2.0 |
+    [usage]
+      >> CXR+ <qubit_id> <qubit_id>
+    [alias]
+      cxr+
+
+### CH
+
+    [description]
+      CH gate is 2-qubit gate called \'controlled H gate\'.
+      It operate H gate to the second qubit if and only if the first qubit is |1>.
+    [usage]
+      >> CH <qubit_id> <qubit_id>
+    [alias]
+      ch
+
+### CS
+
+    [description]
+      CS gate is 2-qubit gate called \'controlled S gate\'.
+      It operate S gate to the second qubit if and only if the first qubit is |1>.
+      - matrix expression:
+        | 1 0 0 0 |
+        | 0 1 0 0 |
+        | 0 0 1 0 |
+        | 0 0 0 i |
+    [usage]
+      >> CS <qubit_id> <qubit_id>
+    [alias]
+      cs
+
+### CS+
+
+    [description]
+      CS+ gate is 2-qubit gate called \'controlled S+ gate\'.
+      It operate S+ gate to the second qubit if and only if the first qubit is |1>.
+      - matrix expression:
+        | 1 0 0  0 |
+        | 0 1 0  0 |
+        | 0 0 1  0 |
+        | 0 0 0 -i |
+    [usage]
+      >> CS+ <qubit_id> <qubit_id>
+    [alias]
+      cs+
+
+### CT
+
+    [description]
+      CT gate is 2-qubit gate called \'controlled T gate\'.
+      It operate T gate to the second qubit if and only if the first qubit is |1>.
+      - matrix expression:
+        | 1 0 0 0                    |
+        | 0 1 0 0                    |
+        | 0 0 1 0                    |
+        | 0 0 0 (1.0+1.0i)/sqrt(2.0) |
+    [usage]
+      >> CT <qubit_id> <qubit_id>
+    [alias]
+      ct
+
+### CT+
+
+    [description]
+      CT+ gate is 2-qubit gate called \'controlled T+ gate\'.
+      It operate T+ gate to the second qubit if and only if the first qubit is |1>.
+      - matrix expression:
+        | 1 0 0 0                    |
+        | 0 1 0 0                    |
+        | 0 0 1 0                    |
+        | 0 0 0 (1.0-1.0i)/sqrt(2.0) |
+    [usage]
+      >> CT+ <qubit_id> <qubit_id>
+    [alias]
+      ct+
+
 ### CP
 
     [description]
@@ -605,16 +705,6 @@ and measurement.
       >> CRZ(<phase>) <qubit_id> <qubit_id>
     [alias]
       crz
-
-### CH
-
-    [description]
-      CH gate is 2-qubit gate called \'controlled H gate\'.
-      It operate H gate to the second qubit if and only if the first qubit is |1>.
-    [usage]
-      >> CH <qubit_id> <qubit_id>
-    [alias]
-      ch
 
 ### CCX
 

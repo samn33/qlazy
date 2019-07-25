@@ -996,7 +996,13 @@ bool qstate_operate_qgate_param(QState* qstate, Kind kind, double phase,
   case CONTROLLED_X:
   case CONTROLLED_Y:
   case CONTROLLED_Z:
+  case CONTROLLED_XR:
+  case CONTROLLED_XR_:
   case CONTROLLED_H:
+  case CONTROLLED_S:
+  case CONTROLLED_S_:
+  case CONTROLLED_T:
+  case CONTROLLED_T_:
     if (!(_qstate_operate_qgate_2(qstate, kind, q0, q1)))
       ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
     break;
@@ -1076,7 +1082,13 @@ bool qstate_operate_qgate(QState* qstate, QGate* qgate)
   case CONTROLLED_X:
   case CONTROLLED_Y:
   case CONTROLLED_Z:
+  case CONTROLLED_XR:
+  case CONTROLLED_XR_:
   case CONTROLLED_H:
+  case CONTROLLED_S:
+  case CONTROLLED_S_:
+  case CONTROLLED_T:
+  case CONTROLLED_T_:
   case CONTROLLED_RX:
   case CONTROLLED_RY:
   case CONTROLLED_RZ:
