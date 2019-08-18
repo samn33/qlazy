@@ -1,3 +1,5 @@
+import sys
+import random
 from qlazypy import QState
 
 # custom gates
@@ -59,11 +61,11 @@ def mpmct(self,id_in,id_out,x):
 
     return self
 
-def q_oracle(self,id_in,id_out,func):
+def q_oracle(self,id_in,id_out,table):
 
     num = 2**len(id_in)
     for x in range(num):
-        y = func(x)
+        y = table[x]
         if y == 1:
             self.mpmct(id_in,id_out,x)
 
@@ -75,14 +77,6 @@ def gray_code(n):
 
     for k in range(2**n):
         yield k^(k>>1)
-        
-def func(x):
-
-    if x == 1 or x == 5:
-        y = 1
-    else:
-        y = 0
-    return y
 
 def create_register(num):
 
@@ -123,21 +117,45 @@ if __name__ == '__main__':
     QState.q_oracle = q_oracle
     QState.result = result
 
+    # input qubit number
+    qnum_in = 4
+    
+    # set function 'constant' or 'balanced'
+    args = sys.argv
+    if args[1] == 'constant':
+        v = random.randint(0,1)
+        table =[v]*(2**qnum_in)
+    elif args[1] == 'balanced':
+        table = [i%2 for i in range(2**qnum_in)]
+        random.shuffle(table)
+    else:
+        sys.exit()
+    print("== test function ==")
+    print(table)
+    
     # set register
-    id_in = create_register(3)
+    id_in = create_register(qnum_in)
     id_out = create_register(1)
     qnum = init_register(id_in,id_out)
+    id = id_in + id_out
 
     # initial state
     qs = QState(qnum)
     qs.hadamard(id_in)
+    qs.x(id_out[0])
 
     # quantum oracle
-    qs.q_oracle(id_in,id_out,func)
+    qs.q_oracle(id_in,id_out,table)
+    qs.hadamard(id)
 
-    # print results
-    in_list,out_list = qs.result(id_in,id_out)
-    for i in range(len(in_list)):
-        print("{0:03b} -> {1:d}".format(in_list[i],out_list[i]))
-
+    # measure and judge
+    cnt = 0
+    for freq in qs.m(id=id_in).freq_list:
+        if freq != 0: cnt += 1
+    print("== judgement ==")
+    if cnt == 1:
+        print("constant")
+    else:
+        print("balanced")
+        
     qs.free()

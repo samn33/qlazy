@@ -1,3 +1,9 @@
+2019-08-19  Sam.N  <saminriver33@gmail.com>
+
+	* v0.0.20
+	- bug fix: bell-measurement (qlazypy)
+	- add example: Deutsh-Jozsa, Grover, Toffoli(n-qubit)
+
 2019-07-25  Sam.N  <saminriver33@gmail.com>
 
 	* v0.0.19

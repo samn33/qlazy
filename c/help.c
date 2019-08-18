@@ -18,7 +18,7 @@ static void _help_print_outline() {
 * help:                     ?,help \n\
 [quantum gates]\n\
 * 1-qubit gates:            X,Y,Z,XR,XR+,H,S,S+,T,T+,P,RX,RY,RZ\n\
-* 2-qubit gates:            CX,CY,CZ,CXR,CXR+,H,CS,CS+,CT,CT+,CP,CRX,CRY,CRZ\n\
+* 2-qubit gates:            CX,CY,CZ,CXR,CXR+,CH,CS,CS+,CT,CT+,CP,CRX,CRY,CRZ\n\
 * 3-qubit gates:            CCX\n\
 * measurement:              M,MX,MY,MZ,MB\n\
 [notes] \n\
@@ -433,8 +433,8 @@ static void _help_print_rz() {
 [description] \n\
   RZ gate is 1-qubit gate, It rotate through any phase around z-axis in bloch sphere.\n\
   - matrix expression:\n\
-    | exp(-i*phase/2) 0              | \n\
-    | 0               exp(i*phase/2) | \n\
+    | exp(-i*phase*PI/2) 0                 | \n\
+    | 0                  exp(i*phase*PI/2) | \n\
 [usage] \n\
   >> RZ(<phase>) <qubit_id>\n\
 [alias] \n\

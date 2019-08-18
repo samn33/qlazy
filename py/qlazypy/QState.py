@@ -4,6 +4,7 @@ import random
 import numpy as np
 from qlazypy.error import *
 from qlazypy.config import *
+from qlazypy.MData import *
 from qlazypy.Observable import *
 
 lib = ctypes.CDLL('libQlazy.so',mode=ctypes.RTLD_GLOBAL)
@@ -707,17 +708,17 @@ class QState(ctypes.Structure):
         if ret == FALSE:
             raise QState_FailToMeasure()
 
-        out = ctypes.cast(c_mdata.value, ctypes.POINTER(MData))
+        out = ctypes.cast(c_mdata.value, ctypes.POINTER(MDataC))
         
         state_num = out.contents.state_num
         last_state = out.contents.last
         freq = ctypes.cast(out.contents.freq, ctypes.POINTER(ctypes.c_int*state_num))
         freq_list = [freq.contents[i] for i in range(state_num)]
-        mdpy = MDataPy(freq_list=freq_list, last_state=last_state, qubit_num=qubit_num,
+        md = MData(freq_list=freq_list, last_state=last_state, qubit_num=qubit_num,
                        state_num=state_num, angle=angle, phase=phase)
         out.contents.free()
 
-        return mdpy
+        return md
 
     def mx(self, id=None, shots=DEF_SHOTS):
         return self.m(id=id, shots=shots, angle=0.5, phase=0.0)
@@ -765,16 +766,16 @@ class QState(ctypes.Structure):
         if ret == FALSE:
             raise QState_FailToMeasure()
 
-        out = ctypes.cast(c_mdata.value, ctypes.POINTER(MData))
+        out = ctypes.cast(c_mdata.value, ctypes.POINTER(MDataC))
         
         last_state = out.contents.last
         freq = ctypes.cast(out.contents.freq, ctypes.POINTER(ctypes.c_int*state_num))
         freq_list = [freq.contents[i] for i in range(state_num)]
-        mdpy = MDataPy(freq_list=freq_list, last_state=last_state, qubit_num=qubit_num,
-                       state_num=state_num, angle=0.0, phase=0.0)
+        md = MData(freq_list=freq_list, last_state=last_state, qubit_num=qubit_num,
+                       state_num=state_num, angle=0.0, phase=0.0, is_bell=True)
         out.contents.free()
 
-        return mdpy
+        return md
 
     def free(self):
 
@@ -797,105 +798,3 @@ class QState(ctypes.Structure):
 
         if ret == FALSE:
             raise QState_FailToOperateQgate()
-            
-
-class MData(ctypes.Structure):
-
-    _fields_ = [
-        ('qubit_num', ctypes.c_int),
-        ('state_num', ctypes.c_int),
-        ('shot_num', ctypes.c_int),
-        ('angle', ctypes.c_double),
-        ('phase', ctypes.c_double),
-        ('qubit_id', ctypes.c_int*MAX_QUBIT_NUM),
-        ('freq', ctypes.POINTER(ctypes.c_int)),
-        ('last', ctypes.c_int),
-    ]
-
-    def show(self):
-
-        lib.mdata_print.restype = ctypes.c_int
-        lib.mdata_print.argtypes = [ctypes.POINTER(MData)]
-        ret = lib.mdata_print(ctypes.byref(self))
-
-        if ret == FALSE:
-            raise MData_FailToShow()
-
-    @property
-    def frq(self):
-
-        try:
-            freq = ctypes.cast(self.freq, ctypes.POINTER(ctypes.c_int*self.state_num))
-            freq_list = [freq.contents[i] for i in range(self.state_num)]
-        except Exception:
-            raise MData_FailToGetFrq()
-        
-        return np.array(freq_list)
-
-    @property
-    def lst(self):
-
-        return self.last
-            
-    def free(self):
-
-        lib.mdata_free.argtypes = [ctypes.POINTER(MData)]
-        lib.mdata_free(ctypes.byref(self))
-
-class MDataPy:
-
-    def __init__(self, freq_list=None, last_state=0, state_num=0, qubit_num=0,
-                 angle=0.0, phase=0.0):
-        self.freq_list = freq_list
-        self.last_state = last_state
-        self.qubit_num = qubit_num
-        self.state_num = state_num
-        self.angle = angle
-        self.phase = phase
-
-    @property
-    def frq(self):
-        return self.freq_list
-
-    @property
-    def lst(self):
-        return self.last_state
-
-    def show(self):
-        if self.angle == 0.5 and self.phase == 0.0:
-            print("direction of measurement: x-axis")
-            self.__show_any()
-        elif self.angle == 0.5 and self.phase == 0.5:
-            print("direction of measurement: y-axis")
-            self.__show_any()
-        elif self.angle == 0.0 and self.phase == 0.0:
-            print("direction of measurement: z-axis")
-            self.__show_z()
-        else:
-            print("direction of measurement: theta={0:f}*PI, phi={1:f}*PI".
-                  format(self.angle, self.phase))
-            self.__show_any()
-
-    def __show_z(self):
-        
-        for i in range(self.state_num):
-            if self.freq_list[i] != 0:
-                state_string = format(i,'b').zfill(self.qubit_num)
-                print("frq[{0:}] = {1:d}".
-                      format(state_string, self.freq_list[i]))
-                
-        state_string = format(self.last_state,'b').zfill(self.qubit_num)
-        print("last state =>", state_string)
-
-    def __show_any(self):
-        
-        for i in range(self.state_num):
-            if self.freq_list[i] != 0:
-                state_string = format(i,'b').zfill(self.qubit_num)\
-                                            .replace('0','u').replace('1','d')
-                print("frq[{0:}] = {1:d}".
-                      format(state_string, self.freq_list[i]))
-                
-        state_string = format(self.last_state,'b').zfill(self.qubit_num)\
-                                                  .replace('0','u').replace('1','d')
-        print("last state =>", state_string)

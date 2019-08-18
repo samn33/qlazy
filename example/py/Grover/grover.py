@@ -1,3 +1,4 @@
+import math
 from qlazypy import QState
 
 # custom gates
@@ -8,16 +9,14 @@ def hadamard(self,id):
         self.h(id[i])
     return self
 
-def multi_cx(self,id_in,id_out):
+def flip(self,id):
 
-    #
-    # hadamard
-    #
-    self.h(id_out[0])
+    for i in range(len(id)):
+        self.x(id[i])
+    return self
 
-    #
-    # controlled-RZ(psi), psi=pi/(2**(bitnum-1))
-    #
+def multi_cz(self,id_in,id_out):
+
     bitnum = len(id_in)
     psi = 1.0/(2**(bitnum-1)) # unit=pi(radian)
     gray_pre = 0
@@ -34,13 +33,16 @@ def multi_cx(self,id_in,id_out):
         psi = -psi
         gray_pre = gray
     
-    #
-    # hadamard
-    #
+    return self
+
+def multi_cx(self,id_in,id_out):
+
+    self.h(id_out[0])
+    self.multi_cz(id_in,id_out)
     self.h(id_out[0])
 
     return self
-    
+
 def mpmct(self,id_in,id_out,x):
 
     bitnum = len(id_in)
@@ -78,7 +80,7 @@ def gray_code(n):
         
 def func(x):
 
-    if x == 1 or x == 5:
+    if x == 881 or x == 883:
         y = 1
     else:
         y = 0
@@ -97,47 +99,71 @@ def init_register(*args):
             idx += 1
     return idx
 
-def result(self,id_a,id_b):
+def result(self,id,solnum):
 
     # measurement
-    id_ab = id_a + id_b
-    iid_ab = id_ab[::-1]
-    shots = (2**len(id_a))*5
-    freq = self.m(id=iid_ab,shots=shots).frq
+    iid = id[::-1]
+    freq = self.m(id=iid).frq
+
+    res = []
+    for _ in range(solnum):
+        idx = freq.index(max(freq))
+        res.append(idx)
+        freq[idx] = 0
+
+    return res
     
-    # set results
-    a_list = []
-    r_list = []
-    for i in range(len(freq)):
-        if freq[i] > 0:
-            a_list.append(i%(2**len(id_a)))
-            r_list.append(i>>len(id_a))
-    return (a_list,r_list)
+def opt_iter(N,solnum):
+
+    return int(0.25*math.pi/math.asin(math.sqrt(solnum/N)))
 
 if __name__ == '__main__':
 
     # add custom gates
     QState.hadamard = hadamard
+    QState.flip = flip
+    QState.multi_cz = multi_cz
     QState.multi_cx = multi_cx
     QState.mpmct = mpmct
     QState.q_oracle = q_oracle
     QState.result = result
 
+    # set parameters
+    bits = 10
+    N = 2**bits
+    solnum = 2
+    
     # set register
-    id_in = create_register(3)
+    id_in = create_register(bits)
     id_out = create_register(1)
     qnum = init_register(id_in,id_out)
+
+    id_in_c = id_in[:-1]
+    id_in_t = [id_in[-1]]
 
     # initial state
     qs = QState(qnum)
     qs.hadamard(id_in)
+    qs.x(id_out[0]).h(id_out[0])
+    
+    iter = opt_iter(N,solnum)
+    print("== algorithm start (total iter:{}) ==".format(iter))
 
-    # quantum oracle
-    qs.q_oracle(id_in,id_out,func)
+    for i in range(iter):
 
+        print("- iter no. = ", i)
+
+        qs.q_oracle(id_in,id_out,func)
+    
+        qs.hadamard(id_in)
+        qs.flip(id_in)
+        qs.multi_cz(id_in_c,id_in_t)
+        qs.flip(id_in)
+        qs.hadamard(id_in)
+    
     # print results
-    in_list,out_list = qs.result(id_in,id_out)
-    for i in range(len(in_list)):
-        print("{0:03b} -> {1:d}".format(in_list[i],out_list[i]))
+    res = qs.result(id_in,solnum)
+    print("== result==")
+    print("x =", res)
 
     qs.free()

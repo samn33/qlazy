@@ -38,6 +38,10 @@ foo.qc
 run the circuit
 
     $ qlazy -qc foo.qc
+    direction of measurement: z-axis
+    frq[00] = 53
+    frq[11] = 47
+    last state => 00
 
 print help
 	
@@ -46,12 +50,19 @@ print help
 ### qlazy (interactive-mode)
 
     $ qlazy
-	
 	>> init 2
 	>> h 0
 	>> cx 0 1
 	>> show   # show the current quantum state
+    c[00] = +0.7071+0.0000*i : 0.5000 |++++++
+    c[01] = +0.0000+0.0000*i : 0.0000 |
+    c[10] = +0.0000+0.0000*i : 0.0000 |
+    c[11] = +0.7071+0.0000*i : 0.5000 |++++++
 	>> m
+	direction of measurement: z-axis
+	frq[00] = 59
+	frq[11] = 41
+	last state => 00
 	>> quit
 
 print help
@@ -78,6 +89,14 @@ foo.py
 execute the program
 
     $ python foo.py
+    c[00] = +0.7071+0.0000*i : 0.5000 |++++++
+    c[01] = +0.0000+0.0000*i : 0.0000 |
+    c[10] = +0.0000+0.0000*i : 0.0000 |
+    c[11] = +0.7071+0.0000*i : 0.5000 |++++++
+    direction of measurement: z-axis
+    frq[00] = 46
+    frq[11] = 54
+    last state => 11
 
 ## Requirements
 
