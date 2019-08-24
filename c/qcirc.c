@@ -349,7 +349,8 @@ bool qcirc_read_file(char* fname, void** qcirc_out)
     if (!(fp = fopen(fname,"r")))
       ERR_RETURN(ERROR_CANT_OPEN_FILE,false);
   }
-  else ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+  //else ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+  else fp = stdin;
 
   /* read lines */
 

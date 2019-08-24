@@ -385,7 +385,8 @@ bool qsystem_execute(QSystem* qsystem, char* fname)
   if (fname != NULL) {
     if (!(fp = fopen(fname,"r"))) SUC_RETURN(true);
   }
-  else ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+  // else ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+  else fp = stdin;
   
   if (!(line = (char*)malloc(sizeof(char)*LINE_STRLEN)))
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);

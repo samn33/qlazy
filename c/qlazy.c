@@ -9,7 +9,8 @@ static void _qlazy_print_help()
   fprintf(stderr,"\
 == qlazy - quantum computer simulator ==\n\
   [option]\n\
-  -qc FILE : quantum circuit file name (default:interactive mode)\n\
+  -qc FILE : quantum circuit file name \n\
+  -i       : quantum circuit file from stdin \n\
   -sd SEED : seed of randam generation for measurement (default:time)\n\
   -tm      : output processing time \n\
   -pr      : print circuit and exit (don't run) \n\
@@ -22,6 +23,8 @@ static void _qlazy_print_help()
   cx 0 1       \n\
   m            \n\
   $ qlazy -qc foo.qc \n\
+  => execute circuit \n\
+  $ qlazy -i < foo.qc \n\
   => execute circuit \n\
   $ qlazy -qc foo.qc -pr \n\
   => print circuit \n\
@@ -45,7 +48,8 @@ int main(int argc, char** argv)
   unsigned int  seed		     = (unsigned int)time(NULL);
   int           pr		     = OFF;
   int           tm		     = OFF;
-  int           im		     = ON;
+  int           interactive	     = OFF;
+  int           stdinput	     = OFF;
   clock_t	c_start		     = 0;
   clock_t	c_end		     = 0;
   double        proc_time            = 0.0;
@@ -55,33 +59,42 @@ int main(int argc, char** argv)
 
   /* get command line arguments */
 
-  for (int n=1; n<argc; n++) {
-    if (strcmp(argv[n],"-v") == 0) {
-      _qlazy_print_version();
-      exit(0);
-    }
-    else if (strcmp(argv[n],"-h") == 0) {
-      _qlazy_print_help();
-      exit(0);
-    }
-    else if (strcmp(argv[n],"-sd") == 0) {
-      seed = (unsigned int)strtol(argv[++n],NULL,10);
-    }
-    else if (strcmp(argv[n],"-qc") == 0) {
-      im = OFF;
-      fname_qc = argv[++n];
-    }
-    else if (strcmp(argv[n],"-pr") == 0) {
-      pr = ON;
-    }
-    else if (strcmp(argv[n],"-tm") == 0) {
-      tm = ON;
-    }
-    else {
-      ERR_RETURN(ERROR_INVALID_ARGUMENT,1);
+  if (argc == 1) { interactive = ON; }
+  else {
+    interactive = OFF;
+    for (int n=1; n<argc; n++) {
+      if (strcmp(argv[n],"-v") == 0) {
+	_qlazy_print_version();
+	exit(0);
+      }
+      else if (strcmp(argv[n],"-h") == 0) {
+	_qlazy_print_help();
+	exit(0);
+      }
+      else if (strcmp(argv[n],"-sd") == 0) {
+	seed = (unsigned int)strtol(argv[++n],NULL,10);
+      }
+      else if (strcmp(argv[n],"-qc") == 0) {
+	fname_qc = argv[++n];
+      }
+      else if (strcmp(argv[n],"-i") == 0) {
+	stdinput = ON;
+	fname_qc = NULL;
+      }
+      else if (strcmp(argv[n],"-pr") == 0) {
+	pr = ON;
+      }
+      else if (strcmp(argv[n],"-tm") == 0) {
+	tm = ON;
+      }
+      else {
+	ERR_RETURN(ERROR_INVALID_ARGUMENT,1);
+      }
     }
   }
-
+  if ((interactive == OFF) && (stdinput == OFF) && (fname_qc == NULL))
+    ERR_RETURN(ERROR_INVALID_ARGUMENT,1);
+  
   init_qlazy(seed);
 
   if (!qsystem_init((void**)&qsystem)) ERR_RETURN(ERROR_QSYSTEM_INIT,1);
@@ -92,7 +105,7 @@ int main(int argc, char** argv)
     qcirc_print_qcirc(qcirc);
     qcirc_free(qcirc); qcirc = NULL;
   }
-  else if (im == ON) {  /* execute in interactive mode */
+  else if (interactive == ON) {  /* execute in interactive mode */
     printf("interactive mode\n");
     if (!(qsystem_intmode(qsystem, fname_ini)))
       ERR_RETURN(ERROR_QSYSTEM_INTMODE,1);

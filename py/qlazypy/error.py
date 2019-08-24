@@ -41,6 +41,10 @@ class QState_NeedMoreArguments(Exception):
 class QState_SameQubitID(Exception):
     def __str__(self):
         return "QState: same qubit id"
+    
+class QState_UnknownQgateKind(Exception):
+    def __str__(self):
+        return "QState: unknown qgate kind"
 
 class QState_FailToOperateQgate(Exception):
     def __str__(self):

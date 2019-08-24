@@ -2,14 +2,12 @@
 import ctypes
 import random
 import numpy as np
+from ctypes.util import find_library
 from qlazypy.error import *
 from qlazypy.config import *
 
 lib = ctypes.CDLL('libQlazy.so',mode=ctypes.RTLD_GLOBAL)
-try:
-    libc = ctypes.CDLL('libc.so.6',mode=ctypes.RTLD_GLOBAL)
-except:
-    libc = ctypes.CDLL('libc.so',mode=ctypes.RTLD_GLOBAL)
+libc = ctypes.CDLL(find_library("c"),mode=ctypes.RTLD_GLOBAL)
 
 class Observable(ctypes.Structure):
 

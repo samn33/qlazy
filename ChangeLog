@@ -1,88 +1,95 @@
+2019-08-24  Sam.N  <saminriver33@gmail.com>
+
+	* v0.0.21
+	- change spec(c): qlazy command ... quantum circuit file from stdin (qlazy -i option)
+	- bug fix(py): find 'libc.so'
+	- refactoring(py): 'QState' class
+
 2019-08-19  Sam.N  <saminriver33@gmail.com>
 
 	* v0.0.20
-	- bug fix: bell-measurement (qlazypy)
-	- add example: Deutsh-Jozsa, Grover, Toffoli(n-qubit)
+	- bug fix(py): bell-measurement (qlazypy)
+	- add example(py): Deutsh-Jozsa, Grover, Toffoli(n-qubit)
 
 2019-07-25  Sam.N  <saminriver33@gmail.com>
 
 	* v0.0.19
-	- add functions: six controlled gates: cxr,cxr+,cs,cs+,ct,ct+
-	- add example: logical function -> quantum oracle
+	- add functions(c/py): six controlled gates: cxr,cxr+,cs,cs+,ct,ct+
+	- add example(py): logical function -> quantum oracle
 
 2019-07-18  Sam.N  <saminriver33@gmail.com>
 
 	* v0.0.18
-	- add function: apply matrix
-	- add example: shor's algorithm
+	- add function(c/py): apply matrix
+	- add example(py): shor's algorithm
 
 2019-07-08  Sam.N  <saminriver33@gmail.com>
 
 	* v0.0.17
-	- add examples: arithmetic operators
+	- add examples(py): arithmetic operators
 
 2019-06-17  Sam.N  <saminriver33@gmail.com>
 
 	* v0.0.16
-	- bug fix: 'show' function
+	- bug fix(c/py): 'show' function
 
 2019-06-07  Sam.N  <saminriver33@gmail.com>
 
 	* v0.0.15
-	- add examples: qft
+	- add examples(py): qft
 
 2019-06-04  Sam.N  <saminriver33@gmail.com>
 
 	* v0.0.14
-	- add functions: some controlled unitary gates and tensor product of quantum states
+	- add functions(c/py): some controlled unitary gates and tensor product of quantum states
 
 2019-05-26  Sam.N  <saminriver33@gmail.com>
 
 	* v0.0.13
-	- change spec: error handling
+	- change spec(c): error handling
 
 2019-05-22  Sam.N  <saminriver33@gmail.com>
 
 	* v0.0.12
-	- change spec: some c-functions
+	- change spec(c): some c-functions
 
 2019-05-21  Sam.N  <saminriver33@gmail.com>
 
 	* v0.0.11
-	- add function: get bloch angles
+	- add function(c/py): get bloch angles
 
 2019-05-15  Sam.N  <saminriver33@gmail.com>
 
 	* v0.0.10
-	- bug fix: constant term of observable
-	- update: tutorials
+	- bug fix(c/py): constant term of observable
+	- update(doc): tutorials
 
 2019-05-14  Sam.N  <saminriver33@gmail.com>
 
 	* v0.0.9
-	- add function: time evolution, expectation value
-	- bug fix: definition of pauli Y
+	- add function(c/py): time evolution, expectation value
+	- bug fix(c/py): definition of pauli Y
 
 2019-04-27  Sam.N  <saminriver33@gmail.com>
 
 	* v0.0.8
-	- add Tutorial
+	- add Tutorial(doc)
 
 2019-04-26  Sam.N  <saminriver33@gmail.com>
 
 	* v0.0.7
-	- bug fix: measure some qubits
-	- qlazypy: implement destructor of QState
+	- bug fix(c/py): measure some qubits
+	- qlazypy(py): implement destructor of QState
 
 2019-04-17  Sam.N  <saminriver33@gmail.com>
 
 	* v0.0.6
-	- bug fix: qlazypy ... show() of measured data
+	- bug fix(py): show of measured data
 
 2019-04-16  Sam.N  <saminriver33@gmail.com>
 
 	* v0.0.5
-	- bug fix of 'show' command.
+	- bug fix(c/py): 'show' command.
 	- change specification of 'show' command.
 	  - normalize that amplitude of |00..0> is real and positive value.
 	  - eliminate phase factor.

@@ -59,10 +59,10 @@ print help
     c[10] = +0.0000+0.0000*i : 0.0000 |
     c[11] = +0.7071+0.0000*i : 0.5000 |++++++
 	>> m
-	direction of measurement: z-axis
-	frq[00] = 59
-	frq[11] = 41
-	last state => 00
+    direction of measurement: z-axis
+    frq[00] = 49
+    frq[11] = 51
+    last state => 00
 	>> quit
 
 print help

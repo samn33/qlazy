@@ -2,16 +2,14 @@
 import ctypes
 import random
 import numpy as np
+from ctypes.util import find_library
 from qlazypy.error import *
 from qlazypy.config import *
 from qlazypy.MData import *
 from qlazypy.Observable import *
 
 lib = ctypes.CDLL('libQlazy.so',mode=ctypes.RTLD_GLOBAL)
-try:
-    libc = ctypes.CDLL('libc.so.6',mode=ctypes.RTLD_GLOBAL)
-except:
-    libc = ctypes.CDLL('libc.so',mode=ctypes.RTLD_GLOBAL)
+libc = ctypes.CDLL(find_library("c"),mode=ctypes.RTLD_GLOBAL)
 
 class QState(ctypes.Structure):
 
@@ -31,6 +29,183 @@ class QState(ctypes.Structure):
         if seed is None:
             seed = random.randint(0,1000000)
 
+        return cls.__init_qstate(qubit_num, seed)
+    
+    def show(self, id=None):
+        self.__print(id)
+
+    def clone(self):
+        return self.__copy()
+
+    def bloch(self, qid=0):
+        return self.__bloch(qid=qid)
+
+    def inpro(self, qstate):
+        return self.__inner_product(qstate)
+        
+    def tenspro(self, qstate):
+        return self.__tensor_product(qstate)
+
+    def evolve(self, observable=None, time=0.0, iter=0):
+        self.__evolve(observable=observable, time=time, iter=iter)
+        return self
+    
+    def expect(self, observable=None):
+        return self.__expect_value(observable=observable)
+    
+    def apply(self, matrix=None):
+        self.__apply_matrix(matrix=matrix)
+        return self
+
+    @property
+    def amp(self, id=None):
+        return self.get_amp()
+        
+    def get_amp(self, id=None):
+        return self.__get_camp(id)
+
+    def x(self, q0):
+        self.__operate_qgate(kind=PAULI_X, phase=DEF_PHASE, id=[q0])
+        return self
+
+    def y(self, q0):
+        self.__operate_qgate(kind=PAULI_Y, phase=DEF_PHASE, id=[q0])
+        return self
+
+    def z(self, q0):
+        self.__operate_qgate(kind=PAULI_Z, phase=DEF_PHASE, id=[q0])
+        return self
+
+    def xr(self, q0):
+        self.__operate_qgate(kind=ROOT_PAULI_X, phase=DEF_PHASE, id=[q0])
+        return self
+
+    def xr_dg(self, q0):
+        self.__operate_qgate(kind=ROOT_PAULI_X_, phase=DEF_PHASE, id=[q0])
+        return self
+
+    def h(self, q0):
+        self.__operate_qgate(kind=HADAMARD, phase=DEF_PHASE, id=[q0])
+        return self
+
+    def s(self, q0):
+        self.__operate_qgate(kind=PHASE_SHIFT_S, phase=DEF_PHASE, id=[q0])
+        return self
+
+    def s_dg(self, q0):
+        self.__operate_qgate(kind=PHASE_SHIFT_S_, phase=DEF_PHASE, id=[q0])
+        return self
+
+    def t(self, q0):
+        self.__operate_qgate(kind=PHASE_SHIFT_T, phase=DEF_PHASE, id=[q0])
+        return self
+
+    def t_dg(self, q0):
+        self.__operate_qgate(kind=PHASE_SHIFT_T_, phase=DEF_PHASE, id=[q0])
+        return self
+
+    def rx(self, q0, phase=DEF_PHASE):
+        self.__operate_qgate(kind=ROTATION_Y, phase=phase, id=[q0])
+        return self
+
+    def ry(self, q0, phase=DEF_PHASE):
+        self.__operate_qgate(kind=ROTATION_Y, phase=phase, id=[q0])
+        return self
+
+    def rz(self, q0, phase=DEF_PHASE):
+        self.__operate_qgate(kind=ROTATION_Z, phase=phase, id=[q0])
+        return self
+
+    def p(self, q0, phase=DEF_PHASE):
+        self.__operate_qgate(kind=PHASE_SHIFT, phase=phase, id=[q0])
+        return self
+
+    def cx(self, q0, q1):
+        id = [q0,q1]
+        self.__operate_qgate(kind=CONTROLLED_X, phase=DEF_PHASE, id=[q0,q1])
+        return self
+
+    def cy(self, q0, q1):
+        self.__operate_qgate(kind=CONTROLLED_Y, phase=DEF_PHASE, id=[q0,q1])
+        return self
+
+    def cz(self, q0, q1):
+        self.__operate_qgate(kind=CONTROLLED_Z, phase=DEF_PHASE, id=[q0,q1])
+        return self
+
+    def cxr(self, q0, q1):
+        self.__operate_qgate(kind=CONTROLLED_XR, phase=DEF_PHASE, id=[q0,q1])
+        return self
+
+    def cxr_dg(self, q0, q1):
+        self.__operate_qgate(kind=CONTROLLED_XR_, phase=DEF_PHASE, id=[q0,q1])
+        return self
+
+    def ch(self, q0, q1):
+        self.__operate_qgate(kind=CONTROLLED_H, phase=DEF_PHASE, id=[q0,q1])
+        return self
+
+    def cs(self, q0, q1):
+        self.__operate_qgate(kind=CONTROLLED_S, phase=DEF_PHASE, id=[q0,q1])
+        return self
+
+    def cs_dg(self, q0, q1):
+        self.__operate_qgate(kind=CONTROLLED_S_, phase=DEF_PHASE, id=[q0,q1])
+        return self
+
+    def ct(self, q0, q1):
+        self.__operate_qgate(kind=CONTROLLED_T, phase=DEF_PHASE, id=[q0,q1])
+        return self
+
+    def ct_dg(self, q0, q1):
+        self.__operate_qgate(kind=CONTROLLED_T_, phase=DEF_PHASE, id=[q0,q1])
+        return self
+
+    def cp(self, q0, q1, phase=DEF_PHASE):
+        self.__operate_qgate(kind=CONTROLLED_P, phase=phase, id=[q0,q1])
+        return self
+
+    def crx(self, q0, q1, phase=DEF_PHASE):
+        self.__operate_qgate(kind=CONTROLLED_RX, phase=phase, id=[q0,q1])
+        return self
+
+    def cry(self, q0, q1, phase=DEF_PHASE):
+        self.__operate_qgate(kind=CONTROLLED_RY, phase=phase, id=[q0,q1])
+        return self
+
+    def crz(self, q0, q1, phase=DEF_PHASE):
+        self.__operate_qgate(kind=CONTROLLED_RZ, phase=phase, id=[q0,q1])
+        return self
+
+    def ccx(self, q0, q1, q2):
+        self.__operate_qgate(kind=TOFFOLI, phase=DEF_PHASE, id=[q0,q1,q2])
+        return self
+    
+    def m(self, id=None, shots=DEF_SHOTS, angle=0.0, phase=0.0, tag=None):
+        return self.__measure(id=id, shots=shots, angle=angle, phase=phase, tag=tag)
+        
+    def mx(self, id=None, shots=DEF_SHOTS, tag=None):
+        return self.__measure(id=id, shots=shots, angle=0.5, phase=0.0, tag=tag)
+        
+    def my(self, id=None, shots=DEF_SHOTS, tag=None):
+        return self.__measure(id=id, shots=shots, angle=0.5, phase=0.5, tag=tag)
+        
+    def mz(self, id=None, shots=DEF_SHOTS, tag=None):
+        return self.__measure(id=id, shots=shots, angle=0.0, phase=0.0, tag=tag)
+
+    def mb(self, id=None, shots=DEF_SHOTS, tag=None):
+        return self.__measure_bell(id=id, shots=shots, tag=tag)
+        
+    def free(self):
+        self.__free()
+
+    #
+    # ctypes
+    #
+
+    @classmethod
+    def __init_qstate(cls, qubit_num=None, seed=None):
+        
         lib.init_qlazy(ctypes.c_int(seed))
         
         qstate = None
@@ -46,21 +221,14 @@ class QState(ctypes.Structure):
         out = ctypes.cast(c_qstate.value, ctypes.POINTER(QState))
         
         return out.contents
-
-    def show(self, id=None):
+    
+    def __print(self, id=None):
 
         if id is None or id == []:
             id = [i for i in range(self.qubit_num)]
 
-        # error check
-        if len(id) > self.qubit_num:
-            raise QState_TooManyArguments()
-        for i in range(len(id)):
-            if id[i] >= self.qubit_num:
-                raise QState_OutOfBound()
-            if id[i] < 0:
-                raise QState_OutOfBound()
-
+        self.__check_args(kind=SHOW, shots=None, angle=None, id=id)
+        
         try:
             qubit_num = len(id)
             qubit_id = [0 for _ in range(MAX_QUBIT_NUM)]
@@ -78,8 +246,8 @@ class QState(ctypes.Structure):
 
         except Exception:
             raise QState_FailToShow()
-
-    def clone(self):
+        
+    def __copy(self):
 
         try:
             qstate = None
@@ -100,11 +268,10 @@ class QState(ctypes.Structure):
         except Exception:
             raise QState_FailToClone()
 
-    def bloch(self, qid=0):
+    def __bloch(self, qid=0):
 
         # error check
-        if qid < 0 or qid >= self.qubit_num:
-            raise QState_OutOfBound()
+        self.__check_args(kind=BLOCH, shots=None, angle=None, id=[qid])
 
         try:
             theta = 0.0
@@ -130,7 +297,7 @@ class QState(ctypes.Structure):
         except Exception:
             raise QState_FailToBloch()
 
-    def inpro(self, qstate):
+    def __inner_product(self, qstate):
 
         try:
             
@@ -157,8 +324,8 @@ class QState(ctypes.Structure):
         
         except Exception:
             raise QState_FailToInnerProduct()
-        
-    def tenspro(self, qstate):
+
+    def __tensor_product(self, qstate):
 
         try:
             qstate_out = None
@@ -180,8 +347,8 @@ class QState(ctypes.Structure):
 
         except Exception:
             raise QState_FailToTensorProduct()
-        
-    def evolve(self, observable=None, time=0.0, iter=0):
+
+    def __evolve(self, observable=None, time=0.0, iter=0):
 
         if iter < 1:
             raise QState_FailToEvolve()
@@ -202,7 +369,7 @@ class QState(ctypes.Structure):
         except Exception:
             raise QState_FailToEvolve()
 
-    def expect(self, observable=None):
+    def __expect_value(self, observable=None):
 
         if observable is None:
             raise QState_FailToExpect()
@@ -230,7 +397,7 @@ class QState(ctypes.Structure):
 
         return out
 
-    def apply(self, matrix=None):
+    def __apply_matrix(self, matrix=None):
 
         if matrix is None:
             raise QState_FailToApply()
@@ -263,12 +430,8 @@ class QState(ctypes.Structure):
         except Exception:
             raise QState_FailToApply()
 
-    @property
-    def amp(self, id=None):
-
-        return self.get_amp()
         
-    def get_amp(self, id=None):
+    def __get_camp(self, id=None):
 
         if id is None or id == []:
             id = [i for i in range(self.qubit_num)]
@@ -316,374 +479,13 @@ class QState(ctypes.Structure):
 
         return np.array(out)
         
-    def x(self, q0):
-        # error check
-        if q0 >= self.qubit_num:
-            raise QState_OutOfBound()
-            
-        # operate
-        id = [q0]
-        self.__operate_qgate(kind=PAULI_X, phase=DEF_PHASE, id=id)
-        return self
+    def __measure(self, id=None, shots=DEF_SHOTS, angle=0.0, phase=0.0, tag=None):
 
-    def y(self, q0):
-        # error check
-        if q0 >= self.qubit_num:
-            raise QState_OutOfBound()
-            
-        # operate
-        id = [q0]
-        self.__operate_qgate(kind=PAULI_Y, phase=DEF_PHASE, id=id)
-        return self
-
-    def z(self, q0):
-        # error check
-        if q0 >= self.qubit_num:
-            raise QState_OutOfBound()
-            
-        # operate
-        id = [q0]
-        self.__operate_qgate(kind=PAULI_Z, phase=DEF_PHASE, id=id)
-        return self
-
-    def xr(self, q0):
-        # error check
-        if q0 >= self.qubit_num:
-            raise QState_OutOfBound()
-            
-        # operate
-        id = [q0]
-        self.__operate_qgate(kind=ROOT_PAULI_X, phase=DEF_PHASE, id=id)
-        return self
-
-    def xr_dg(self, q0):
-        # error check
-        if q0 >= self.qubit_num:
-            raise QState_OutOfBound()
-
-        # operate
-        id = [q0]
-        self.__operate_qgate(kind=ROOT_PAULI_X_, phase=DEF_PHASE, id=id)
-        return self
-
-    def h(self, q0):
-        # error check
-        if q0 >= self.qubit_num:
-            raise QState_OutOfBound()
-
-        # operate
-        id = [q0]
-        self.__operate_qgate(kind=HADAMARD, phase=DEF_PHASE, id=id)
-        return self
-
-    def s(self, q0):
-        # error check
-        if q0 >= self.qubit_num:
-            raise QState_OutOfBound()
-            
-        # operate
-        id = [q0]
-        self.__operate_qgate(kind=PHASE_SHIFT_S, phase=DEF_PHASE, id=id)
-        return self
-
-    def s_dg(self, q0):
-        # error check
-        if q0 >= self.qubit_num:
-            raise QState_OutOfBound()
-            
-        # operate
-        id = [q0]
-        self.__operate_qgate(kind=PHASE_SHIFT_S_, phase=DEF_PHASE, id=id)
-        return self
-
-    def t(self, q0):
-        # error check
-        if q0 >= self.qubit_num:
-            raise QState_OutOfBound()
-            
-        # operate
-        id = [q0]
-        self.__operate_qgate(kind=PHASE_SHIFT_T, phase=DEF_PHASE, id=id)
-        return self
-
-    def t_dg(self, q0):
-        # error check
-        if q0 >= self.qubit_num:
-            raise QState_OutOfBound()
-            
-        # operate
-        id = [q0]
-        self.__operate_qgate(kind=PHASE_SHIFT_T_, phase=DEF_PHASE, id=id)
-        return self
-
-    def rx(self, q0, phase=DEF_PHASE):
-        # error check
-        if q0 >= self.qubit_num:
-            raise QState_OutOfBound()
-            
-        # operate
-        id = [q0]
-        self.__operate_qgate(kind=ROTATION_Y, phase=phase, id=id)
-        return self
-
-    def ry(self, q0, phase=DEF_PHASE):
-        # error check
-        if q0 >= self.qubit_num:
-            raise QState_OutOfBound()
-            
-        # operate
-        id = [q0]
-        self.__operate_qgate(kind=ROTATION_Y, phase=phase, id=id)
-        return self
-
-    def rz(self, q0, phase=DEF_PHASE):
-        # error check
-        if q0 >= self.qubit_num:
-            raise QState_OutOfBound()
-            
-        # operate
-        id = [q0]
-        self.__operate_qgate(kind=ROTATION_Z, phase=phase, id=id)
-        return self
-
-    def p(self, q0, phase=DEF_PHASE):
-        # error check
-        if q0 >= self.qubit_num:
-            raise QState_OutOfBound()
-            
-        # operate
-        id = [q0]
-        self.__operate_qgate(kind=PHASE_SHIFT, phase=phase, id=id)
-        return self
-
-    def cx(self, q0, q1):
-        # error check
-        if q0 >= self.qubit_num:
-            raise QState_OutOfBound()
-        if q1 >= self.qubit_num:
-            raise QState_OutOfBound()
-        if q0 == q1:
-            raise QState_SameQubitID()
-            
-        # operate
-        id = [q0,q1]
-        self.__operate_qgate(kind=CONTROLLED_X, phase=DEF_PHASE, id=id)
-        return self
-
-    def cy(self, q0, q1):
-        # error check
-        if q0 >= self.qubit_num:
-            raise QState_OutOfBound()
-        if q1 >= self.qubit_num:
-            raise QState_OutOfBound()
-        if q0 == q1:
-            raise QState_SameQubitID()
-            
-        # operate
-        id = [q0,q1]
-        self.__operate_qgate(kind=CONTROLLED_Y, phase=DEF_PHASE, id=id)
-        return self
-
-    def cz(self, q0, q1):
-        # error check
-        if q0 >= self.qubit_num:
-            raise QState_OutOfBound()
-        if q1 >= self.qubit_num:
-            raise QState_OutOfBound()
-        if q0 == q1:
-            raise QState_SameQubitID()
-
-        # operate
-        id = [q0,q1]
-        self.__operate_qgate(kind=CONTROLLED_Z, phase=DEF_PHASE, id=id)
-        return self
-
-    def cxr(self, q0, q1):
-        # error check
-        if q0 >= self.qubit_num:
-            raise QState_OutOfBound()
-        if q1 >= self.qubit_num:
-            raise QState_OutOfBound()
-        if q0 == q1:
-            raise QState_SameQubitID()
-
-        # operate
-        id = [q0,q1]
-        self.__operate_qgate(kind=CONTROLLED_XR, phase=DEF_PHASE, id=id)
-        return self
-
-    def cxr_dg(self, q0, q1):
-        # error check
-        if q0 >= self.qubit_num:
-            raise QState_OutOfBound()
-        if q1 >= self.qubit_num:
-            raise QState_OutOfBound()
-        if q0 == q1:
-            raise QState_SameQubitID()
-
-        # operate
-        id = [q0,q1]
-        self.__operate_qgate(kind=CONTROLLED_XR_, phase=DEF_PHASE, id=id)
-        return self
-
-    def ch(self, q0, q1):
-        # error check
-        if q0 >= self.qubit_num:
-            raise QState_OutOfBound()
-        if q1 >= self.qubit_num:
-            raise QState_OutOfBound()
-        if q0 == q1:
-            raise QState_SameQubitID()
-
-        # operate
-        id = [q0,q1]
-        self.__operate_qgate(kind=CONTROLLED_H, phase=DEF_PHASE, id=id)
-        return self
-
-    def cs(self, q0, q1):
-        # error check
-        if q0 >= self.qubit_num:
-            raise QState_OutOfBound()
-        if q1 >= self.qubit_num:
-            raise QState_OutOfBound()
-        if q0 == q1:
-            raise QState_SameQubitID()
-
-        # operate
-        id = [q0,q1]
-        self.__operate_qgate(kind=CONTROLLED_S, phase=DEF_PHASE, id=id)
-        return self
-
-    def cs_dg(self, q0, q1):
-        # error check
-        if q0 >= self.qubit_num:
-            raise QState_OutOfBound()
-        if q1 >= self.qubit_num:
-            raise QState_OutOfBound()
-        if q0 == q1:
-            raise QState_SameQubitID()
-
-        # operate
-        id = [q0,q1]
-        self.__operate_qgate(kind=CONTROLLED_S_, phase=DEF_PHASE, id=id)
-        return self
-
-    def ct(self, q0, q1):
-        # error check
-        if q0 >= self.qubit_num:
-            raise QState_OutOfBound()
-        if q1 >= self.qubit_num:
-            raise QState_OutOfBound()
-        if q0 == q1:
-            raise QState_SameQubitID()
-
-        # operate
-        id = [q0,q1]
-        self.__operate_qgate(kind=CONTROLLED_T, phase=DEF_PHASE, id=id)
-        return self
-
-    def ct_dg(self, q0, q1):
-        # error check
-        if q0 >= self.qubit_num:
-            raise QState_OutOfBound()
-        if q1 >= self.qubit_num:
-            raise QState_OutOfBound()
-        if q0 == q1:
-            raise QState_SameQubitID()
-
-        # operate
-        id = [q0,q1]
-        self.__operate_qgate(kind=CONTROLLED_T_, phase=DEF_PHASE, id=id)
-        return self
-
-    def cp(self, q0, q1, phase=DEF_PHASE):
-        # error check
-        if q0 >= self.qubit_num:
-            raise QState_OutOfBound()
-        if q1 >= self.qubit_num:
-            raise QState_OutOfBound()
-        if q0 == q1:
-            raise QState_SameQubitID()
-
-        # operate
-        id = [q0,q1]
-        self.__operate_qgate(kind=CONTROLLED_P, phase=phase, id=id)
-        return self
-
-    def crx(self, q0, q1, phase=DEF_PHASE):
-        # error check
-        if q0 >= self.qubit_num:
-            raise QState_OutOfBound()
-        if q1 >= self.qubit_num:
-            raise QState_OutOfBound()
-        if q0 == q1:
-            raise QState_SameQubitID()
-
-        # operate
-        id = [q0,q1]
-        self.__operate_qgate(kind=CONTROLLED_RX, phase=phase, id=id)
-        return self
-
-    def cry(self, q0, q1, phase=DEF_PHASE):
-        # error check
-        if q0 >= self.qubit_num:
-            raise QState_OutOfBound()
-        if q1 >= self.qubit_num:
-            raise QState_OutOfBound()
-        if q0 == q1:
-            raise QState_SameQubitID()
-
-        # operate
-        id = [q0,q1]
-        self.__operate_qgate(kind=CONTROLLED_RY, phase=phase, id=id)
-        return self
-
-    def crz(self, q0, q1, phase=DEF_PHASE):
-        # error check
-        if q0 >= self.qubit_num:
-            raise QState_OutOfBound()
-        if q1 >= self.qubit_num:
-            raise QState_OutOfBound()
-        if q0 == q1:
-            raise QState_SameQubitID()
-
-        # operate
-        id = [q0,q1]
-        self.__operate_qgate(kind=CONTROLLED_RZ, phase=phase, id=id)
-        return self
-
-    def ccx(self, q0, q1, q2):
-        # error check
-        if q0 >= self.qubit_num:
-            raise QState_OutOfBound()
-        if q1 >= self.qubit_num:
-            raise QState_OutOfBound()
-        if q2 >= self.qubit_num:
-            raise QState_OutOfBound()
-        if q0 == q1:
-            raise QState_SameQubitID()
-        if q1 == q2:
-            raise QState_SameQubitID()
-        if q2 == q0:
-            raise QState_SameQubitID()
-
-        # operate
-        id = [q0,q1,q2]
-        self.__operate_qgate(kind=TOFFOLI, phase=DEF_PHASE, id=id)
-        return self
-
-    def m(self, id=None, shots=DEF_SHOTS, angle=0.0, phase=0.0):
         if id is None or id == []:
             id = [i for i in range(self.qubit_num)]
             
         # error check
-        if len(id) > self.qubit_num:
-            raise QState_TooManyArguments()
-        for i in range(len(id)):
-            if id[i] >= self.qubit_num:
-                raise QState_OutOfBound()
-            if id[i] < 0:
-                raise QState_OutOfBound()
+        self.__check_args(kind=MEASURE, id=id, shots=shots, angle=angle, phase=phase)
 
         # operate
         qubit_num = len(id)
@@ -720,28 +522,13 @@ class QState(ctypes.Structure):
 
         return md
 
-    def mx(self, id=None, shots=DEF_SHOTS):
-        return self.m(id=id, shots=shots, angle=0.5, phase=0.0)
-        
-    def my(self, id=None, shots=DEF_SHOTS):
-        return self.m(id=id, shots=shots, angle=0.5, phase=0.5)
-        
-    def mz(self, id=None, shots=DEF_SHOTS):
-        return self.m(id=id, shots=shots, angle=0.0, phase=0.0)
-        
-    def mb(self, id=None, shots=DEF_SHOTS):
-        # error check
+    def __measure_bell(self, id=None, shots=DEF_SHOTS, tag=None):
+
         if id is None or id == []:
-            raise QState_NeedMoreArguments()
-        if len(id) < 2:
-            raise QState_NeedMoreArguments()
-        if len(id) > 2:
-            raise QState_TooManyArguments()
-        for i in range(len(id)):
-            if id[i] >= self.qubit_num:
-                raise QState_OutOfBound()
-            if id[i] < 0:
-                raise QState_OutOfBound()
+            id = [i for i in range(2)]
+            
+        # error check
+        self.__check_args(kind=MEASURE_BELL, id=id, shots=shots, angle=None, phase=None)
 
         # operate
         state_num = 4
@@ -772,18 +559,21 @@ class QState(ctypes.Structure):
         freq = ctypes.cast(out.contents.freq, ctypes.POINTER(ctypes.c_int*state_num))
         freq_list = [freq.contents[i] for i in range(state_num)]
         md = MData(freq_list=freq_list, last_state=last_state, qubit_num=qubit_num,
-                       state_num=state_num, angle=0.0, phase=0.0, is_bell=True)
+                   state_num=state_num, angle=0.0, phase=0.0, is_bell=True)
         out.contents.free()
 
         return md
 
-    def free(self):
+    def __free(self):
 
         lib.qstate_free.argtypes = [ctypes.POINTER(QState)]
         lib.qstate_free(ctypes.byref(self))
  
-    def __operate_qgate(self, kind=None, phase=None, id=None):
+    def __operate_qgate(self, kind=None, id=None, phase=None):
 
+        # error check
+        self.__check_args(kind=kind, id=id, shots=None, angle=None, phase=phase)
+        
         qubit_id = [0 for _ in range(MAX_QUBIT_NUM)]
         for i in range(len(id)):
             qubit_id[i] = id[i]
@@ -798,3 +588,86 @@ class QState(ctypes.Structure):
 
         if ret == FALSE:
             raise QState_FailToOperateQgate()
+
+    def __check_args(self, kind=None, id=None, shots=None, angle=None, phase=None):
+
+        for q in id:
+            if (q >= self.qubit_num) or (q < 0):
+                raise QState_OutOfBound()
+            
+        qnum = self.__get_qgate_qubit_num(kind)
+
+        if qnum == 0:  # any qubit number
+            # check qubit number
+            if len(id) > self.qubit_num:
+                raise QState_TooManyArguments()
+            elif len(id) < 1:
+                raise QState_NeedMoreArguments()
+            else:
+                pass
+            
+            # check same qubit number
+            if len(set(id)) != len(id):
+                raise QState_SameQubitID()
+            
+        elif qnum == 1:
+            # check qubit number
+            if len(id) > qnum:
+                raise QState_TooManyArguments()
+            elif len(id) < qnum:
+                raise QState_NeedMoreArguments()
+            else:
+                return True
+            
+        elif qnum == 2:
+            # check qubit number
+            if len(id) > qnum:
+                raise QState_TooManyArguments()
+            elif len(id) < qnum:
+                raise QState_NeedMoreArguments()
+            else:
+                pass
+
+            # check same qubit number
+            if (id[0]==id[1]):
+                raise QState_SameQubitID()
+            else:
+                return True
+            
+        elif qnum == 3:
+            # check qubit number
+            if len(id) > qnum:
+                raise QState_TooManyArguments()
+            elif len(id) < qnum:
+                raise QState_NeedMoreArguments()
+            else:
+                pass
+
+            # check same qubit id
+            if (id[0]==id[1] or id[1]==id[2] or id[2]==id[0]):
+                raise QState_SameQubitID()
+            else:
+                return True
+        
+    def __get_qgate_qubit_num(self, kind=None):
+
+        if (kind==SHOW or kind==MEASURE or
+            kind==MEASURE_X or kind==MEASURE_Y or kind==MEASURE_Z):  # 0 if any number
+            return 0
+        elif (kind==BLOCH or kind==PAULI_X or kind==PAULI_Y or kind==PAULI_Z or
+              kind==ROOT_PAULI_X or kind==ROOT_PAULI_X_ or kind==HADAMARD or
+              kind==PHASE_SHIFT_S or kind==PHASE_SHIFT_S_ or
+              kind==PHASE_SHIFT_T or kind==PHASE_SHIFT_T_ or kind==PHASE_SHIFT or
+              kind==ROTATION_X or kind==ROTATION_Y or kind==ROTATION_Z):
+            return 1
+        elif (kind==CONTROLLED_X or kind==CONTROLLED_Y or kind==CONTROLLED_Z or
+              kind==CONTROLLED_XR or kind==CONTROLLED_XR_ or kind==CONTROLLED_H or
+              kind==CONTROLLED_S or kind==CONTROLLED_S_ or
+              kind==CONTROLLED_T or kind==CONTROLLED_T_ or kind==CONTROLLED_P or
+              kind==CONTROLLED_RX or kind==CONTROLLED_RY or kind==CONTROLLED_RZ or
+              kind==MEASURE_BELL):
+            return 2
+        elif (kind==TOFFOLI):
+            return 3
+        else:
+            raise QState_UnknownQgateKind()

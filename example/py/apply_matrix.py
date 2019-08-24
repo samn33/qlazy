@@ -10,6 +10,6 @@ matrix = np.array([[1,0,0,0],
 print(matrix)
 
 qs.h(0)
-qs.apply(matrix)
+qs.apply(matrix).x(0)
 qs.show()
 qs.free()

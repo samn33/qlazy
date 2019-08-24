@@ -15,7 +15,8 @@ and measurement.
 
     qlazy - quantum computer simulator ==
     [option]
-    -qc FILE : quantum circuit file name (default:interactive mode)
+    -qc FILE : quantum circuit file name
+    -i       : quantum circuit file from stdin
     -sd SEED : seed of randam generation for measurement (default:time)
     -tm      : output processing time 
     -pr      : print circuit and exit (don't run) 
@@ -29,6 +30,8 @@ and measurement.
     m
     $ qlazy -qc foo.qc
     => run circuit
+    $ qlazy -i < foo.qc
+    => execute circuit
     $ qlazy -qc foo.qc -pr
     => print circuit (don't run)
     $ qlazy

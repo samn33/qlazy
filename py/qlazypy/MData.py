@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 import ctypes
+from ctypes.util import find_library
 from qlazypy.error import *
 from qlazypy.config import *
 
 lib = ctypes.CDLL('libQlazy.so',mode=ctypes.RTLD_GLOBAL)
-try:
-    libc = ctypes.CDLL('libc.so.6',mode=ctypes.RTLD_GLOBAL)
-except:
-    libc = ctypes.CDLL('libc.so',mode=ctypes.RTLD_GLOBAL)
+libc = ctypes.CDLL(find_library("c"),mode=ctypes.RTLD_GLOBAL)
 
 class MDataC(ctypes.Structure):
 
@@ -55,7 +53,7 @@ class MDataC(ctypes.Structure):
 class MData:
 
     def __init__(self, freq_list=None, last_state=0, state_num=0, qubit_num=0,
-                 angle=0.0, phase=0.0, is_bell=False):
+                 angle=0.0, phase=0.0, is_bell=False, tag=None):
         self.freq_list = freq_list
         self.last_state = last_state
         self.qubit_num = qubit_num
