@@ -85,3 +85,29 @@ class MData_FailToShow(Exception):
 class Observable_FailToInitialize(Exception):
     def __str__(self):
         return "Observable: fail to initialize"
+
+# DensOp
+
+class DensOp_FailToInitialize(Exception):
+    def __str__(self):
+        return "DensOp: fail to initialize"
+
+class DensOp_FailToShow(Exception):
+    def __str__(self):
+        return "DensOp: fail to show"
+
+class DensOp_FailToTrace(Exception):
+    def __str__(self):
+        return "DensOp: fail to trace"
+
+class DensOp_FailToSqTrace(Exception):
+    def __str__(self):
+        return "DensOp: fail to square trace"
+
+class DensOp_FailToPaTrace(Exception):
+    def __str__(self):
+        return "DensOp: fail to partial trace"
+
+class DensOp_FailToApply(Exception):
+    def __str__(self):
+        return "DensOp: fail to apply"

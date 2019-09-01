@@ -74,6 +74,12 @@ void error_msg(ErrCode err)
   case ERROR_QSTATE_INIT:
     fprintf(stderr, "ERROR: qstate init failure !\n");
     break;
+//  case ERROR_QSTATE_ADD:
+//    fprintf(stderr, "ERROR: qstate add failure !\n");
+//    break;
+//  case ERROR_QSTATE_MUL:
+//    fprintf(stderr, "ERROR: qstate mul failure !\n");
+//    break;
   case ERROR_QSTATE_COPY:
     fprintf(stderr, "ERROR: qstate copy failure !\n");
     break;
@@ -140,6 +146,16 @@ void error_msg(ErrCode err)
 
   case ERROR_OBSERVABLE_INIT:
     fprintf(stderr, "ERROR: observable init failure !\n");
+    break;
+
+  case ERROR_DENSOP_INIT:
+    fprintf(stderr, "ERROR: densop init failure !\n");
+    break;
+  case ERROR_DENSOP_PRINT:
+    fprintf(stderr, "ERROR: densop print failure !\n");
+    break;
+  case ERROR_DENSOP_TRACE:
+    fprintf(stderr, "ERROR: densop trace failure !\n");
     break;
 
   case ERROR_NEED_TO_INITIALIZE:

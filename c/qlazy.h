@@ -15,7 +15,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
-#define VERSION "0.0.21"
+#define VERSION "0.0.22"
 
 /*====================================================================*/
 /*  Definitions & Macros                                              */
@@ -127,6 +127,9 @@ typedef enum _ErrCode {
   ERROR_QSYSTEM_INTMODE,
   ERROR_SPRO_INIT,
   ERROR_OBSERVABLE_INIT,
+  ERROR_DENSOP_INIT,
+  ERROR_DENSOP_PRINT,
+  ERROR_DENSOP_TRACE,
 
   /* qlazy interactive mode */
   ERROR_NEED_TO_INITIALIZE,
@@ -299,6 +302,12 @@ typedef struct _Observable {
   SPro**	spro_array;
 } Observable;
 
+typedef struct _DensOp {
+  int row;
+  int col;
+  COMPLEX* elm;
+} DensOp;
+
 /*====================================================================*/
 /*  Global Variables                                                  */
 /*====================================================================*/
@@ -391,7 +400,7 @@ bool     qstate_inner_product(QState* qstate_0, QState* qstate_1, double* real,
 			      double* imag);
 bool     qstate_tensor_product(QState* qstate_0, QState* qstate_1, void** qstate_out);
 bool     qstate_expect_value(QState* qstate, Observable* observ, double* value);
-bool     qstate_apply_matrix(QState* qstate, double* matrix, int dim);
+bool     qstate_apply_matrix(QState* qstate, double* real, double *imag, int row, int col);
 void	 qstate_free(QState* qstate);
 
 /* mdata.c */
@@ -415,5 +424,15 @@ void     spro_free(SPro* spro);
 /* observable.c */
 bool     observable_init(char* str, void** observ_out);
 void     observable_free(Observable* observ);
+
+/* densop.c */
+bool     densop_init(QState* qstate, double* prob, int num, void** densop_out);
+bool     densop_print(DensOp* densop);
+bool     densop_trace(DensOp* densop, double* real, double* imag);
+bool     densop_sqtrace(DensOp* densop, double* real, double* imag);
+bool     densop_patrace(DensOp* densop_in, int qubit_num, int qubit_id[MAX_QUBIT_NUM],
+			void** densop_out);
+bool     densop_apply_matrix(DensOp* densop, double* real, double* imag, int row, int col);
+void     densop_free(DensOp* densop);
 
 #endif

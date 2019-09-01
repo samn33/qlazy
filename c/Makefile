@@ -6,9 +6,9 @@ INC = qlazy.h
 
 LIB = libQlazy.so
 LIB_OBJ_BASE = qsystem.o init.o cimage.o qgate.o qcirc.o qstate.o mdata.o gbank.o spro.o \
-        observable.o misc.o message.o help.o
+        observable.o densop.o misc.o message.o help.o
 LIB_SRC_BASE = qsystem.c init.c cimage.c qgate.c qcirc.c qstate.c mdata.c gbank.c spro.c \
-        observable.c misc.c message.c help.c
+        observable.c densop.c misc.c message.c help.c
 
 # install directory (edit here to your environment)
 INSTALL_BIN_DIR = ~/bin

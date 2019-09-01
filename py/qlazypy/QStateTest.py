@@ -11,10 +11,17 @@ class QStateTest(QState):
         ret.__class__ = QStateTest
         return ret
         
-    def hadamard(self,id):
+    def clone(self):
+        ret = self.qstate_copy()
+        ret.__class__ = QStateTest
+        return ret
+    
+    def tenspro(self, qstate):
+        ret = self.qstate_tensor_product(qstate)
+        ret.__class__ = QStateTest
+        return ret
 
+    def hadamard(self,id):
         for i in range(len(id)):
             self.h(id[i])
-            
         return self
-
