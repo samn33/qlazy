@@ -274,15 +274,20 @@ bool qstate_get_camp(QState* qstate, int qubit_num, int qubit_id[MAX_QUBIT_NUM],
 
   if (qstate == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
-  if (!(mask_qstate = _qstate_mask(qstate, qubit_num, qubit_id)))
+  //if (!(mask_qstate = _qstate_mask(qstate, qubit_num, qubit_id)))
+  //  ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+
+  if (!(mask_qstate = _qstate_pickup(qstate, qubit_num, qubit_id)))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
   if (!(camp = (double*)malloc(sizeof(double)*2*mask_qstate->state_num)))
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
 
   for (int i=0; i<mask_qstate->state_num; i++) {
-    camp[2*i] = creal(qstate->camp[i]);
-    camp[2*i+1] = cimag(qstate->camp[i]);
+    // camp[2*i] = creal(qstate->camp[i]);
+    // camp[2*i+1] = cimag(qstate->camp[i]);
+    camp[2*i] = creal(mask_qstate->camp[i]);
+    camp[2*i+1] = cimag(mask_qstate->camp[i]);
   }
 
   qstate_free(mask_qstate); mask_qstate = NULL;

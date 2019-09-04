@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import ctypes
 import random
+import math
 import numpy as np
 from ctypes.util import find_library
 from qlazypy.error import *
@@ -23,9 +24,19 @@ class DensOp(ctypes.Structure):
     def __new__(cls, qstate=[], prob=[]):
         return cls.densop_init(qstate, prob)
 
-    def show(self):
-        self.densop_print()
-        
+    def show(self, id=None):
+        if id is None:
+            self.densop_print()
+        else:
+            qubit_num = int(math.log2(self.row))
+            id_remained = []
+            for x in range(qubit_num):
+                if not x in id:
+                    id_remained.append(x)
+            de_remained = self.patrace(id=id_remained)
+            de_remained.densop_print()
+            de_remained.free()
+            
     def trace(self):
         return self.densop_trace()
         

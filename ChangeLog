@@ -1,3 +1,9 @@
+2019-09-04  Sam.N  <saminriver33@gmail.com>
+
+	* v0.0.23
+	- bug fix(c/py): densop_init, DensOp.__new__()
+	- bug fix(c/py): get_camp, QState.get_amp()
+
 2019-09-01  Sam.N  <saminriver33@gmail.com>
 
 	* v0.0.22

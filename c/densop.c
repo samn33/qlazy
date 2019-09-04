@@ -26,6 +26,7 @@ bool densop_init(QState* qstate, double* prob, int num, void** densop_out)
   densop->row = densop->col = state_num;
   if (!(densop->elm = (COMPLEX*)malloc(sizeof(COMPLEX)*state_num*state_num)))
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
+  for (int i=0; i<state_num*state_num; i++) densop->elm[i] = 0.0 + 0.0i;
 
   int idx = 0;
   for (int k=0; k<state_num; k++) {
@@ -198,9 +199,9 @@ bool densop_patrace(DensOp* densop_in, int qubit_num, int qubit_id[MAX_QUBIT_NUM
   dim_tr = 1<<qubit_num;
   dim = 1<<(total_qubit_num-qubit_num);
   
-#ifdef DEV
-  printf("* total_qubit_num = %d\n", total_qubit_num);
-#endif
+//#ifdef DEV
+//  printf("* total_qubit_num = %d\n", total_qubit_num);
+//#endif
 
   if (!(densop = (DensOp*)malloc(sizeof(DensOp))))
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
