@@ -74,12 +74,6 @@ void error_msg(ErrCode err)
   case ERROR_QSTATE_INIT:
     fprintf(stderr, "ERROR: qstate init failure !\n");
     break;
-//  case ERROR_QSTATE_ADD:
-//    fprintf(stderr, "ERROR: qstate add failure !\n");
-//    break;
-//  case ERROR_QSTATE_MUL:
-//    fprintf(stderr, "ERROR: qstate mul failure !\n");
-//    break;
   case ERROR_QSTATE_COPY:
     fprintf(stderr, "ERROR: qstate copy failure !\n");
     break;
@@ -151,11 +145,44 @@ void error_msg(ErrCode err)
   case ERROR_DENSOP_INIT:
     fprintf(stderr, "ERROR: densop init failure !\n");
     break;
+  case ERROR_DENSOP_COPY:
+    fprintf(stderr, "ERROR: densop copy failure !\n");
+    break;
+  case ERROR_DENSOP_GET_ELM:
+    fprintf(stderr, "ERROR: densop get_elm failure !\n");
+    break;
   case ERROR_DENSOP_PRINT:
     fprintf(stderr, "ERROR: densop print failure !\n");
     break;
+  case ERROR_DENSOP_ADD:
+    fprintf(stderr, "ERROR: densop add failure !\n");
+    break;
+  case ERROR_DENSOP_MUL:
+    fprintf(stderr, "ERROR: densop mul failure !\n");
+    break;
   case ERROR_DENSOP_TRACE:
     fprintf(stderr, "ERROR: densop trace failure !\n");
+    break;
+  case ERROR_DENSOP_SQTRACE:
+    fprintf(stderr, "ERROR: densop sqtrace failure !\n");
+    break;
+  case ERROR_DENSOP_PATRACE:
+    fprintf(stderr, "ERROR: densop patrace failure !\n");
+    break;
+  case ERROR_DENSOP_LAPPLY_MATRIX:
+    fprintf(stderr, "ERROR: densop laplly_matrix failure !\n");
+    break;
+  case ERROR_DENSOP_RAPPLY_MATRIX:
+    fprintf(stderr, "ERROR: densop raplly_matrix failure !\n");
+    break;
+  case ERROR_DENSOP_APPLY_MATRIX:
+    fprintf(stderr, "ERROR: densop aplly_matrix failure !\n");
+    break;
+  case ERROR_DENSOP_MEASURE_KRAUS:
+    fprintf(stderr, "ERROR: densop measure_kraus failure !\n");
+    break;
+  case ERROR_DENSOP_MEASURE_POVM:
+    fprintf(stderr, "ERROR: densop measure_povm failure !\n");
     break;
 
   case ERROR_NEED_TO_INITIALIZE:

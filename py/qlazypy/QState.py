@@ -30,7 +30,11 @@ class QState(ctypes.Structure):
             seed = random.randint(0,1000000)
 
         return cls.qstate_init(qubit_num, seed)
-    
+
+    def __str__(self):
+
+        return str(self.get_amp())
+        
     @property
     def amp(self, id=None):
         return self.get_amp()
@@ -60,8 +64,8 @@ class QState(ctypes.Structure):
     def expect(self, observable=None):
         return self.qstate_expect_value(observable=observable)
     
-    def apply(self, matrix=None):
-        self.qstate_apply_matrix(matrix=matrix)
+    def apply(self, matrix=None, id=None):
+        self.qstate_apply_matrix(matrix=matrix, id=id)
         return self
 
     def x(self, q0):
@@ -233,6 +237,7 @@ class QState(ctypes.Structure):
             qubit_id = [0 for _ in range(MAX_QUBIT_NUM)]
             for i in range(len(id)):
                 qubit_id[i] = id[i]
+
             IntArray = ctypes.c_int * MAX_QUBIT_NUM
             id_array = IntArray(*qubit_id)
             
@@ -396,12 +401,24 @@ class QState(ctypes.Structure):
 
         return out
 
-    def qstate_apply_matrix(self, matrix=None):
+    def qstate_apply_matrix(self, matrix=None, id=None):
 
         if matrix is None:
             raise QState_FailToApply()
+        if (matrix.shape[0] > self.state_num or matrix.shape[0] > self.state_num):
+            raise QState_FailToApply()
         
+        if id is None or id == []:
+            id = [i for i in range(self.qubit_num)]
+
         try:
+            qubit_num = len(id)
+            qubit_id = [0 for _ in range(MAX_QUBIT_NUM)]
+            for i in range(len(id)):
+                qubit_id[i] = id[i]
+            IntArray = ctypes.c_int * MAX_QUBIT_NUM
+            id_array = IntArray(*qubit_id)
+
             row = len(matrix) # dimension of the unitary matrix
             col = row
             size = row * col
@@ -420,16 +437,16 @@ class QState(ctypes.Structure):
             
             lib.qstate_apply_matrix.restype = ctypes.c_int
             lib.qstate_apply_matrix.argtypes = [ctypes.POINTER(QState),
+                                                ctypes.c_int, IntArray,
                                                 DoubleArray, DoubleArray,
                                                 ctypes.c_int, ctypes.c_int]
             ret = lib.qstate_apply_matrix(ctypes.byref(self),
+                                          ctypes.c_int(qubit_num), id_array,
                                           c_mat_real, c_mat_imag,
                                           ctypes.c_int(row), ctypes.c_int(col))
 
             if ret == FALSE:
                 raise QState_FailToApply()
-
-            return self
 
         except Exception:
             raise QState_FailToApply()

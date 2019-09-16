@@ -15,7 +15,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
-#define VERSION "0.0.23"
+#define VERSION "0.0.24"
 
 /*====================================================================*/
 /*  Definitions & Macros                                              */
@@ -128,8 +128,19 @@ typedef enum _ErrCode {
   ERROR_SPRO_INIT,
   ERROR_OBSERVABLE_INIT,
   ERROR_DENSOP_INIT,
+  ERROR_DENSOP_COPY,
+  ERROR_DENSOP_GET_ELM,
   ERROR_DENSOP_PRINT,
+  ERROR_DENSOP_ADD,
+  ERROR_DENSOP_MUL,
   ERROR_DENSOP_TRACE,
+  ERROR_DENSOP_SQTRACE,
+  ERROR_DENSOP_PATRACE,
+  ERROR_DENSOP_LAPPLY_MATRIX,
+  ERROR_DENSOP_RAPPLY_MATRIX,
+  ERROR_DENSOP_APPLY_MATRIX,
+  ERROR_DENSOP_MEASURE_KRAUS,
+  ERROR_DENSOP_MEASURE_POVM,
 
   /* qlazy interactive mode */
   ERROR_NEED_TO_INITIALIZE,
@@ -343,6 +354,8 @@ bool     line_remove_space(char* str);
 bool     is_number(char* str);
 bool     is_decimal(char* str);
 bool	 binstr_from_decimal(char* binstr, int qubit_num, int decimal, int zflag);
+int      bit_permutation(int bits_in, int qnum, int qnum_part, int qid[MAX_QUBIT_NUM]);
+int*     bit_permutation_array(int length, int qnum, int qnum_part, int qid[MAX_QUBIT_NUM]);
 
 /* init.c */
 void	 init_qlazy(unsigned int seed);
@@ -400,7 +413,8 @@ bool     qstate_inner_product(QState* qstate_0, QState* qstate_1, double* real,
 			      double* imag);
 bool     qstate_tensor_product(QState* qstate_0, QState* qstate_1, void** qstate_out);
 bool     qstate_expect_value(QState* qstate, Observable* observ, double* value);
-bool     qstate_apply_matrix(QState* qstate, double* real, double *imag, int row, int col);
+bool     qstate_apply_matrix(QState* qstate, int qnum, int qid[MAX_QUBIT_NUM],
+			     double* real, double *imag, int row, int col);
 void	 qstate_free(QState* qstate);
 
 /* mdata.c */
@@ -427,12 +441,27 @@ void     observable_free(Observable* observ);
 
 /* densop.c */
 bool     densop_init(QState* qstate, double* prob, int num, void** densop_out);
+bool	 densop_copy(DensOp* densop_in, void** densop_out);
+bool     densop_get_elm(DensOp* densop, void** densop_out);
 bool     densop_print(DensOp* densop);
+bool     densop_add(DensOp* densop, DensOp* densop_add);
+bool     densop_mul(DensOp* densop, double factor);
 bool     densop_trace(DensOp* densop, double* real, double* imag);
 bool     densop_sqtrace(DensOp* densop, double* real, double* imag);
 bool     densop_patrace(DensOp* densop_in, int qubit_num, int qubit_id[MAX_QUBIT_NUM],
 			void** densop_out);
-bool     densop_apply_matrix(DensOp* densop, double* real, double* imag, int row, int col);
+bool     densop_lapply_matrix(DensOp* densop, int qnum_part, int qid[MAX_QUBIT_NUM],
+			      double* real, double* imag, int row, int col);
+bool     densop_rapply_matrix(DensOp* densop, int qnum_part, int qid[MAX_QUBIT_NUM],
+			      double* real, double* imag, int row, int col);
+bool     densop_apply_matrix(DensOp* densop, int qnum_part, int qid[MAX_QUBIT_NUM],
+			     double* real, double* imag, int row, int col);
+bool     densop_measure_kraus(DensOp* densop, int qnum_part, int qid[MAX_QUBIT_NUM],
+			      double* real, double* imag, int row, int col,
+			      double* prob_out);
+bool     densop_measure_povm(DensOp* densop, int qnum_part, int qid[MAX_QUBIT_NUM],
+			     double* real, double* imag, int row, int col,
+			     double* prob_out);
 void     densop_free(DensOp* densop);
 
 #endif

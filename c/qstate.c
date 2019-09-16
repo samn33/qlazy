@@ -274,9 +274,6 @@ bool qstate_get_camp(QState* qstate, int qubit_num, int qubit_id[MAX_QUBIT_NUM],
 
   if (qstate == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
-  //if (!(mask_qstate = _qstate_mask(qstate, qubit_num, qubit_id)))
-  //  ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
-
   if (!(mask_qstate = _qstate_pickup(qstate, qubit_num, qubit_id)))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
@@ -284,8 +281,6 @@ bool qstate_get_camp(QState* qstate, int qubit_num, int qubit_id[MAX_QUBIT_NUM],
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
 
   for (int i=0; i<mask_qstate->state_num; i++) {
-    // camp[2*i] = creal(qstate->camp[i]);
-    // camp[2*i+1] = cimag(qstate->camp[i]);
     camp[2*i] = creal(mask_qstate->camp[i]);
     camp[2*i+1] = cimag(mask_qstate->camp[i]);
   }
@@ -1373,30 +1368,61 @@ bool qstate_expect_value(QState* qstate, Observable* observ, double* value)
   SUC_RETURN(true);
 }
 
-bool qstate_apply_matrix(QState* qstate, double* real, double *imag, int row, int col)
+bool qstate_apply_matrix(QState* qstate, int qnum_part, int qid[MAX_QUBIT_NUM],
+			 double* real, double *imag, int row, int col)
 {
   QState*	qstate_tmp = NULL;
+  int*		index	   = NULL;
+  int*		inv_index  = NULL;
   COMPLEX	coef	   = 0.0 + 0.0i;
-  int		idx;
+  int		shift	   = 0;
+  int           N	   = 0;
+  int		ii,iii,jj,jjj;
 
   if ((qstate == NULL) || (real == NULL) || (imag == NULL) ||
-      (qstate->state_num != col) || (row != col))
+      (qstate->state_num < row) || (1<<qnum_part != row) || (row != col))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
   if (!(qstate_copy(qstate, (void**)&qstate_tmp)))
     ERR_RETURN(ERROR_QSTATE_COPY,false);
 
-  for (int i=0; i<row; i++) {
+  index = bit_permutation_array(qstate->state_num, qstate->qubit_num, qnum_part, qid);
+
+  if (!(inv_index = (int*)malloc(sizeof(int)*qstate->state_num)))
+    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
+  for (int n=0; n<qstate->state_num; n++) inv_index[index[n]] = n; 
+
+  shift = qstate->qubit_num-qnum_part;
+  N = 1<<(qstate->qubit_num-shift);
+  
+  for (int i=0; i<qstate->state_num; i++) {
     qstate->camp[i] = 0.0 + 0.0i;
-    idx = i*col;
-    for (int j=0; j<col; j++) {
-      coef = real[idx+j] + 1.0i * imag[idx+j];
+    ii = index[i]>>shift;
+    iii = index[i]%(1<<shift);
+
+    for (int k=0; k<N; k++) {
+      int j = inv_index[(k<<shift)+iii];
+      jj = index[j]>>shift;
+      jjj = index[j]%(1<<shift);
+      coef = real[ii*col+jj] + 1.0i * imag[ii*col+jj];
       qstate->camp[i] += (coef * qstate_tmp->camp[j]);
     }
+
+    /*
+    for (int j=0; j<qstate->state_num; j++) {
+      jj = index[j]>>shift;
+      jjj = index[j]%(1<<shift);
+      if (iii == jjj) {
+	coef = real[ii*col+jj] + 1.0i * imag[ii*col+jj];
+	qstate->camp[i] += (coef * qstate_tmp->camp[j]);
+      }
+    }
+    */
   }
 
-  qstate_free(qstate_tmp);
-  qstate_tmp = NULL;
+  free(index); index = NULL;
+  free(inv_index); inv_index = NULL;
+  qstate_free(qstate_tmp); qstate_tmp = NULL;
 
   SUC_RETURN(true);
 }

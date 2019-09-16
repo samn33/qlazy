@@ -96,6 +96,14 @@ class DensOp_FailToShow(Exception):
     def __str__(self):
         return "DensOp: fail to show"
 
+class DensOp_FailToClone(Exception):
+    def __str__(self):
+        return "DensOp: fail to clone"
+
+class DensOp_FailToGetElm(Exception):
+    def __str__(self):
+        return "DensOp: fail to get_elm"
+
 class DensOp_FailToTrace(Exception):
     def __str__(self):
         return "DensOp: fail to trace"
@@ -111,3 +119,16 @@ class DensOp_FailToPaTrace(Exception):
 class DensOp_FailToApply(Exception):
     def __str__(self):
         return "DensOp: fail to apply"
+
+class DensOp_FailToMeasure(Exception):
+    def __str__(self):
+        return "DensOp: fail to measure"
+
+class DensOp_FailToAdd(Exception):
+    def __str__(self):
+        return "DensOp: fail to add"
+
+class DensOp_FailToMul(Exception):
+    def __str__(self):
+        return "DensOp: fail to mul"
+

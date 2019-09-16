@@ -17,7 +17,9 @@ add followings to your ~/.bashrc
     export PATH=$PATH:~/bin
     export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/lib
 
-You may also need to install 'readline-dev' ($ sudo apt install readline-dev).
+You may also need to install 'readline-dev'
+
+    $ sudo apt install readline-dev).
 
 ### python package - qlazypy
 

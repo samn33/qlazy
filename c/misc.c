@@ -203,3 +203,52 @@ bool binstr_from_decimal(char* binstr, int qubit_num, int decimal, int zflag)
   
   return true;
 }
+
+int bit_permutation(int bits_in, int qnum, int qnum_part, int qid[MAX_QUBIT_NUM])
+/*
+  [example]
+  bits_in: abcdef (<-- binary array)
+  qnum_part: 3
+  qid: [4,0,2,...]
+  --> bits_out: eacbdf
+*/
+{
+  int	bits_out = 0;
+  int	bit	 = 0;
+  int	now	 = 0;
+  bool	flg[MAX_QUBIT_NUM];
+
+  for (int i=0; i<MAX_QUBIT_NUM; i++) flg[i] = false;
+
+  for (int i=0; i<qnum_part; i++) {
+    bit = (bits_in>>(qnum-1-qid[i]))&0x1;
+    bits_out += (bit<<(qnum-1-i));
+    flg[qid[i]] = true;
+  }
+
+  now = qnum_part;
+  for (int i=0; i<qnum; i++) {
+    if (flg[i] == false) {
+      bit = (bits_in>>(qnum-1-i))&0x1;
+      bits_out += (bit<<(qnum-1-now));
+      now++;
+    }
+  }
+  
+  return bits_out;
+}
+
+int* bit_permutation_array(int length, int qnum, int qnum_part, int qid[MAX_QUBIT_NUM])
+{
+  int* index = NULL;
+
+  if (!(index = (int*)malloc(sizeof(int)*length)))
+    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
+
+  for (int i=0; i<length; i++) {
+    index[i] = bit_permutation(i, qnum, qnum_part, qid);
+  }
+
+  return index;
+}
+

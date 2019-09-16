@@ -1,8 +1,19 @@
+2019-09-17  Sam.N  <saminriver33@gmail.com>
+
+	* v0.0.24
+	- update(doc): Tutorial_py.md - DensOp class
+	- bug fix(c/py): densop_apply_matrix, DensOp.aply
+	- change spec(c): qstate_apply_matrix
+	- add function(c) densop_add,densop_mul,densop_measure_kraus,densop_measure_povm
+	- add function(py) DensOp.add,DensOp.mul,DensOp.measure,DensOp.mix
+	- add function(c/py): densop_get_amp, DensOp.get_amp
+	- example(py): Measure/povm.py
+
 2019-09-04  Sam.N  <saminriver33@gmail.com>
 
 	* v0.0.23
-	- bug fix(c/py): densop_init, DensOp.__new__()
-	- bug fix(c/py): get_camp, QState.get_amp()
+	- bug fix(c/py): densop_init, DensOp.__new__
+	- bug fix(c/py): get_camp, QState.get_amp
 
 2019-09-01  Sam.N  <saminriver33@gmail.com>
 
