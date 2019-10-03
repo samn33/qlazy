@@ -2,7 +2,7 @@
 import os
 from setuptools import setup, find_packages
 
-VERSION = '0.0.24'
+VERSION = '0.0.25'
 
 try:
     with open('README.md') as f:

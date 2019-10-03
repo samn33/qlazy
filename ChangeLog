@@ -1,3 +1,18 @@
+2019-10-04  Sam.N  <saminriver33@gmail.com>
+
+	* v0.0.25
+	- add function(py): Densop.instrument
+	- add function(py): Densop.expect
+	- add function(c): swap gate (sw)
+	- add function(py): swap gate (sw), fredkin gate (csw)
+	- add function(c/py): U1,U2,U3 gate (u1,u2,u3)
+	- change spec(py): Densop.__new__
+	- change spec(c): densop_probability,densop_apply_matrix
+	- change spec(py): DensOp.probability,DensOp.apply
+	- bug fix(c/py): densop_sqtrace, DensOp.sqtrace
+	- refactoring(c): qstate,gbank,...
+	- add example(py): QChannel/amplitude_dumping.py
+
 2019-09-17  Sam.N  <saminriver33@gmail.com>
 
 	* v0.0.24

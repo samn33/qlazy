@@ -15,7 +15,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
-#define VERSION "0.0.24"
+#define VERSION "0.0.25"
 
 /*====================================================================*/
 /*  Definitions & Macros                                              */
@@ -102,9 +102,7 @@ typedef enum _ErrCode {
   ERROR_QCIRC_READ_FILE,
   ERROR_QCIRC_WRITE_FILE,
   ERROR_GBANK_INIT,
-  ERROR_GBANK_GET,
-  ERROR_GBANK_GET_ROTATION,
-  ERROR_CIMAGE_INIT,
+  ERROR_GBANK_GET_UNITARY,
   ERROR_QSTATE_INIT,
   ERROR_QSTATE_COPY,
   ERROR_QSTATE_GET_CAMP,
@@ -114,7 +112,6 @@ typedef enum _ErrCode {
   ERROR_QSTATE_MEASURE,
   ERROR_QSTATE_MEASURE_BELL,
   ERROR_QSTATE_OPERATE_QGATE,
-  ERROR_QSTATE_OPERATE_QGATE_PARAM,
   ERROR_QSTATE_EVOLVE,
   ERROR_QSTATE_INNER_PRODUCT,
   ERROR_QSTATE_EXPECT_VALUE,
@@ -136,11 +133,8 @@ typedef enum _ErrCode {
   ERROR_DENSOP_TRACE,
   ERROR_DENSOP_SQTRACE,
   ERROR_DENSOP_PATRACE,
-  ERROR_DENSOP_LAPPLY_MATRIX,
-  ERROR_DENSOP_RAPPLY_MATRIX,
   ERROR_DENSOP_APPLY_MATRIX,
-  ERROR_DENSOP_MEASURE_KRAUS,
-  ERROR_DENSOP_MEASURE_POVM,
+  ERROR_DENSOP_PROBABILITY,
 
   /* qlazy interactive mode */
   ERROR_NEED_TO_INITIALIZE,
@@ -182,6 +176,9 @@ typedef enum _Kind {
   ROTATION_X	 = 150,		/* symbol: 'RX','rx'     */
   ROTATION_Y	 = 151,		/* symbol: 'RY','ry'     */
   ROTATION_Z	 = 152,		/* symbol: 'RZ','rz'     */
+  ROTATION_U1	 = 153,		/* symbol: 'U1','u1'     */
+  ROTATION_U2	 = 154,		/* symbol: 'U2','u2'     */
+  ROTATION_U3	 = 155,		/* symbol: 'U3','u3'     */
   CONTROLLED_X	 = 160,		/* symbol: 'CX','cx'     */
   CONTROLLED_Y	 = 161,		/* symbol: 'CX','cx'     */
   CONTROLLED_Z	 = 162,		/* symbol: 'CZ','cz'     */
@@ -196,7 +193,7 @@ typedef enum _Kind {
   CONTROLLED_RX	 = 171,		/* symbol: 'CRX','crx'   */
   CONTROLLED_RY	 = 172,		/* symbol: 'CRY','cry'   */
   CONTROLLED_RZ	 = 173,		/* symbol: 'CRZ','crz'   */
-  TOFFOLI	 = 180,		/* symbol: 'CCX','ccx'   */
+  SWAP	         = 180,		/* symbol: 'SW','sw'     */
   MEASURE	 = 200,	 	/* symbol: 'M','m'       */
   MEASURE_X	 = 201,	 	/* symbol: 'MX','mx'     */
   MEASURE_Y	 = 202,	 	/* symbol: 'MY','my'     */
@@ -218,8 +215,25 @@ typedef enum _SpinType {
   SIGMA_Z = 3,
 } SpinType;
 
+typedef enum _ApplyDir {
+  LEFT  = 0,
+  RIGHT = 1,
+  BOTH  = 2,
+} ApplyDir;
+
+typedef enum _MatrixType {
+  KRAUS = 1,
+  POVM  = 2,
+} MatrixType;
+
 typedef double _Complex COMPLEX;
 
+typedef struct _ParaPhase {
+  double	alpha;
+  double	beta;
+  double	gamma;
+} ParaPhase;
+  
 typedef struct _ParaMes {
   int		shots;
   double	angle;
@@ -227,7 +241,7 @@ typedef struct _ParaMes {
 } ParaMes;
   
 typedef union _Para {
-  double	phase;		/* phase angle under unit PI (for RX,RY,RZ) */
+  ParaPhase	phase;		/* phase angle under unit PI (for RX,RY,RZ) */
   ParaMes	mes;		/* measurement parameter (for M) */
 } Para;
   
@@ -264,6 +278,7 @@ typedef struct _GBank {
   COMPLEX ControlledS_[16];
   COMPLEX ControlledT[16];
   COMPLEX ControlledT_[16];
+  COMPLEX Swap[16];
 } GBank;
 
 typedef struct _QCirc {
@@ -341,6 +356,7 @@ double	 carg(double _Complex z);
 double	 creal(double _Complex z);
 double	 cimag(double _Complex z);
 double _Complex conj(double _Complex z);
+double _Complex cexp(double _Complex z);
 
 /* misc.c */
 bool	 line_check_length(char* str);
@@ -367,7 +383,7 @@ void	 error_msg(ErrCode err);
 bool	 help_print(char* item);
 
 /* qgate.c */
-bool	 qgate_get_symbol(char* symbol, Kind kind);
+bool	 qgate_get_symbol(Kind kind, char* symbol_out);
 bool	 qgate_get_kind(char* symbol, Kind* kind_out);
 
 /* qcirc.c */
@@ -383,15 +399,8 @@ void	 qcirc_free(QCirc* qcirc);
 
 /* gbank.c */
 bool	 gbank_init(void** gbank_out);
-bool     gbank_get(GBank* gbank, Kind kind, void** matrix_out);
-bool     gbank_get_rotation(Axis axis, double phase, double unit, void** matrix_out);
-bool     gbank_get_phase_shift(double phase, double unit, void** matrix_out);
-bool     gbank_get_ctr_rotation(Axis axis, double phase, double unit, void** matrix_out);
-bool     gbank_get_ctr_phase_shift(double phase, double unit, void** matrix_out);
-
-/* cimage.c */
-bool     cimage_init(int qubit_num, int step_num, void** cimage_out);
-void	 cimage_free(CImage* cimage);
+bool     gbank_get_unitary(GBank* gbank, Kind kind, double phase, double phase1,
+			   double phase2, int* dim_out, void** matrix_out);
 
 /* qstate.c */
 bool	 qstate_init(int qubit_num, void** qstate_out);
@@ -405,9 +414,8 @@ bool	 qstate_measure(QState* qstate, int shot_num, double angle, double phase,
 			int qubit_num, int qubit_id[MAX_QUBIT_NUM], void** mdata_out);
 bool     qstate_measure_bell(QState* qstate, int shot_num, int qubit_num,
 			     int qubit_id[MAX_QUBIT_NUM], void** mdata_out);
-bool	 qstate_operate_qgate(QState* qstate, QGate* qgate);
-bool	 qstate_operate_qgate_param(QState* qstate, Kind kind, double phase,
-				    int qubit_id[MAX_QUBIT_NUM]);
+bool	 qstate_operate_qgate(QState* qstate, Kind kind, double alpha, double beta,
+			      double gamma, int qubit_id[MAX_QUBIT_NUM]);
 bool     qstate_evolve(QState* qstate, Observable* observ, double time, int iter);
 bool     qstate_inner_product(QState* qstate_0, QState* qstate_1, double* real,
 			      double* imag);
@@ -441,6 +449,8 @@ void     observable_free(Observable* observ);
 
 /* densop.c */
 bool     densop_init(QState* qstate, double* prob, int num, void** densop_out);
+bool     densop_init_with_matrix(double* real, double* imag, int row, int col,
+				 void** densop_out);
 bool	 densop_copy(DensOp* densop_in, void** densop_out);
 bool     densop_get_elm(DensOp* densop, void** densop_out);
 bool     densop_print(DensOp* densop);
@@ -450,18 +460,11 @@ bool     densop_trace(DensOp* densop, double* real, double* imag);
 bool     densop_sqtrace(DensOp* densop, double* real, double* imag);
 bool     densop_patrace(DensOp* densop_in, int qubit_num, int qubit_id[MAX_QUBIT_NUM],
 			void** densop_out);
-bool     densop_lapply_matrix(DensOp* densop, int qnum_part, int qid[MAX_QUBIT_NUM],
-			      double* real, double* imag, int row, int col);
-bool     densop_rapply_matrix(DensOp* densop, int qnum_part, int qid[MAX_QUBIT_NUM],
-			      double* real, double* imag, int row, int col);
 bool     densop_apply_matrix(DensOp* densop, int qnum_part, int qid[MAX_QUBIT_NUM],
-			     double* real, double* imag, int row, int col);
-bool     densop_measure_kraus(DensOp* densop, int qnum_part, int qid[MAX_QUBIT_NUM],
-			      double* real, double* imag, int row, int col,
-			      double* prob_out);
-bool     densop_measure_povm(DensOp* densop, int qnum_part, int qid[MAX_QUBIT_NUM],
-			     double* real, double* imag, int row, int col,
-			     double* prob_out);
+			     ApplyDir adir, double* real, double* imag, int row, int col);
+bool     densop_probability(DensOp* densop, int qnum_part, int qid[MAX_QUBIT_NUM],
+			    MatrixType mtype, double* real, double* imag, int row, int col,
+			    double* prob_out);
 void     densop_free(DensOp* densop);
 
 #endif

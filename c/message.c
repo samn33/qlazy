@@ -60,15 +60,8 @@ void error_msg(ErrCode err)
     fprintf(stderr, "ERROR: gbank init failure !\n");
     break;
 
-  case ERROR_GBANK_GET:
-    fprintf(stderr, "ERROR: gbank get failure !\n");
-    break;
-  case ERROR_GBANK_GET_ROTATION:
-    fprintf(stderr, "ERROR: gbank get rotation failure !\n");
-    break;
-
-  case ERROR_CIMAGE_INIT:
-    fprintf(stderr, "ERROR: cimage init failure !\n");
+  case ERROR_GBANK_GET_UNITARY:
+    fprintf(stderr, "ERROR: gbank get unitary failure !\n");
     break;
 
   case ERROR_QSTATE_INIT:
@@ -97,9 +90,6 @@ void error_msg(ErrCode err)
     break;
   case ERROR_QSTATE_OPERATE_QGATE:
     fprintf(stderr, "ERROR: qstate operate qgate failure !\n");
-    break;
-  case ERROR_QSTATE_OPERATE_QGATE_PARAM:
-    fprintf(stderr, "ERROR: qstate operate qgate param failure !\n");
     break;
   case ERROR_QSTATE_EVOLVE:
     fprintf(stderr, "ERROR: qstate evolve failure !\n");
@@ -169,20 +159,11 @@ void error_msg(ErrCode err)
   case ERROR_DENSOP_PATRACE:
     fprintf(stderr, "ERROR: densop patrace failure !\n");
     break;
-  case ERROR_DENSOP_LAPPLY_MATRIX:
-    fprintf(stderr, "ERROR: densop laplly_matrix failure !\n");
-    break;
-  case ERROR_DENSOP_RAPPLY_MATRIX:
-    fprintf(stderr, "ERROR: densop raplly_matrix failure !\n");
-    break;
   case ERROR_DENSOP_APPLY_MATRIX:
     fprintf(stderr, "ERROR: densop aplly_matrix failure !\n");
     break;
-  case ERROR_DENSOP_MEASURE_KRAUS:
-    fprintf(stderr, "ERROR: densop measure_kraus failure !\n");
-    break;
-  case ERROR_DENSOP_MEASURE_POVM:
-    fprintf(stderr, "ERROR: densop measure_povm failure !\n");
+  case ERROR_DENSOP_PROBABILITY:
+    fprintf(stderr, "ERROR: densop probability failure !\n");
     break;
 
   case ERROR_NEED_TO_INITIALIZE:

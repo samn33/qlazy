@@ -8,7 +8,13 @@ show
 
 # fredkin
 cx 2 1
-ccx 0 1 2
+
+cxr 1 2
+cx 0 1
+cxr+ 1 2
+cx 0 1
+cxr 0 2
+
 cx 2 1
 
 @ == final state ==

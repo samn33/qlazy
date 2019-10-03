@@ -4,7 +4,7 @@
 
 #include "qlazy.h"
 
-bool qgate_get_symbol(char* symbol, Kind kind)
+bool qgate_get_symbol(Kind kind, char* symbol)
 {
   switch (kind) {
   case INIT:
@@ -76,6 +76,15 @@ bool qgate_get_symbol(char* symbol, Kind kind)
   case ROTATION_Z:
     strcpy(symbol,"RZ");
     break;
+  case ROTATION_U1:
+    strcpy(symbol,"U1");
+    break;
+  case ROTATION_U2:
+    strcpy(symbol,"U2");
+    break;
+  case ROTATION_U3:
+    strcpy(symbol,"U3");
+    break;
   case CONTROLLED_X:
     strcpy(symbol,"CX");
     break;
@@ -118,8 +127,8 @@ bool qgate_get_symbol(char* symbol, Kind kind)
   case CONTROLLED_RZ:
     strcpy(symbol,"CRZ");
     break;
-  case TOFFOLI:
-    strcpy(symbol,"CCX");
+  case SWAP:
+    strcpy(symbol,"SW");
     break;
   case MEASURE:
     strcpy(symbol,"M");
@@ -193,6 +202,12 @@ bool qgate_get_kind(char* symbol, Kind* kind_out)
   else if (strcmp(symbol,"ry")    == 0) kind = ROTATION_Y;
   else if (strcmp(symbol,"RZ")    == 0) kind = ROTATION_Z;
   else if (strcmp(symbol,"rz")    == 0) kind = ROTATION_Z;
+  else if (strcmp(symbol,"U1")    == 0) kind = ROTATION_U1;
+  else if (strcmp(symbol,"u1")    == 0) kind = ROTATION_U1;
+  else if (strcmp(symbol,"U2")    == 0) kind = ROTATION_U2;
+  else if (strcmp(symbol,"u2")    == 0) kind = ROTATION_U2;
+  else if (strcmp(symbol,"U3")    == 0) kind = ROTATION_U3;
+  else if (strcmp(symbol,"u3")    == 0) kind = ROTATION_U3;
   else if (strcmp(symbol,"CX")    == 0) kind = CONTROLLED_X;
   else if (strcmp(symbol,"cx")    == 0) kind = CONTROLLED_X;
   else if (strcmp(symbol,"CY")    == 0) kind = CONTROLLED_Y;
@@ -221,8 +236,8 @@ bool qgate_get_kind(char* symbol, Kind* kind_out)
   else if (strcmp(symbol,"cry")   == 0) kind = CONTROLLED_RY;
   else if (strcmp(symbol,"CRZ")   == 0) kind = CONTROLLED_RZ;
   else if (strcmp(symbol,"crz")   == 0) kind = CONTROLLED_RZ;
-  else if (strcmp(symbol,"CCX")   == 0) kind = TOFFOLI;
-  else if (strcmp(symbol,"ccx")   == 0) kind = TOFFOLI;
+  else if (strcmp(symbol,"SW")    == 0) kind = SWAP;
+  else if (strcmp(symbol,"sw")    == 0) kind = SWAP;
   else if (strcmp(symbol,"M")     == 0) kind = MEASURE;
   else if (strcmp(symbol,"m")     == 0) kind = MEASURE;
   else if (strcmp(symbol,"MX")    == 0) kind = MEASURE_X;

@@ -10,6 +10,8 @@ from qlazypy.QState import *
 from qlazypy.MData import *
 from qlazypy.Observable import *
 
+import sys
+
 lib = ctypes.CDLL('libQlazy.so',mode=ctypes.RTLD_GLOBAL)
 libc = ctypes.CDLL(find_library("c"),mode=ctypes.RTLD_GLOBAL)
 
@@ -21,10 +23,13 @@ class DensOp(ctypes.Structure):
         ('elm', ctypes.c_void_p),
     ]
     
-    def __new__(cls, qstate=[], prob=[]):
+    def __new__(cls, qstate=[], prob=[], matrix=[]):
 
-        return cls.densop_init(qstate, prob)
-
+        if qstate != [] and prob != []:
+            return cls.densop_init(qstate, prob)
+        else:
+            return cls.densop_init_with_matrix(matrix)
+    
     def __str__(self):
 
         return str(self.get_elm())
@@ -103,31 +108,75 @@ class DensOp(ctypes.Structure):
 
         return self.densop_patrace(id=id)
 
-    def apply(self, matrix=None, id=None):
+    def expect(self, matrix=None):
 
-        self.densop_apply_matrix(matrix=matrix, id=id)
+        densop = self.clone()
+        densop.densop_apply_matrix(matrix=matrix,dir='left')
+        value = densop.trace()
+        densop.free()
+        return value
+        
+    def apply(self, matrix=None, id=[], dir='both'):
+
+        self.densop_apply_matrix(matrix=matrix, id=id, dir=dir)
         return self
 
-    def measure(self, kraus=[], povm=[], id=[]):
+    def probability(self, kraus=[], povm=[], id=[]):
 
         if kraus != []:
             N = len(kraus)
             prob = [0.0]*N
             for i in range(N):
-                prob[i] = self.densop_measure_kraus(matrix=kraus[i], id=id)
+                prob[i] = self.densop_probability(matrix=kraus[i], id=id,
+                                                  matrix_type='kraus')
                 if abs(prob[i]) < MIN_DOUBLE:
                     prob[i] = 0.0
         elif povm != []:
             N = len(povm)
             prob = [0.0]*N
             for i in range(N):
-                prob[i] = self.densop_measure_povm(matrix=povm[i], id=id)
+                prob[i] = self.densop_probability(matrix=povm[i], id=id,
+                                                  matrix_type='povm')
                 if abs(prob[i]) < MIN_DOUBLE:
                     prob[i] = 0.0
         else:
-            raise DensOp_FailToMeasure()
+            raise DensOp_FailToProbability()
                 
         return prob
+
+    def instrument(self, kraus=[], id=[], measured_value=None):
+
+        if id is None or id == []:
+            qnum = int(math.log2(self.row))
+            id = [i for i in range(qnum)]
+
+        if kraus == []:
+            raise DensOp_FailToInstrument()
+        else:
+            N = len(kraus)
+
+        if measured_value is None:  # non-selective measurement
+            
+            densop_ori = self.clone()
+            for i in range(N):
+                if i == 0:
+                    self.apply(matrix=kraus[i], id=id, dir='both')
+                else:
+                    densop_tmp = densop_ori.clone()
+                    densop_tmp.apply(matrix=kraus[i], id=id, dir='both')
+                    self.add(densop=densop_tmp)
+                    densop_tmp.free()
+            densop_ori.free()
+                
+        else:  # selective measurement
+
+            if (measured_value < 0 or measured_value >= N):
+                raise DensOp_FailToInstrument()
+            self.apply(matrix=kraus[measured_value],id=id)
+            #prob = self.trace()
+            #self.mul(factor=1.0/prob)
+
+        return self
 
     def free(self):
 
@@ -166,6 +215,42 @@ class DensOp(ctypes.Structure):
         
         return out.contents
 
+    @classmethod
+    def densop_init_with_matrix(cls, matrix=None):
+
+        densop = None
+        c_densop = ctypes.c_void_p(densop)
+
+        row = len(matrix)
+        col = row
+        size = row * col
+
+        mat_complex = list(matrix.flatten())
+        mat_real = [0.0 for _ in range(size)]
+        mat_imag = [0.0 for _ in range(size)]
+        for i in range(size):
+            mat_real[i] = mat_complex[i].real
+            mat_imag[i] = mat_complex[i].imag
+                
+        DoubleArray = ctypes.c_double * size
+        c_mat_real = DoubleArray(*mat_real)
+        c_mat_imag = DoubleArray(*mat_imag)
+            
+        lib.densop_init_with_matrix.restype = ctypes.c_int
+        lib.densop_init_with_matrix.argtypes = [DoubleArray, DoubleArray,
+                                                ctypes.c_int, ctypes.c_int,
+                                                ctypes.POINTER(ctypes.c_void_p)]
+        ret = lib.densop_init_with_matrix(c_mat_real, c_mat_imag,
+                                          ctypes.c_int(row), ctypes.c_int(col),
+                                          c_densop)
+        
+        if ret == FALSE:
+            raise DensOp_FailToInitialize()
+            
+        out = ctypes.cast(c_densop.value, ctypes.POINTER(DensOp))
+        
+        return out.contents
+        
     def densop_get_elm(self):
 
         try:
@@ -260,7 +345,7 @@ class DensOp(ctypes.Structure):
     def densop_trace(self):
 
         try:
-
+        
             real = 0.0
             imag = 0.0
             c_real = ctypes.c_double(real)
@@ -349,7 +434,7 @@ class DensOp(ctypes.Structure):
         except Exception:
             raise DensOp_FailToPaTrace()
 
-    def densop_apply_matrix(self, matrix=None, id=None):
+    def densop_apply_matrix(self, matrix=None, id=[], dir='both'):
 
         if matrix is None:
             raise DensOp_FailToApply()
@@ -359,7 +444,16 @@ class DensOp(ctypes.Structure):
         if id is None or id == []:
             qnum = int(math.log2(self.row))
             id = [i for i in range(qnum)]
-            
+
+        if dir == 'left':
+            adir = LEFT
+        elif dir == 'right':
+            adir = RIGHT
+        elif dir == 'both':
+            adir = BOTH
+        else:
+            raise DensOp_FailToApply()
+
         try:
             qubit_num = len(id)
             qubit_id = [0 for _ in range(MAX_QUBIT_NUM)]
@@ -387,11 +481,12 @@ class DensOp(ctypes.Structure):
             lib.densop_apply_matrix.restype = ctypes.c_int
             lib.densop_apply_matrix.argtypes = [ctypes.POINTER(DensOp),
                                                 ctypes.c_int, IntArray,
+                                                ctypes.c_int,
                                                 DoubleArray, DoubleArray,
                                                 ctypes.c_int, ctypes.c_int]
             ret = lib.densop_apply_matrix(ctypes.byref(self),
                                           ctypes.c_int(qubit_num), id_array,
-                                          c_mat_real, c_mat_imag,
+                                          ctypes.c_int(adir), c_mat_real, c_mat_imag,
                                           ctypes.c_int(row), ctypes.c_int(col))
 
             if ret == FALSE:
@@ -399,17 +494,25 @@ class DensOp(ctypes.Structure):
 
         except Exception:
             raise DensOp_FailToApply()
+        
 
-    def densop_measure_kraus(self, matrix=None, id=None):
+    def densop_probability(self, matrix=None, id=[], matrix_type=None):
 
         if matrix is None:
-            raise DensOp_FailToMeasure()
+            raise DensOp_FailToProbability()
         if (matrix.shape[0] > self.row or matrix.shape[1] > self.col):
-            raise DensOp_FailToMeasure()
+            raise DensOp_FailToProbability()
         
         if id is None or id == []:
             qnum = int(math.log2(self.row))
             id = [i for i in range(qnum)]
+
+        if matrix_type == 'kraus':
+            mtype = KRAUS
+        elif matrix_type == 'povm':
+            mtype = POVM
+        else:
+            raise DensOp_FailToProbability()
             
         try:
             qubit_num = len(id)
@@ -438,87 +541,27 @@ class DensOp(ctypes.Structure):
             prob = 0.0
             c_prob = ctypes.c_double(prob)
 
-            lib.densop_measure_kraus.restype = ctypes.c_int
-            lib.densop_measure_kraus.argtypes = [ctypes.POINTER(DensOp),
-                                                 ctypes.c_int, IntArray,
-                                                 DoubleArray, DoubleArray,
-                                                 ctypes.c_int, ctypes.c_int,
-                                                 ctypes.POINTER(ctypes.c_double)]
-            ret = lib.densop_measure_kraus(ctypes.byref(self),
-                                           ctypes.c_int(qubit_num), id_array,
-                                           c_mat_real, c_mat_imag,
-                                           ctypes.c_int(row), ctypes.c_int(col),
-                                           ctypes.byref(c_prob))
+            lib.densop_probability.restype = ctypes.c_int
+            lib.densop_probability.argtypes = [ctypes.POINTER(DensOp),
+                                               ctypes.c_int, IntArray,
+                                               ctypes.c_int, DoubleArray, DoubleArray,
+                                               ctypes.c_int, ctypes.c_int,
+                                               ctypes.POINTER(ctypes.c_double)]
+            ret = lib.densop_probability(ctypes.byref(self),
+                                         ctypes.c_int(qubit_num), id_array,
+                                         ctypes.c_int(mtype), c_mat_real, c_mat_imag,
+                                         ctypes.c_int(row), ctypes.c_int(col),
+                                         ctypes.byref(c_prob))
 
             if ret == FALSE:
-                raise DensOp_FailToMeasure()
+                raise DensOp_FailToProbability()
 
             prob = round(c_prob.value, 8)
             
             return prob
 
         except Exception:
-            raise DensOp_FailToMeasure()
-
-    def densop_measure_povm(self, matrix=None, id=None):
-
-        if matrix is None:
-            raise DensOp_FailToMeasure()
-        if (matrix.shape[0] > self.row or matrix.shape[1] > self.col):
-            raise DensOp_FailToMeasure()
-        
-        if id is None or id == []:
-            qnum = int(math.log2(self.row))
-            id = [i for i in range(qnum)]
-            
-        try:
-            qubit_num = len(id)
-            qubit_id = [0 for _ in range(MAX_QUBIT_NUM)]
-            for i in range(len(id)):
-                qubit_id[i] = id[i]
-            IntArray = ctypes.c_int * MAX_QUBIT_NUM
-            id_array = IntArray(*qubit_id)
-
-            row = len(matrix) # dimension of the unitary matrix
-            col = row
-            size = row * col
-
-            # set array of matrix
-            mat_complex = list(matrix.flatten())
-            mat_real = [0.0 for _ in range(size)]
-            mat_imag = [0.0 for _ in range(size)]
-            for i in range(size):
-                mat_real[i] = mat_complex[i].real
-                mat_imag[i] = mat_complex[i].imag
-                
-            DoubleArray = ctypes.c_double * size
-            c_mat_real = DoubleArray(*mat_real)
-            c_mat_imag = DoubleArray(*mat_imag)
-            
-            prob = 0.0
-            c_prob = ctypes.c_double(prob)
-
-            lib.densop_measure_povm.restype = ctypes.c_int
-            lib.densop_measure_povm.argtypes = [ctypes.POINTER(DensOp),
-                                                ctypes.c_int, IntArray,
-                                                DoubleArray, DoubleArray,
-                                                ctypes.c_int, ctypes.c_int,
-                                                ctypes.POINTER(ctypes.c_double)]
-            ret = lib.densop_measure_povm(ctypes.byref(self),
-                                          ctypes.c_int(qubit_num), id_array,
-                                          c_mat_real, c_mat_imag,
-                                          ctypes.c_int(row), ctypes.c_int(col),
-                                          ctypes.byref(c_prob))
-
-            if ret == FALSE:
-                raise DensOp_FailToMeasure()
-
-            prob = round(c_prob.value, 8)
-            
-            return prob
-
-        except Exception:
-            raise DensOp_FailToMeasure()
+            raise DensOp_FailTorobability()
 
 
     def densop_free(self):

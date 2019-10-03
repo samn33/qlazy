@@ -17,9 +17,8 @@ static void _help_print_outline() {
 * quit:                     .,quit \n\
 * help:                     ?,help \n\
 [quantum gates]\n\
-* 1-qubit gates:            X,Y,Z,XR,XR+,H,S,S+,T,T+,P,RX,RY,RZ\n\
-* 2-qubit gates:            CX,CY,CZ,CXR,CXR+,CH,CS,CS+,CT,CT+,CP,CRX,CRY,CRZ\n\
-* 3-qubit gates:            CCX\n\
+* 1-qubit gates:            X,Y,Z,XR,XR+,H,S,S+,T,T+,P,RX,RY,RZ,U1,U2,U3\n\
+* 2-qubit gates:            CX,CY,CZ,CXR,CXR+,CH,CS,CS+,CT,CT+,CP,CRX,CRY,CRZ,SW\n\
 * measurement:              M,MX,MY,MZ,MB\n\
 [notes] \n\
 * see \'help <item>\', for more information\n\
@@ -442,6 +441,51 @@ static void _help_print_rz() {
 ");
 }
 
+static void _help_print_u1() {
+  printf("\
+== U1 gate ==\n\
+[description] \n\
+  U1 gate is difined by IBM Q. (is equal to 'P gate')\n\
+  - matrix expression:\n\
+    | 1 0               | \n\
+    | 0 exp(i*alpha*PI) | \n\
+[usage] \n\
+  >> U1(<alpha>) <qubit_id>\n\
+[alias] \n\
+  u1 \n\
+");
+}
+
+static void _help_print_u2() {
+  printf("\
+== U2 gate ==\n\
+[description] \n\
+  U2 gate is difined by IBM Q.\n\
+  - matrix expression:\n\
+    | 1/sqrt(2)              -exp(i*alpha*PI)/sqrt(2)       | \n\
+    | exp(i*beta*PI)/sqrt(2) exp(i*(alpha+beta)*PI)/sqrt(2) | \n\
+[usage] \n\
+  >> U2(<alpha>,<beta>) <qubit_id>\n\
+[alias] \n\
+  u2 \n\
+");
+}
+
+static void _help_print_u3() {
+  printf("\
+== U3 gate ==\n\
+[description] \n\
+  U3 gate is difined by IBM Q.\n\
+  - matrix expression:\n\
+    | cos(gamma/2)                -exp(i*alpha*PI)*sin(gamma/2)       | \n\
+    | exp(i*beta*PI)*sin(gamma/2) exp(i*(alpha+beta)*PI)*cos(gamma/2) | \n\
+[usage] \n\
+  >> U3(<alpha>,<beta>,<gamma>) <qubit_id>\n\
+[alias] \n\
+  u3 \n\
+");
+}
+
 static void _help_print_cx() {
   printf("\
 == CX gate ==\n\
@@ -668,24 +712,15 @@ static void _help_print_crz() {
 ");
 }
 
-static void _help_print_ccx() {
+static void _help_print_sw() {
   printf("\
-== CCX gate ==\n\
+== SW gate ==\n\
 [description] \n\
-  CCX gate is 3-qubit gate called \'controlled-controlled-X gate\' or \'toffoli gate\'.\n\
-  It flips the third qubit if and only if the first and second qubit are both |1>.\n\
-  - quantum circuit expresson:\n\
-    0 --*---- \n\
-    1 --*---- \n\
-    2 --CCX-- \n\
-  - equivalent another expresson:\n\
-    0 ----------*----------*--------*--T----*--- \n\
-    1 ----*----------*--------T-----CX---T+-CX-- \n\
-    2 --H-CX-T+-CX-T-CX-T+-CX---T-H------------- \n\
+  SW gate is 2-qubit swap gate.\n\
 [usage] \n\
-  >> CCX <qubit_id> <qubit_id> <qubit_id>\n\
+  >> SW <qubit_id> <qubit_id>\n\
 [alias] \n\
-  ccx \n\
+  sw \n\
 ");
 }
 
@@ -785,6 +820,15 @@ bool help_print(char* item)
   case ROTATION_Z:
     _help_print_rz();
     break;
+  case ROTATION_U1:
+    _help_print_u1();
+    break;
+  case ROTATION_U2:
+    _help_print_u2();
+    break;
+  case ROTATION_U3:
+    _help_print_u3();
+    break;
   case CONTROLLED_X:
     _help_print_cx();
     break;
@@ -827,8 +871,8 @@ bool help_print(char* item)
   case CONTROLLED_RZ:
     _help_print_crz();
     break;
-  case TOFFOLI:
-    _help_print_ccx();
+  case SWAP:
+    _help_print_sw();
     break;
   default:
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);

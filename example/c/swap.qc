@@ -6,9 +6,11 @@ x 0
 show
 
 # swap gate
-cx 0 1
-cx 1 0
-cx 0 1
+sw 0 1
+
+#cx 0 1
+#cx 1 0
+#cx 0 1
 
 @ == circuit ==
 circ

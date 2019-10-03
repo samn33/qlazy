@@ -4,6 +4,23 @@
 
 #include "qlazy.h"
 
+static DensOp* _create_densop(int row, int col)
+{
+  DensOp*	densop = NULL;
+  int		size   = row * col;
+
+  if (!(densop = (DensOp*)malloc(sizeof(DensOp))))
+    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
+  densop->row = row;
+  densop->col = col;
+  if (!(densop->elm = (COMPLEX*)malloc(sizeof(COMPLEX)*size)))
+    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
+
+  for (int i=0; i<size; i++) densop->elm[i] = 0.0 + 0.0i;
+
+  return densop;
+}
+
 bool densop_init(QState* qstate, double* prob, int num, void** densop_out)
 {
   DensOp*	densop = NULL;
@@ -21,12 +38,7 @@ bool densop_init(QState* qstate, double* prob, int num, void** densop_out)
     }
   }
 
-  if (!(densop = (DensOp*)malloc(sizeof(DensOp))))
-    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
-  densop->row = densop->col = state_num;
-  if (!(densop->elm = (COMPLEX*)malloc(sizeof(COMPLEX)*state_num*state_num)))
-    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
-  for (int i=0; i<state_num*state_num; i++) densop->elm[i] = 0.0 + 0.0i;
+  densop = _create_densop(state_num, state_num);
 
   int idx = 0;
   for (int k=0; k<state_num; k++) {
@@ -38,6 +50,27 @@ bool densop_init(QState* qstate, double* prob, int num, void** densop_out)
     }
   }
 
+  *densop_out = densop;
+
+  SUC_RETURN(true);
+}
+
+bool densop_init_with_matrix(double* real, double* imag, int row, int col,
+			     void** densop_out)
+{
+  DensOp*	densop = NULL;
+  int		size   = row * col;
+  
+  if ((real == NULL) || (imag == NULL) || (row != col) || (row < 1) ||
+      (fabs(log2(row)-(int)log2(row)) > MIN_DOUBLE))
+    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+
+  densop = _create_densop(row, col);
+
+  for (int i=0; i<size; i++) {
+    densop->elm[i] = real[i] + 1.0i * imag[i];
+  }
+  
   *densop_out = densop;
 
   SUC_RETURN(true);
@@ -137,7 +170,7 @@ bool densop_mul(DensOp* densop, double factor)
 
   size = densop->row * densop->col;
 
-  for (int i=0; i<densop->row; i++) {
+  for (int i=0; i<size; i++) {
     densop->elm[i] *= factor;
   }
 
@@ -181,16 +214,18 @@ bool densop_sqtrace(DensOp* densop, double* real, double* imag)
     for (int j=0; j<dim; j++) {
       tmp = 0.0 + 0.0i;
       for (int k=0; k<dim; k++) {
-	tmp += (densop_tmp->elm[i*dim+k] * densop_tmp->elm[k*dim+j]);
+	//tmp += (densop_tmp->elm[i*dim+k] * densop_tmp->elm[k*dim+j]);
+	tmp += (densop->elm[i*dim+k] * densop->elm[k*dim+j]);
       }
-      densop->elm[i*dim+j] = tmp;
+      //densop->elm[i*dim+j] = tmp;
+      densop_tmp->elm[i*dim+j] = tmp;
     }
   }
 
   /* trace of the matrix */
   tmp = 0.0 + 0.0i;
   for (int i=0; i<dim; i++) {
-    tmp += densop->elm[i*dim+i];
+    tmp += densop_tmp->elm[i*dim+i];
   }
   
   *real = creal(tmp);
@@ -308,8 +343,8 @@ static bool _hermitian_conj(double* real_in, double* imag_in, int row, int col,
   SUC_RETURN(true);
 }
 
-bool densop_rapply_matrix(DensOp* densop, int qnum_part, int qid[MAX_QUBIT_NUM],
-			  double* real, double* imag, int row, int col)
+static bool _densop_rapply_matrix(DensOp* densop, int qnum_part, int qid[MAX_QUBIT_NUM],
+				  double* real, double* imag, int row, int col)
 /*
   densop' = densop * matrix
 */
@@ -379,8 +414,8 @@ bool densop_rapply_matrix(DensOp* densop, int qnum_part, int qid[MAX_QUBIT_NUM],
   SUC_RETURN(true);
 }
 
-bool densop_lapply_matrix(DensOp* densop, int qnum_part, int qid[MAX_QUBIT_NUM],
-			  double* real, double* imag, int row, int col)
+static bool _densop_lapply_matrix(DensOp* densop, int qnum_part, int qid[MAX_QUBIT_NUM],
+				  double* real, double* imag, int row, int col)
 /*
   densop' = matrix * densop
 */
@@ -450,8 +485,8 @@ bool densop_lapply_matrix(DensOp* densop, int qnum_part, int qid[MAX_QUBIT_NUM],
   SUC_RETURN(true);
 }
 
-bool densop_apply_matrix(DensOp* densop, int qnum_part, int qid[MAX_QUBIT_NUM],
-			 double* real, double* imag, int row, int col)
+static bool _densop_bapply_matrix(DensOp* densop, int qnum_part, int qid[MAX_QUBIT_NUM],
+				  double* real, double* imag, int row, int col)
 /*
   densop' = matrix * densop * matrix^{dagger}
 */
@@ -459,13 +494,13 @@ bool densop_apply_matrix(DensOp* densop, int qnum_part, int qid[MAX_QUBIT_NUM],
   double*	real_hc = NULL;
   double*	imag_hc = NULL;
 
-  if (!(densop_lapply_matrix(densop, qnum_part, qid, real, imag, row, col)))
-    ERR_RETURN(ERROR_DENSOP_LAPPLY_MATRIX,false);
+  if (!(_densop_lapply_matrix(densop, qnum_part, qid, real, imag, row, col)))
+    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
   _hermitian_conj(real, imag, row, col, (void**)&real_hc, (void**)&imag_hc);
   
-  if (!(densop_rapply_matrix(densop, qnum_part, qid, real_hc, imag_hc, row, col)))
-    ERR_RETURN(ERROR_DENSOP_RAPPLY_MATRIX,false);
+  if (!(_densop_rapply_matrix(densop, qnum_part, qid, real_hc, imag_hc, row, col)))
+    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
   free(real_hc); real_hc = NULL;
   free(imag_hc); imag_hc = NULL;
@@ -473,8 +508,31 @@ bool densop_apply_matrix(DensOp* densop, int qnum_part, int qid[MAX_QUBIT_NUM],
   SUC_RETURN(true);
 }
 
-bool densop_measure_kraus(DensOp* densop, int qnum_part, int qid[MAX_QUBIT_NUM],
-			  double* real, double* imag, int row, int col, double* prob_out)
+bool densop_apply_matrix(DensOp* densop, int qnum_part, int qid[MAX_QUBIT_NUM],
+			 ApplyDir adir, double* real, double* imag, int row, int col)
+{
+  if (adir == LEFT) {
+    if (!(_densop_lapply_matrix(densop, qnum_part, qid, real, imag, row, col)))
+      ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+  }
+  else if (adir == RIGHT) {
+    if (!(_densop_rapply_matrix(densop, qnum_part, qid, real, imag, row, col)))
+      ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+  }
+  else if (adir == BOTH) {
+    if (!(_densop_bapply_matrix(densop, qnum_part, qid, real, imag, row, col)))
+      ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+  }
+  else {
+      ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+  }
+
+  SUC_RETURN(true);
+}
+
+static bool _densop_probability_kraus(DensOp* densop, int qnum_part, int qid[MAX_QUBIT_NUM],
+				      double* real, double* imag, int row, int col,
+				      double* prob_out)
 {
   DensOp*	densop_tmp = NULL;
   double	prob_real  = 0.0;
@@ -485,7 +543,7 @@ bool densop_measure_kraus(DensOp* densop, int qnum_part, int qid[MAX_QUBIT_NUM],
   if (!(densop_copy(densop, (void**)&densop_tmp)))
     ERR_RETURN(ERROR_DENSOP_COPY,false);
 
-  if (!(densop_apply_matrix(densop_tmp, qnum_part, qid, real, imag, row, col)))
+  if (!(_densop_bapply_matrix(densop_tmp, qnum_part, qid, real, imag, row, col)))
     ERR_RETURN(ERROR_DENSOP_APPLY_MATRIX,false);
   
   if (!(densop_trace(densop_tmp, &prob_real, &prob_imag)))
@@ -498,8 +556,9 @@ bool densop_measure_kraus(DensOp* densop, int qnum_part, int qid[MAX_QUBIT_NUM],
   SUC_RETURN(true);
 }
 
-bool densop_measure_povm(DensOp* densop, int qnum_part, int qid[MAX_QUBIT_NUM],
-			 double* real, double* imag, int row, int col, double* prob_out)
+static bool _densop_probability_povm(DensOp* densop, int qnum_part, int qid[MAX_QUBIT_NUM],
+				     double* real, double* imag, int row, int col,
+				     double* prob_out)
 {
   DensOp*	densop_tmp = NULL;
   double	prob_real  = 0.0;
@@ -510,8 +569,8 @@ bool densop_measure_povm(DensOp* densop, int qnum_part, int qid[MAX_QUBIT_NUM],
   if (!(densop_copy(densop, (void**)&densop_tmp)))
     ERR_RETURN(ERROR_DENSOP_COPY,false);
 
-  if (!(densop_lapply_matrix(densop_tmp, qnum_part, qid, real, imag, row, col)))
-    ERR_RETURN(ERROR_DENSOP_LAPPLY_MATRIX,false);
+  if (!(_densop_lapply_matrix(densop_tmp, qnum_part, qid, real, imag, row, col)))
+    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
   
   if (!(densop_trace(densop_tmp, &prob_real, &prob_imag)))
     ERR_RETURN(ERROR_DENSOP_TRACE,false);
@@ -520,6 +579,27 @@ bool densop_measure_povm(DensOp* densop, int qnum_part, int qid[MAX_QUBIT_NUM],
     
   densop_free(densop_tmp); densop_tmp = NULL;
   
+  SUC_RETURN(true);
+}
+
+bool densop_probability(DensOp* densop, int qnum_part, int qid[MAX_QUBIT_NUM],
+			MatrixType mtype, double* real, double* imag, int row, int col,
+			double* prob_out)
+{
+  if (densop == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+
+  if (mtype == KRAUS) {
+    if (!(_densop_probability_kraus(densop, qnum_part, qid, real, imag, row, col, prob_out)))
+      ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+  }
+  else if (mtype == POVM) {
+    if (!(_densop_probability_povm(densop, qnum_part, qid, real, imag, row, col, prob_out)))
+      ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+  }
+  else {
+    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+  }
+
   SUC_RETURN(true);
 }
 

@@ -68,6 +68,8 @@ class QState(ctypes.Structure):
         self.qstate_apply_matrix(matrix=matrix, id=id)
         return self
 
+    # 1-qubit gate
+
     def x(self, q0):
         self.qstate_operate_qgate(kind=PAULI_X, phase=DEF_PHASE, id=[q0])
         return self
@@ -124,6 +126,21 @@ class QState(ctypes.Structure):
         self.qstate_operate_qgate(kind=PHASE_SHIFT, phase=phase, id=[q0])
         return self
 
+    def u1(self, q0, phase=DEF_PHASE):
+        self.qstate_operate_qgate(kind=ROTATION_U1, phase=phase, id=[q0])
+        return self
+
+    def u2(self, q0, phase=DEF_PHASE, phase1=DEF_PHASE):
+        self.qstate_operate_qgate(kind=ROTATION_U2, phase=phase, phase1=phase1, id=[q0])
+        return self
+
+    def u3(self, q0, phase=DEF_PHASE, phase1=DEF_PHASE, phase2=DEF_PHASE):
+        self.qstate_operate_qgate(kind=ROTATION_U3, phase=phase, phase1=phase1,
+                                  phase2=phase2, id=[q0])
+        return self
+
+    # 2-qubit gate
+
     def cx(self, q0, q1):
         self.qstate_operate_qgate(kind=CONTROLLED_X, phase=DEF_PHASE, id=[q0,q1])
         return self
@@ -164,6 +181,10 @@ class QState(ctypes.Structure):
         self.qstate_operate_qgate(kind=CONTROLLED_T_, phase=DEF_PHASE, id=[q0,q1])
         return self
 
+    def sw(self, q0, q1):
+        self.qstate_operate_qgate(kind=SWAP, phase=DEF_PHASE, id=[q0,q1])
+        return self
+
     def cp(self, q0, q1, phase=DEF_PHASE):
         self.qstate_operate_qgate(kind=CONTROLLED_P, phase=phase, id=[q0,q1])
         return self
@@ -180,9 +201,17 @@ class QState(ctypes.Structure):
         self.qstate_operate_qgate(kind=CONTROLLED_RZ, phase=phase, id=[q0,q1])
         return self
 
+    # 3-qubit gate
+    
     def ccx(self, q0, q1, q2):
-        self.qstate_operate_qgate(kind=TOFFOLI, phase=DEF_PHASE, id=[q0,q1,q2])
+        self.cxr(q1,q2).cx(q0,q1).cxr_dg(q1,q2).cx(q0,q1).cxr(q0,q2)
         return self
+
+    def csw(self, q0, q1, q2):
+        self.cx(q2,q1).ccx(q0,q1,q2).cx(q2,q1)
+        return self
+
+    # measurement
     
     def m(self, id=None, shots=DEF_SHOTS, angle=0.0, phase=0.0, tag=None):
         return self.qstate_measure(id=id, shots=shots, angle=angle, phase=phase, tag=tag)
@@ -589,7 +618,9 @@ class QState(ctypes.Structure):
         lib.qstate_free.argtypes = [ctypes.POINTER(QState)]
         lib.qstate_free(ctypes.byref(self))
  
-    def qstate_operate_qgate(self, kind=None, id=None, phase=None):
+    # def qstate_operate_qgate(self, kind=None, id=None, phase=None):
+    def qstate_operate_qgate(self, kind=None, id=None,
+                             phase=DEF_PHASE, phase1=DEF_PHASE, phase2=DEF_PHASE):
 
         # error check
         self.__check_args(kind=kind, id=id, shots=None, angle=None, phase=phase)
@@ -602,9 +633,11 @@ class QState(ctypes.Structure):
 
         lib.qstate_operate_qgate.restype = ctypes.c_int
         lib.qstate_operate_qgate.argtypes = [ctypes.POINTER(QState), ctypes.c_int,
+                                             ctypes.c_double, ctypes.c_double,
                                              ctypes.c_double, IntArray]
-        ret = lib.qstate_operate_qgate_param(ctypes.byref(self), ctypes.c_int(kind),
-                                             ctypes.c_double(phase), id_array)
+        ret = lib.qstate_operate_qgate(ctypes.byref(self), ctypes.c_int(kind),
+                                       ctypes.c_double(phase), ctypes.c_double(phase1),
+                                       ctypes.c_double(phase2), id_array)
 
         if ret == FALSE:
             raise QState_FailToOperateQgate()
@@ -678,16 +711,15 @@ class QState(ctypes.Structure):
               kind==ROOT_PAULI_X or kind==ROOT_PAULI_X_ or kind==HADAMARD or
               kind==PHASE_SHIFT_S or kind==PHASE_SHIFT_S_ or
               kind==PHASE_SHIFT_T or kind==PHASE_SHIFT_T_ or kind==PHASE_SHIFT or
-              kind==ROTATION_X or kind==ROTATION_Y or kind==ROTATION_Z):
-            return 1
+              kind==ROTATION_X or kind==ROTATION_Y or kind==ROTATION_Z or
+              kind==ROTATION_U1 or kind==ROTATION_U2 or kind==ROTATION_U3):
+             return 1
         elif (kind==CONTROLLED_X or kind==CONTROLLED_Y or kind==CONTROLLED_Z or
               kind==CONTROLLED_XR or kind==CONTROLLED_XR_ or kind==CONTROLLED_H or
-              kind==CONTROLLED_S or kind==CONTROLLED_S_ or
-              kind==CONTROLLED_T or kind==CONTROLLED_T_ or kind==CONTROLLED_P or
+              kind==CONTROLLED_S or kind==CONTROLLED_S_ or kind==CONTROLLED_T or
+              kind==CONTROLLED_T_ or kind==SWAP or kind==CONTROLLED_P or
               kind==CONTROLLED_RX or kind==CONTROLLED_RY or kind==CONTROLLED_RZ or
               kind==MEASURE_BELL):
             return 2
-        elif (kind==TOFFOLI):
-            return 3
         else:
             raise QState_UnknownQgateKind()

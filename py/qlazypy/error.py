@@ -100,6 +100,14 @@ class DensOp_FailToClone(Exception):
     def __str__(self):
         return "DensOp: fail to clone"
 
+class DensOp_FailToAdd(Exception):
+    def __str__(self):
+        return "DensOp: fail to add"
+
+class DensOp_FailToMul(Exception):
+    def __str__(self):
+        return "DensOp: fail to mul"
+
 class DensOp_FailToGetElm(Exception):
     def __str__(self):
         return "DensOp: fail to get_elm"
@@ -120,15 +128,11 @@ class DensOp_FailToApply(Exception):
     def __str__(self):
         return "DensOp: fail to apply"
 
-class DensOp_FailToMeasure(Exception):
+class DensOp_FailToProbability(Exception):
     def __str__(self):
-        return "DensOp: fail to measure"
+        return "DensOp: fail to probability"
 
-class DensOp_FailToAdd(Exception):
+class DensOp_FailToInstrument(Exception):
     def __str__(self):
-        return "DensOp: fail to add"
-
-class DensOp_FailToMul(Exception):
-    def __str__(self):
-        return "DensOp: fail to mul"
+        return "DensOp: fail to instrument"
 
