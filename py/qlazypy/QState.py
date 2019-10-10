@@ -20,16 +20,21 @@ class QState(ctypes.Structure):
         ('gbank', ctypes.c_void_p),
     ]
     
-    def __new__(cls, qubit_num, seed=None):
-
-        if qubit_num > MAX_QUBIT_NUM:
-            print("qubit number must be {0:d} or less.".format(MAX_QUBIT_NUM))
-            raise QState_FailToInitialize()
+    def __new__(cls, qubit_num=0, seed=None, vector=None):
 
         if seed is None:
             seed = random.randint(0,1000000)
+            
+        if qubit_num != 0:
+            if qubit_num > MAX_QUBIT_NUM:
+                print("qubit number must be {0:d} or less.".format(MAX_QUBIT_NUM))
+                raise QState_FailToInitialize()
+            
+            return cls.qstate_init(qubit_num, seed)
 
-        return cls.qstate_init(qubit_num, seed)
+        else:
+            return cls.qstate_init_with_vector(vector, seed)
+            
 
     def __str__(self):
 
@@ -246,6 +251,38 @@ class QState(ctypes.Structure):
         lib.qstate_init.restype = ctypes.c_int
         lib.qstate_init.argtypes = [ctypes.c_int, ctypes.POINTER(ctypes.c_void_p)]
         ret = lib.qstate_init(ctypes.c_int(qubit_num), c_qstate)
+
+        if ret == FALSE:
+            raise QState_FailToInitialize()
+
+        out = ctypes.cast(c_qstate.value, ctypes.POINTER(QState))
+        
+        return out.contents
+    
+    @classmethod
+    def qstate_init_with_vector(cls, vector=None, seed=None):
+        
+        lib.init_qlazy(ctypes.c_int(seed))
+        
+        qstate = None
+        c_qstate = ctypes.c_void_p(qstate)
+
+        dim = len(vector)
+        vec_real = [0.0 for _ in range(dim)]
+        vec_imag = [0.0 for _ in range(dim)]
+        for i in range(dim):
+            vec_real[i] = vector[i].real
+            vec_imag[i] = vector[i].imag
+
+        DoubleArray = ctypes.c_double * dim
+        c_vec_real = DoubleArray(*vec_real)
+        c_vec_imag = DoubleArray(*vec_imag)
+
+        lib.qstate_init_with_vector.restype = ctypes.c_int
+        lib.qstate_init_with_vector.argtypes = [DoubleArray, DoubleArray, ctypes.c_int,
+                                                ctypes.POINTER(ctypes.c_void_p)]
+        ret = lib.qstate_init_with_vector(c_vec_real, c_vec_imag, ctypes.c_int(dim),
+                                          c_qstate)
 
         if ret == FALSE:
             raise QState_FailToInitialize()

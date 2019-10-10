@@ -1,3 +1,9 @@
+2019-10-11  Sam.N  <saminriver33@gmail.com>
+
+	* v0.0.26
+	- add function(c/py): qstate_init, QState.__new__ (create from a vector)
+	- example(py): Schmidt decomposition
+
 2019-10-04  Sam.N  <saminriver33@gmail.com>
 
 	* v0.0.25

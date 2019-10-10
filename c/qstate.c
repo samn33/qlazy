@@ -250,6 +250,27 @@ bool qstate_init(int qubit_num, void** qstate_out)
   SUC_RETURN(true);
 }
 
+bool qstate_init_with_vector(double* real, double* imag, int dim, void** qstate_out)
+{
+  QState	*qstate = NULL;
+  int            state_num = dim;
+  int		 qubit_num;
+
+  if ((real == NULL) || (imag == NULL) || (dim <= 0) || (!(is_power_of_2(dim))))
+    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+
+  qubit_num = log2(dim);
+  if (!(qstate_init(qubit_num, (void**)&qstate)))
+    ERR_RETURN(ERROR_QSTATE_INIT,false);
+
+  for (int i=0; i<state_num; i++)
+    qstate->camp[i] = real[i] + 1.0i * imag[i];
+
+  *qstate_out = qstate;
+  
+  SUC_RETURN(true);
+}
+
 bool qstate_copy(QState* qstate_in, void** qstate_out)
 {
   QState* qstate = NULL;

@@ -11,11 +11,11 @@ Sigma_3 = np.array([[1,0],[0,-1]])
 
 def get_coordinate(densop=None):
 
-    b_1 = densop.expect(matrix=Sigma_1)
-    b_2 = densop.expect(matrix=Sigma_2)
-    b_3 = densop.expect(matrix=Sigma_3)
+    u_1 = densop.expect(matrix=Sigma_1)
+    u_2 = densop.expect(matrix=Sigma_2)
+    u_3 = densop.expect(matrix=Sigma_3)
 
-    return (b_1,b_2,b_3)
+    return (u_1,u_2,u_3)
     
 def make_densop_matrix(u_1,u_2,u_3):
 
@@ -42,7 +42,7 @@ if __name__ == '__main__':
 
     print("== parameter ==")
 
-    gamma = 1.0
+    gamma = 0.5
     H = make_hamiltonian()
     print("gamma =", gamma)
     

@@ -67,6 +67,9 @@ void error_msg(ErrCode err)
   case ERROR_QSTATE_INIT:
     fprintf(stderr, "ERROR: qstate init failure !\n");
     break;
+  case ERROR_QSTATE_INIT_WITH_VECTOR:
+    fprintf(stderr, "ERROR: qstate init with vector failure !\n");
+    break;
   case ERROR_QSTATE_COPY:
     fprintf(stderr, "ERROR: qstate copy failure !\n");
     break;
@@ -134,6 +137,9 @@ void error_msg(ErrCode err)
 
   case ERROR_DENSOP_INIT:
     fprintf(stderr, "ERROR: densop init failure !\n");
+    break;
+  case ERROR_DENSOP_INIT_WITH_MATRIX:
+    fprintf(stderr, "ERROR: densop init with matrix failure !\n");
     break;
   case ERROR_DENSOP_COPY:
     fprintf(stderr, "ERROR: densop copy failure !\n");

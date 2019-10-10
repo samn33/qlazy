@@ -15,7 +15,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
-#define VERSION "0.0.25"
+#define VERSION "0.0.26"
 
 /*====================================================================*/
 /*  Definitions & Macros                                              */
@@ -104,6 +104,7 @@ typedef enum _ErrCode {
   ERROR_GBANK_INIT,
   ERROR_GBANK_GET_UNITARY,
   ERROR_QSTATE_INIT,
+  ERROR_QSTATE_INIT_WITH_VECTOR,
   ERROR_QSTATE_COPY,
   ERROR_QSTATE_GET_CAMP,
   ERROR_QSTATE_PRINT,
@@ -125,6 +126,7 @@ typedef enum _ErrCode {
   ERROR_SPRO_INIT,
   ERROR_OBSERVABLE_INIT,
   ERROR_DENSOP_INIT,
+  ERROR_DENSOP_INIT_WITH_MATRIX,
   ERROR_DENSOP_COPY,
   ERROR_DENSOP_GET_ELM,
   ERROR_DENSOP_PRINT,
@@ -372,6 +374,7 @@ bool     is_decimal(char* str);
 bool	 binstr_from_decimal(char* binstr, int qubit_num, int decimal, int zflag);
 int      bit_permutation(int bits_in, int qnum, int qnum_part, int qid[MAX_QUBIT_NUM]);
 int*     bit_permutation_array(int length, int qnum, int qnum_part, int qid[MAX_QUBIT_NUM]);
+bool     is_power_of_2(int n);
 
 /* init.c */
 void	 init_qlazy(unsigned int seed);
@@ -404,6 +407,7 @@ bool     gbank_get_unitary(GBank* gbank, Kind kind, double phase, double phase1,
 
 /* qstate.c */
 bool	 qstate_init(int qubit_num, void** qstate_out);
+bool	 qstate_init_with_vector(double* real, double* imag, int dim, void** qstate_out);
 bool	 qstate_copy(QState* qstate, void** qstate_out);
 bool     qstate_get_camp(QState* qstate, int qubit_num, int qubit_id[MAX_QUBIT_NUM],
 			 void** camp_out);

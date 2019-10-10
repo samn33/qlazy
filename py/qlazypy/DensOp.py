@@ -23,7 +23,7 @@ class DensOp(ctypes.Structure):
         ('elm', ctypes.c_void_p),
     ]
     
-    def __new__(cls, qstate=[], prob=[], matrix=[]):
+    def __new__(cls, qstate=[], prob=[], matrix=None):
 
         if qstate != [] and prob != []:
             return cls.densop_init(qstate, prob)

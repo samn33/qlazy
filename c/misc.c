@@ -252,3 +252,13 @@ int* bit_permutation_array(int length, int qnum, int qnum_part, int qid[MAX_QUBI
   return index;
 }
 
+bool is_power_of_2(int n)
+{
+  int log2_n;
+  double diff;
+  
+  log2_n = (int)log2((double)n);
+  diff = log2((double)n) - (double)log2_n;
+  if (fabs(diff) < MIN_DOUBLE) return true;
+  else return false;
+}
