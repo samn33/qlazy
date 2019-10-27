@@ -625,5 +625,17 @@ measured_valueに測定値（Kraus演算子番号）を指定すると、密度�
     prob = de.trace()
     de.mul(factor=1.0/prob)
 
+#### フィデリティ（忠実度）
+
+	fid = de1.fidelity(de2)
+
+密度演算子de1とde2のフィデリティを計算します。
+
+#### トレース距離
+
+	dis = de1.distance(de2)
+
+密度演算子de1とde2のトレース距離を計算します。
+
 
 以上

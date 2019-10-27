@@ -1,3 +1,9 @@
+2019-10-28  Sam.N  <saminriver33@gmail.com>
+
+	* v0.0.27
+	- example(py): DensOp.fidelity, DensOp.distance
+	- add functioon(py): DensOp.fidelity, DensOp.distance
+
 2019-10-11  Sam.N  <saminriver33@gmail.com>
 
 	* v0.0.26
@@ -23,7 +29,7 @@
 
 	* v0.0.24
 	- update(doc): Tutorial_py.md - DensOp class
-	- bug fix(c/py): densop_apply_matrix, DensOp.aply
+	- bug fix(c/py): densop_apply_matrix, DensOp.apply
 	- change spec(c): qstate_apply_matrix
 	- add function(c) densop_add,densop_mul,densop_measure_kraus,densop_measure_povm
 	- add function(py) DensOp.add,DensOp.mul,DensOp.measure,DensOp.mix

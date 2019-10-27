@@ -6,6 +6,17 @@ from qlazypy import QState, DensOp
 
 MIN_DOUBLE = 0.000001
 
+def random_qstate(qubit_num):
+
+    dim = 2**qubit_num
+    vec_ini = np.array([0.0]*dim)
+    vec_ini[0] = 1.0
+    mat = unitary_group.rvs(dim)
+    vec = np.dot(mat, vec_ini)
+    qs = QState(vector=vec)
+
+    return qs
+
 def random_qubit_id(qubit_num):
 
     id = list(range(qubit_num))
@@ -16,17 +27,6 @@ def random_qubit_id(qubit_num):
     id_B = id[qubit_num_A:]
 
     return id_A,id_B
-
-def random_qstate(qubit_num):
-
-    dim = 2**qubit_num
-    vec_ini = [0.0]*dim
-    vec_ini[0] = 1.0
-    mat = unitary_group.rvs(dim)
-    vec = np.dot(mat, vec_ini)
-    qs = QState(vector=vec)
-
-    return qs
 
 def eigen_values(densop):
 

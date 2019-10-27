@@ -136,3 +136,6 @@ class DensOp_FailToInstrument(Exception):
     def __str__(self):
         return "DensOp: fail to instrument"
 
+class DensOp_FailToFidelity(Exception):
+    def __str__(self):
+        return "DensOp: fail to fidelity"

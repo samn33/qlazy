@@ -10,8 +10,6 @@ from qlazypy.QState import *
 from qlazypy.MData import *
 from qlazypy.Observable import *
 
-import sys
-
 lib = ctypes.CDLL('libQlazy.so',mode=ctypes.RTLD_GLOBAL)
 libc = ctypes.CDLL(find_library("c"),mode=ctypes.RTLD_GLOBAL)
 
@@ -177,6 +175,50 @@ class DensOp(ctypes.Structure):
             #self.mul(factor=1.0/prob)
 
         return self
+
+    def __mat_sqrt(self,mat):  # mat is hermite
+
+        eigenvals, unitary = np.linalg.eigh(mat)
+        unitary_dg = np.conjugate(unitary.T)
+        mat_diag = np.sqrt(np.abs(np.diag(eigenvals)))
+        mat_sq = np.dot(np.dot(unitary,mat_diag),unitary_dg)
+
+        return mat_sq
+
+    def __mat_norm(self,mat):
+
+        mat2 = np.dot(np.conjugate(mat.T),mat)  # mat2 is hermite
+        mat2_sqrt = self.__mat_sqrt(mat2)
+        norm = np.trace(mat2_sqrt).real
+
+        return norm 
+
+    def fidelity(self, densop=None):
+
+        mat1 = self.get_elm()
+        mat2 = densop.get_elm()
+
+        if mat1.shape != mat2.shape:
+            raise DensOp_FailToFidelity()
+
+        mat1_sqrt = self.__mat_sqrt(mat1)
+        mat2_sqrt = self.__mat_sqrt(mat2)
+
+        fid = self.__mat_norm(np.dot(mat1_sqrt,mat2_sqrt))
+            
+        return fid
+
+    def distance(self, densop=None):  # trace distance
+
+        mat1 = self.get_elm()
+        mat2 = densop.get_elm()
+
+        if mat1.shape != mat2.shape:
+            raise DensOp_FailToFidelity()
+
+        dis = 0.5 * self.__mat_norm(mat1-mat2)
+            
+        return dis
 
     def free(self):
 
