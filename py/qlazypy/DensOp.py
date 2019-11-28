@@ -214,12 +214,115 @@ class DensOp(ctypes.Structure):
         mat2 = densop.get_elm()
 
         if mat1.shape != mat2.shape:
-            raise DensOp_FailToFidelity()
+            raise DensOp_FailToDistance()
 
         dis = 0.5 * self.__mat_norm(mat1-mat2)
             
         return dis
 
+    def __mat_spectrum(self, mat):  # mat is hermite
+
+        eigenvals, unitary = np.linalg.eigh(mat)
+        unitary_dg = np.conjugate(unitary.T)
+        return eigenvals,unitary_dg
+
+    def spectrum(self):
+
+        mat = self.get_elm()
+        eigvals,eigvecs = self.__mat_spectrum(mat)
+        prob = [eigvals[i] for i in range(len(eigvals)) if abs(eigvals[i]) > MIN_DOUBLE]
+        vecs = [eigvecs[i] for i in range(len(eigvals)) if abs(eigvals[i]) > MIN_DOUBLE]
+        qstate = [QState(vector=vecs[i]) for i in range(len(prob))]
+
+        return prob,qstate
+
+    def __von_neumann_entropy(self):  # von neumann entropy
+
+        mat = self.get_elm()
+        eigvals = np.linalg.eigvalsh(mat)
+        diag = [-eigvals[i]*np.log2(eigvals[i])
+                for i in range(len(eigvals)) if abs(eigvals[i]) > MIN_DOUBLE]
+        ent = np.sum(diag)
+        return ent
+    
+    def entropy(self, id=[]):  # von neumann / entanglement entropy
+
+        qubit_num = int(math.log2(self.row))
+        
+        if id == []:
+            ent = self.__von_neumann_entropy()
+        else:
+            if (min(id) < 0 or max(id) >= qubit_num or len(id)!=len(set(id))):
+                raise DensOp_FailToEntropy()
+            if len(id) == qubit_num:
+                ent = self.__von_neumann_entropy()
+            else:
+                de_part = self.partial(id=id)
+                ent = de_part.__von_neumann_entropy()
+                de_part.free()
+                
+        return ent
+
+    def cond_entropy(self, id_0=[], id_1=[]):  # conditional entropy
+
+        qubit_num = int(math.log2(self.row))
+        
+        if (id_0 == [] or id_1 == []
+            or min(id_0) < 0 or max(id_0) >= qubit_num
+            or min(id_1) < 0 or max(id_1) >= qubit_num
+            or len(id_0) != len(set(id_0))
+            or len(id_1) != len(set(id_1))):
+            raise DensOp_FailToEntropy()
+        else:
+            id_merge = id_0 + id_1
+            id_whole = set(id_merge)
+            ent = self.entropy(id_whole) - self.entropy(id_1)
+            
+        return ent
+
+    def mutual_info(self, id_0=[], id_1=[]):  # mutual information
+
+        qubit_num = int(math.log2(self.row))
+        
+        if (id_0 == [] or id_1 == []
+            or min(id_0) < 0 or max(id_0) >= qubit_num
+            or min(id_1) < 0 or max(id_1) >= qubit_num
+            or len(id_0) != len(set(id_0))
+            or len(id_1) != len(set(id_1))):
+            raise DensOp_FailToEntropy()
+        else:
+            ent = self.entropy(id_0) - self.cond_entropy(id_0,id_1)
+            
+        return ent
+
+    def relative_entropy(self, densop=None):  # relative entropy
+
+        if self.row != densop.row:
+            raise DensOp_FailToEntropy()
+        
+        mat_A = self.get_elm()
+        mat_B = densop.get_elm()
+
+        eigvals_A,eigvecs_A = self.__mat_spectrum(mat_A)
+        eigvals_B,eigvecs_B = self.__mat_spectrum(mat_A)
+
+        P = np.dot(np.conjugate(eigvecs_A.T),eigvecs_B)
+        P = np.conjugate(P)*P
+        
+        diag_A = [eigvals_A[i]*np.log2(eigvals_A[i])
+                for i in range(len(eigvals_A)) if abs(eigvals_A[i]) > MIN_DOUBLE]
+        relent_A = np.sum(diag_A)
+
+        relent_B = 0.0
+        for i in range(len(eigvals_A)):
+            if eigvals_A[i] < MIN_DOUBLE:
+                continue
+            for j in range(len(eigvals_B)):
+                relent_B += abs(P[i][j]) * np.log2(eigvals_B[j])
+        
+        relent = relent_A - relent_B
+        return relent
+    
     def free(self):
 
         return self.densop_free()

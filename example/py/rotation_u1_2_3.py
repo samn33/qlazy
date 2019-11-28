@@ -106,11 +106,11 @@ if __name__ == '__main__':
     print("== quantum operation ==")
 
     if unitary == "u1":
-        qs.u1(0, phase=alpha)
+        qs.u1(0, alpha=alpha)
     elif unitary == "u2":
-        qs.u2(0, phase=alpha, phase1=beta)
+        qs.u2(0, alpha=alpha, beta=beta)
     elif unitary == "u3":
-        qs.u3(0, phase=alpha, phase1=beta, phase2=gamma)
+        qs.u3(0, alpha=alpha, beta=beta, gamma=gamma)
     else:
         print("unknown unitary operator")
         sys.exit()

@@ -32,10 +32,10 @@ def hadamard_test_real():
 
     # free memory
     
-    qs_0.free()
-    qs_psi.free()
-    qs_op.free()
-    qs.free()
+    #qs_0.free()
+    #qs_psi.free()
+    #qs_op.free()
+    #qs.free()
     
 def hadamard_test_imag():
     

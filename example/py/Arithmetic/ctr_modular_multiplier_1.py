@@ -1,4 +1,4 @@
-ffrom qlazypy import QState
+from qlazypy import QState
 
 def swap(self,id_0,id_1):
 

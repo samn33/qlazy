@@ -1,14 +1,21 @@
+2019-11-29  Sam.N  <saminriver33@gmail.com>
+
+	* v0.0.28
+	- add function(py): DensOp class - spectrum
+	- add function(py): DensOp class - entropy,cond_entropy,mutual_info,relative_entropy
+	- add example(py): trace distance, entropy
+
 2019-10-28  Sam.N  <saminriver33@gmail.com>
 
 	* v0.0.27
-	- example(py): DensOp.fidelity, DensOp.distance
-	- add functioon(py): DensOp.fidelity, DensOp.distance
+	- add example(py): fidelity
+	- add function(py): DensOp class - fidelity,distance
 
 2019-10-11  Sam.N  <saminriver33@gmail.com>
 
 	* v0.0.26
 	- add function(c/py): qstate_init, QState.__new__ (create from a vector)
-	- example(py): Schmidt decomposition
+	- add example(py): Schmidt decomposition
 
 2019-10-04  Sam.N  <saminriver33@gmail.com>
 
@@ -34,7 +41,7 @@
 	- add function(c) densop_add,densop_mul,densop_measure_kraus,densop_measure_povm
 	- add function(py) DensOp.add,DensOp.mul,DensOp.measure,DensOp.mix
 	- add function(c/py): densop_get_amp, DensOp.get_amp
-	- example(py): Measure/povm.py
+	- add example(py): Measure/povm.py
 
 2019-09-04  Sam.N  <saminriver33@gmail.com>
 

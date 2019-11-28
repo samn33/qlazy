@@ -35,7 +35,6 @@ class QState(ctypes.Structure):
         else:
             return cls.qstate_init_with_vector(vector, seed)
             
-
     def __str__(self):
 
         return str(self.get_amp())
@@ -131,17 +130,17 @@ class QState(ctypes.Structure):
         self.qstate_operate_qgate(kind=PHASE_SHIFT, phase=phase, id=[q0])
         return self
 
-    def u1(self, q0, phase=DEF_PHASE):
-        self.qstate_operate_qgate(kind=ROTATION_U1, phase=phase, id=[q0])
+    def u1(self, q0, alpha=DEF_PHASE):
+        self.qstate_operate_qgate(kind=ROTATION_U1, phase=alpha, id=[q0])
         return self
 
-    def u2(self, q0, phase=DEF_PHASE, phase1=DEF_PHASE):
-        self.qstate_operate_qgate(kind=ROTATION_U2, phase=phase, phase1=phase1, id=[q0])
+    def u2(self, q0, alpha=DEF_PHASE, beta=DEF_PHASE):
+        self.qstate_operate_qgate(kind=ROTATION_U2, phase=alpha, phase1=beta, id=[q0])
         return self
 
-    def u3(self, q0, phase=DEF_PHASE, phase1=DEF_PHASE, phase2=DEF_PHASE):
-        self.qstate_operate_qgate(kind=ROTATION_U3, phase=phase, phase1=phase1,
-                                  phase2=phase2, id=[q0])
+    def u3(self, q0, alpha=DEF_PHASE, beta=DEF_PHASE, gamma=DEF_PHASE):
+        self.qstate_operate_qgate(kind=ROTATION_U3, phase=alpha, phase1=beta,
+                                  phase2=gamma, id=[q0])
         return self
 
     # 2-qubit gate

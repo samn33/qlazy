@@ -138,4 +138,16 @@ class DensOp_FailToInstrument(Exception):
 
 class DensOp_FailToFidelity(Exception):
     def __str__(self):
-        return "DensOp: fail to fidelity"
+        return "DensOp: fail to get fidelity"
+
+class DensOp_FailToDistance(Exception):
+    def __str__(self):
+        return "DensOp: fail to get distance"
+
+class DensOp_FailToSpectrum(Exception):
+    def __str__(self):
+        return "DensOp: fail to get spectrum"
+
+class DensOp_FailToEntropy(Exception):
+    def __str__(self):
+        return "DensOp: fail to get entropy"

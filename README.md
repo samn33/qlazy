@@ -19,7 +19,7 @@ add followings to your ~/.bashrc
 
 You may also need to install 'readline-dev'
 
-    $ sudo apt install readline-dev).
+    $ sudo apt install readline-dev
 
 ### python package - qlazypy
 

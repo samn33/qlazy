@@ -1,4 +1,5 @@
 import random
+import math
 import numpy as np
 from scipy.stats import unitary_group
 from qlazypy import QState, DensOp
@@ -46,8 +47,8 @@ if __name__ == '__main__':
     de1_ini = de1_whole.partial(id=list(range(qnum_tar)))
     de2_ini = de2_whole.partial(id=list(range(qnum_tar)))
 
-    # fidelity for initial states
-    fid_ini = de1_ini.fidelity(de2_ini)
+    # trace distance for initial states
+    dis_ini = de1_ini.distance(de2_ini)
 
     # unitary transformation for whole system
     U = random_unitary(qnum_whole)
@@ -58,14 +59,14 @@ if __name__ == '__main__':
     de1_fin = de1_whole.partial(id=list(range(qnum_tar)))
     de2_fin = de2_whole.partial(id=list(range(qnum_tar)))
     
-    # fidelity for final states
-    fid_fin = de1_fin.fidelity(de2_fin)
+    # trace distance for final states
+    dis_fin = de1_fin.distance(de2_fin)
 
     # result
-    print("* fidelity(ini) =", fid_ini)
-    print("* fidelity(fin) =", fid_fin)
+    print("* trace distance(ini) =", dis_ini)
+    print("* trace distance(fin) =", dis_fin)
 
-    if fid_ini <= fid_fin:
+    if dis_ini >= dis_fin:
         print("OK!")
     else:
         print("NG!")
