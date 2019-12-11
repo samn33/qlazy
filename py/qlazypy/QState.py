@@ -24,7 +24,7 @@ class QState(ctypes.Structure):
 
         if seed is None:
             seed = random.randint(0,1000000)
-            
+
         if qubit_num != 0:
             if qubit_num > MAX_QUBIT_NUM:
                 print("qubit number must be {0:d} or less.".format(MAX_QUBIT_NUM))
@@ -203,6 +203,20 @@ class QState(ctypes.Structure):
 
     def crz(self, q0, q1, phase=DEF_PHASE):
         self.qstate_operate_qgate(kind=CONTROLLED_RZ, phase=phase, id=[q0,q1])
+        return self
+
+    def cu1(self, q0, q1, alpha=DEF_PHASE):
+        self.qstate_operate_qgate(kind=CONTROLLED_U1, phase=alpha, id=[q0,q1])
+        return self
+
+    def cu2(self, q0, q1, alpha=DEF_PHASE, beta=DEF_PHASE):
+        self.qstate_operate_qgate(kind=CONTROLLED_U2, phase=alpha, phase1=beta,
+                                  id=[q0,q1])
+        return self
+
+    def cu3(self, q0, q1, alpha=DEF_PHASE, beta=DEF_PHASE, gamma=DEF_PHASE):
+        self.qstate_operate_qgate(kind=CONTROLLED_U2, phase=alpha, phase1=beta,
+                                  phase2=gamma, id=[q0,q1])
         return self
 
     # 3-qubit gate
@@ -601,8 +615,8 @@ class QState(ctypes.Structure):
         last_state = out.contents.last
         freq = ctypes.cast(out.contents.freq, ctypes.POINTER(ctypes.c_int*state_num))
         freq_list = [freq.contents[i] for i in range(state_num)]
-        md = MData(freq_list=freq_list, last_state=last_state, qubit_num=qubit_num,
-                       state_num=state_num, angle=angle, phase=phase)
+        md = MData(freq_list=freq_list, last_state=last_state, id=id,
+                   qubit_num=qubit_num, state_num=state_num, angle=angle, phase=phase)
         out.contents.free()
 
         return md

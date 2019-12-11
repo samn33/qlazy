@@ -127,6 +127,15 @@ bool qgate_get_symbol(Kind kind, char* symbol)
   case CONTROLLED_RZ:
     strcpy(symbol,"CRZ");
     break;
+  case CONTROLLED_U1:
+    strcpy(symbol,"CU1");
+    break;
+  case CONTROLLED_U2:
+    strcpy(symbol,"CU2");
+    break;
+  case CONTROLLED_U3:
+    strcpy(symbol,"CU3");
+    break;
   case SWAP:
     strcpy(symbol,"SW");
     break;
@@ -236,6 +245,12 @@ bool qgate_get_kind(char* symbol, Kind* kind_out)
   else if (strcmp(symbol,"cry")   == 0) kind = CONTROLLED_RY;
   else if (strcmp(symbol,"CRZ")   == 0) kind = CONTROLLED_RZ;
   else if (strcmp(symbol,"crz")   == 0) kind = CONTROLLED_RZ;
+  else if (strcmp(symbol,"CU1")   == 0) kind = CONTROLLED_U1;
+  else if (strcmp(symbol,"cu1")   == 0) kind = CONTROLLED_U1;
+  else if (strcmp(symbol,"CU2")   == 0) kind = CONTROLLED_U2;
+  else if (strcmp(symbol,"cu2")   == 0) kind = CONTROLLED_U2;
+  else if (strcmp(symbol,"CU3")   == 0) kind = CONTROLLED_U3;
+  else if (strcmp(symbol,"cu3")   == 0) kind = CONTROLLED_U3;
   else if (strcmp(symbol,"SW")    == 0) kind = SWAP;
   else if (strcmp(symbol,"sw")    == 0) kind = SWAP;
   else if (strcmp(symbol,"M")     == 0) kind = MEASURE;

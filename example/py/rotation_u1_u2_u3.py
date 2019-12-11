@@ -103,7 +103,7 @@ if __name__ == '__main__':
                       alpha=alpha, beta=beta, gamma=gamma)
     print(vec_out)
 
-    print("== quantum operation ==")
+    print("== quantum operation (U1,U2,U3) ==")
 
     if unitary == "u1":
         qs.u1(0, alpha=alpha)

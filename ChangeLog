@@ -1,3 +1,10 @@
+2019-12-12  Sam.N  <saminriver33@gmail.com>
+
+	* v0.0.29
+	- add function(c/py): cu1,cu2,cu3
+	- add example(py): holevo
+	- bug fix(py): Densop class - mix
+
 2019-11-29  Sam.N  <saminriver33@gmail.com>
 
 	* v0.0.28

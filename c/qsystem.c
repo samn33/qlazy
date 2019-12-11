@@ -423,6 +423,7 @@ static bool _qsystem_execute_one_line(QSystem* qsystem, char* line)
   case CONTROLLED_RX:
   case CONTROLLED_RY:
   case CONTROLLED_RZ:
+  case CONTROLLED_U1:
     /* 2-qubit, 1-parameter gate */
     if ((qcirc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
     if (tnum > 3) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
@@ -437,6 +438,71 @@ static bool _qsystem_execute_one_line(QSystem* qsystem, char* line)
       para.phase.alpha = strtod(args[1], NULL);
       para.phase.beta = DEF_PHASE;
       para.phase.gamma = DEF_PHASE;
+    }
+    else ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
+    qubit_id[0] = strtol(token[1], NULL, 10);
+    qubit_id[1] = strtol(token[2], NULL, 10);
+    if (qubit_num < qubit_id[0] + 1) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
+    if (qubit_num < qubit_id[1] + 1) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
+    if (qubit_id[0] < 0) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
+    if (qubit_id[1] < 0) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
+    if (qubit_id[0] == qubit_id[1]) ERR_RETURN(ERROR_SAME_QUBIT_ID,false);
+    break;
+  case CONTROLLED_U2:
+    /* 2-qubit, 2-parameter gate */
+    if ((qcirc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
+    if (tnum > 3) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
+    if (tnum < 3) ERR_RETURN(ERROR_NEED_MORE_ARGUMENTS,false);
+    terminal_num = 2;
+    if (anum == 1) {
+      para.phase.alpha = DEF_PHASE;
+      para.phase.beta = DEF_PHASE;
+      para.phase.gamma = DEF_PHASE;
+    }
+    else if (anum == 2) {
+      para.phase.alpha = strtod(args[1], NULL);
+      para.phase.beta = DEF_PHASE;
+      para.phase.gamma = DEF_PHASE;
+    }
+    else if (anum == 3) {
+      para.phase.alpha = strtod(args[1], NULL);
+      para.phase.beta = strtod(args[2], NULL);
+      para.phase.gamma = DEF_PHASE;
+    }
+    else ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
+    qubit_id[0] = strtol(token[1], NULL, 10);
+    qubit_id[1] = strtol(token[2], NULL, 10);
+    if (qubit_num < qubit_id[0] + 1) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
+    if (qubit_num < qubit_id[1] + 1) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
+    if (qubit_id[0] < 0) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
+    if (qubit_id[1] < 0) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
+    if (qubit_id[0] == qubit_id[1]) ERR_RETURN(ERROR_SAME_QUBIT_ID,false);
+    break;
+  case CONTROLLED_U3:
+    /* 2-qubit, 3-parameter gate */
+    if ((qcirc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
+    if (tnum > 3) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
+    if (tnum < 3) ERR_RETURN(ERROR_NEED_MORE_ARGUMENTS,false);
+    terminal_num = 2;
+    if (anum == 1) {
+      para.phase.alpha = DEF_PHASE;
+      para.phase.beta = DEF_PHASE;
+      para.phase.gamma = DEF_PHASE;
+    }
+    else if (anum == 2) {
+      para.phase.alpha = strtod(args[1], NULL);
+      para.phase.beta = DEF_PHASE;
+      para.phase.gamma = DEF_PHASE;
+    }
+    else if (anum == 3) {
+      para.phase.alpha = strtod(args[1], NULL);
+      para.phase.beta = strtod(args[2], NULL);
+      para.phase.gamma = DEF_PHASE;
+    }
+    else if (anum == 4) {
+      para.phase.alpha = strtod(args[1], NULL);
+      para.phase.beta = strtod(args[2], NULL);
+      para.phase.gamma = strtod(args[3], NULL);
     }
     else ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
     qubit_id[0] = strtol(token[1], NULL, 10);

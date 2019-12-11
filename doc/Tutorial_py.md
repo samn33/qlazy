@@ -196,6 +196,9 @@ alpha,beta,gamma（実数値）が指定されなければ0ラジアンとみな
 	qs.crx(id_0,id_1, phase=xxx)  # 制御X軸回転ゲート
 	qs.cry(id_0,id_1, phase=xxx)  # 制御Y軸回転ゲート
 	qs.crz(id_0,id_1, phase=xxx)  # 制御Z軸回転ゲート
+	qs.cu1(id_0,id_1, alpha=xxx)                       # 制御U1ゲート
+	qs.cu2(id_0,id_1, alpha=xxx, beta=xxx)             # 制御U2ゲート
+	qs.cu3(id_0,id_1, alpha=xxx, beta=xxx, gamma=xxx)  # 制御U2ゲート
 
 #### 交換ゲート（スワップゲート）
 
@@ -653,7 +656,7 @@ measured_valueに測定値（Kraus演算子番号）を指定すると、密度�
 密度演算子をスペクトル分解します。固有値（確率）のリストと固有ベクトル
 （量子状態）のリストをリターンします。ちなみに、
 
-	de2 = DensOp(qstate=qstate, prob=prob)
+	de1 = DensOp(qstate=qstate, prob=prob)
 
 とやると、スペクトル分解の逆操作となり密度演算子は元に戻ります。つまり、
 deとde1は計算誤差を除き一致します。

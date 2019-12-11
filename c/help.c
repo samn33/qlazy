@@ -18,7 +18,7 @@ static void _help_print_outline() {
 * help:                     ?,help \n\
 [quantum gates]\n\
 * 1-qubit gates:            X,Y,Z,XR,XR+,H,S,S+,T,T+,P,RX,RY,RZ,U1,U2,U3\n\
-* 2-qubit gates:            CX,CY,CZ,CXR,CXR+,CH,CS,CS+,CT,CT+,CP,CRX,CRY,CRZ,SW\n\
+* 2-qubit gates:            CX,CY,CZ,CXR,CXR+,CH,CS,CS+,CT,CT+,CP,CRX,CRY,CRZ,CU1,CU2,CU3,SW\n\
 * measurement:              M,MX,MY,MZ,MB\n\
 [notes] \n\
 * see \'help <item>\', for more information\n\
@@ -712,6 +712,42 @@ static void _help_print_crz() {
 ");
 }
 
+static void _help_print_cu1() {
+  printf("\
+== CU1 gate ==\n\
+[description] \n\
+  CU1 gate is 2-qubit gate called \'controlled U1 gate\'.\n\
+[usage] \n\
+  >> CU1(<alpha>) <qubit_id> <qubit_id>\n\
+[alias] \n\
+  cu1 \n\
+");
+}
+
+static void _help_print_cu2() {
+  printf("\
+== CU2 gate ==\n\
+[description] \n\
+  CU2 gate is 2-qubit gate called \'controlled U2 gate\'.\n\
+[usage] \n\
+  >> CU2(<alpha>,<beta>) <qubit_id> <qubit_id>\n\
+[alias] \n\
+  cu2 \n\
+");
+}
+
+static void _help_print_cu3() {
+  printf("\
+== CU3 gate ==\n\
+[description] \n\
+  CU3 gate is 2-qubit gate called \'controlled U3 gate\'.\n\
+[usage] \n\
+  >> CU3(<alpha>,<beta>,<gamma>) <qubit_id> <qubit_id>\n\
+[alias] \n\
+  cu3 \n\
+");
+}
+
 static void _help_print_sw() {
   printf("\
 == SW gate ==\n\
@@ -870,6 +906,15 @@ bool help_print(char* item)
     break;
   case CONTROLLED_RZ:
     _help_print_crz();
+    break;
+  case CONTROLLED_U1:
+    _help_print_cu1();
+    break;
+  case CONTROLLED_U2:
+    _help_print_cu2();
+    break;
+  case CONTROLLED_U3:
+    _help_print_cu3();
     break;
   case SWAP:
     _help_print_sw();

@@ -45,8 +45,10 @@ class DensOp(ctypes.Structure):
         de_out = densop[0].clone()
         de_out.mul(factor=prob[0])
         for i in range(1,len(densop)):
-            densop[i].mul(factor=prob[i])
-            de_out.add(densop=densop[i])
+            de_tmp = densop[i].clone()
+            de_tmp.mul(factor=prob[i])
+            de_out.add(densop=de_tmp)
+            de_tmp.free()
 
         return de_out
 
@@ -706,7 +708,7 @@ class DensOp(ctypes.Structure):
             return prob
 
         except Exception:
-            raise DensOp_FailTorobability()
+            raise DensOp_FailToProbability()
 
 
     def densop_free(self):

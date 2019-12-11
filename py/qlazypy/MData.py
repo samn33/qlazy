@@ -52,10 +52,11 @@ class MDataC(ctypes.Structure):
 
 class MData:
 
-    def __init__(self, freq_list=None, last_state=0, state_num=0, qubit_num=0,
+    def __init__(self, freq_list=None, last_state=0, id=None, qubit_num=0, state_num=0,
                  angle=0.0, phase=0.0, is_bell=False, tag=None):
         self.freq_list = freq_list
         self.last_state = last_state
+        self.id = id
         self.qubit_num = qubit_num
         self.state_num = state_num
         self.angle = angle

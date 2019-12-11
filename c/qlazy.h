@@ -15,7 +15,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
-#define VERSION "0.0.28"
+#define VERSION "0.0.29"
 
 /*====================================================================*/
 /*  Definitions & Macros                                              */
@@ -195,6 +195,9 @@ typedef enum _Kind {
   CONTROLLED_RX	 = 171,		/* symbol: 'CRX','crx'   */
   CONTROLLED_RY	 = 172,		/* symbol: 'CRY','cry'   */
   CONTROLLED_RZ	 = 173,		/* symbol: 'CRZ','crz'   */
+  CONTROLLED_U1  = 174,		/* symbol: 'CU1','cu1'   */
+  CONTROLLED_U2  = 175,		/* symbol: 'CU1','cu1'   */
+  CONTROLLED_U3  = 176,		/* symbol: 'CU1','cu1'   */
   SWAP	         = 180,		/* symbol: 'SW','sw'     */
   MEASURE	 = 200,	 	/* symbol: 'M','m'       */
   MEASURE_X	 = 201,	 	/* symbol: 'MX','mx'     */

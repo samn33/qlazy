@@ -126,6 +126,9 @@ bool qcirc_append_qgate(QCirc* qcirc, Kind kind, int terminal_num,
   case CONTROLLED_RX:
   case CONTROLLED_RY:
   case CONTROLLED_RZ:
+  case CONTROLLED_U1:
+  case CONTROLLED_U2:
+  case CONTROLLED_U3:
   case CONTROLLED_P:
     qcirc->qgate[qcirc->step_num].para.phase.alpha = para->phase.alpha;
     qcirc->qgate[qcirc->step_num].para.phase.beta = para->phase.beta;
@@ -242,6 +245,9 @@ bool qcirc_set_cimage(QCirc* qcirc)
     case CONTROLLED_RX:
     case CONTROLLED_RY:
     case CONTROLLED_RZ:
+    case CONTROLLED_U1:
+    case CONTROLLED_U2:
+    case CONTROLLED_U3:
       qcirc->cimage->ch[qcirc->qgate[i].qubit_id[0]][pos] = '*';
       while (symbol[p] != '\0') {
 	qcirc->cimage->ch[qcirc->qgate[i].qubit_id[1]][pos] = symbol[p];
@@ -367,8 +373,15 @@ bool qcirc_write_file(QCirc* qcirc, char* fname)
     case CONTROLLED_RX:
     case CONTROLLED_RY:
     case CONTROLLED_RZ:
+    case CONTROLLED_U1:
     case CONTROLLED_P:
       fprintf(fp, "%s(%f) %d %d\n", symbol, para->phase.alpha, qubit_id[0], qubit_id[1]);
+    case CONTROLLED_U2:
+      fprintf(fp, "%s(%f,%f) %d %d\n", symbol, para->phase.alpha,
+	      para->phase.beta, qubit_id[0], qubit_id[1]);
+    case CONTROLLED_U3:
+      fprintf(fp, "%s(%f,%f,%f) %d %d\n", symbol, para->phase.alpha,
+	      para->phase.beta, para->phase.gamma, qubit_id[0], qubit_id[1]);
       break;
     default:
       break;
@@ -633,6 +646,7 @@ bool qcirc_read_file(char* fname, void** qcirc_out)
     case CONTROLLED_RY:
     case CONTROLLED_RZ:
     case CONTROLLED_P:
+    case CONTROLLED_U1:
       /* 2-qubit, 1-parameter gate */
       terminal_num = 2;
       if (anum == 1) {
@@ -644,6 +658,65 @@ bool qcirc_read_file(char* fname, void** qcirc_out)
 	para.phase.alpha = strtod(args[1], NULL);
 	para.phase.beta = DEF_PHASE;
 	para.phase.gamma = DEF_PHASE;
+      }
+      else ERR_RETURN(ERROR_CANT_READ_LINE,false);
+      qubit_id[0] = strtol(token[1], NULL, 10);
+      qubit_id[1] = strtol(token[2], NULL, 10);
+      if (qubit_num < qubit_id[0] + 1) ERR_RETURN(ERROR_CANT_READ_LINE,false);
+      if (qubit_num < qubit_id[1] + 1) ERR_RETURN(ERROR_CANT_READ_LINE,false);
+      if (qubit_id[0] < 0) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
+      if (qubit_id[1] < 0) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
+      if (qubit_id[0] == qubit_id[1]) ERR_RETURN(ERROR_SAME_QUBIT_ID,false);
+      break;
+    case CONTROLLED_U2:
+      /* 2-qubit, 2-parameter gate */
+      terminal_num = 2;
+      if (anum == 1) {
+	para.phase.alpha = DEF_PHASE;
+	para.phase.beta = DEF_PHASE;
+	para.phase.gamma = DEF_PHASE;
+      }
+      else if (anum == 2) {
+	para.phase.alpha = strtod(args[1], NULL);
+	para.phase.beta = DEF_PHASE;
+	para.phase.gamma = DEF_PHASE;
+      }
+      else if (anum == 3) {
+	para.phase.alpha = strtod(args[1], NULL);
+	para.phase.beta = strtod(args[2], NULL);
+	para.phase.gamma = DEF_PHASE;
+      }
+      else ERR_RETURN(ERROR_CANT_READ_LINE,false);
+      qubit_id[0] = strtol(token[1], NULL, 10);
+      qubit_id[1] = strtol(token[2], NULL, 10);
+      if (qubit_num < qubit_id[0] + 1) ERR_RETURN(ERROR_CANT_READ_LINE,false);
+      if (qubit_num < qubit_id[1] + 1) ERR_RETURN(ERROR_CANT_READ_LINE,false);
+      if (qubit_id[0] < 0) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
+      if (qubit_id[1] < 0) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
+      if (qubit_id[0] == qubit_id[1]) ERR_RETURN(ERROR_SAME_QUBIT_ID,false);
+      break;
+    case CONTROLLED_U3:
+      /* 2-qubit, 3-parameter gate */
+      terminal_num = 2;
+      if (anum == 1) {
+	para.phase.alpha = DEF_PHASE;
+	para.phase.beta = DEF_PHASE;
+	para.phase.gamma = DEF_PHASE;
+      }
+      else if (anum == 2) {
+	para.phase.alpha = strtod(args[1], NULL);
+	para.phase.beta = DEF_PHASE;
+	para.phase.gamma = DEF_PHASE;
+      }
+      else if (anum == 3) {
+	para.phase.alpha = strtod(args[1], NULL);
+	para.phase.beta = strtod(args[2], NULL);
+	para.phase.gamma = DEF_PHASE;
+      }
+      else if (anum == 4) {
+	para.phase.alpha = strtod(args[1], NULL);
+	para.phase.beta = strtod(args[2], NULL);
+	para.phase.gamma = strtod(args[3], NULL);
       }
       else ERR_RETURN(ERROR_CANT_READ_LINE,false);
       qubit_id[0] = strtol(token[1], NULL, 10);
