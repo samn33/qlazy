@@ -66,10 +66,6 @@ class QState_FailToBloch(Exception):
     def __str__(self):
         return "QState: fail to bloch"
 
-class QState_FailToOperate(Exception):
-    def __str__(self):
-        return "QState: fail to operate"
-
 # MData
 
 class MData_FailToGetFrq(Exception):
@@ -151,3 +147,12 @@ class DensOp_FailToSpectrum(Exception):
 class DensOp_FailToEntropy(Exception):
     def __str__(self):
         return "DensOp: fail to get entropy"
+
+class DensOp_FailToOperateQGate(Exception):
+    def __str__(self):
+        return "DensOp: fail to operate qgate"
+
+class DensOp_FailToTensorProduct(Exception):
+    def __str__(self):
+        return "DensOp: fail to tensor product"
+    

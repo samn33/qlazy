@@ -10,13 +10,16 @@ static DensOp* _create_densop(int row, int col)
   int		size   = row * col;
 
   if (!(densop = (DensOp*)malloc(sizeof(DensOp))))
-    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
+    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,NULL);
   densop->row = row;
   densop->col = col;
   if (!(densop->elm = (COMPLEX*)malloc(sizeof(COMPLEX)*size)))
-    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
+    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,NULL);
 
   for (int i=0; i<size; i++) densop->elm[i] = 0.0 + 0.0i;
+
+  if (!(gbank_init((void**)&(densop->gbank))))
+      ERR_RETURN(ERROR_GBANK_INIT,NULL);
 
   return densop;
 }
@@ -38,13 +41,16 @@ bool densop_init(QState* qstate, double* prob, int num, void** densop_out)
     }
   }
 
-  densop = _create_densop(state_num, state_num);
+  if(!(densop = _create_densop(state_num, state_num)))
+    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
   int idx = 0;
   for (int k=0; k<state_num; k++) {
     for (int l=0; l<state_num; l++) {
       for (int i=0; i<num; i++) {
-	densop->elm[idx] += (prob[i] * conj(qstate[i].camp[k]) * qstate[i].camp[l]);
+	// 2019.12.20
+	//densop->elm[idx] += (prob[i] * conj(qstate[i].camp[k]) * qstate[i].camp[l]);
+	densop->elm[idx] += (prob[i] * qstate[i].camp[k] * conj(qstate[i].camp[l]));
       }
       idx++;
     }
@@ -65,7 +71,8 @@ bool densop_init_with_matrix(double* real, double* imag, int row, int col,
       (fabs(log2(row)-(int)log2(row)) > MIN_DOUBLE))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
-  densop = _create_densop(row, col);
+  if(!(densop = _create_densop(row, col)))
+    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
   for (int i=0; i<size; i++) {
     densop->elm[i] = real[i] + 1.0i * imag[i];
@@ -599,6 +606,112 @@ bool densop_probability(DensOp* densop, int qnum_part, int qid[MAX_QUBIT_NUM],
   else {
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
   }
+
+  SUC_RETURN(true);
+}
+
+static bool _densop_operate_unitary(DensOp* densop, COMPLEX* U, int dim, int m, int n)
+{
+  int		qnum_part;
+  int		qid[MAX_QUBIT_NUM];
+  ApplyDir	adir = BOTH;
+  double	real[16];
+  double	imag[16];
+  int		row,col;
+
+  if ((densop == NULL) || (densop->row != densop->col))
+      ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+  if ((m < 0) || (m >= densop->row))
+    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+  
+  if (dim == 2) {
+    qnum_part = 1;
+    row = col = 2;
+    qid[0] = m;
+    for (int i=0; i<dim*dim; i++) {
+      real[i] = creal(U[i]);
+      imag[i] = cimag(U[i]);
+    }
+    if (!(densop_apply_matrix(densop, qnum_part, qid, adir, real, imag, row, col)))
+      ERR_RETURN(ERROR_DENSOP_APPLY_MATRIX,false);
+  }
+
+  else if (dim == 4) {
+    if ((n < 0) || (n >= densop->row) || (m == n))
+      ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+    qnum_part = 2;
+    row = col = 4;
+    qid[0] = m; qid[1] = n;
+    for (int i=0; i<dim*dim; i++) {
+      real[i] = creal(U[i]);
+      imag[i] = cimag(U[i]);
+    }
+    if (!(densop_apply_matrix(densop, qnum_part, qid, adir, real, imag, row, col)))
+      ERR_RETURN(ERROR_DENSOP_APPLY_MATRIX,false);
+  }
+
+  else {
+    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+  }
+  
+  SUC_RETURN(true);
+}
+
+bool densop_operate_qgate(DensOp* densop, Kind kind, double alpha, double beta,
+			  double gamma, int qubit_id[MAX_QUBIT_NUM])
+{
+  int		q0  = qubit_id[0];
+  int		q1  = qubit_id[1];
+  int		dim = 0;
+  COMPLEX*	U   = NULL;
+
+  if (densop == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+
+  if ((kind == INIT) || (kind ==MEASURE) || (kind ==MEASURE_X) ||
+      (kind == MEASURE_Y) || (kind == MEASURE_Z) || (kind == MEASURE_BELL))
+    SUC_RETURN(true);
+  else {
+    if (!(gbank_get_unitary(densop->gbank, kind, alpha, beta, gamma, &dim, (void**)&U)))
+      ERR_RETURN(ERROR_GBANK_GET_UNITARY,false);
+    if (!(_densop_operate_unitary(densop, U, dim, q0, q1)))
+      ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+    free(U); U = NULL;
+    SUC_RETURN(true);
+  }
+}
+
+bool densop_tensor_product(DensOp* densop_0, DensOp* densop_1, void** densop_out)
+{
+  int		row, row_0, row_1;
+  int		col, col_0, col_1;
+  int		idx, idx_0, idx_1;
+  DensOp*	densop = NULL;
+
+  if ((densop_0 == NULL) || (densop_1 == NULL) ||
+      (densop_0->row != densop_0->col) || (densop_1->row != densop_1->col))
+    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+
+  row_0 = densop_0->row;
+  col_0 = densop_0->col;
+  row_1 = densop_1->row;
+  col_1 = densop_1->col;
+  row = row_0 * row_1;
+  col = col_0 * col_1;
+  
+  if(!(densop = _create_densop(row, col)))
+    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+
+  /* Kronecker product */
+  idx = 0;
+  for (int i=0; i<row; i++) {
+    for (int j=0; j<col; j++) {
+      idx_0 = (i/row_1) * col_0 + (j/col_1);
+      idx_1 = (i%row_1) * col_1 + (j%col_1);
+      densop->elm[idx++] = densop_0->elm[idx_0] * densop_1->elm[idx_1];
+    }
+  }
+
+  *densop_out = densop;
 
   SUC_RETURN(true);
 }

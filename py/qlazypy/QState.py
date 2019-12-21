@@ -215,7 +215,7 @@ class QState(ctypes.Structure):
         return self
 
     def cu3(self, q0, q1, alpha=DEF_PHASE, beta=DEF_PHASE, gamma=DEF_PHASE):
-        self.qstate_operate_qgate(kind=CONTROLLED_U2, phase=alpha, phase1=beta,
+        self.qstate_operate_qgate(kind=CONTROLLED_U3, phase=alpha, phase1=beta,
                                   phase2=gamma, id=[q0,q1])
         return self
 
@@ -668,13 +668,13 @@ class QState(ctypes.Structure):
         lib.qstate_free.argtypes = [ctypes.POINTER(QState)]
         lib.qstate_free(ctypes.byref(self))
  
-    # def qstate_operate_qgate(self, kind=None, id=None, phase=None):
     def qstate_operate_qgate(self, kind=None, id=None,
                              phase=DEF_PHASE, phase1=DEF_PHASE, phase2=DEF_PHASE):
 
         # error check
-        self.__check_args(kind=kind, id=id, shots=None, angle=None, phase=phase)
-        
+        self.__check_args(kind=kind, id=id, shots=None, angle=None,
+                          phase=phase, phase1=phase1, phase2=phase2)
+
         qubit_id = [0 for _ in range(MAX_QUBIT_NUM)]
         for i in range(len(id)):
             qubit_id[i] = id[i]
@@ -692,7 +692,8 @@ class QState(ctypes.Structure):
         if ret == FALSE:
             raise QState_FailToOperateQgate()
 
-    def __check_args(self, kind=None, id=None, shots=None, angle=None, phase=None):
+    def __check_args(self, kind=None, id=None, shots=None, angle=None,
+                     phase=None, phase1=None, phase2=None):
 
         for q in id:
             if (q >= self.qubit_num) or (q < 0):
@@ -769,6 +770,7 @@ class QState(ctypes.Structure):
               kind==CONTROLLED_S or kind==CONTROLLED_S_ or kind==CONTROLLED_T or
               kind==CONTROLLED_T_ or kind==SWAP or kind==CONTROLLED_P or
               kind==CONTROLLED_RX or kind==CONTROLLED_RY or kind==CONTROLLED_RZ or
+              kind==CONTROLLED_U1 or kind==CONTROLLED_U2 or kind==CONTROLLED_U3 or
               kind==MEASURE_BELL):
             return 2
         else:

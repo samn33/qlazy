@@ -1,3 +1,10 @@
+2019-12-21  Sam.N  <saminriver33@gmail.com>
+
+	* v0.0.30
+	- add function(c/py): gate operation for densop
+	- add function(c/py): tensor product for densop
+	- bug fix(c/py): cu1,cu2,cu3,densop_init
+
 2019-12-12  Sam.N  <saminriver33@gmail.com>
 
 	* v0.0.29

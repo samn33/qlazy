@@ -15,7 +15,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
-#define VERSION "0.0.29"
+#define VERSION "0.0.30"
 
 /*====================================================================*/
 /*  Definitions & Macros                                              */
@@ -334,9 +334,10 @@ typedef struct _Observable {
 } Observable;
 
 typedef struct _DensOp {
-  int row;
-  int col;
-  COMPLEX* elm;
+  int		row;
+  int		col;
+  COMPLEX*	elm;
+  GBank*        gbank;
 } DensOp;
 
 /*====================================================================*/
@@ -472,6 +473,9 @@ bool     densop_apply_matrix(DensOp* densop, int qnum_part, int qid[MAX_QUBIT_NU
 bool     densop_probability(DensOp* densop, int qnum_part, int qid[MAX_QUBIT_NUM],
 			    MatrixType mtype, double* real, double* imag, int row, int col,
 			    double* prob_out);
+bool     densop_operate_qgate(DensOp* densop, Kind kind, double alpha, double beta,
+			      double gamma, int qubit_id[MAX_QUBIT_NUM]);
+bool     densop_tensor_product(DensOp* densop_0, DensOp* densop_1, void** densop_out);
 void     densop_free(DensOp* densop);
 
 #endif

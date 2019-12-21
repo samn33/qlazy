@@ -442,7 +442,7 @@ static bool _gbank_get_ctr_u2(double phase, double phase1, double unit,
   double	alpha  = phase * unit;
   double	beta   = phase1 * unit;
   
-  if (!(matrix = (COMPLEX*)malloc(sizeof(COMPLEX)*4)))
+  if (!(matrix = (COMPLEX*)malloc(sizeof(COMPLEX)*16)))
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
 
   for (int i=0; i<16; i++) matrix[i] = 0.0 + 0.0i;
@@ -466,7 +466,7 @@ static bool _gbank_get_ctr_u3(double phase, double phase1, double phase2,
   double	beta   = phase1 * unit;
   double	gamma  = phase2 * unit;
   
-  if (!(matrix = (COMPLEX*)malloc(sizeof(COMPLEX)*4)))
+  if (!(matrix = (COMPLEX*)malloc(sizeof(COMPLEX)*16)))
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
 
   for (int i=0; i<16; i++) matrix[i] = 0.0 + 0.0i;
