@@ -1,3 +1,21 @@
+2020-01-15  Sam.N  <saminriver33@gmail.com>
+
+	* v0.0.31
+	- add function(py): QState - add_method (add custom gate)
+	- add function(py): QState - create_register
+	- add function(py): QState - init_register
+	- add function(py): QState - mcx (multi-controlled X gate)
+	- add function(py): QState - fidelity (abs. value of the inner product)
+	- add function(py): QState - composite (make composite quantum state)
+	- add function(py): DensOp - composite (make composite density operator)
+	- add function(py): MData - __str__ (print MData instance)
+	- change spec(py): DensOp - __init__ (set equal prob., if 'prob' is not specified)
+	- add example(py): quantum state tomograpy
+	- add example(py): data compression (shannon)
+	- add example(py): data compression (schumacher)
+	- bug fix(c): interactive mode ('segmentation fault' issue of 'init 0')
+	- bug fix(c): densop_copy
+
 2019-12-21  Sam.N  <saminriver33@gmail.com>
 
 	* v0.0.30

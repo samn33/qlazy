@@ -48,8 +48,6 @@ bool densop_init(QState* qstate, double* prob, int num, void** densop_out)
   for (int k=0; k<state_num; k++) {
     for (int l=0; l<state_num; l++) {
       for (int i=0; i<num; i++) {
-	// 2019.12.20
-	//densop->elm[idx] += (prob[i] * conj(qstate[i].camp[k]) * qstate[i].camp[l]);
 	densop->elm[idx] += (prob[i] * qstate[i].camp[k] * conj(qstate[i].camp[l]));
       }
       idx++;
@@ -97,6 +95,9 @@ bool densop_copy(DensOp* densop_in, void** densop_out)
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
 
   memcpy(densop->elm, densop_in->elm, sizeof(COMPLEX)*(densop->row)*(densop->col));
+
+  if (!(gbank_init((void**)&(densop->gbank))))
+      ERR_RETURN(ERROR_GBANK_INIT,NULL);
 
   *densop_out = densop;
 
@@ -221,10 +222,8 @@ bool densop_sqtrace(DensOp* densop, double* real, double* imag)
     for (int j=0; j<dim; j++) {
       tmp = 0.0 + 0.0i;
       for (int k=0; k<dim; k++) {
-	//tmp += (densop_tmp->elm[i*dim+k] * densop_tmp->elm[k*dim+j]);
 	tmp += (densop->elm[i*dim+k] * densop->elm[k*dim+j]);
       }
-      //densop->elm[i*dim+j] = tmp;
       densop_tmp->elm[i*dim+j] = tmp;
     }
   }

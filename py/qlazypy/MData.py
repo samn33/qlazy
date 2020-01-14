@@ -63,6 +63,17 @@ class MData:
         self.phase = phase
         self.is_bell = is_bell
 
+    def __str__(self):
+
+        s = ""
+        s += "id: {}\n".format(self.id)
+        s += "qubit num: {}\n".format(self.qubit_num)
+        s += "state num: {}\n".format(self.state_num)
+        s += "angle, phase: {0:}, {1:}\n".format(self.angle, self.phase)
+        s += "frequency: {}\n".format(self.freq_list)
+        s += "last state: {}".format(self.last_state)
+        return s
+
     @property
     def frq(self):
         return self.freq_list

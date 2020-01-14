@@ -49,7 +49,7 @@ def mpmct(self,id_in,id_out,x):
         bit = (x>>i)%2
         if bit == 0:
             self.x(id_in[i])
-            
+
     self.multi_cx(id_in,id_out)
 
     for i in range(bitnum):

@@ -38,7 +38,27 @@ class QState(ctypes.Structure):
     def __str__(self):
 
         return str(self.get_amp())
+
+    @classmethod
+    def add_method(cls, method):
+
+        setattr(cls, method.__name__, method)
         
+    @classmethod
+    def create_register(cls, num):
+
+        return [0]*num
+
+    @classmethod
+    def init_register(cls, *args):
+
+        idx = 0
+        for i in range(len(args)):
+            for j in range(len(args[i])):
+                args[i][j] = idx
+                idx += 1
+        return idx
+    
     @property
     def amp(self, id=None):
         return self.get_amp()
@@ -61,6 +81,21 @@ class QState(ctypes.Structure):
     def tenspro(self, qstate):
         return self.qstate_tensor_product(qstate)
 
+    def fidelity(self, qstate):
+        return abs(self.inpro(qstate))
+
+    def composite(self, num=1):
+        if num <= 1:
+            return self
+        else:
+            qs = self.clone()
+            for i in range(num-1):
+                qs_tmp = qs.tenspro(self)
+                qs.free()
+                qs = qs_tmp.clone()
+                qs_tmp.free()
+            return qs
+        
     def evolve(self, observable=None, time=0.0, iter=0):
         self.qstate_evolve(observable=observable, time=time, iter=iter)
         return self
@@ -227,6 +262,41 @@ class QState(ctypes.Structure):
 
     def csw(self, q0, q1, q2):
         self.cx(q2,q1).ccx(q0,q1,q2).cx(q2,q1)
+        return self
+
+    # other gate
+    
+    def __gray_code(self, n):
+
+        for k in range(2**n):
+            yield k^(k>>1)
+
+    # multi-controlled X gate
+    def mcx(self,id_ctr=[],id_tar=None):
+
+        # hadamard
+        self.h(id_tar)
+
+        # controlled-RZ(psi), psi=pi/(2**(bitnum-1))
+        bitnum = len(id_ctr)
+        psi = 1.0/(2**(bitnum-1)) # unit=pi(radian)
+        gray_pre = 0
+        for gray in self.__gray_code(bitnum):
+            if gray == 0:
+                continue
+            msb = len(str(bin(gray)))-3
+            chb = len(str(bin(gray^gray_pre)))-3
+            if gray != 1:
+                if chb == msb:
+                    chb -= 1
+                self.cx(id_ctr[chb],id_ctr[msb])
+            self.cp(id_ctr[msb],id_tar,phase=psi)
+            psi = -psi
+            gray_pre = gray
+    
+        # hadamard
+        self.h(id_tar)
+
         return self
 
     # measurement

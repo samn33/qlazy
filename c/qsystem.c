@@ -185,7 +185,7 @@ static bool _qsystem_execute_one_line(QSystem* qsystem, char* line)
     if (tnum < 2) ERR_RETURN(ERROR_NEED_MORE_ARGUMENTS,false);
     if (anum > 1) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
     qubit_num = strtol(token[1], NULL, 10);
-    if ((qubit_num < 0) || (qubit_num > MAX_QUBIT_NUM))
+    if ((qubit_num <= 0) || (qubit_num > MAX_QUBIT_NUM))
       ERR_RETURN(ERROR_OUT_OF_BOUND,false);
     if (qstate != NULL) { qstate_free(qstate); qstate = NULL; }
     if (qcirc != NULL) { qcirc_free(qcirc); qcirc = NULL; }

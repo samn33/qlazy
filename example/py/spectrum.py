@@ -43,7 +43,7 @@ if __name__ == '__main__':
     mixed_num = 5
 
     de_ini = random_mixed_state(qubit_num, mixed_num)
-    prob,qstate = de_ini.spectrum()
+    qstate,prob = de_ini.spectrum()
     de_fin = DensOp(qstate=qstate, prob=prob)
     dis = de_ini.distance(de_fin)
 

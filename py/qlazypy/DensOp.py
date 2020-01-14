@@ -23,6 +23,11 @@ class DensOp(ctypes.Structure):
     
     def __new__(cls, qstate=[], prob=[], matrix=None):
 
+        # if prob is not specified, set equal probability
+        if qstate != [] and prob == []:
+            mixed_num = len(qstate)
+            prob = [1.0/mixed_num for _ in range(mixed_num)]
+        
         if qstate != [] and prob != []:
             return cls.densop_init(qstate, prob)
         else:
@@ -112,6 +117,18 @@ class DensOp(ctypes.Structure):
 
         return self.densop_tensor_product(densop)
 
+    def composite(self, num=0):
+        if num <= 1:
+            return self
+        else:
+            de = self.clone()
+            for i in range(num-1):
+                de_tmp = de.tenspro(self)
+                de.free()
+                de = de_tmp.clone()
+                de_tmp.free()
+            return de
+        
     def expect(self, matrix=None):
 
         densop = self.clone()
@@ -240,7 +257,8 @@ class DensOp(ctypes.Structure):
         vecs = [eigvecs[i] for i in range(len(eigvals)) if abs(eigvals[i]) > MIN_DOUBLE]
         qstate = [QState(vector=vecs[i]) for i in range(len(prob))]
 
-        return prob,qstate
+        #return prob,qstate
+        return qstate,prob
 
     def __von_neumann_entropy(self):  # von neumann entropy
 
@@ -486,6 +504,41 @@ class DensOp(ctypes.Structure):
         self.cx(q2,q1).ccx(q0,q1,q2).cx(q2,q1)
         return self
     
+    # other gate
+    
+    def __gray_code(self, n):
+
+        for k in range(2**n):
+            yield k^(k>>1)
+
+    # multi-controlled X gate
+    def mcx(self,id_ctr=[],id_tar=None):
+
+        # hadamard
+        self.h(id_tar)
+
+        # controlled-RZ(psi), psi=pi/(2**(bitnum-1))
+        bitnum = len(id_ctr)
+        psi = 1.0/(2**(bitnum-1)) # unit=pi(radian)
+        gray_pre = 0
+        for gray in self.__gray_code(bitnum):
+            if gray == 0:
+                continue
+            msb = len(str(bin(gray)))-3
+            chb = len(str(bin(gray^gray_pre)))-3
+            if gray != 1:
+                if chb == msb:
+                    chb -= 1
+                self.cx(id_ctr[chb],id_ctr[msb])
+            self.cp(id_ctr[msb],id_tar,phase=psi)
+            psi = -psi
+            gray_pre = gray
+    
+        # hadamard
+        self.h(id_tar)
+
+        return self
+
     def free(self):
 
         return self.densop_free()
