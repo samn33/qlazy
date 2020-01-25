@@ -833,7 +833,7 @@ bool qstate_operate_qgate(QState* qstate, Kind kind, double alpha, double beta,
   int		q1  = qubit_id[1];
   int		dim = 0;
   COMPLEX*	U   = NULL;
-  
+
   if (qstate == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
   if ((kind == INIT) || (kind ==MEASURE) || (kind ==MEASURE_X) ||

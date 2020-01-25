@@ -1,3 +1,16 @@
+2020-01-25  Sam.N  <saminriver33@gmail.com>
+
+	* v0.0.32
+	- unittest
+	- change spec(py): QState - mcx
+	- change spec(py): DensOp - mcx
+	- change directories of examples(py): structures and 'test.sh'
+	- correct exapmple(py): hadamard test
+	- correct exapmple(py): purification
+	- add function(py): QState - partial (extract partial quantum state)
+	- bug fix(py): DensOp - relative_entropy
+	- bug fix(py): rx
+
 2020-01-15  Sam.N  <saminriver33@gmail.com>
 
 	* v0.0.31

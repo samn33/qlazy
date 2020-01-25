@@ -5,8 +5,8 @@
 TRUE  = 1
 FALSE = 0
 
-MIN_DOUBLE = 0.000001
-MAX_DOUBLE = 1000000.0
+EPS = 1e-6
+INF = 1e+6
 
 MAX_QUBIT_NUM = 30
 
@@ -70,6 +70,9 @@ MEASURE_Y      = 202
 MEASURE_Z      = 203
 MEASURE_BELL   = 204
 NOT_A_GATE     = 1000
+
+GATE = {'x':PAULI_X}
+
 
 # MatrixType
 

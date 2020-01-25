@@ -12,7 +12,9 @@ lib = ctypes.CDLL('libQlazy.so',mode=ctypes.RTLD_GLOBAL)
 libc = ctypes.CDLL(find_library("c"),mode=ctypes.RTLD_GLOBAL)
 
 class QState(ctypes.Structure):
-
+    """ quantum state
+    """
+    
     _fields_ = [
         ('qubit_num', ctypes.c_int),
         ('state_num', ctypes.c_int),
@@ -66,6 +68,10 @@ class QState(ctypes.Structure):
     def get_amp(self, id=None):
         return self.qstate_get_camp(id)
 
+    def partial(self, id=None):
+        vec = self.get_amp(id)
+        return QState(vector=vec)
+        
     def show(self, id=None):
         self.qstate_print(id)
 
@@ -150,7 +156,7 @@ class QState(ctypes.Structure):
         return self
 
     def rx(self, q0, phase=DEF_PHASE):
-        self.qstate_operate_qgate(kind=ROTATION_Y, phase=phase, id=[q0])
+        self.qstate_operate_qgate(kind=ROTATION_X, phase=phase, id=[q0])
         return self
 
     def ry(self, q0, phase=DEF_PHASE):
@@ -272,8 +278,13 @@ class QState(ctypes.Structure):
             yield k^(k>>1)
 
     # multi-controlled X gate
-    def mcx(self,id_ctr=[],id_tar=None):
+    # def mcx(self,id_ctr=[],id_tar=None):
+    def mcx(self,id=[]):
 
+        # controled and target register
+        id_ctr = id[:-1]
+        id_tar = id[-1]
+        
         # hadamard
         self.h(id_tar)
 
@@ -727,8 +738,9 @@ class QState(ctypes.Structure):
         last_state = out.contents.last
         freq = ctypes.cast(out.contents.freq, ctypes.POINTER(ctypes.c_int*state_num))
         freq_list = [freq.contents[i] for i in range(state_num)]
-        md = MData(freq_list=freq_list, last_state=last_state, qubit_num=qubit_num,
-                   state_num=state_num, angle=0.0, phase=0.0, is_bell=True)
+        md = MData(freq_list=freq_list, last_state=last_state, id=id,
+                   qubit_num=qubit_num, state_num=state_num, angle=0.0, phase=0.0,
+                   is_bell=True)
         out.contents.free()
 
         return md

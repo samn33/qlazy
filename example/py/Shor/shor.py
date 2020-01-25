@@ -229,8 +229,9 @@ if __name__ == '__main__':
     QState.mod_exp = mod_exp
 
     print("== input number ==")
-    args = sys.argv
-    N = int(args[1])
+    # args = sys.argv
+    # N = int(args[1])
+    N = 57
     print("N = ",N)
 
     print("== Shor's algorithm start ==")

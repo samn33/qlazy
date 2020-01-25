@@ -298,7 +298,7 @@ static bool _gbank_get_ctr_rotation(Axis axis, double phase, double unit, void**
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
 
   for (int i=0; i<16; i++) matrix[i] = 0.0 + 0.0i;
-  
+
   switch (axis) {
   case X_AXIS:
     matrix[IDX4(0,0)] = 1.0 + 0.0i;
@@ -607,7 +607,7 @@ bool gbank_get_unitary(GBank* gbank, Kind kind, double phase, double phase1,
 {
   COMPLEX*	matrix = NULL;
   int		dim    = 0;
-
+  
   if (gbank == NULL)
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 

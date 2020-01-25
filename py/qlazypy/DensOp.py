@@ -68,19 +68,6 @@ class DensOp(ctypes.Structure):
         elm = de_part.densop_get_elm()
         return elm
     
-    def partial(self, id=[]):
-
-        if id is None or id == []:
-            return self.clone()
-        else:
-            qubit_num = int(math.log2(self.row))
-            id_remained = []
-            for x in range(qubit_num):
-                if not x in id:
-                    id_remained.append(x)
-            de_remained = self.patrace(id=id_remained)
-            return de_remained
-        
     def show(self, id=[]):
 
         de_part = self.partial(id=id)
@@ -113,6 +100,19 @@ class DensOp(ctypes.Structure):
 
         return self.densop_patrace(id=id)
 
+    def partial(self, id=[]):
+
+        if id is None or id == []:
+            return self.clone()
+        else:
+            qubit_num = int(math.log2(self.row))
+            id_remained = []
+            for x in range(qubit_num):
+                if not x in id:
+                    id_remained.append(x)
+            de_remained = self.patrace(id=id_remained)
+            return de_remained
+        
     def tenspro(self, densop):
 
         return self.densop_tensor_product(densop)
@@ -150,7 +150,7 @@ class DensOp(ctypes.Structure):
             for i in range(N):
                 prob[i] = self.densop_probability(matrix=kraus[i], id=id,
                                                   matrix_type='kraus')
-                if abs(prob[i]) < MIN_DOUBLE:
+                if abs(prob[i]) < EPS:
                     prob[i] = 0.0
         elif povm != []:
             N = len(povm)
@@ -158,7 +158,7 @@ class DensOp(ctypes.Structure):
             for i in range(N):
                 prob[i] = self.densop_probability(matrix=povm[i], id=id,
                                                   matrix_type='povm')
-                if abs(prob[i]) < MIN_DOUBLE:
+                if abs(prob[i]) < EPS:
                     prob[i] = 0.0
         else:
             raise DensOp_FailToProbability()
@@ -253,8 +253,8 @@ class DensOp(ctypes.Structure):
 
         mat = self.get_elm()
         eigvals,eigvecs = self.__mat_spectrum(mat)
-        prob = [eigvals[i] for i in range(len(eigvals)) if abs(eigvals[i]) > MIN_DOUBLE]
-        vecs = [eigvecs[i] for i in range(len(eigvals)) if abs(eigvals[i]) > MIN_DOUBLE]
+        prob = [eigvals[i] for i in range(len(eigvals)) if abs(eigvals[i]) > EPS]
+        vecs = [eigvecs[i] for i in range(len(eigvals)) if abs(eigvals[i]) > EPS]
         qstate = [QState(vector=vecs[i]) for i in range(len(prob))]
 
         #return prob,qstate
@@ -265,7 +265,7 @@ class DensOp(ctypes.Structure):
         mat = self.get_elm()
         eigvals = np.linalg.eigvalsh(mat)
         diag = [-eigvals[i]*np.log2(eigvals[i])
-                for i in range(len(eigvals)) if abs(eigvals[i]) > MIN_DOUBLE]
+                for i in range(len(eigvals)) if abs(eigvals[i]) > EPS]
         ent = np.sum(diag)
         return ent
     
@@ -328,21 +328,21 @@ class DensOp(ctypes.Structure):
         mat_B = densop.get_elm()
 
         eigvals_A,eigvecs_A = self.__mat_spectrum(mat_A)
-        eigvals_B,eigvecs_B = self.__mat_spectrum(mat_A)
+        eigvals_B,eigvecs_B = self.__mat_spectrum(mat_B)
 
         P = np.dot(np.conjugate(eigvecs_A.T),eigvecs_B)
         P = np.conjugate(P)*P
         
         diag_A = [eigvals_A[i]*np.log2(eigvals_A[i])
-                for i in range(len(eigvals_A)) if abs(eigvals_A[i]) > MIN_DOUBLE]
+                for i in range(len(eigvals_A)) if abs(eigvals_A[i]) > EPS]
         relent_A = np.sum(diag_A)
 
         relent_B = 0.0
         for i in range(len(eigvals_A)):
-            if eigvals_A[i] < MIN_DOUBLE:
+            if eigvals_A[i] < EPS:
                 continue
             for j in range(len(eigvals_B)):
-                relent_B += abs(P[i][j]) * np.log2(eigvals_B[j])
+                relent_B += abs(P[i][j]) * eigvals_A[i] *np.log2(eigvals_B[j])
         
         relent = relent_A - relent_B
         return relent
@@ -390,7 +390,7 @@ class DensOp(ctypes.Structure):
         return self
 
     def rx(self, q0, phase=DEF_PHASE):
-        self.densop_operate_qgate(kind=ROTATION_Y, phase=phase, id=[q0])
+        self.densop_operate_qgate(kind=ROTATION_X, phase=phase, id=[q0])
         return self
 
     def ry(self, q0, phase=DEF_PHASE):
@@ -512,8 +512,13 @@ class DensOp(ctypes.Structure):
             yield k^(k>>1)
 
     # multi-controlled X gate
-    def mcx(self,id_ctr=[],id_tar=None):
+    # def mcx(self,id_ctr=[],id_tar=None):
+    def mcx(self,id=[]):
 
+        # controled and target register
+        id_ctr = id[:-1]
+        id_tar = id[-1]
+        
         # hadamard
         self.h(id_tar)
 
@@ -725,7 +730,7 @@ class DensOp(ctypes.Structure):
             real = round(c_real.value, 8)
             imag = round(c_imag.value, 8)
 
-            if abs(imag) > MIN_DOUBLE:
+            if abs(imag) > EPS:
                 raise DensOp_FailToTrace()
                 
             return real
@@ -754,7 +759,7 @@ class DensOp(ctypes.Structure):
             real = round(c_real.value, 8)
             imag = round(c_imag.value, 8)
 
-            if abs(imag) > MIN_DOUBLE:
+            if abs(imag) > EPS:
                 raise DensOp_FailToTrace()
                 
             return real

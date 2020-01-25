@@ -48,7 +48,8 @@ def eigen_values_vectors(densop):
 
     matrix = densop.get_elm()
     eigvals, eigvecs = eigh(matrix, eigvals_only=False)
-    eigvecs = np.conjugate(eigvecs.T)
+    #eigvecs = np.conjugate(eigvecs.T)
+    eigvecs = eigvecs.T
 
     eigvals_list = [eigvals[i] for i in range(len(eigvals)) if abs(eigvals[i]) > MIN_DOUBLE]
     eigvecs_list = [eigvecs[i] for i in range(len(eigvecs)) if abs(eigvals[i]) > MIN_DOUBLE]
@@ -102,7 +103,7 @@ if __name__ == '__main__':
     mixed_num = 3
     
     print("=== system A (mixed state) ===")
-    de_A = random_mixed_state(qnum_A,mixed_num)
+    de_A = random_mixed_state(qnum_A, mixed_num)
     print("* density operator:")
     print(de_A)
     print("* square trace:", de_A.sqtrace())
