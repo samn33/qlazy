@@ -44,8 +44,8 @@ if __name__ == '__main__':
     de2_whole = random_densop(qnum_tar,qnum_ref,qnum_env)
 
     # two states in system A (trace out R+E)
-    de1_ini = de1_whole.partial(id=list(range(qnum_tar)))
-    de2_ini = de2_whole.partial(id=list(range(qnum_tar)))
+    de1_ini = de1_whole.partial(list(range(qnum_tar)))
+    de2_ini = de2_whole.partial(list(range(qnum_tar)))
 
     # trace distance for initial states
     dis_ini = de1_ini.distance(de2_ini)
@@ -56,8 +56,8 @@ if __name__ == '__main__':
     de2_whole.apply(U)
 
     # two states in system A (trace out R+E)
-    de1_fin = de1_whole.partial(id=list(range(qnum_tar)))
-    de2_fin = de2_whole.partial(id=list(range(qnum_tar)))
+    de1_fin = de1_whole.partial(list(range(qnum_tar)))
+    de2_fin = de2_whole.partial(list(range(qnum_tar)))
     
     # trace distance for final states
     dis_fin = de1_fin.distance(de2_fin)

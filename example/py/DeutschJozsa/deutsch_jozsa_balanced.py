@@ -97,7 +97,7 @@ def result(self,id_a,id_b):
     id_ab = id_a + id_b
     iid_ab = id_ab[::-1]
     shots = (2**len(id_a))*5
-    freq = self.m(id=iid_ab,shots=shots).frq
+    freq = self.m(iid_ab,shots=shots).frq
     
     # set results
     a_list = []
@@ -150,7 +150,7 @@ if __name__ == '__main__':
 
     # measure and judge
     cnt = 0
-    for freq in qs.m(id=id_in).freq_list:
+    for freq in qs.m(id_in, shots=100).freq_list:
         if freq != 0: cnt += 1
     print("== judgement ==")
     if cnt == 1:

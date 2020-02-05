@@ -3,19 +3,19 @@ init 1
 show
 
 @ == measurement (x-axis) ==
-mx
+mx(100)
 
 @ == state ==
 show
 
 @ == measurement (x-axis) ==
-mx
+mx(100)
 
 @ == state ==
 show
 
 @ == measurement (z-axis) ==
-mz
+mz(100)
 
 @ == state ==
 show

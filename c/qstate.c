@@ -59,11 +59,25 @@ static bool _qstate_normalize(QState* qstate)
   }
   norm = sqrt(norm);
 
+  /*
   if (norm == 0.0) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
-
-  /* normalization */
+  
   for (int i=0; i<qstate->state_num; i++) {
     qstate->camp[i] = qstate->camp[i] / norm;
+  }
+  */
+
+  /* normalization */
+  if (norm != 0.0) {
+    for (int i=0; i<qstate->state_num; i++) {
+      qstate->camp[i] = qstate->camp[i] / norm;
+    }
+  }
+  else {
+    for (int i=0; i<qstate->state_num; i++) {
+      qstate->camp[i] = 0.0;
+    }
+    qstate->camp[0] = 1.0;
   }
 
   SUC_RETURN(true);
@@ -267,6 +281,50 @@ bool qstate_init_with_vector(double* real, double* imag, int dim, void** qstate_
     qstate->camp[i] = real[i] + 1.0i * imag[i];
 
   *qstate_out = qstate;
+  
+  SUC_RETURN(true);
+}
+
+bool qstate_reset(QState* qstate_in, int qubit_num, int qubit_id[MAX_QUBIT_NUM])
+{
+  QState*	qstate = NULL;
+  int		mask   = 0;
+  int           shift  = 0;
+  int           idx    = 0;
+  
+  if (qstate_in == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+
+  /* copy to temporary qstate */
+  if (!(qstate_copy(qstate_in, (void**)&qstate)))
+    ERR_RETURN(ERROR_QSTATE_COPY,false);
+
+  /* make mask */
+  mask = (1 << qstate_in->qubit_num) - 1;
+  for (int k=0; k<qubit_num; k++) {
+    shift = qstate_in->qubit_num - qubit_id[k] - 1;
+    mask = mask ^ (1 << shift);
+  }
+
+  /* apply mask operation to qubit index (= reset |0>) */
+  for (int i=0; i<qstate_in->state_num; i++) {
+    qstate_in->camp[i] = 0.0;
+  }
+  if (qubit_num == qstate_in->qubit_num) {
+    qstate_in->camp[0] = 1.0;
+  }
+  else {
+    for (int i=0; i<qstate->state_num; i++) {
+      idx = i & mask;
+      qstate_in->camp[idx] += qstate->camp[i];
+    }
+  }
+
+  /* normalize the qstate */
+  if (!(_qstate_normalize(qstate_in)))
+    ERR_RETURN(ERROR_INVALID_ARGUMENT,NULL);
+
+  /* free temporary qstate */
+  qstate_free(qstate); qstate = NULL;
   
   SUC_RETURN(true);
 }
@@ -702,7 +760,7 @@ static int _qstate_measure_one_time(QState* qstate, double angle, double phase,
   int mes_id,x;
 
   if (qstate == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT,-1);
-  
+
   /* change basis, if measurement axis isn't Z */
   if ((angle != 0.0) || (phase != 0.0)) {
     for (int i=0; i<qubit_num; i++) {

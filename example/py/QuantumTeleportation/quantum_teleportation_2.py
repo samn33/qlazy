@@ -10,9 +10,9 @@ qs.h(1).cx(1,2)
 
 # initial state (before teleportation)
 print("== Alice (initial) ==")
-qs.show(id=[0])
+qs.show([0])
 print("== Bob (initial) ==")
-qs.show(id=[2])
+qs.show([2])
     
 # equivalent to quantum teleportation
 qs.cx(0,1).h(0)
@@ -21,8 +21,8 @@ qs.cz(0,2)
 
 # final state (before teleportation)
 print("== Alice (final) ==")
-qs.show(id=[0])
+qs.show([0])
 print("== Bob (final) ==")
-qs.show(id=[2])
+qs.show([2])
 
 qs.free()

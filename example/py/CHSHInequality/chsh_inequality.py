@@ -38,15 +38,15 @@ def quantum_strategy(trials=1000):
         # response by Alice (a)
         if x == 0:
             # measurement of Z-basis (= Ry(0.0)-basis)
-            sa = qs.m(id=[0], shots=1, angle=0.0, phase=0.0).lst
+            sa = qs.m([0], shots=1, angle=0.0, phase=0.0).lst
             if sa == 0:
                 a = 0
             else:
                 a = 1
         else:
             # measurement of X-basis (or Ry(0.5*PI)-basis)
-            sa = qs.mx(id=[0], shots=1).lst
-            # sa = qs.m(id=[0], shots=1, angle=0.5, phase=0.0).lst
+            sa = qs.mx([0], shots=1).lst
+            # sa = qs.m([0], shots=1, angle=0.5, phase=0.0).lst
             if sa == 0:
                 a = 0
             else:
@@ -55,14 +55,14 @@ def quantum_strategy(trials=1000):
         # response by Bob (b)
         if y == 0:
             # measurement of Ry(0.25*PI)-basis
-            sb = qs.m(id=[1], shots=1, angle=0.25, phase=0.0).lst
+            sb = qs.m([1], shots=1, angle=0.25, phase=0.0).lst
             if sb == 0:
                 b = 0
             else:
                 b = 1
         else:
             # measurement of Ry(-0.25*PI)-basis
-            sb = qs.m(id=[1], shots=1, angle=-0.25, phase=0.0).lst
+            sb = qs.m([1], shots=1, angle=-0.25, phase=0.0).lst
             if sb == 0:
                 b = 0
             else:

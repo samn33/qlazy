@@ -61,6 +61,45 @@ class TestQState_init(unittest.TestCase):
         qs.free()
         self.assertEqual(ans,True)
 
+class TestQState_free_all(unittest.TestCase):
+    """ test 'QState' : 'free_all'
+    """
+
+    def test_free_all(self):
+        """test 'free_all'
+        """
+        qs_0 = QState(1)
+        qs_1 = QState(1).x(0)
+        qs_2 = QState(1).h(0)
+        QState.free_all(qs_0,qs_1,qs_2)
+
+        qs_0 = QState(1)
+        qs_1 = QState(1).x(0)
+        qs_2 = QState(1).h(0)
+        qs_A = [qs_1,qs_2]
+        QState.free_all(qs_0,qs_A)
+
+        qs_0 = QState(1)
+        qs_1 = QState(1).x(0)
+        qs_2 = QState(1).h(0)
+        qs_B = [qs_0,[qs_1,qs_2]]
+        QState.free_all(qs_B)
+        
+class TestQState_free(unittest.TestCase):
+    """ test 'QState' : 'free_all'
+    """
+
+    def test_init(self):
+        """test 'reset'
+        """
+        qs = QState(qubit_num=3).h(0).h(1).h(2)
+        qs.reset()
+        actual = qs.amp
+        expect = np.array([1j, 0j, 0j, 0j, 0j, 0j, 0j, 0j])
+        ans = equal_vectors(actual, expect)
+        qs.free()
+        self.assertEqual(ans,True)
+
 class TestQState_1_qubit(unittest.TestCase):
     """ test 'QState' : 1-qubit gate
     """
@@ -724,7 +763,7 @@ class TestQState_n_qubit(unittest.TestCase):
     def test_mcx_3(self):
         """test 'mcx' gate (for 3-qubit)
         """
-        qs = QState(qubit_num=3).x(0).x(1).mcx(id=[0,1,2])
+        qs = QState(qubit_num=3).x(0).x(1).mcx([0,1,2])
         actual = qs.amp
         expect = np.array([0j, 0j, 0j, 0j, 0j, 0j, 0j, (1+0j)])
         ans = equal_vectors(actual, expect)
@@ -734,7 +773,7 @@ class TestQState_n_qubit(unittest.TestCase):
     def test_mcx_4(self):
         """test 'mcx' gate (for 4-qubit)
         """
-        qs = QState(qubit_num=4).x(0).x(1).x(2).mcx(id=[0,1,2,3])
+        qs = QState(qubit_num=4).x(0).x(1).x(2).mcx([0,1,2,3])
         actual = qs.amp
         expect = np.array([0j, 0j, 0j, 0j, 0j, 0j, 0j, 0j,
                            0j, 0j, 0j, 0j, 0j, 0j, 0j, (1+0j)])
@@ -745,7 +784,7 @@ class TestQState_n_qubit(unittest.TestCase):
     def test_mcx_5(self):
         """test 'mcx' gate (for 5-qubit)
         """
-        qs = QState(qubit_num=5).x(0).x(1).x(2).x(3).mcx(id=[0,1,2,3,4])
+        qs = QState(qubit_num=5).x(0).x(1).x(2).x(3).mcx([0,1,2,3,4])
         actual = qs.amp
         expect = np.array([0j, 0j, 0j, 0j, 0j, 0j, 0j, 0j,
                            0j, 0j, 0j, 0j, 0j, 0j, 0j, 0j,
@@ -763,7 +802,7 @@ class TestQState_partial(unittest.TestCase):
         """test 'partial' (2-qubit state from 3-qubit)
         """
         qs_ini = QState(qubit_num=3).h(0).h(1).cx(1,2)
-        qs = qs_ini.partial(id=[1,2])
+        qs = qs_ini.partial([1,2])
         actual = qs.amp
         expect = np.array([(0.7071067811865476+0j), 0j, 0j, (0.7071067811865476+0j)])
         ans = equal_vectors(actual, expect)
@@ -775,7 +814,7 @@ class TestQState_partial(unittest.TestCase):
         """test 'partial' (3-qubit permutation)
         """
         qs_ini = QState(qubit_num=3).h(0).h(1).cx(1,2)
-        qs = qs_ini.partial(id=[2,0,1])
+        qs = qs_ini.partial([2,0,1])
         actual = qs.amp
         expect = np.array([(0.5+0j), 0j, (0.5+0j), 0j, 0j, (0.5+0j), 0j, (0.5+0j)])
         ans = equal_vectors(actual, expect)
@@ -819,9 +858,20 @@ class TestQState_inpro(unittest.TestCase):
     def test_inpro(self):
         """test 'inpro'
         """
-        qs_0 = QState(qubit_num=3)
-        qs_1 = QState(qubit_num=3)
+        qs_0 = QState(qubit_num=3).h(0).h(1).h(2)
+        qs_1 = QState(qubit_num=3).h(0).h(1).h(2)
         inpro = qs_0.inpro(qs_1)
+        qs_0.free()
+        qs_1.free()
+        ans = (round(inpro.real, 4) == 1.0 and inpro.imag == 0.0)
+        self.assertEqual(ans, True)
+
+    def test_inpro_partial(self):
+        """test 'inpro' (for partial system)
+        """
+        qs_0 = QState(qubit_num=3).h(0).h(1).h(2)
+        qs_1 = QState(qubit_num=3).h(0).h(1).h(2)
+        inpro = qs_0.inpro(qs_1, qid=[0,1])
         qs_0.free()
         qs_1.free()
         ans = (round(inpro.real, 4) == 1.0 and inpro.imag == 0.0)
@@ -830,9 +880,20 @@ class TestQState_inpro(unittest.TestCase):
     def test_fidelity(self):
         """test 'fidelity'
         """
-        qs_0 = QState(qubit_num=3)
-        qs_1 = QState(qubit_num=3)
+        qs_0 = QState(qubit_num=3).h(0).h(1).h(2)
+        qs_1 = QState(qubit_num=3).h(0).h(1).h(2)
         fid = qs_0.fidelity(qs_1)
+        qs_0.free()
+        qs_1.free()
+        ans = (round(fid, 4) == 1.0)
+        self.assertEqual(ans, True)
+
+    def test_fidelity_partial(self):
+        """test 'fidelity' (for partial system)
+        """
+        qs_0 = QState(qubit_num=3).h(0).h(1).h(2)
+        qs_1 = QState(qubit_num=3).h(0).h(1).h(2)
+        fid = qs_0.fidelity(qs_1, qid=[0,1])
         qs_0.free()
         qs_1.free()
         ans = (round(fid, 4) == 1.0)
@@ -997,10 +1058,70 @@ class TestQState_measure(unittest.TestCase):
         """test 'm' (some angle and phase)
         """
         qs = QState(qubit_num=2).ry(1, phase=0.2).rz(1, phase=0.2)
-        md = qs.m(id=[1], shots=10, angle=0.2, phase=0.2)
+        md = qs.m([1], shots=10, angle=0.2, phase=0.2)
         qs.free()
         self.assertEqual(md.frq[0], 10)
         self.assertEqual(md.frq[1], 0)
+
+    def test_m_value(self):
+        """test 'm_value'
+        """
+        qs = QState(qubit_num=2).h(0).cx(0,1)
+        qs.m(shots=10)
+        qs.m([0], shots=10, tag='foo')
+        qs.m([1], shots=10, tag='bar', angle=0.25, phase=0.25)
+        actual = (qs.m_value() == 0 or qs.m_value() == 3)
+        self.assertEqual(actual, True)
+        actual = (qs.m_value(binary=True) == '00' or qs.m_value(binary=True) == '11')
+        self.assertEqual(actual, True)
+        actual = (qs.m_value(tag='foo') == 0 or qs.m_value(tag='foo') == 1)
+        self.assertEqual(actual, True)
+        actual = (qs.m_value(tag='bar', angle=0.25, phase=0.25) == 0
+                  or qs.m_value(tag='bar', angle=0.25, phase=0.25) == 1)
+        self.assertEqual(actual, True)
+        
+    def test_m_bit(self):
+        """test 'm_bit'
+        """
+        qs = QState(qubit_num=4)
+        [qs.h(i) for i in range(4)]
+        qs.m(shots=10, angle=0.25, phase=0.25)
+        qs.m(shots=10, tag='foo')
+        actual = (qs.m_bit(1, angle=0.25, phase=0.25) == 0
+                  or qs.m_bit(1, angle=0.25, phase=0.25) == 1)
+        self.assertEqual(actual, True)
+        actual = (qs.m_bit(3, tag='foo') == 0 or qs.m_bit(3, tag='foo') == 1)
+        self.assertEqual(actual, True)
+        actual = ((qs.m_bit(3, tag='foo', boolean=True) == False
+                   or qs.m_bit(3, tag='foo', boolean=True) == True))
+        self.assertEqual(actual, True)
+        
+    def test_m_is_zero_or_one(self):
+        """test 'm_is_zero','m_is_one'
+        """
+        qs = QState(qubit_num=4)
+        [qs.h(i) for i in range(4)]
+        qs.m([0,2,3], shots=100, tag='foo')
+        actual_0 = ((int(not qs.m_is_zero(0, tag='foo'))<<2)
+                    + (int(not qs.m_is_zero(2, tag='foo'))<<1)
+                    + (int(not qs.m_is_zero(3, tag='foo'))))
+        actual_1 = ((int(qs.m_is_one(0, tag='foo'))<<2)
+                    + (int(qs.m_is_one(2, tag='foo'))<<1)
+                    + (int(qs.m_is_one(3, tag='foo'))))
+        expect = qs.m_value(tag='foo')
+        qs.free()
+        self.assertEqual(actual_0, expect)
+        self.assertEqual(actual_1, expect)
+        
+    def test_m_freq(self):
+        """test 'm_freq'
+        """
+        qs = QState(2)
+        qs.h(0).cx(0,1).m(shots=100)
+        freq = qs.m_freq()
+        actual = sum(freq.values())
+        self.assertEqual(actual, 100)
+        qs.free()
 
 if __name__ == '__main__':
     unittest.main()

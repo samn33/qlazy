@@ -12,13 +12,13 @@ def main():
     qs_oneway.cz(0,1).cz(1,2).cz(2,3).cz(3,4)
 
     # measurement
-    qs_oneway.mx(id=[0], shots=1)
-    qs_oneway.my(id=[1], shots=1)
-    qs_oneway.my(id=[2], shots=1)
-    qs_oneway.my(id=[3], shots=1)
+    qs_oneway.mx([0], shots=1)
+    qs_oneway.my([1], shots=1)
+    qs_oneway.my([2], shots=1)
+    qs_oneway.my([3], shots=1)
 
     # result state
-    qs_oneway.show(id=[4])
+    qs_oneway.show([4])
 
     print("** conventianal quantum gate")
 

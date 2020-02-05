@@ -18,7 +18,7 @@ def main():
     qs.h(0)
 
     shots = 1000
-    md = qs.m(id=[0], shots=shots)
+    md = qs.m([0], shots=shots)
     p0 = md.frq[0]/shots
     p1 = md.frq[1]/shots
     print("[predicted]   cos(gamma) = {0:.3f}".format(p0-p1))

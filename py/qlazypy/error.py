@@ -66,6 +66,10 @@ class QState_FailToBloch(Exception):
     def __str__(self):
         return "QState: fail to bloch"
 
+class QState_FailToFreeAll(Exception):
+    def __str__(self):
+        return "QState: fail to free all"
+
 # MData
 
 class MData_FailToGetFrq(Exception):
@@ -75,6 +79,10 @@ class MData_FailToGetFrq(Exception):
 class MData_FailToShow(Exception):
     def __str__(self):
         return "MData: fail to show"
+
+class MData_FailToGetMeasuredData(Exception):
+    def __str__(self):
+        return "MData: fail to get measured data (probably not measured yet)"
 
 # Observable
 
@@ -156,3 +164,6 @@ class DensOp_FailToTensorProduct(Exception):
     def __str__(self):
         return "DensOp: fail to tensor product"
     
+class DensOp_FailToFreeAll(Exception):
+    def __str__(self):
+        return "DensOp: fail to free all"

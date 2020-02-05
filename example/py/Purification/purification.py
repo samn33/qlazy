@@ -113,7 +113,7 @@ if __name__ == '__main__':
     print("* square trace:", de_AR.sqtrace())
 
     print("=== system A (partial system of A+R) ===")
-    de_AR_pat = de_AR.partial(id=list(range(qnum_A)))
+    de_AR_pat = de_AR.partial(list(range(qnum_A)))
     print("* density operator:")
     print(de_AR_pat)
     print("* square trace:", de_AR_pat.sqtrace())

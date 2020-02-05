@@ -15,7 +15,7 @@ def encode(self,decimal,id):
 def decode(self,id):
 
     iid = id[::-1]
-    return self.m(id=iid,shots=1).lst
+    return self.m(iid,shots=1).lst
 
 def hadamard(self,id):
 

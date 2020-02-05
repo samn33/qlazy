@@ -127,7 +127,7 @@ def discover_order(a,N):
     qs.mod_exp(a,N,id_up,id_dn)
 
     qs.iqft(id_up)
-    md = qs.m(id=id_up,shots=100)
+    md = qs.m(id_up,shots=100)
 
     order = 1
     for i in range(len(md.freq_list)):

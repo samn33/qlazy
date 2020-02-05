@@ -15,13 +15,13 @@ qs.h(1).cx(1,2)
 
 # initial state (before teleportation)
 print("== Alice (initial) ==")
-qs.show(id=[0])
+qs.show([0])
 print("== Bob (initial) ==")
-qs.show(id=[2])
+qs.show([2])
     
 # Alice execute Bell-measurement to her qubits 0,1
 print("== Bell measurement ==")
-result = qs.mb(id=[0,1],shots=1).lst
+result = qs.mb([0,1],shots=1).lst
 
 # Bob operate his qubit (id=2) according to the result
 if result == BELL_PHI_PLUS:
@@ -38,8 +38,8 @@ elif result == BELL_PHI_MINUS:
 
 # final state (before teleportation)
 print("== Alice (final) ==")
-qs.show(id=[0])
+qs.show([0])
 print("== Bob (final) ==")
-qs.show(id=[2])
+qs.show([2])
 
 qs.free()

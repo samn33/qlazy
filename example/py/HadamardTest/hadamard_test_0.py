@@ -7,7 +7,7 @@ def hadamard_test_real():
     # prepare initial state
 
     qs_0 = QState(1)
-    qs_psi = QState(2)
+    qs_psi = QState(2).h(0).h(1)
     qs = qs_0.tenspro(qs_psi)
 
     # circuit for hadamard test
@@ -17,12 +17,12 @@ def hadamard_test_real():
     qs.h(0)
 
     shots = 1000
-    md = qs.m(id=[0], shots=shots)
+    md = qs.m([0], shots=shots)
     p0 = md.frq[0]/shots
     p1 = md.frq[1]/shots
     exp_pred = p0-p1
     print("expectation value (predict) = {0:.3f}".format(exp_pred))
-
+    
     # theoretical expactation value
     
     qs_op = qs_psi.clone()
@@ -44,7 +44,7 @@ def hadamard_test_imag():
     # prepare initial state
 
     qs_0 = QState(1)
-    qs_psi = QState(2)
+    qs_psi = QState(2).h(0).h(1)
     qs = qs_0.tenspro(qs_psi)
 
     # circuit for hadamard test
@@ -54,10 +54,10 @@ def hadamard_test_imag():
     qs.h(0)
 
     shots = 1000
-    md = qs.m(id=[0], shots=shots)
+    md = qs.m([0], shots=shots)
     p0 = md.frq[0]/shots
     p1 = md.frq[1]/shots
-    exp_pred = p0-p1
+    exp_pred = p1-p0
     print("expectation value (predict) = {0:.3f}".format(exp_pred))
 
     # theoretical expactation value

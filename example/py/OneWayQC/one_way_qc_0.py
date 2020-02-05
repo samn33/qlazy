@@ -18,10 +18,10 @@ def main():
     qs_oneway.cz(0,1)
 
     # measurement
-    s = qs_oneway.m(id=[0], shots=1, angle=0.5, phase=phi)
+    s = qs_oneway.m([0], shots=1, angle=0.5, phase=phi)
 
     # result state
-    qs_oneway.show(id=[1])
+    qs_oneway.show([1])
 
     print("** conventianal quantum gate")
 

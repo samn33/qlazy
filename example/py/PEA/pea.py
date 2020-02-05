@@ -30,7 +30,7 @@ def eigen_state_ctr(psi_dim):
     id = [psi_dim] + list(range(psi_dim))
     iter = 100
     for _ in range(iter):
-        qs.h(psi_dim).c_unitary(id).h(psi_dim).m(id=[2],shots=1)
+        qs.h(psi_dim).c_unitary(id).h(psi_dim).m([2],shots=1)
 
     print("== eigen state (convergence) ==")
     id = list(range(psi_dim))
@@ -75,7 +75,7 @@ def main():
 
     # mesurement
     print("== result of measurement ==")
-    md = qs_total.m(sub_qid)
+    md = qs_total.m(sub_qid, shots=100)
     md.show()
 
     # phase estimation

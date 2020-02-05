@@ -21,4 +21,4 @@ cx 2 1
 show
 
 @ == measurement ==
-m 0 1 2
+m(100) 0 1 2

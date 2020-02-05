@@ -15,7 +15,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
-#define VERSION "0.0.32"
+#define VERSION "0.0.33"
 
 /*====================================================================*/
 /*  Definitions & Macros                                              */
@@ -412,6 +412,7 @@ bool     gbank_get_unitary(GBank* gbank, Kind kind, double phase, double phase1,
 /* qstate.c */
 bool	 qstate_init(int qubit_num, void** qstate_out);
 bool	 qstate_init_with_vector(double* real, double* imag, int dim, void** qstate_out);
+bool	 qstate_reset(QState* qstate, int qubit_num, int qubit_id[MAX_QUBIT_NUM]);
 bool	 qstate_copy(QState* qstate, void** qstate_out);
 bool     qstate_get_camp(QState* qstate, int qubit_num, int qubit_id[MAX_QUBIT_NUM],
 			 void** camp_out);

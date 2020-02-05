@@ -477,6 +477,33 @@ class TestDensOp_init(unittest.TestCase):
         de.free()
         self.assertEqual(ans,True)
 
+class TestDensOp_free_all(unittest.TestCase):
+    """ test 'DensOp' : free_all'
+    """
+
+    def test_free_all(self):
+        """test 'free_all'
+        """
+        mat = make_densop_matrix(VECTORS_4, PROBS_4)
+        de_0 = DensOp(matrix=mat)
+        de_1 = DensOp(matrix=mat).x(0)
+        de_2 = DensOp(matrix=mat).h(0)
+        DensOp.free_all(de_0,de_1,de_2)
+
+        mat = make_densop_matrix(VECTORS_4, PROBS_4)
+        de_0 = DensOp(matrix=mat)
+        de_1 = DensOp(matrix=mat).x(0)
+        de_2 = DensOp(matrix=mat).h(0)
+        de_A = [de_1,de_2]
+        DensOp.free_all(de_0,de_A)
+
+        mat = make_densop_matrix(VECTORS_4, PROBS_4)
+        de_0 = DensOp(matrix=mat)
+        de_1 = DensOp(matrix=mat).x(0)
+        de_2 = DensOp(matrix=mat).h(0)
+        de_B = [de_0, [de_1,de_2]]
+        DensOp.free_all(de_B)
+        
 class TestDensOp_clone(unittest.TestCase):
     """ test 'DensOp' : 'clone'
     """
@@ -563,7 +590,7 @@ class TestDensOp_composite(unittest.TestCase):
         mat_2 = make_densop_matrix(VECTORS_2, PROBS_2)
         mat_8 = make_tenspro_matrices(mat_4, mat_2)
         de = DensOp(matrix=mat_8)
-        de_pat = de.patrace(id=[0,1])
+        de_pat = de.patrace([0,1])
         actual = de_pat.element
         expect = mat_2
         ans = equal_matrices(actual, expect)
@@ -578,7 +605,7 @@ class TestDensOp_composite(unittest.TestCase):
         mat_2 = make_densop_matrix(VECTORS_2, PROBS_2)
         mat_8 = make_tenspro_matrices(mat_4, mat_2)
         de = DensOp(matrix=mat_8)
-        de_pat = de.partial(id=[2])
+        de_pat = de.partial([2])
         actual = de_pat.element
         expect = mat_2
         ans = equal_matrices(actual, expect)
@@ -751,6 +778,20 @@ class TestDensOp_similarity(unittest.TestCase):
         de_1.free()
         self.assertEqual(ans,True)
         
+    def test_fidelity_partial(self):
+        """test 'fidelity' (for partial system)
+        """
+        mat_0 = make_densop_matrix(VECTORS_4, PROBS_4)
+        mat_1 = make_densop_matrix(VECTORS_4_ANOTHER, PROBS_4_ANOTHER)
+        de_0 = DensOp(matrix=mat_0)
+        de_1 = DensOp(matrix=mat_1)
+        actual = de_0.fidelity(de_1, qid=[3,2,1,0])
+        expect = 0.6973384790052483
+        ans = equal_values(actual, expect)
+        de_0.free()
+        de_1.free()
+        self.assertEqual(ans,True)
+        
     def test_distance(self):
         """test 'fidelity'
         """
@@ -759,6 +800,20 @@ class TestDensOp_similarity(unittest.TestCase):
         de_0 = DensOp(matrix=mat_0)
         de_1 = DensOp(matrix=mat_1)
         actual = de_0.distance(de_1)
+        expect = 0.6395360466162878
+        ans = equal_values(actual, expect)
+        de_0.free()
+        de_1.free()
+        self.assertEqual(ans,True)
+
+    def test_distance_partial(self):
+        """test 'fidelity' (for partial system)
+        """
+        mat_0 = make_densop_matrix(VECTORS_4, PROBS_4)
+        mat_1 = make_densop_matrix(VECTORS_4_ANOTHER, PROBS_4_ANOTHER)
+        de_0 = DensOp(matrix=mat_0)
+        de_1 = DensOp(matrix=mat_1)
+        actual = de_0.distance(de_1, qid=[3,2,1,0])
         expect = 0.6395360466162878
         ans = equal_values(actual, expect)
         de_0.free()
@@ -804,8 +859,8 @@ class TestDensOp_entropy(unittest.TestCase):
         """
         qs = QState(vector=VECTORS_4[0])
         de = DensOp(qstate=[qs])
-        ent_A = de.entropy(id=[0])
-        ent_B = de.entropy(id=[1])
+        ent_A = de.entropy([0])
+        ent_B = de.entropy([1])
         ans = equal_values(ent_A, ent_B)
         qs.free()
         de.free()
@@ -1469,9 +1524,9 @@ class TestQState_n_qubit(unittest.TestCase):
         """test 'mcx' gate (3-qubit)
         """
         mat = make_densop_matrix(VECTORS_8, PROBS_8)
-        actual = DensOp(matrix=mat).mcx(id=[0,1,2])
+        actual = DensOp(matrix=mat).mcx([0,1,2])
         qstate = [QState(vector=vec) for vec in VECTORS_8]
-        [qs.mcx(id=[0,1,2]) for qs in qstate]
+        [qs.mcx([0,1,2]) for qs in qstate]
         expect = DensOp(qstate=qstate, prob=PROBS_8)
         ans = equal_densops(actual, expect)
         [qs.free() for qs in qstate]
@@ -1483,9 +1538,9 @@ class TestQState_n_qubit(unittest.TestCase):
         """test 'mcx' gate (4-qubit)
         """
         mat = make_densop_matrix(VECTORS_16, PROBS_16)
-        actual = DensOp(matrix=mat).mcx(id=[0,1,2,3])
+        actual = DensOp(matrix=mat).mcx([0,1,2,3])
         qstate = [QState(vector=vec) for vec in VECTORS_16]
-        [qs.mcx(id=[0,1,2,3]) for qs in qstate]
+        [qs.mcx([0,1,2,3]) for qs in qstate]
         expect = DensOp(qstate=qstate, prob=PROBS_16)
         ans = equal_densops(actual, expect)
         [qs.free() for qs in qstate]

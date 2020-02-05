@@ -103,7 +103,7 @@ def result(self,id,solnum):
 
     # measurement
     iid = id[::-1]
-    freq = self.m(id=iid).frq
+    freq = self.m(iid, shots=100).frq
 
     res = []
     for _ in range(solnum):

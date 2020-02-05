@@ -1,3 +1,18 @@
+2020-02-05  Sam.N  <saminriver33@gmail.com>
+
+	* v0.0.33
+	- change spec(py): QState - m,mx,my,mz,mb (add 'tag' option)
+	- change spec(py): QState - m_freq, m_value, m_bit, m_is_zero, m_is_one (refer to 'tag')
+	- change spec(py): all measurement methods (default 'shots' value changed 100 -> 1)
+	- add function(py): QState - reset (reset quantum state |i> to |0>)
+	- add function(py): QState - free_all
+	- add function(py): DensOp - free_all
+	- change spec(py): QState - argument name 'id' changed to 'qid'
+	- change spec(py): DensOp - argument name 'id' changed to 'qid'
+	- change spec(py): QState - inpro, fidelity (for partial system)
+	- change spec(py): DensOp - distance, fidelity (for partial system)
+	- correct example(py): hadamard test
+
 2020-01-25  Sam.N  <saminriver33@gmail.com>
 
 	* v0.0.32

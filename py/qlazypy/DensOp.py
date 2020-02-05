@@ -57,20 +57,32 @@ class DensOp(ctypes.Structure):
 
         return de_out
 
+    @classmethod
+    def free_all(cls, *densops):
+
+        for de in densops:
+            if type(de) is list or type(de) is tuple:
+                cls.free_all(*de)
+            elif type(de) is DensOp:
+                de.free()
+            else:
+                raise DensOp_FailToFreeAll()
+
     @property
     def element(self):
 
         return self.get_elm()
     
-    def get_elm(self, id=[]):
+    def get_elm(self, qid=[]):
 
-        de_part = self.partial(id=id)
+        de_part = self.partial(qid=qid)
         elm = de_part.densop_get_elm()
+        de_part.free()
         return elm
     
-    def show(self, id=[]):
+    def show(self, qid=[]):
 
-        de_part = self.partial(id=id)
+        de_part = self.partial(qid=qid)
         de_part.densop_print()
         de_part.free()
 
@@ -96,21 +108,21 @@ class DensOp(ctypes.Structure):
 
         return self.densop_sqtrace()
         
-    def patrace(self, id=[]):
+    def patrace(self, qid=[]):
 
-        return self.densop_patrace(id=id)
+        return self.densop_patrace(qid=qid)
 
-    def partial(self, id=[]):
+    def partial(self, qid=[]):
 
-        if id is None or id == []:
+        if qid is None or qid == []:
             return self.clone()
         else:
             qubit_num = int(math.log2(self.row))
-            id_remained = []
+            qid_remained = []
             for x in range(qubit_num):
-                if not x in id:
-                    id_remained.append(x)
-            de_remained = self.patrace(id=id_remained)
+                if not x in qid:
+                    qid_remained.append(x)
+            de_remained = self.patrace(qid=qid_remained)
             return de_remained
         
     def tenspro(self, densop):
@@ -132,23 +144,23 @@ class DensOp(ctypes.Structure):
     def expect(self, matrix=None):
 
         densop = self.clone()
-        densop.densop_apply_matrix(matrix=matrix,dir='left')
+        densop.densop_apply_matrix(matrix=matrix, dire='left')
         value = densop.trace()
         densop.free()
         return value
         
-    def apply(self, matrix=None, id=[], dir='both'):
+    def apply(self, matrix=None, qid=[], dire='both'):
 
-        self.densop_apply_matrix(matrix=matrix, id=id, dir=dir)
+        self.densop_apply_matrix(matrix=matrix, qid=qid, dire=dire)
         return self
 
-    def probability(self, kraus=[], povm=[], id=[]):
+    def probability(self, kraus=[], povm=[], qid=[]):
 
         if kraus != []:
             N = len(kraus)
             prob = [0.0]*N
             for i in range(N):
-                prob[i] = self.densop_probability(matrix=kraus[i], id=id,
+                prob[i] = self.densop_probability(matrix=kraus[i], qid=qid,
                                                   matrix_type='kraus')
                 if abs(prob[i]) < EPS:
                     prob[i] = 0.0
@@ -156,7 +168,7 @@ class DensOp(ctypes.Structure):
             N = len(povm)
             prob = [0.0]*N
             for i in range(N):
-                prob[i] = self.densop_probability(matrix=povm[i], id=id,
+                prob[i] = self.densop_probability(matrix=povm[i], qid=qid,
                                                   matrix_type='povm')
                 if abs(prob[i]) < EPS:
                     prob[i] = 0.0
@@ -165,11 +177,11 @@ class DensOp(ctypes.Structure):
                 
         return prob
 
-    def instrument(self, kraus=[], id=[], measured_value=None):
+    def instrument(self, kraus=[], qid=[], measured_value=None):
 
-        if id is None or id == []:
+        if qid is None or qid == []:
             qnum = int(math.log2(self.row))
-            id = [i for i in range(qnum)]
+            qid = [i for i in range(qnum)]
 
         if kraus == []:
             raise DensOp_FailToInstrument()
@@ -181,10 +193,10 @@ class DensOp(ctypes.Structure):
             densop_ori = self.clone()
             for i in range(N):
                 if i == 0:
-                    self.apply(matrix=kraus[i], id=id, dir='both')
+                    self.apply(matrix=kraus[i], qid=qid, dire='both')
                 else:
                     densop_tmp = densop_ori.clone()
-                    densop_tmp.apply(matrix=kraus[i], id=id, dir='both')
+                    densop_tmp.apply(matrix=kraus[i], qid=qid, dire='both')
                     self.add(densop=densop_tmp)
                     densop_tmp.free()
             densop_ori.free()
@@ -193,7 +205,7 @@ class DensOp(ctypes.Structure):
 
             if (measured_value < 0 or measured_value >= N):
                 raise DensOp_FailToInstrument()
-            self.apply(matrix=kraus[measured_value],id=id)
+            self.apply(matrix=kraus[measured_value],qid=qid)
             #prob = self.trace()
             #self.mul(factor=1.0/prob)
 
@@ -216,10 +228,10 @@ class DensOp(ctypes.Structure):
 
         return norm 
 
-    def fidelity(self, densop=None):
+    def fidelity(self, densop=None, qid=[]):
 
-        mat1 = self.get_elm()
-        mat2 = densop.get_elm()
+        mat1 = self.get_elm(qid=qid)
+        mat2 = densop.get_elm(qid=qid)
 
         if mat1.shape != mat2.shape:
             raise DensOp_FailToFidelity()
@@ -231,10 +243,10 @@ class DensOp(ctypes.Structure):
             
         return fid
 
-    def distance(self, densop=None):  # trace distance
+    def distance(self, densop=None, qid=[]):  # trace distance
 
-        mat1 = self.get_elm()
-        mat2 = densop.get_elm()
+        mat1 = self.get_elm(qid=qid)
+        mat2 = densop.get_elm(qid=qid)
 
         if mat1.shape != mat2.shape:
             raise DensOp_FailToDistance()
@@ -269,53 +281,53 @@ class DensOp(ctypes.Structure):
         ent = np.sum(diag)
         return ent
     
-    def entropy(self, id=[]):  # von neumann / entanglement entropy
+    def entropy(self, qid=[]):  # von neumann / entanglement entropy
 
         qubit_num = int(math.log2(self.row))
         
-        if id == []:
+        if qid == []:
             ent = self.__von_neumann_entropy()
         else:
-            if (min(id) < 0 or max(id) >= qubit_num or len(id)!=len(set(id))):
+            if (min(qid) < 0 or max(qid) >= qubit_num or len(qid)!=len(set(qid))):
                 raise DensOp_FailToEntropy()
-            if len(id) == qubit_num:
+            if len(qid) == qubit_num:
                 ent = self.__von_neumann_entropy()
             else:
-                de_part = self.partial(id=id)
+                de_part = self.partial(qid=qid)
                 ent = de_part.__von_neumann_entropy()
                 de_part.free()
                 
         return ent
 
-    def cond_entropy(self, id_0=[], id_1=[]):  # conditional entropy
+    def cond_entropy(self, qid_0=[], qid_1=[]):  # conditional entropy
 
         qubit_num = int(math.log2(self.row))
         
-        if (id_0 == [] or id_1 == []
-            or min(id_0) < 0 or max(id_0) >= qubit_num
-            or min(id_1) < 0 or max(id_1) >= qubit_num
-            or len(id_0) != len(set(id_0))
-            or len(id_1) != len(set(id_1))):
+        if (qid_0 == [] or qid_1 == []
+            or min(qid_0) < 0 or max(qid_0) >= qubit_num
+            or min(qid_1) < 0 or max(qid_1) >= qubit_num
+            or len(qid_0) != len(set(qid_0))
+            or len(qid_1) != len(set(qid_1))):
             raise DensOp_FailToEntropy()
         else:
-            id_merge = id_0 + id_1
-            id_whole = set(id_merge)
-            ent = self.entropy(id_whole) - self.entropy(id_1)
+            qid_merge = qid_0 + qid_1
+            qid_whole = set(qid_merge)
+            ent = self.entropy(qid_whole) - self.entropy(qid_1)
             
         return ent
 
-    def mutual_info(self, id_0=[], id_1=[]):  # mutual information
+    def mutual_info(self, qid_0=[], qid_1=[]):  # mutual information
 
         qubit_num = int(math.log2(self.row))
         
-        if (id_0 == [] or id_1 == []
-            or min(id_0) < 0 or max(id_0) >= qubit_num
-            or min(id_1) < 0 or max(id_1) >= qubit_num
-            or len(id_0) != len(set(id_0))
-            or len(id_1) != len(set(id_1))):
+        if (qid_0 == [] or qid_1 == []
+            or min(qid_0) < 0 or max(qid_0) >= qubit_num
+            or min(qid_1) < 0 or max(qid_1) >= qubit_num
+            or len(qid_0) != len(set(qid_0))
+            or len(qid_1) != len(set(qid_1))):
             raise DensOp_FailToEntropy()
         else:
-            ent = self.entropy(id_0) - self.cond_entropy(id_0,id_1)
+            ent = self.entropy(qid_0) - self.cond_entropy(qid_0,qid_1)
             
         return ent
 
@@ -350,148 +362,148 @@ class DensOp(ctypes.Structure):
     # 1-qubit gate
 
     def x(self, q0):
-        self.densop_operate_qgate(kind=PAULI_X, phase=DEF_PHASE, id=[q0])
+        self.densop_operate_qgate(kind=PAULI_X, phase=DEF_PHASE, qid=[q0])
         return self
 
     def y(self, q0):
-        self.densop_operate_qgate(kind=PAULI_Y, phase=DEF_PHASE, id=[q0])
+        self.densop_operate_qgate(kind=PAULI_Y, phase=DEF_PHASE, qid=[q0])
         return self
 
     def z(self, q0):
-        self.densop_operate_qgate(kind=PAULI_Z, phase=DEF_PHASE, id=[q0])
+        self.densop_operate_qgate(kind=PAULI_Z, phase=DEF_PHASE, qid=[q0])
         return self
 
     def xr(self, q0):
-        self.densop_operate_qgate(kind=ROOT_PAULI_X, phase=DEF_PHASE, id=[q0])
+        self.densop_operate_qgate(kind=ROOT_PAULI_X, phase=DEF_PHASE, qid=[q0])
         return self
 
     def xr_dg(self, q0):
-        self.densop_operate_qgate(kind=ROOT_PAULI_X_, phase=DEF_PHASE, id=[q0])
+        self.densop_operate_qgate(kind=ROOT_PAULI_X_, phase=DEF_PHASE, qid=[q0])
         return self
 
     def h(self, q0):
-        self.densop_operate_qgate(kind=HADAMARD, phase=DEF_PHASE, id=[q0])
+        self.densop_operate_qgate(kind=HADAMARD, phase=DEF_PHASE, qid=[q0])
         return self
 
     def s(self, q0):
-        self.densop_operate_qgate(kind=PHASE_SHIFT_S, phase=DEF_PHASE, id=[q0])
+        self.densop_operate_qgate(kind=PHASE_SHIFT_S, phase=DEF_PHASE, qid=[q0])
         return self
 
     def s_dg(self, q0):
-        self.densop_operate_qgate(kind=PHASE_SHIFT_S_, phase=DEF_PHASE, id=[q0])
+        self.densop_operate_qgate(kind=PHASE_SHIFT_S_, phase=DEF_PHASE, qid=[q0])
         return self
 
     def t(self, q0):
-        self.densop_operate_qgate(kind=PHASE_SHIFT_T, phase=DEF_PHASE, id=[q0])
+        self.densop_operate_qgate(kind=PHASE_SHIFT_T, phase=DEF_PHASE, qid=[q0])
         return self
 
     def t_dg(self, q0):
-        self.densop_operate_qgate(kind=PHASE_SHIFT_T_, phase=DEF_PHASE, id=[q0])
+        self.densop_operate_qgate(kind=PHASE_SHIFT_T_, phase=DEF_PHASE, qid=[q0])
         return self
 
     def rx(self, q0, phase=DEF_PHASE):
-        self.densop_operate_qgate(kind=ROTATION_X, phase=phase, id=[q0])
+        self.densop_operate_qgate(kind=ROTATION_X, phase=phase, qid=[q0])
         return self
 
     def ry(self, q0, phase=DEF_PHASE):
-        self.densop_operate_qgate(kind=ROTATION_Y, phase=phase, id=[q0])
+        self.densop_operate_qgate(kind=ROTATION_Y, phase=phase, qid=[q0])
         return self
 
     def rz(self, q0, phase=DEF_PHASE):
-        self.densop_operate_qgate(kind=ROTATION_Z, phase=phase, id=[q0])
+        self.densop_operate_qgate(kind=ROTATION_Z, phase=phase, qid=[q0])
         return self
 
     def p(self, q0, phase=DEF_PHASE):
-        self.densop_operate_qgate(kind=PHASE_SHIFT, phase=phase, id=[q0])
+        self.densop_operate_qgate(kind=PHASE_SHIFT, phase=phase, qid=[q0])
         return self
 
     def u1(self, q0, alpha=DEF_PHASE):
-        self.densop_operate_qgate(kind=ROTATION_U1, phase=alpha, id=[q0])
+        self.densop_operate_qgate(kind=ROTATION_U1, phase=alpha, qid=[q0])
         return self
 
     def u2(self, q0, alpha=DEF_PHASE, beta=DEF_PHASE):
-        self.densop_operate_qgate(kind=ROTATION_U2, phase=alpha, phase1=beta, id=[q0])
+        self.densop_operate_qgate(kind=ROTATION_U2, phase=alpha, phase1=beta, qid=[q0])
         return self
 
     def u3(self, q0, alpha=DEF_PHASE, beta=DEF_PHASE, gamma=DEF_PHASE):
         self.densop_operate_qgate(kind=ROTATION_U3, phase=alpha, phase1=beta,
-                                  phase2=gamma, id=[q0])
+                                  phase2=gamma, qid=[q0])
         return self
 
     # 2-qubit gate
 
     def cx(self, q0, q1):
-        self.densop_operate_qgate(kind=CONTROLLED_X, phase=DEF_PHASE, id=[q0,q1])
+        self.densop_operate_qgate(kind=CONTROLLED_X, phase=DEF_PHASE, qid=[q0,q1])
         return self
 
     def cy(self, q0, q1):
-        self.densop_operate_qgate(kind=CONTROLLED_Y, phase=DEF_PHASE, id=[q0,q1])
+        self.densop_operate_qgate(kind=CONTROLLED_Y, phase=DEF_PHASE, qid=[q0,q1])
         return self
 
     def cz(self, q0, q1):
-        self.densop_operate_qgate(kind=CONTROLLED_Z, phase=DEF_PHASE, id=[q0,q1])
+        self.densop_operate_qgate(kind=CONTROLLED_Z, phase=DEF_PHASE, qid=[q0,q1])
         return self
 
     def cxr(self, q0, q1):
-        self.densop_operate_qgate(kind=CONTROLLED_XR, phase=DEF_PHASE, id=[q0,q1])
+        self.densop_operate_qgate(kind=CONTROLLED_XR, phase=DEF_PHASE, qid=[q0,q1])
         return self
 
     def cxr_dg(self, q0, q1):
-        self.densop_operate_qgate(kind=CONTROLLED_XR_, phase=DEF_PHASE, id=[q0,q1])
+        self.densop_operate_qgate(kind=CONTROLLED_XR_, phase=DEF_PHASE, qid=[q0,q1])
         return self
 
     def ch(self, q0, q1):
-        self.densop_operate_qgate(kind=CONTROLLED_H, phase=DEF_PHASE, id=[q0,q1])
+        self.densop_operate_qgate(kind=CONTROLLED_H, phase=DEF_PHASE, qid=[q0,q1])
         return self
 
     def cs(self, q0, q1):
-        self.densop_operate_qgate(kind=CONTROLLED_S, phase=DEF_PHASE, id=[q0,q1])
+        self.densop_operate_qgate(kind=CONTROLLED_S, phase=DEF_PHASE, qid=[q0,q1])
         return self
 
     def cs_dg(self, q0, q1):
-        self.densop_operate_qgate(kind=CONTROLLED_S_, phase=DEF_PHASE, id=[q0,q1])
+        self.densop_operate_qgate(kind=CONTROLLED_S_, phase=DEF_PHASE, qid=[q0,q1])
         return self
 
     def ct(self, q0, q1):
-        self.densop_operate_qgate(kind=CONTROLLED_T, phase=DEF_PHASE, id=[q0,q1])
+        self.densop_operate_qgate(kind=CONTROLLED_T, phase=DEF_PHASE, qid=[q0,q1])
         return self
 
     def ct_dg(self, q0, q1):
-        self.densop_operate_qgate(kind=CONTROLLED_T_, phase=DEF_PHASE, id=[q0,q1])
+        self.densop_operate_qgate(kind=CONTROLLED_T_, phase=DEF_PHASE, qid=[q0,q1])
         return self
 
     def sw(self, q0, q1):
-        self.densop_operate_qgate(kind=SWAP, phase=DEF_PHASE, id=[q0,q1])
+        self.densop_operate_qgate(kind=SWAP, phase=DEF_PHASE, qid=[q0,q1])
         return self
 
     def cp(self, q0, q1, phase=DEF_PHASE):
-        self.densop_operate_qgate(kind=CONTROLLED_P, phase=phase, id=[q0,q1])
+        self.densop_operate_qgate(kind=CONTROLLED_P, phase=phase, qid=[q0,q1])
         return self
 
     def crx(self, q0, q1, phase=DEF_PHASE):
-        self.densop_operate_qgate(kind=CONTROLLED_RX, phase=phase, id=[q0,q1])
+        self.densop_operate_qgate(kind=CONTROLLED_RX, phase=phase, qid=[q0,q1])
         return self
 
     def cry(self, q0, q1, phase=DEF_PHASE):
-        self.densop_operate_qgate(kind=CONTROLLED_RY, phase=phase, id=[q0,q1])
+        self.densop_operate_qgate(kind=CONTROLLED_RY, phase=phase, qid=[q0,q1])
         return self
 
     def crz(self, q0, q1, phase=DEF_PHASE):
-        self.densop_operate_qgate(kind=CONTROLLED_RZ, phase=phase, id=[q0,q1])
+        self.densop_operate_qgate(kind=CONTROLLED_RZ, phase=phase, qid=[q0,q1])
         return self
 
     def cu1(self, q0, q1, alpha=DEF_PHASE):
-        self.densop_operate_qgate(kind=CONTROLLED_U1, phase=alpha, id=[q0,q1])
+        self.densop_operate_qgate(kind=CONTROLLED_U1, phase=alpha, qid=[q0,q1])
         return self
 
     def cu2(self, q0, q1, alpha=DEF_PHASE, beta=DEF_PHASE):
         self.densop_operate_qgate(kind=CONTROLLED_U2, phase=alpha, phase1=beta,
-                                  id=[q0,q1])
+                                  qid=[q0,q1])
         return self
 
     def cu3(self, q0, q1, alpha=DEF_PHASE, beta=DEF_PHASE, gamma=DEF_PHASE):
         self.densop_operate_qgate(kind=CONTROLLED_U3, phase=alpha, phase1=beta,
-                                  phase2=gamma, id=[q0,q1])
+                                  phase2=gamma, qid=[q0,q1])
         return self
 
     # 3-qubit gate
@@ -513,17 +525,17 @@ class DensOp(ctypes.Structure):
 
     # multi-controlled X gate
     # def mcx(self,id_ctr=[],id_tar=None):
-    def mcx(self,id=[]):
+    def mcx(self,qid=[]):
 
         # controled and target register
-        id_ctr = id[:-1]
-        id_tar = id[-1]
+        qid_ctr = qid[:-1]
+        qid_tar = qid[-1]
         
         # hadamard
-        self.h(id_tar)
+        self.h(qid_tar)
 
         # controlled-RZ(psi), psi=pi/(2**(bitnum-1))
-        bitnum = len(id_ctr)
+        bitnum = len(qid_ctr)
         psi = 1.0/(2**(bitnum-1)) # unit=pi(radian)
         gray_pre = 0
         for gray in self.__gray_code(bitnum):
@@ -534,13 +546,13 @@ class DensOp(ctypes.Structure):
             if gray != 1:
                 if chb == msb:
                     chb -= 1
-                self.cx(id_ctr[chb],id_ctr[msb])
-            self.cp(id_ctr[msb],id_tar,phase=psi)
+                self.cx(qid_ctr[chb], qid_ctr[msb])
+            self.cp(qid_ctr[msb], qid_tar, phase=psi)
             psi = -psi
             gray_pre = gray
     
         # hadamard
-        self.h(id_tar)
+        self.h(qid_tar)
 
         return self
 
@@ -767,28 +779,28 @@ class DensOp(ctypes.Structure):
         except Exception:
             raise DensOp_FailToSqTrace()
 
-    def densop_patrace(self, id=None):
+    def densop_patrace(self, qid=None):
 
         try:
-            if id == None:
+            if qid == None:
                 raise DensOp_FailToPaTrace()
             
             densop = None
             c_densop = ctypes.c_void_p(densop)
             
-            qubit_num = len(id)
+            qubit_num = len(qid)
             qubit_id = [0 for _ in range(MAX_QUBIT_NUM)]
-            for i in range(len(id)):
-                qubit_id[i] = id[i]
+            for i in range(len(qid)):
+                qubit_id[i] = qid[i]
             IntArray = ctypes.c_int * MAX_QUBIT_NUM
-            id_array = IntArray(*qubit_id)
+            qid_array = IntArray(*qubit_id)
 
             lib.densop_patrace.restype = ctypes.c_int
             lib.densop_patrace.argtypes = [ctypes.POINTER(DensOp),
                                            ctypes.c_int,IntArray,
                                            ctypes.POINTER(ctypes.c_void_p)]
             ret = lib.densop_patrace(ctypes.byref(self), ctypes.c_int(qubit_num),
-                                     id_array, c_densop)
+                                     qid_array, c_densop)
 
             if ret == FALSE:
                 raise DensOp_FailToPaTrace()
@@ -823,33 +835,33 @@ class DensOp(ctypes.Structure):
         except Exception:
             raise DensOp_FailToTensorProduct()
 
-    def densop_apply_matrix(self, matrix=None, id=[], dir='both'):
+    def densop_apply_matrix(self, matrix=None, qid=[], dire='both'):
 
         if matrix is None:
             raise DensOp_FailToApply()
         if (matrix.shape[0] > self.row or matrix.shape[1] > self.col):
             raise DensOp_FailToApply()
         
-        if id is None or id == []:
+        if qid is None or qid == []:
             qnum = int(math.log2(self.row))
-            id = [i for i in range(qnum)]
+            qid = [i for i in range(qnum)]
 
-        if dir == 'left':
-            adir = LEFT
-        elif dir == 'right':
-            adir = RIGHT
-        elif dir == 'both':
-            adir = BOTH
+        if dire == 'left':
+            adire = LEFT
+        elif dire == 'right':
+            adire = RIGHT
+        elif dire == 'both':
+            adire = BOTH
         else:
             raise DensOp_FailToApply()
 
         try:
-            qubit_num = len(id)
+            qubit_num = len(qid)
             qubit_id = [0 for _ in range(MAX_QUBIT_NUM)]
-            for i in range(len(id)):
-                qubit_id[i] = id[i]
+            for i in range(len(qid)):
+                qubit_id[i] = qid[i]
             IntArray = ctypes.c_int * MAX_QUBIT_NUM
-            id_array = IntArray(*qubit_id)
+            qid_array = IntArray(*qubit_id)
 
             row = len(matrix) # dimension of the unitary matrix
             col = row
@@ -874,8 +886,8 @@ class DensOp(ctypes.Structure):
                                                 DoubleArray, DoubleArray,
                                                 ctypes.c_int, ctypes.c_int]
             ret = lib.densop_apply_matrix(ctypes.byref(self),
-                                          ctypes.c_int(qubit_num), id_array,
-                                          ctypes.c_int(adir), c_mat_real, c_mat_imag,
+                                          ctypes.c_int(qubit_num), qid_array,
+                                          ctypes.c_int(adire), c_mat_real, c_mat_imag,
                                           ctypes.c_int(row), ctypes.c_int(col))
 
             if ret == FALSE:
@@ -885,16 +897,16 @@ class DensOp(ctypes.Structure):
             raise DensOp_FailToApply()
         
 
-    def densop_probability(self, matrix=None, id=[], matrix_type=None):
+    def densop_probability(self, matrix=None, qid=[], matrix_type=None):
 
         if matrix is None:
             raise DensOp_FailToProbability()
         if (matrix.shape[0] > self.row or matrix.shape[1] > self.col):
             raise DensOp_FailToProbability()
         
-        if id is None or id == []:
+        if qid is None or qid == []:
             qnum = int(math.log2(self.row))
-            id = [i for i in range(qnum)]
+            qid = [i for i in range(qnum)]
 
         if matrix_type == 'kraus':
             mtype = KRAUS
@@ -904,12 +916,12 @@ class DensOp(ctypes.Structure):
             raise DensOp_FailToProbability()
             
         try:
-            qubit_num = len(id)
+            qubit_num = len(qid)
             qubit_id = [0 for _ in range(MAX_QUBIT_NUM)]
-            for i in range(len(id)):
-                qubit_id[i] = id[i]
+            for i in range(len(qid)):
+                qubit_id[i] = qid[i]
             IntArray = ctypes.c_int * MAX_QUBIT_NUM
-            id_array = IntArray(*qubit_id)
+            qid_array = IntArray(*qubit_id)
 
             row = len(matrix) # dimension of the unitary matrix
             col = row
@@ -937,7 +949,7 @@ class DensOp(ctypes.Structure):
                                                ctypes.c_int, ctypes.c_int,
                                                ctypes.POINTER(ctypes.c_double)]
             ret = lib.densop_probability(ctypes.byref(self),
-                                         ctypes.c_int(qubit_num), id_array,
+                                         ctypes.c_int(qubit_num), qid_array,
                                          ctypes.c_int(mtype), c_mat_real, c_mat_imag,
                                          ctypes.c_int(row), ctypes.c_int(col),
                                          ctypes.byref(c_prob))
@@ -957,18 +969,18 @@ class DensOp(ctypes.Structure):
         lib.densop_free.argtypes = [ctypes.POINTER(DensOp)]
         lib.densop_free(ctypes.byref(self))
 
-    def densop_operate_qgate(self, kind=None, id=None,
+    def densop_operate_qgate(self, kind=None, qid=None,
                              phase=DEF_PHASE, phase1=DEF_PHASE, phase2=DEF_PHASE):
 
         # error check
-        self.__check_args(kind=kind, id=id, shots=None, angle=None,
+        self.__check_args(kind=kind, qid=qid, shots=None, angle=None,
                           phase=phase, phase1=phase1, phase2=phase2)
 
         qubit_id = [0 for _ in range(MAX_QUBIT_NUM)]
-        for i in range(len(id)):
-            qubit_id[i] = id[i]
+        for i in range(len(qid)):
+            qubit_id[i] = qid[i]
         IntArray = ctypes.c_int * MAX_QUBIT_NUM
-        id_array = IntArray(*qubit_id)
+        qid_array = IntArray(*qubit_id)
 
         lib.densop_operate_qgate.restype = ctypes.c_int
         lib.densop_operate_qgate.argtypes = [ctypes.POINTER(DensOp), ctypes.c_int,
@@ -976,17 +988,17 @@ class DensOp(ctypes.Structure):
                                              ctypes.c_double, IntArray]
         ret = lib.densop_operate_qgate(ctypes.byref(self), ctypes.c_int(kind),
                                        ctypes.c_double(phase), ctypes.c_double(phase1),
-                                       ctypes.c_double(phase2), id_array)
+                                       ctypes.c_double(phase2), qid_array)
 
         if ret == FALSE:
             raise DensOp_FailToOperateQGate()
 
-    def __check_args(self, kind=None, id=None, shots=None, angle=None,
+    def __check_args(self, kind=None, qid=None, shots=None, angle=None,
                      phase=None, phase1=None, phase2=None):
 
         qubit_num = int(math.log2(self.row))
         
-        for q in id:
+        for q in qid:
             if (q >= qubit_num) or (q < 0):
                 raise QState_OutOfBound()
             
@@ -994,52 +1006,52 @@ class DensOp(ctypes.Structure):
 
         if qnum == 0:  # any qubit number
             # check qubit number
-            if len(id) > qubit_num:
+            if len(qid) > qubit_num:
                 raise QState_TooManyArguments()
-            elif len(id) < 1:
+            elif len(qid) < 1:
                 raise QState_NeedMoreArguments()
             else:
                 pass
             
             # check same qubit number
-            if len(set(id)) != len(id):
+            if len(set(qid)) != len(qid):
                 raise QState_SameQubitID()
             
         elif qnum == 1:
             # check qubit number
-            if len(id) > qnum:
+            if len(qid) > qnum:
                 raise QState_TooManyArguments()
-            elif len(id) < qnum:
+            elif len(qid) < qnum:
                 raise QState_NeedMoreArguments()
             else:
                 return True
             
         elif qnum == 2:
             # check qubit number
-            if len(id) > qnum:
+            if len(qid) > qnum:
                 raise QState_TooManyArguments()
-            elif len(id) < qnum:
+            elif len(qid) < qnum:
                 raise QState_NeedMoreArguments()
             else:
                 pass
 
             # check same qubit number
-            if (id[0]==id[1]):
+            if (qid[0]==qid[1]):
                 raise QState_SameQubitID()
             else:
                 return True
             
         elif qnum == 3:
             # check qubit number
-            if len(id) > qnum:
+            if len(qid) > qnum:
                 raise QState_TooManyArguments()
-            elif len(id) < qnum:
+            elif len(qid) < qnum:
                 raise QState_NeedMoreArguments()
             else:
                 pass
 
             # check same qubit id
-            if (id[0]==id[1] or id[1]==id[2] or id[2]==id[0]):
+            if (qid[0]==qid[1] or qid[1]==qid[2] or qid[2]==qid[0]):
                 raise QState_SameQubitID()
             else:
                 return True

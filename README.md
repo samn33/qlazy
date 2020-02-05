@@ -82,8 +82,7 @@ foo.py
     qs.h(0)
     qs.cx(0,1)
     qs.show()
-    
-    md = qs.m()
+    md = qs.m(shots=100)
     md.show()
     
     qs.free()
@@ -99,6 +98,13 @@ execute the program
     frq[00] = 46
     frq[11] = 54
     last state => 11
+
+another style to print measured result.
+
+    ...
+    qs.m(shots=100)
+	print(qs.m_freq())
+    >> Counter({'00': 46, '11': 54})
 
 ## Requirements
 

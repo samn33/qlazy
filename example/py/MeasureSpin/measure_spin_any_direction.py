@@ -5,7 +5,7 @@ def measure(phase):
 
     qs = QState(1)
     qs.h(0)
-    freq_list = qs.m(id=[0],angle=0.5,phase=phase).frq
+    freq_list = qs.m([0], shots=100, angle=0.5, phase=phase).frq
     prob = freq_list[0] / 100
 
     print("===")

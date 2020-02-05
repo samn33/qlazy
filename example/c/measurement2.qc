@@ -16,7 +16,7 @@ m(100,0.5,0.5)
 show
 
 @ == measurement (z-axis) ==
-m
+m(100)
 
 @ == state ==
 show

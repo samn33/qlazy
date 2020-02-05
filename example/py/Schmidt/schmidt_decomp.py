@@ -45,8 +45,8 @@ if __name__ == '__main__':
 
     # partial density operators (system A and B)
     id_A, id_B = random_qubit_id(qubit_num)
-    de_A = de.patrace(id=id_B)
-    de_B = de.patrace(id=id_A)
+    de_A = de.patrace(id_B)
+    de_B = de.patrace(id_A)
 
     # eigen-values of density operators (system A and B)
     eval_A = eigen_values(de_A)

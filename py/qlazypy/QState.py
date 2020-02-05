@@ -2,11 +2,14 @@
 import ctypes
 import random
 import numpy as np
+from collections import Counter
 from ctypes.util import find_library
 from qlazypy.error import *
 from qlazypy.config import *
 from qlazypy.MData import *
 from qlazypy.Observable import *
+
+MDATA_TABLE = {}
 
 lib = ctypes.CDLL('libQlazy.so',mode=ctypes.RTLD_GLOBAL)
 libc = ctypes.CDLL(find_library("c"),mode=ctypes.RTLD_GLOBAL)
@@ -21,7 +24,7 @@ class QState(ctypes.Structure):
         ('camp', ctypes.c_void_p),
         ('gbank', ctypes.c_void_p),
     ]
-    
+
     def __new__(cls, qubit_num=0, seed=None, vector=None):
 
         if seed is None:
@@ -41,6 +44,10 @@ class QState(ctypes.Structure):
 
         return str(self.get_amp())
 
+    def reset(self, qid=[]):
+
+        self.qstate_reset(qid=qid)
+        
     @classmethod
     def add_method(cls, method):
 
@@ -61,34 +68,54 @@ class QState(ctypes.Structure):
                 idx += 1
         return idx
     
+    @classmethod
+    def free_all(cls, *qstates):
+
+        for qs in qstates:
+            if type(qs) is list or type(qs) is tuple:
+                cls.free_all(*qs)
+            elif type(qs) is QState:
+                qs.free()
+            else:
+                raise QState_FailToFreeAll()
+
     @property
-    def amp(self, id=None):
+    def amp(self, qid=None):
         return self.get_amp()
         
-    def get_amp(self, id=None):
-        return self.qstate_get_camp(id)
+    def get_amp(self, qid=None):
+        return self.qstate_get_camp(qid)
 
-    def partial(self, id=None):
-        vec = self.get_amp(id)
+    def partial(self, qid=None):
+        vec = self.get_amp(qid)
         return QState(vector=vec)
         
-    def show(self, id=None):
-        self.qstate_print(id)
+    def show(self, qid=None):
+        self.qstate_print(qid)
 
     def clone(self):
         return self.qstate_copy()
 
-    def bloch(self, qid=0):
-        return self.qstate_bloch(qid=qid)
+    def bloch(self, q=0):
+        return self.qstate_bloch(q=q)
 
-    def inpro(self, qstate):
-        return self.qstate_inner_product(qstate)
+    def inpro(self, qstate, qid=[]):
+
+        if qid == []:
+            inp = self.qstate_inner_product(qstate)
+        else:
+            qs_0 = self.partial(qid=qid)
+            qs_1 = qstate.partial(qid=qid)
+            inp = qs_0.qstate_inner_product(qs_1)
+            qs_0.free()
+            qs_1.free()
+        return inp
         
     def tenspro(self, qstate):
         return self.qstate_tensor_product(qstate)
 
-    def fidelity(self, qstate):
-        return abs(self.inpro(qstate))
+    def fidelity(self, qstate, qid=[]):
+        return abs(self.inpro(qstate, qid=qid))
 
     def composite(self, num=1):
         if num <= 1:
@@ -109,155 +136,155 @@ class QState(ctypes.Structure):
     def expect(self, observable=None):
         return self.qstate_expect_value(observable=observable)
     
-    def apply(self, matrix=None, id=None):
-        self.qstate_apply_matrix(matrix=matrix, id=id)
+    def apply(self, matrix=None, qid=None):
+        self.qstate_apply_matrix(matrix=matrix, qid=qid)
         return self
 
     # 1-qubit gate
 
     def x(self, q0):
-        self.qstate_operate_qgate(kind=PAULI_X, phase=DEF_PHASE, id=[q0])
+        self.qstate_operate_qgate(kind=PAULI_X, phase=DEF_PHASE, qid=[q0])
         return self
 
     def y(self, q0):
-        self.qstate_operate_qgate(kind=PAULI_Y, phase=DEF_PHASE, id=[q0])
+        self.qstate_operate_qgate(kind=PAULI_Y, phase=DEF_PHASE, qid=[q0])
         return self
 
     def z(self, q0):
-        self.qstate_operate_qgate(kind=PAULI_Z, phase=DEF_PHASE, id=[q0])
+        self.qstate_operate_qgate(kind=PAULI_Z, phase=DEF_PHASE, qid=[q0])
         return self
 
     def xr(self, q0):
-        self.qstate_operate_qgate(kind=ROOT_PAULI_X, phase=DEF_PHASE, id=[q0])
+        self.qstate_operate_qgate(kind=ROOT_PAULI_X, phase=DEF_PHASE, qid=[q0])
         return self
 
     def xr_dg(self, q0):
-        self.qstate_operate_qgate(kind=ROOT_PAULI_X_, phase=DEF_PHASE, id=[q0])
+        self.qstate_operate_qgate(kind=ROOT_PAULI_X_, phase=DEF_PHASE, qid=[q0])
         return self
 
     def h(self, q0):
-        self.qstate_operate_qgate(kind=HADAMARD, phase=DEF_PHASE, id=[q0])
+        self.qstate_operate_qgate(kind=HADAMARD, phase=DEF_PHASE, qid=[q0])
         return self
 
     def s(self, q0):
-        self.qstate_operate_qgate(kind=PHASE_SHIFT_S, phase=DEF_PHASE, id=[q0])
+        self.qstate_operate_qgate(kind=PHASE_SHIFT_S, phase=DEF_PHASE, qid=[q0])
         return self
 
     def s_dg(self, q0):
-        self.qstate_operate_qgate(kind=PHASE_SHIFT_S_, phase=DEF_PHASE, id=[q0])
+        self.qstate_operate_qgate(kind=PHASE_SHIFT_S_, phase=DEF_PHASE, qid=[q0])
         return self
 
     def t(self, q0):
-        self.qstate_operate_qgate(kind=PHASE_SHIFT_T, phase=DEF_PHASE, id=[q0])
+        self.qstate_operate_qgate(kind=PHASE_SHIFT_T, phase=DEF_PHASE, qid=[q0])
         return self
 
     def t_dg(self, q0):
-        self.qstate_operate_qgate(kind=PHASE_SHIFT_T_, phase=DEF_PHASE, id=[q0])
+        self.qstate_operate_qgate(kind=PHASE_SHIFT_T_, phase=DEF_PHASE, qid=[q0])
         return self
 
     def rx(self, q0, phase=DEF_PHASE):
-        self.qstate_operate_qgate(kind=ROTATION_X, phase=phase, id=[q0])
+        self.qstate_operate_qgate(kind=ROTATION_X, phase=phase, qid=[q0])
         return self
 
     def ry(self, q0, phase=DEF_PHASE):
-        self.qstate_operate_qgate(kind=ROTATION_Y, phase=phase, id=[q0])
+        self.qstate_operate_qgate(kind=ROTATION_Y, phase=phase, qid=[q0])
         return self
 
     def rz(self, q0, phase=DEF_PHASE):
-        self.qstate_operate_qgate(kind=ROTATION_Z, phase=phase, id=[q0])
+        self.qstate_operate_qgate(kind=ROTATION_Z, phase=phase, qid=[q0])
         return self
 
     def p(self, q0, phase=DEF_PHASE):
-        self.qstate_operate_qgate(kind=PHASE_SHIFT, phase=phase, id=[q0])
+        self.qstate_operate_qgate(kind=PHASE_SHIFT, phase=phase, qid=[q0])
         return self
 
     def u1(self, q0, alpha=DEF_PHASE):
-        self.qstate_operate_qgate(kind=ROTATION_U1, phase=alpha, id=[q0])
+        self.qstate_operate_qgate(kind=ROTATION_U1, phase=alpha, qid=[q0])
         return self
 
     def u2(self, q0, alpha=DEF_PHASE, beta=DEF_PHASE):
-        self.qstate_operate_qgate(kind=ROTATION_U2, phase=alpha, phase1=beta, id=[q0])
+        self.qstate_operate_qgate(kind=ROTATION_U2, phase=alpha, phase1=beta, qid=[q0])
         return self
 
     def u3(self, q0, alpha=DEF_PHASE, beta=DEF_PHASE, gamma=DEF_PHASE):
         self.qstate_operate_qgate(kind=ROTATION_U3, phase=alpha, phase1=beta,
-                                  phase2=gamma, id=[q0])
+                                  phase2=gamma, qid=[q0])
         return self
 
     # 2-qubit gate
 
     def cx(self, q0, q1):
-        self.qstate_operate_qgate(kind=CONTROLLED_X, phase=DEF_PHASE, id=[q0,q1])
+        self.qstate_operate_qgate(kind=CONTROLLED_X, phase=DEF_PHASE, qid=[q0,q1])
         return self
 
     def cy(self, q0, q1):
-        self.qstate_operate_qgate(kind=CONTROLLED_Y, phase=DEF_PHASE, id=[q0,q1])
+        self.qstate_operate_qgate(kind=CONTROLLED_Y, phase=DEF_PHASE, qid=[q0,q1])
         return self
 
     def cz(self, q0, q1):
-        self.qstate_operate_qgate(kind=CONTROLLED_Z, phase=DEF_PHASE, id=[q0,q1])
+        self.qstate_operate_qgate(kind=CONTROLLED_Z, phase=DEF_PHASE, qid=[q0,q1])
         return self
 
     def cxr(self, q0, q1):
-        self.qstate_operate_qgate(kind=CONTROLLED_XR, phase=DEF_PHASE, id=[q0,q1])
+        self.qstate_operate_qgate(kind=CONTROLLED_XR, phase=DEF_PHASE, qid=[q0,q1])
         return self
 
     def cxr_dg(self, q0, q1):
-        self.qstate_operate_qgate(kind=CONTROLLED_XR_, phase=DEF_PHASE, id=[q0,q1])
+        self.qstate_operate_qgate(kind=CONTROLLED_XR_, phase=DEF_PHASE, qid=[q0,q1])
         return self
 
     def ch(self, q0, q1):
-        self.qstate_operate_qgate(kind=CONTROLLED_H, phase=DEF_PHASE, id=[q0,q1])
+        self.qstate_operate_qgate(kind=CONTROLLED_H, phase=DEF_PHASE, qid=[q0,q1])
         return self
 
     def cs(self, q0, q1):
-        self.qstate_operate_qgate(kind=CONTROLLED_S, phase=DEF_PHASE, id=[q0,q1])
+        self.qstate_operate_qgate(kind=CONTROLLED_S, phase=DEF_PHASE, qid=[q0,q1])
         return self
 
     def cs_dg(self, q0, q1):
-        self.qstate_operate_qgate(kind=CONTROLLED_S_, phase=DEF_PHASE, id=[q0,q1])
+        self.qstate_operate_qgate(kind=CONTROLLED_S_, phase=DEF_PHASE, qid=[q0,q1])
         return self
 
     def ct(self, q0, q1):
-        self.qstate_operate_qgate(kind=CONTROLLED_T, phase=DEF_PHASE, id=[q0,q1])
+        self.qstate_operate_qgate(kind=CONTROLLED_T, phase=DEF_PHASE, qid=[q0,q1])
         return self
 
     def ct_dg(self, q0, q1):
-        self.qstate_operate_qgate(kind=CONTROLLED_T_, phase=DEF_PHASE, id=[q0,q1])
+        self.qstate_operate_qgate(kind=CONTROLLED_T_, phase=DEF_PHASE, qid=[q0,q1])
         return self
 
     def sw(self, q0, q1):
-        self.qstate_operate_qgate(kind=SWAP, phase=DEF_PHASE, id=[q0,q1])
+        self.qstate_operate_qgate(kind=SWAP, phase=DEF_PHASE, qid=[q0,q1])
         return self
 
     def cp(self, q0, q1, phase=DEF_PHASE):
-        self.qstate_operate_qgate(kind=CONTROLLED_P, phase=phase, id=[q0,q1])
+        self.qstate_operate_qgate(kind=CONTROLLED_P, phase=phase, qid=[q0,q1])
         return self
 
     def crx(self, q0, q1, phase=DEF_PHASE):
-        self.qstate_operate_qgate(kind=CONTROLLED_RX, phase=phase, id=[q0,q1])
+        self.qstate_operate_qgate(kind=CONTROLLED_RX, phase=phase, qid=[q0,q1])
         return self
 
     def cry(self, q0, q1, phase=DEF_PHASE):
-        self.qstate_operate_qgate(kind=CONTROLLED_RY, phase=phase, id=[q0,q1])
+        self.qstate_operate_qgate(kind=CONTROLLED_RY, phase=phase, qid=[q0,q1])
         return self
 
     def crz(self, q0, q1, phase=DEF_PHASE):
-        self.qstate_operate_qgate(kind=CONTROLLED_RZ, phase=phase, id=[q0,q1])
+        self.qstate_operate_qgate(kind=CONTROLLED_RZ, phase=phase, qid=[q0,q1])
         return self
 
     def cu1(self, q0, q1, alpha=DEF_PHASE):
-        self.qstate_operate_qgate(kind=CONTROLLED_U1, phase=alpha, id=[q0,q1])
+        self.qstate_operate_qgate(kind=CONTROLLED_U1, phase=alpha, qid=[q0,q1])
         return self
 
     def cu2(self, q0, q1, alpha=DEF_PHASE, beta=DEF_PHASE):
         self.qstate_operate_qgate(kind=CONTROLLED_U2, phase=alpha, phase1=beta,
-                                  id=[q0,q1])
+                                  qid=[q0,q1])
         return self
 
     def cu3(self, q0, q1, alpha=DEF_PHASE, beta=DEF_PHASE, gamma=DEF_PHASE):
         self.qstate_operate_qgate(kind=CONTROLLED_U3, phase=alpha, phase1=beta,
-                                  phase2=gamma, id=[q0,q1])
+                                  phase2=gamma, qid=[q0,q1])
         return self
 
     # 3-qubit gate
@@ -278,18 +305,17 @@ class QState(ctypes.Structure):
             yield k^(k>>1)
 
     # multi-controlled X gate
-    # def mcx(self,id_ctr=[],id_tar=None):
-    def mcx(self,id=[]):
+    def mcx(self,qid=[]):
 
         # controled and target register
-        id_ctr = id[:-1]
-        id_tar = id[-1]
+        qid_ctr = qid[:-1]
+        qid_tar = qid[-1]
         
         # hadamard
-        self.h(id_tar)
+        self.h(qid_tar)
 
         # controlled-RZ(psi), psi=pi/(2**(bitnum-1))
-        bitnum = len(id_ctr)
+        bitnum = len(qid_ctr)
         psi = 1.0/(2**(bitnum-1)) # unit=pi(radian)
         gray_pre = 0
         for gray in self.__gray_code(bitnum):
@@ -300,33 +326,70 @@ class QState(ctypes.Structure):
             if gray != 1:
                 if chb == msb:
                     chb -= 1
-                self.cx(id_ctr[chb],id_ctr[msb])
-            self.cp(id_ctr[msb],id_tar,phase=psi)
+                self.cx(qid_ctr[chb],qid_ctr[msb])
+            self.cp(qid_ctr[msb],qid_tar,phase=psi)
             psi = -psi
             gray_pre = gray
     
         # hadamard
-        self.h(id_tar)
+        self.h(qid_tar)
 
         return self
 
     # measurement
     
-    def m(self, id=None, shots=DEF_SHOTS, angle=0.0, phase=0.0, tag=None):
-        return self.qstate_measure(id=id, shots=shots, angle=angle, phase=phase, tag=tag)
+    def m(self, qid=None, shots=DEF_SHOTS, angle=0.0, phase=0.0, tag=None):
+        return self.qstate_measure(qid=qid, shots=shots, angle=angle, phase=phase, tag=tag)
         
-    def mx(self, id=None, shots=DEF_SHOTS, tag=None):
-        return self.qstate_measure(id=id, shots=shots, angle=0.5, phase=0.0, tag=tag)
+    def mx(self, qid=None, shots=DEF_SHOTS, tag=None):
+        return self.qstate_measure(qid=qid, shots=shots, angle=0.5, phase=0.0, tag=tag)
         
-    def my(self, id=None, shots=DEF_SHOTS, tag=None):
-        return self.qstate_measure(id=id, shots=shots, angle=0.5, phase=0.5, tag=tag)
+    def my(self, qid=None, shots=DEF_SHOTS, tag=None):
+        return self.qstate_measure(qid=qid, shots=shots, angle=0.5, phase=0.5, tag=tag)
         
-    def mz(self, id=None, shots=DEF_SHOTS, tag=None):
-        return self.qstate_measure(id=id, shots=shots, angle=0.0, phase=0.0, tag=tag)
+    def mz(self, qid=None, shots=DEF_SHOTS, tag=None):
+        return self.qstate_measure(qid=qid, shots=shots, angle=0.0, phase=0.0, tag=tag)
 
-    def mb(self, id=None, shots=DEF_SHOTS, tag=None):
-        return self.qstate_measure_bell(id=id, shots=shots, tag=tag)
+    def mb(self, qid=None, shots=DEF_SHOTS, tag=None):
+        return self.qstate_measure_bell(qid=qid, shots=shots, tag=tag)
         
+    def m_value(self, tag=None, angle=0.0, phase=0.0, binary=False):
+
+        if tag is None: tag = DEF_TAG
+        tag_long = repr(self) + '.' + tag
+        mval = MDATA_TABLE[tag_long].measured_value(angle=angle, phase=phase)
+        if binary == True:
+            digits = len(MDATA_TABLE[tag_long].qid)
+            mval = '{:0{digits}b}'.format(mval, digits=digits)
+        return mval
+
+    def m_bit(self, q, tag=None, angle=0.0, phase=0.0, boolean=False):
+
+        if tag is None: tag = DEF_TAG
+        tag_long = repr(self) + '.' + tag
+        mbit =  MDATA_TABLE[tag_long].measured_bit(q, angle=angle, phase=phase)
+        if boolean == True:
+            mbit = bool(mbit)
+        return mbit
+    
+    def m_is_zero(self, q, tag=None, angle=0.0, phase=0.0):
+
+        if tag is None: tag = DEF_TAG
+        tag_long = repr(self) + '.' + tag
+        return MDATA_TABLE[tag_long].measured_is_zero(q, angle=angle, phase=phase)
+        
+    def m_is_one(self, q, tag=None, angle=0.0, phase=0.0):
+
+        if tag is None: tag = DEF_TAG
+        tag_long = repr(self) + '.' + tag
+        return MDATA_TABLE[tag_long].measured_is_one(q, angle=angle, phase=phase)
+        
+    def m_freq(self, tag=None, angle=0.0, phase=0.0):
+
+        if tag is None: tag = DEF_TAG
+        tag_long = repr(self) + '.' + tag
+        return MDATA_TABLE[tag_long].measured_freq(angle=angle, phase=phase)
+
     def free(self):
         self.qstate_free()
 
@@ -385,25 +448,51 @@ class QState(ctypes.Structure):
         
         return out.contents
     
-    def qstate_print(self, id=None):
+    def qstate_reset(self, qid=None):
 
-        if id is None or id == []:
-            id = [i for i in range(self.qubit_num)]
+        if qid is None or qid == []:
+            qid = [i for i in range(self.qubit_num)]
 
-        self.__check_args(kind=SHOW, shots=None, angle=None, id=id)
-        
+        self.__check_args(kind=SHOW, shots=None, angle=None, qid=qid)
+
         try:
-            qubit_num = len(id)
+            qubit_num = len(qid)
             qubit_id = [0 for _ in range(MAX_QUBIT_NUM)]
-            for i in range(len(id)):
-                qubit_id[i] = id[i]
+            for i in range(len(qid)):
+                qubit_id[i] = qid[i]
 
             IntArray = ctypes.c_int * MAX_QUBIT_NUM
-            id_array = IntArray(*qubit_id)
+            qid_array = IntArray(*qubit_id)
+            
+            lib.qstate_reset.restype = ctypes.c_int
+            lib.qstate_reset.argtypes = [ctypes.POINTER(QState),ctypes.c_int, IntArray]
+            ret = lib.qstate_reset(ctypes.byref(self),ctypes.c_int(qubit_num), qid_array)
+
+            if ret == FALSE:
+                raise QState_FailToShow()
+
+        except Exception:
+            raise QState_FailToShow()
+        
+    def qstate_print(self, qid=None):
+
+        if qid is None or qid == []:
+            qid = [i for i in range(self.qubit_num)]
+
+        self.__check_args(kind=SHOW, shots=None, angle=None, qid=qid)
+        
+        try:
+            qubit_num = len(qid)
+            qubit_id = [0 for _ in range(MAX_QUBIT_NUM)]
+            for i in range(len(qid)):
+                qubit_id[i] = qid[i]
+
+            IntArray = ctypes.c_int * MAX_QUBIT_NUM
+            qid_array = IntArray(*qubit_id)
             
             lib.qstate_print.restype = ctypes.c_int
             lib.qstate_print.argtypes = [ctypes.POINTER(QState),ctypes.c_int, IntArray]
-            ret = lib.qstate_print(ctypes.byref(self),ctypes.c_int(qubit_num), id_array)
+            ret = lib.qstate_print(ctypes.byref(self),ctypes.c_int(qubit_num), qid_array)
 
             if ret == FALSE:
                 raise QState_FailToShow()
@@ -432,10 +521,10 @@ class QState(ctypes.Structure):
         except Exception:
             raise QState_FailToClone()
 
-    def qstate_bloch(self, qid=0):
+    def qstate_bloch(self, q=0):
 
         # error check
-        self.__check_args(kind=BLOCH, shots=None, angle=None, id=[qid])
+        self.__check_args(kind=BLOCH, shots=None, angle=None, qid=[q])
 
         try:
             theta = 0.0
@@ -447,7 +536,7 @@ class QState(ctypes.Structure):
             lib.qstate_bloch.argtypes = [ctypes.POINTER(QState),ctypes.c_int,
                                          ctypes.POINTER(ctypes.c_double),
                                          ctypes.POINTER(ctypes.c_double)]
-            ret = lib.qstate_bloch(ctypes.byref(self),ctypes.c_int(qid),
+            ret = lib.qstate_bloch(ctypes.byref(self),ctypes.c_int(q),
                                    ctypes.byref(c_theta), ctypes.byref(c_phi))
 
             if ret == FALSE:
@@ -561,23 +650,23 @@ class QState(ctypes.Structure):
 
         return out
 
-    def qstate_apply_matrix(self, matrix=None, id=None):
+    def qstate_apply_matrix(self, matrix=None, qid=None):
 
         if matrix is None:
             raise QState_FailToApply()
         if (matrix.shape[0] > self.state_num or matrix.shape[0] > self.state_num):
             raise QState_FailToApply()
         
-        if id is None or id == []:
-            id = [i for i in range(self.qubit_num)]
+        if qid is None or qid == []:
+            qid = [i for i in range(self.qubit_num)]
 
         try:
-            qubit_num = len(id)
+            qubit_num = len(qid)
             qubit_id = [0 for _ in range(MAX_QUBIT_NUM)]
-            for i in range(len(id)):
-                qubit_id[i] = id[i]
+            for i in range(len(qid)):
+                qubit_id[i] = qid[i]
             IntArray = ctypes.c_int * MAX_QUBIT_NUM
-            id_array = IntArray(*qubit_id)
+            qid_array = IntArray(*qubit_id)
 
             row = len(matrix) # dimension of the unitary matrix
             col = row
@@ -601,7 +690,7 @@ class QState(ctypes.Structure):
                                                 DoubleArray, DoubleArray,
                                                 ctypes.c_int, ctypes.c_int]
             ret = lib.qstate_apply_matrix(ctypes.byref(self),
-                                          ctypes.c_int(qubit_num), id_array,
+                                          ctypes.c_int(qubit_num), qid_array,
                                           c_mat_real, c_mat_imag,
                                           ctypes.c_int(row), ctypes.c_int(col))
 
@@ -611,27 +700,27 @@ class QState(ctypes.Structure):
         except Exception:
             raise QState_FailToApply()
 
-    def qstate_get_camp(self, id=None):
+    def qstate_get_camp(self, qid=None):
 
-        if id is None or id == []:
-            id = [i for i in range(self.qubit_num)]
+        if qid is None or qid == []:
+            qid = [i for i in range(self.qubit_num)]
 
         # error check
-        if len(id) > self.qubit_num:
+        if len(qid) > self.qubit_num:
             raise QState_TooManyArguments()
-        for i in range(len(id)):
-            if id[i] >= self.qubit_num:
+        for i in range(len(qid)):
+            if qid[i] >= self.qubit_num:
                 raise QState_OutOfBound()
-            if id[i] < 0:
+            if qid[i] < 0:
                 raise QState_OutOfBound()
 
         try:
-            qubit_num = len(id)
+            qubit_num = len(qid)
             qubit_id = [0 for _ in range(MAX_QUBIT_NUM)]
-            for i in range(len(id)):
-                qubit_id[i] = id[i]
+            for i in range(len(qid)):
+                qubit_id[i] = qid[i]
             IntArray = ctypes.c_int * MAX_QUBIT_NUM
-            id_array = IntArray(*qubit_id)
+            qid_array = IntArray(*qubit_id)
 
             camp = None
             c_camp = ctypes.c_void_p(camp)
@@ -639,14 +728,14 @@ class QState(ctypes.Structure):
             lib.qstate_get_camp.argtypes = [ctypes.POINTER(QState),ctypes.c_int, IntArray,
                                             ctypes.POINTER(ctypes.c_void_p)]
             ret = lib.qstate_get_camp(ctypes.byref(self),ctypes.c_int(qubit_num),
-                                      id_array, c_camp)
+                                      qid_array, c_camp)
 
             if ret == FALSE:
                 raise QState_FailToGetAmp()
                 
             o = ctypes.cast(c_camp.value, ctypes.POINTER(ctypes.c_double))
             
-            state_num = (1 << len(id))
+            state_num = (1 << len(qid))
             out = [0] * state_num
             for i in range(state_num):
                 out[i] = complex(o[2*i],o[2*i+1])
@@ -659,21 +748,23 @@ class QState(ctypes.Structure):
 
         return np.array(out)
         
-    def qstate_measure(self, id=None, shots=DEF_SHOTS, angle=0.0, phase=0.0, tag=None):
+    def qstate_measure(self, qid=None, shots=DEF_SHOTS, angle=0.0, phase=0.0, tag=None):
 
-        if id is None or id == []:
-            id = [i for i in range(self.qubit_num)]
+        global MDATA_TABLE
+        
+        if qid is None or qid == []:
+            qid = [i for i in range(self.qubit_num)]
             
         # error check
-        self.__check_args(kind=MEASURE, id=id, shots=shots, angle=angle, phase=phase)
+        self.__check_args(kind=MEASURE, qid=qid, shots=shots, angle=angle, phase=phase)
 
         # operate
-        qubit_num = len(id)
+        qubit_num = len(qid)
         qubit_id = [0 for _ in range(MAX_QUBIT_NUM)]
-        for i in range(len(id)):
-            qubit_id[i] = id[i]
+        for i in range(len(qid)):
+            qubit_id[i] = qid[i]
         IntArray = ctypes.c_int * MAX_QUBIT_NUM
-        id_array = IntArray(*qubit_id)
+        qid_array = IntArray(*qubit_id)
 
         mdata = None
         c_mdata = ctypes.c_void_p(mdata)
@@ -685,7 +776,7 @@ class QState(ctypes.Structure):
                                        ctypes.POINTER(ctypes.c_void_p)]
         ret = lib.qstate_measure(ctypes.byref(self), ctypes.c_int(shots),
                                  ctypes.c_double(angle), ctypes.c_double(phase),
-                                 ctypes.c_int(qubit_num), id_array, c_mdata)
+                                 ctypes.c_int(qubit_num), qid_array, c_mdata)
 
         if ret == FALSE:
             raise QState_FailToMeasure()
@@ -696,28 +787,36 @@ class QState(ctypes.Structure):
         last_state = out.contents.last
         freq = ctypes.cast(out.contents.freq, ctypes.POINTER(ctypes.c_int*state_num))
         freq_list = [freq.contents[i] for i in range(state_num)]
-        md = MData(freq_list=freq_list, last_state=last_state, id=id,
-                   qubit_num=qubit_num, state_num=state_num, angle=angle, phase=phase)
+        md = MData(freq_list=freq_list, last_state=last_state, qid=qid,
+                   qubit_num=qubit_num, state_num=state_num, angle=angle, phase=phase,
+                   is_bell=False, tag=tag)
         out.contents.free()
+
+        if tag is None: tag = DEF_TAG
+        tag_long = repr(self) + '.' + tag
+            
+        MDATA_TABLE[tag_long] = md
 
         return md
 
-    def qstate_measure_bell(self, id=None, shots=DEF_SHOTS, tag=None):
+    def qstate_measure_bell(self, qid=None, shots=DEF_SHOTS, tag=None):
 
-        if id is None or id == []:
-            id = [i for i in range(2)]
+        global MDATA_TABLE
+        
+        if qid is None or qid == []:
+            qid = [i for i in range(2)]
             
         # error check
-        self.__check_args(kind=MEASURE_BELL, id=id, shots=shots, angle=None, phase=None)
+        self.__check_args(kind=MEASURE_BELL, qid=qid, shots=shots, angle=None, phase=None)
 
         # operate
         state_num = 4
         qubit_num = 2
         qubit_id = [0 for _ in range(MAX_QUBIT_NUM)]
         for i in range(qubit_num):
-            qubit_id[i] = id[i]
+            qubit_id[i] = qid[i]
         IntArray = ctypes.c_int * MAX_QUBIT_NUM
-        id_array = IntArray(*qubit_id)
+        qid_array = IntArray(*qubit_id)
         
         mdata = None
         c_mdata = ctypes.c_void_p(mdata)
@@ -728,7 +827,7 @@ class QState(ctypes.Structure):
                                             ctypes.POINTER(ctypes.c_void_p)]
 
         ret = lib.qstate_measure_bell(ctypes.byref(self), ctypes.c_int(shots),
-                                      ctypes.c_int(qubit_num), id_array, c_mdata)
+                                      ctypes.c_int(qubit_num), qid_array, c_mdata)
 
         if ret == FALSE:
             raise QState_FailToMeasure()
@@ -738,10 +837,15 @@ class QState(ctypes.Structure):
         last_state = out.contents.last
         freq = ctypes.cast(out.contents.freq, ctypes.POINTER(ctypes.c_int*state_num))
         freq_list = [freq.contents[i] for i in range(state_num)]
-        md = MData(freq_list=freq_list, last_state=last_state, id=id,
+        md = MData(freq_list=freq_list, last_state=last_state, qid=qid,
                    qubit_num=qubit_num, state_num=state_num, angle=0.0, phase=0.0,
-                   is_bell=True)
+                   is_bell=True, tag=tag)
         out.contents.free()
+
+        if tag is None: tag = DEF_TAG
+        tag_long = repr(self) + '.' + tag
+
+        MDATA_TABLE[tag_long] = md
 
         return md
 
@@ -750,18 +854,18 @@ class QState(ctypes.Structure):
         lib.qstate_free.argtypes = [ctypes.POINTER(QState)]
         lib.qstate_free(ctypes.byref(self))
  
-    def qstate_operate_qgate(self, kind=None, id=None,
+    def qstate_operate_qgate(self, kind=None, qid=None,
                              phase=DEF_PHASE, phase1=DEF_PHASE, phase2=DEF_PHASE):
 
         # error check
-        self.__check_args(kind=kind, id=id, shots=None, angle=None,
+        self.__check_args(kind=kind, qid=qid, shots=None, angle=None,
                           phase=phase, phase1=phase1, phase2=phase2)
 
         qubit_id = [0 for _ in range(MAX_QUBIT_NUM)]
-        for i in range(len(id)):
-            qubit_id[i] = id[i]
+        for i in range(len(qid)):
+            qubit_id[i] = qid[i]
         IntArray = ctypes.c_int * MAX_QUBIT_NUM
-        id_array = IntArray(*qubit_id)
+        qid_array = IntArray(*qubit_id)
 
         lib.qstate_operate_qgate.restype = ctypes.c_int
         lib.qstate_operate_qgate.argtypes = [ctypes.POINTER(QState), ctypes.c_int,
@@ -769,15 +873,15 @@ class QState(ctypes.Structure):
                                              ctypes.c_double, IntArray]
         ret = lib.qstate_operate_qgate(ctypes.byref(self), ctypes.c_int(kind),
                                        ctypes.c_double(phase), ctypes.c_double(phase1),
-                                       ctypes.c_double(phase2), id_array)
+                                       ctypes.c_double(phase2), qid_array)
 
         if ret == FALSE:
             raise QState_FailToOperateQgate()
 
-    def __check_args(self, kind=None, id=None, shots=None, angle=None,
+    def __check_args(self, kind=None, qid=None, shots=None, angle=None,
                      phase=None, phase1=None, phase2=None):
 
-        for q in id:
+        for q in qid:
             if (q >= self.qubit_num) or (q < 0):
                 raise QState_OutOfBound()
             
@@ -785,52 +889,52 @@ class QState(ctypes.Structure):
 
         if qnum == 0:  # any qubit number
             # check qubit number
-            if len(id) > self.qubit_num:
+            if len(qid) > self.qubit_num:
                 raise QState_TooManyArguments()
-            elif len(id) < 1:
+            elif len(qid) < 1:
                 raise QState_NeedMoreArguments()
             else:
                 pass
             
             # check same qubit number
-            if len(set(id)) != len(id):
+            if len(set(qid)) != len(qid):
                 raise QState_SameQubitID()
             
         elif qnum == 1:
             # check qubit number
-            if len(id) > qnum:
+            if len(qid) > qnum:
                 raise QState_TooManyArguments()
-            elif len(id) < qnum:
+            elif len(qid) < qnum:
                 raise QState_NeedMoreArguments()
             else:
                 return True
             
         elif qnum == 2:
             # check qubit number
-            if len(id) > qnum:
+            if len(qid) > qnum:
                 raise QState_TooManyArguments()
-            elif len(id) < qnum:
+            elif len(qid) < qnum:
                 raise QState_NeedMoreArguments()
             else:
                 pass
 
             # check same qubit number
-            if (id[0]==id[1]):
+            if (qid[0]==qid[1]):
                 raise QState_SameQubitID()
             else:
                 return True
             
         elif qnum == 3:
             # check qubit number
-            if len(id) > qnum:
+            if len(qid) > qnum:
                 raise QState_TooManyArguments()
-            elif len(id) < qnum:
+            elif len(qid) < qnum:
                 raise QState_NeedMoreArguments()
             else:
                 pass
 
             # check same qubit id
-            if (id[0]==id[1] or id[1]==id[2] or id[2]==id[0]):
+            if (qid[0]==qid[1] or qid[1]==qid[2] or qid[2]==qid[0]):
                 raise QState_SameQubitID()
             else:
                 return True

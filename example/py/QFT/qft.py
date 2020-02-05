@@ -91,7 +91,7 @@ def main():
     data_in = qs.amp
 
     print("== QFT ==")
-    qs.qft(id=[0,1,2])
+    qs.qft([0,1,2])
     qs.show()
 
     print("== FFT (numpy) ==")

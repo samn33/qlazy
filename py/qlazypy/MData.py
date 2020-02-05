@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import ctypes
+from collections import Counter
 from ctypes.util import find_library
 from qlazypy.error import *
 from qlazypy.config import *
@@ -52,21 +53,23 @@ class MDataC(ctypes.Structure):
 
 class MData:
 
-    def __init__(self, freq_list=None, last_state=0, id=None, qubit_num=0, state_num=0,
+    def __init__(self, freq_list=None, last_state=0, qid=None, qubit_num=0, state_num=0,
                  angle=0.0, phase=0.0, is_bell=False, tag=None):
         self.freq_list = freq_list
         self.last_state = last_state
-        self.id = id
+        self.qid = qid
         self.qubit_num = qubit_num
         self.state_num = state_num
         self.angle = angle
         self.phase = phase
         self.is_bell = is_bell
+        self.tag = tag
 
     def __str__(self):
 
         s = ""
-        s += "id: {}\n".format(self.id)
+        s += "tag: {}\n".format(self.tag)
+        s += "qid: {}\n".format(self.qid)
         s += "qubit num: {}\n".format(self.qubit_num)
         s += "state num: {}\n".format(self.state_num)
         s += "angle, phase: {0:}, {1:}\n".format(self.angle, self.phase)
@@ -74,6 +77,52 @@ class MData:
         s += "last state: {}".format(self.last_state)
         return s
 
+    def measured_value(self, angle=0.0, phase=0.0):
+
+        if (self.angle == angle and self.phase == phase):
+            mval = self.last_state
+            return mval
+        else:
+            raise MData_FailToGetMeasuredData()
+
+    def measured_bit(self, q, angle=0.0, phase=0.0):
+
+        if (q in self.qid and self.angle == angle and self.phase == phase):
+            bits = len(self.qid)  # total number of qubits measured
+            pos = bits - 1- self.qid.index(q)  # position of 'qid' in the 'last_state'
+            mbit = (self.last_state >> pos) % 2  # measured value '0' or '1'
+            return mbit
+        else:
+            raise MData_FailToGetMeasuredData()
+
+    def measured_is_zero(self, q, angle=0.0, phase=0.0):
+
+        if self.measured_bit(q, angle=angle, phase=phase) == 0:
+            return True
+        elif self.measured_bit(q, angle=angle, phase=phase) == 1:
+            return False
+        else:
+            raise MData_FailToGetMeasuredData()
+        
+    def measured_is_one(self, q, angle=0.0, phase=0.0):
+
+        if self.measured_bit(q, angle=angle, phase=phase) == 1:
+            return True
+        elif self.measured_bit(q, angle=angle, phase=phase) == 0:
+            return False
+        else:
+            raise MData_FailToGetMeasuredData()
+
+    def measured_freq(self, angle=0.0, phase=0.0):
+
+        if (self.angle == angle and self.phase == phase):
+            digits = len(self.qid)
+            res = {"{:0{digits}b}".format(k, digits=digits):v
+                   for k,v in enumerate(self.frq) if v > 0}
+            return Counter(res)
+        else:
+            raise MData_FailToGetMeasuredData()
+            
     @property
     def frq(self):
         return self.freq_list
@@ -87,7 +136,7 @@ class MData:
             print("bell-measurement")
             self.__show_bell()
         elif self.angle == 0.5 and self.phase == 0.0:
-            print("direction of measurement: x-axis")
+            print("direction of measurent: x-axis")
             self.__show_any()
         elif self.angle == 0.5 and self.phase == 0.5:
             print("direction of measurement: y-axis")

@@ -22,19 +22,19 @@ def main():
     alpha_oneway = alpha
     beta_oneway = beta
     gamma_oneway = gamma
-    s0 = qs_oneway.m(id=[0], shots=1, angle=0.5, phase=0.0).lst
+    s0 = qs_oneway.m([0], shots=1, angle=0.5, phase=0.0).lst
     if s0 == 1:
         alpha_oneway = -alpha_oneway
-    s1 = qs_oneway.m(id=[1], shots=1, angle=0.5, phase=alpha_oneway).lst
+    s1 = qs_oneway.m([1], shots=1, angle=0.5, phase=alpha_oneway).lst
     if s1 == 1:
         beta_oneway = -beta_oneway
-    s2 = qs_oneway.m(id=[2], shots=1, angle=0.5, phase=beta_oneway).lst
+    s2 = qs_oneway.m([2], shots=1, angle=0.5, phase=beta_oneway).lst
     if(s0+s2)%2 == 1:
         gamma_oneway = -gamma_oneway
-    s3 = qs_oneway.m(id=[3], shots=1, angle=0.5, phase=gamma_oneway).lst
+    s3 = qs_oneway.m([3], shots=1, angle=0.5, phase=gamma_oneway).lst
 
     # result state
-    qs_oneway.show(id=[4])
+    qs_oneway.show([4])
 
     print("** conventianal quantum gate")
 

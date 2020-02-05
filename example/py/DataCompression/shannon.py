@@ -72,7 +72,7 @@ def error_rate(data_in, data_out):
 if __name__ == "__main__":
 
     # settings
-    BLK = 10          # block size
+    BLK = 100          # block size
     NUM = BLK * 1000  # number of binary data sequence
     PRB = 0.8         # probability to generate '0'
     ENT = - PRB * np.log2(PRB) - (1-PRB) * np.log2(1-PRB)  # entropy (= 0.7219..)

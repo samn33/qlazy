@@ -12,7 +12,7 @@ def main():
         qs.evolve(observable=hm, time=t, iter=100)
 
         # quantum stat in bloch spere
-        theta, phi = qs.bloch(qid=0)
+        theta, phi = qs.bloch(0)
 
         print("time = {0:.2f}, theta = {1:.2f}*PI, phi = {2:.2f}*PI"
               .format(t,theta,phi))
