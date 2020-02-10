@@ -27,6 +27,7 @@ directories=(
     Holevo
     QuantumTomography
     DataCompression
+    ErrorCorrection
 )
 for dir in ${directories[@]}; do
 

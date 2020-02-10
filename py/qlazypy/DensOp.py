@@ -21,15 +21,28 @@ class DensOp(ctypes.Structure):
         ('elm', ctypes.c_void_p),
     ]
     
-    def __new__(cls, qstate=[], prob=[], matrix=None):
+    def __new__(cls, qubit_num=0, qstate=[], prob=[], matrix=None):
 
         # if prob is not specified, set equal probability
         if qstate != [] and prob == []:
             mixed_num = len(qstate)
             prob = [1.0/mixed_num for _ in range(mixed_num)]
         
-        if qstate != [] and prob != []:
+        # if qstate != [] and prob != []:
+        #     return cls.densop_init(qstate, prob)
+        # else:
+        #     return cls.densop_init_with_matrix(matrix)
+
+        if qubit_num != 0:
+            qstate = [QState(qubit_num=qubit_num)]
+            prob = [1.0]
+            de = cls.densop_init(qstate, prob)
+            qstate[0].free()
+            return de
+        
+        elif qstate != [] and prob != []:
             return cls.densop_init(qstate, prob)
+
         else:
             return cls.densop_init_with_matrix(matrix)
     
@@ -57,6 +70,11 @@ class DensOp(ctypes.Structure):
 
         return de_out
 
+    @classmethod
+    def add_method(cls, method):
+
+        setattr(cls, method.__name__, method)
+        
     @classmethod
     def free_all(cls, *densops):
 
@@ -211,6 +229,76 @@ class DensOp(ctypes.Structure):
 
         return self
 
+    def bit_flip(self, q, prob=0.0):
+
+        Sigma_0 = np.eye(2)
+        Sigma_1 = np.array([[0,1],[1,0]])
+        Sigma_2 = np.array([[0,-1j],[1j,0]])
+        Sigma_3 = np.array([[1,0],[0,-1]])
+
+        para_a = math.sqrt(1-prob)
+        para_b = math.sqrt(prob)
+        kraus = [para_a*Sigma_0, para_b*Sigma_1]
+        self.instrument(qid=[q], kraus=kraus)
+        return self
+    
+    def phase_flip(self, q, prob=0.0):
+
+        Sigma_0 = np.eye(2)
+        Sigma_1 = np.array([[0,1],[1,0]])
+        Sigma_2 = np.array([[0,-1j],[1j,0]])
+        Sigma_3 = np.array([[1,0],[0,-1]])
+
+        para_a = math.sqrt(1-prob)
+        para_b = math.sqrt(prob)
+        kraus = [para_a*Sigma_0, para_b*Sigma_3]
+        self.instrument(qid=[q], kraus=kraus)
+        return self
+    
+    def bit_phase_flip(self, q, prob=0.0):
+
+        Sigma_0 = np.eye(2)
+        Sigma_1 = np.array([[0,1],[1,0]])
+        Sigma_2 = np.array([[0,-1j],[1j,0]])
+        Sigma_3 = np.array([[1,0],[0,-1]])
+
+        para_a = math.sqrt(1-prob)
+        para_b = math.sqrt(prob)
+        kraus = [para_a*Sigma_0, para_b*Sigma_2]
+        self.instrument(qid=[q], kraus=kraus)
+        return self
+    
+    def depolarize(self, q, prob=0.0):
+
+        Sigma_0 = np.eye(2)
+        Sigma_1 = np.array([[0,1],[1,0]])
+        Sigma_2 = np.array([[0,-1j],[1j,0]])
+        Sigma_3 = np.array([[1,0],[0,-1]])
+
+        para_a = math.sqrt(1-0.75*prob)
+        para_b = math.sqrt(0.25*prob)
+        para_c = math.sqrt(0.25*prob)
+        para_d = math.sqrt(0.25*prob)
+        kraus = [para_a*Sigma_0, para_b*Sigma_1, para_c*Sigma_2, para_d*Sigma_3]
+        self.instrument(qid=[q], kraus=kraus)
+        return self
+    
+    def amp_dump(self, q, prob=0.0):
+        
+        transmit = math.sqrt(1.0-prob)
+        reflect = math.sqrt(prob)
+        kraus = [np.array([[1,0],[0,transmit]]), np.array([[0,reflect],[0,0]])]
+        self.instrument(qid=[q], kraus=kraus)
+        return self
+    
+    def phase_dump(self, q, prob=0.0):
+
+        transmit = math.sqrt(1.0-prob)
+        reflect = math.sqrt(prob)
+        kraus = [np.array([[1,0],[0,transmit]]), np.array([[0,0],[0,reflect]])]
+        self.instrument(qid=[q], kraus=kraus)
+        return self
+    
     def __mat_sqrt(self,mat):  # mat is hermite
 
         eigenvals, unitary = np.linalg.eigh(mat)

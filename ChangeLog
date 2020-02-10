@@ -1,3 +1,10 @@
+2020-02-10  Sam.N  <saminriver33@gmail.com>
+
+	* v0.0.34
+	- add function(py): DensOp - bit_flip, phase_flip, bit_phase_flip, depolarize, amp_dump, phase_dump
+	- change spec(py): DensOp - __new__ ('qubit_num' option -> create |00..0><00..0|)
+	- add example(py): error correction (shor code)
+
 2020-02-05  Sam.N  <saminriver33@gmail.com>
 
 	* v0.0.33

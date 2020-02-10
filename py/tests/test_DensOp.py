@@ -760,6 +760,98 @@ class TestDensOp_measurement(unittest.TestCase):
         de.free()
         self.assertEqual(ans,True)
 
+class TestDensOp_qchannel(unittest.TestCase):
+    """ test 'DensOp' : 'bit_flip','phase_flip','bit_phase_flip',
+                        'depolarize','amp_dump','phase_dump'
+    """
+
+    Sigma_0 = np.eye(2)
+    Sigma_1 = np.array([[0,1],[1,0]])
+    Sigma_2 = np.array([[0,-1j],[1j,0]])
+    Sigma_3 = np.array([[1,0],[0,-1]])
+
+    def get_coordinate(self, densop=None):
+        u_1 = densop.expect(matrix=self.Sigma_1)
+        u_2 = densop.expect(matrix=self.Sigma_2)
+        u_3 = densop.expect(matrix=self.Sigma_3)
+        return [u_1,u_2,u_3]
+    
+    def make_densop_matrix(self, u_1,u_2,u_3):
+        matrix = (self.Sigma_0+u_1*self.Sigma_1+u_2*self.Sigma_2+u_3*self.Sigma_3) / 2.0
+        return matrix
+
+    def test_bit_flip(self):
+        """test 'bit_flip'
+        """
+        prob = 0.1
+        D = self.make_densop_matrix(math.sqrt(1/3), math.sqrt(1/3), math.sqrt(1/3))
+        de = DensOp(matrix=D)
+        de.bit_flip(0, prob=prob)
+        actual = np.array(self.get_coordinate(densop=de))
+        expect = np.array([0.57735027,0.46188022,0.46188022])
+        de.free()
+        self.assertEqual((abs(np.linalg.norm(actual-expect)) < EPS), True)
+ 
+    def test_phase_flip(self):
+        """test 'phase_flip'
+        """
+        prob = 0.1
+        D = self.make_densop_matrix(math.sqrt(1/3), math.sqrt(1/3), math.sqrt(1/3))
+        de = DensOp(matrix=D)
+        de.phase_flip(0, prob=prob)
+        actual = np.array(self.get_coordinate(densop=de))
+        expect = np.array([0.46188022,0.46188022,0.57735027])
+        de.free()
+        self.assertEqual((abs(np.linalg.norm(actual-expect)) < EPS), True)
+ 
+    def test_bit_phase_flip(self):
+        """test 'bit_phase_flip'
+        """
+        prob = 0.1
+        D = self.make_densop_matrix(math.sqrt(1/3), math.sqrt(1/3), math.sqrt(1/3))
+        de = DensOp(matrix=D)
+        de.bit_phase_flip(0, prob=prob)
+        actual = np.array(self.get_coordinate(densop=de))
+        expect = np.array([0.46188022,0.57735027,0.46188022])
+        de.free()
+        self.assertEqual((abs(np.linalg.norm(actual-expect)) < EPS), True)
+ 
+    def test_depolarize(self):
+        """test 'depolarize'
+        """
+        prob = 0.1
+        D = self.make_densop_matrix(math.sqrt(1/3), math.sqrt(1/3), math.sqrt(1/3))
+        de = DensOp(matrix=D)
+        de.depolarize(0, prob=prob)
+        actual = np.array(self.get_coordinate(densop=de))
+        expect = np.array([0.51961524,0.51961524,0.51961524])
+        de.free()
+        self.assertEqual((abs(np.linalg.norm(actual-expect)) < EPS), True)
+ 
+    def test_amp_dump(self):
+        """test 'amp_dump'
+        """
+        prob = 0.1
+        D = self.make_densop_matrix(math.sqrt(1/3), math.sqrt(1/3), math.sqrt(1/3))
+        de = DensOp(matrix=D)
+        de.amp_dump(0, prob=prob)
+        actual = np.array(self.get_coordinate(densop=de))
+        expect = np.array([0.54772256,0.54772256,0.61961524])
+        de.free()
+        self.assertEqual((abs(np.linalg.norm(actual-expect)) < EPS), True)
+ 
+    def test_phase_dump(self):
+        """test 'phase_dump'
+        """
+        prob = 0.1
+        D = self.make_densop_matrix(math.sqrt(1/3), math.sqrt(1/3), math.sqrt(1/3))
+        de = DensOp(matrix=D)
+        de.phase_dump(0, prob=prob)
+        actual = np.array(self.get_coordinate(densop=de))
+        expect = np.array([0.54772256,0.54772256,0.57735027])
+        de.free()
+        self.assertEqual((abs(np.linalg.norm(actual-expect)) < EPS), True)
+ 
 class TestDensOp_similarity(unittest.TestCase):
     """ test 'DensOp' : 'fidelity','distance'
     """
