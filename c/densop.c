@@ -81,6 +81,23 @@ bool densop_init_with_matrix(double* real, double* imag, int row, int col,
   SUC_RETURN(true);
 }
 
+bool densop_reset(DensOp* densop, int qubit_num, int qubit_id[MAX_QUBIT_NUM])
+{
+  int row,col;
+  
+  if ((densop == NULL) || (densop->row != densop->col))
+    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+
+  row = densop->row;
+  col = densop->col;
+  for (int i=0; i<row*col; i++) {
+    densop->elm[i] = 0.0;
+  }
+  densop->elm[0] = 1.0;
+  
+  SUC_RETURN(true);
+}
+
 bool densop_copy(DensOp* densop_in, void** densop_out)
 {
   DensOp* densop = NULL;

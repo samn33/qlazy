@@ -85,11 +85,11 @@ class TestQState_free_all(unittest.TestCase):
         qs_B = [qs_0,[qs_1,qs_2]]
         QState.free_all(qs_B)
         
-class TestQState_free(unittest.TestCase):
-    """ test 'QState' : 'free_all'
+class TestQState_reset(unittest.TestCase):
+    """ test 'QState' : 'reset'
     """
 
-    def test_init(self):
+    def test_reset(self):
         """test 'reset'
         """
         qs = QState(qubit_num=3).h(0).h(1).h(2)

@@ -1,3 +1,11 @@
+2020-03-05  Sam.N  <saminriver33@gmail.com>
+
+	* v0.0.35
+	- refactoring(c): qstate.c
+	- add function(py): DensOp - reset
+	- add example(py): error correction (hamming code)
+	- change name(c): libQlazy.so -> libqlz.so
+
 2020-02-10  Sam.N  <saminriver33@gmail.com>
 
 	* v0.0.34

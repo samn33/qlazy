@@ -10,7 +10,7 @@ from qlazypy.QState import *
 from qlazypy.MData import *
 from qlazypy.Observable import *
 
-lib = ctypes.CDLL('libQlazy.so',mode=ctypes.RTLD_GLOBAL)
+lib = ctypes.CDLL('libqlz.so',mode=ctypes.RTLD_GLOBAL)
 libc = ctypes.CDLL(find_library("c"),mode=ctypes.RTLD_GLOBAL)
 
 class DensOp(ctypes.Structure):
@@ -28,11 +28,6 @@ class DensOp(ctypes.Structure):
             mixed_num = len(qstate)
             prob = [1.0/mixed_num for _ in range(mixed_num)]
         
-        # if qstate != [] and prob != []:
-        #     return cls.densop_init(qstate, prob)
-        # else:
-        #     return cls.densop_init_with_matrix(matrix)
-
         if qubit_num != 0:
             qstate = [QState(qubit_num=qubit_num)]
             prob = [1.0]
@@ -50,6 +45,10 @@ class DensOp(ctypes.Structure):
 
         return str(self.get_elm())
 
+    def reset(self):
+
+        self.densop_reset()
+        
     @classmethod
     def mix(cls, densop=[], prob=[]):
 
@@ -746,6 +745,31 @@ class DensOp(ctypes.Structure):
         except Exception:
             raise DensOp_FailToGetElm()
 
+    def densop_reset(self, qid=None):
+
+        if qid is None or qid == []:
+            qnum = int(math.log2(self.row))
+            qid = [i for i in range(qnum)]
+
+        try:
+            qubit_num = len(qid)
+            qubit_id = [0 for _ in range(MAX_QUBIT_NUM)]
+            for i in range(len(qid)):
+                qubit_id[i] = qid[i]
+
+            IntArray = ctypes.c_int * MAX_QUBIT_NUM
+            qid_array = IntArray(*qubit_id)
+            
+            lib.densop_reset.restype = ctypes.c_int
+            lib.densop_reset.argtypes = [ctypes.POINTER(DensOp),ctypes.c_int, IntArray]
+            ret = lib.densop_reset(ctypes.byref(self),ctypes.c_int(qubit_num), qid_array)
+
+            if ret == FALSE:
+                raise DensOp_FailToReset()
+
+        except Exception:
+            raise DensOp_FailToReset()
+        
     def densop_print(self):
 
         try:

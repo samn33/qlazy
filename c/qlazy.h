@@ -15,7 +15,9 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
-#define VERSION "0.0.34"
+#define VERSION "0.0.35"
+
+//#define TEST_NEW_VERSION
 
 /*====================================================================*/
 /*  Definitions & Macros                                              */
@@ -460,6 +462,7 @@ void     observable_free(Observable* observ);
 bool     densop_init(QState* qstate, double* prob, int num, void** densop_out);
 bool     densop_init_with_matrix(double* real, double* imag, int row, int col,
 				 void** densop_out);
+bool	 densop_reset(DensOp* densop, int qubit_num, int qubit_id[MAX_QUBIT_NUM]);
 bool	 densop_copy(DensOp* densop_in, void** densop_out);
 bool     densop_get_elm(DensOp* densop, void** densop_out);
 bool     densop_print(DensOp* densop);

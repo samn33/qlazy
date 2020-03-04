@@ -537,6 +537,56 @@ static bool _qstate_operate_unitary4(COMPLEX* camp_out, COMPLEX* camp_in, COMPLE
   SUC_RETURN(true);
 }
 
+#ifdef TEST_NEW_VERSION
+
+static bool _qstate_operate_unitary_new(QState* qstate, COMPLEX* U, int dim, int m, int n)
+{
+  int		qnum_part;
+  int		qid[MAX_QUBIT_NUM];
+  double	real[16];
+  double	imag[16];
+  int		row,col;
+
+  if ((qstate == NULL) || (dim < 0))
+    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+  if ((m < 0) || (m >= qstate->state_num))
+    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+  
+  if (dim == 2) {
+    qnum_part = 1;
+    row = col = 2;
+    qid[0] = m;
+    for (int i=0; i<dim*dim; i++) {
+      real[i] = creal(U[i]);
+      imag[i] = cimag(U[i]);
+    }
+    if (!(qstate_apply_matrix(qstate, qnum_part, qid, real, imag, row, col)))
+      ERR_RETURN(ERROR_QSTATE_APPLY_MATRIX,false);
+  }
+
+  else if (dim == 4) {
+    if ((n < 0) || (n >= qstate->state_num) || (m == n))
+      ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+    qnum_part = 2;
+    row = col = 4;
+    qid[0] = m; qid[1] = n;
+    for (int i=0; i<dim*dim; i++) {
+      real[i] = creal(U[i]);
+      imag[i] = cimag(U[i]);
+    }
+    if (!(qstate_apply_matrix(qstate, qnum_part, qid, real, imag, row, col)))
+      ERR_RETURN(ERROR_QSTATE_APPLY_MATRIX,false);
+  }
+
+  else {
+    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+  }
+  
+  SUC_RETURN(true);
+}
+
+#else
+
 static bool _qstate_operate_unitary(QState* qstate, COMPLEX* U, int dim, int m, int n)
 {
   QState* qstate_tmp = NULL;
@@ -567,103 +617,7 @@ static bool _qstate_operate_unitary(QState* qstate, COMPLEX* U, int dim, int m, 
   SUC_RETURN(true);
 }
 
-static bool _qstate_operate_qgate_1(QState* qstate, Kind kind, int n)
-{
-  QState*	qstate_tmp = NULL;
-  COMPLEX*	U	   = NULL;
-  double	phase	   = 0.0;
-  double	phase1	   = 0.0;
-  double	phase2	   = 0.0;
-  int           dim	   = 0;
-
-  if (!(gbank_get_unitary(qstate->gbank, kind, phase, phase1, phase2, &dim, (void**)&U)))
-      ERR_RETURN(ERROR_GBANK_GET_UNITARY,false);
-
-  if ((qstate == NULL) || (n < 0) || (n >= qstate->qubit_num))
-    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
-  
-  if (!(qstate_init(qstate->qubit_num, (void**)&qstate_tmp)))
-    ERR_RETURN(ERROR_QSTATE_INIT,false);
-
-  if (!(_qstate_operate_unitary2(qstate_tmp->camp, qstate->camp, U,
-				 qstate->qubit_num, qstate->state_num, n)))
-    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
-  
-  memcpy(qstate->camp, qstate_tmp->camp, sizeof(COMPLEX)*qstate->state_num);
-  qstate_free(qstate_tmp); qstate_tmp = NULL;
-
-  free(U); U = NULL;
-
-  SUC_RETURN(true);
-}
-
-static bool _qstate_operate_qgate_1_rot(QState* qstate, Axis axis, double phase,
-					double unit, int n)
-{
-  QState*	qstate_tmp = NULL;
-  COMPLEX*	U	   = NULL;
-  Kind		kind	   = ROTATION_Z;
-  int		dim	   = 0;
-  double	phase1	   = 0.0;
-  double	phase2	   = 0.0;
-
-  if ((qstate == NULL) || (n < 0) || (n >= qstate->qubit_num))
-    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
-
-  if (axis == X_AXIS) kind = ROTATION_X;
-  else if (axis == Y_AXIS) kind = ROTATION_Y;
-  else if (axis == Z_AXIS) kind = ROTATION_Z;
-  else ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
-  
-  if (!(gbank_get_unitary(qstate->gbank, kind, phase, phase1, phase2, &dim, (void**)&U)))
-      ERR_RETURN(ERROR_GBANK_GET_UNITARY,false);
-  
-  if (!(qstate_init(qstate->qubit_num, (void**)&qstate_tmp)))
-    ERR_RETURN(ERROR_QSTATE_INIT,false);
-  
-  if (!(_qstate_operate_unitary2(qstate_tmp->camp, qstate->camp, U,
-				 qstate->qubit_num, qstate->state_num, n)))
-    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
-  
-  memcpy(qstate->camp, qstate_tmp->camp, sizeof(COMPLEX)*qstate->state_num);
-  qstate_free(qstate_tmp); qstate_tmp = NULL;
-
-  free(U); U = NULL;
-
-  SUC_RETURN(true);
-}
-
-static bool _qstate_operate_qgate_2(QState* qstate, Kind kind, int m, int n)
-{
-  QState*	qstate_tmp = NULL;
-  COMPLEX*	U	   = NULL;
-  double	phase	   = 0.0;
-  double	phase1	   = 0.0;
-  double	phase2	   = 0.0;
-  int           dim	   = 0;
-
-  if (!(gbank_get_unitary(qstate->gbank, kind, phase, phase1, phase2, &dim, (void**)&U)))
-      ERR_RETURN(ERROR_GBANK_GET_UNITARY,false);
-
-  if ((qstate == NULL) ||
-      (m < 0) || (m >= qstate->qubit_num) ||
-      (n < 0) || (n >= qstate->qubit_num))
-    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
-  
-  if (!(qstate_init(qstate->qubit_num, (void**)&qstate_tmp)))
-    ERR_RETURN(ERROR_QSTATE_INIT,false);
-  
-  if (!(_qstate_operate_unitary4(qstate_tmp->camp, qstate->camp, U,
-				 qstate->qubit_num, qstate->state_num, m, n)))
-    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
-  
-  memcpy(qstate->camp, qstate_tmp->camp, sizeof(COMPLEX)*qstate->state_num);
-  qstate_free(qstate_tmp); qstate_tmp = NULL;
-
-  free(U); U = NULL;
-
-  SUC_RETURN(true);
-}
+#endif
 
 static bool _qstate_transform_basis(QState* qstate, double angle, double phase, int n)
 {
@@ -673,18 +627,20 @@ static bool _qstate_transform_basis(QState* qstate, double angle, double phase, 
      - U = Rz(PI/2 + phi) H Rz(theta) H
      - U+ = H Rz(-theta) H Rz(-PI/2 - phi)
    */
-  double phs = -0.5 - phase;
-  double ang = -angle;
+  double	phs = -0.5 - phase;
+  double	ang = -angle;
+  int		qubit_id[MAX_QUBIT_NUM];
 
   if (qstate == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
   
-  if (!(_qstate_operate_qgate_1_rot(qstate, Z_AXIS, phs, M_PI, n)))
+  qubit_id[0] = n;
+  if (!(qstate_operate_qgate(qstate, ROTATION_Z, phs, 0.0, 0.0, qubit_id)))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
-  if (!(_qstate_operate_qgate_1(qstate, HADAMARD, n)))
+  if (!(qstate_operate_qgate(qstate, HADAMARD, 0.0, 0.0, 0.0, qubit_id)))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
-  if (!(_qstate_operate_qgate_1_rot(qstate, Z_AXIS, ang, M_PI, n)))
+  if (!(qstate_operate_qgate(qstate, ROTATION_Z, ang, 0.0, 0.0, qubit_id)))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
-  if (!(_qstate_operate_qgate_1(qstate, HADAMARD, n)))
+  if (!(qstate_operate_qgate(qstate, HADAMARD, 0.0, 0.0, 0.0, qubit_id)))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
   SUC_RETURN(true);
@@ -698,18 +654,20 @@ static bool _qstate_transform_basis_inv(QState* qstate, double angle, double pha
      - U = Rz(PI/2 + phi) H Rz(theta) H
      - U+ = H Rz(-theta) H Rz(-PI/2 - phi)
    */
-  double phs = 0.5 + phase;
-  double ang = angle;
+  double	phs = 0.5 + phase;
+  double	ang = angle;
+  int		qubit_id[MAX_QUBIT_NUM];
 
   if (qstate == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
   
-  if (!(_qstate_operate_qgate_1(qstate, HADAMARD, n)))
+  qubit_id[0] = n;
+  if (!(qstate_operate_qgate(qstate, HADAMARD, 0.0, 0.0, 0.0, qubit_id)))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
-  if (!(_qstate_operate_qgate_1_rot(qstate, Z_AXIS, ang, M_PI, n)))
+  if (!(qstate_operate_qgate(qstate, ROTATION_Z, ang, 0.0, 0.0, qubit_id)))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
-  if (!(_qstate_operate_qgate_1(qstate, HADAMARD, n)))
+  if (!(qstate_operate_qgate(qstate, HADAMARD, 0.0, 0.0, 0.0, qubit_id)))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
-  if (!(_qstate_operate_qgate_1_rot(qstate, Z_AXIS, phs, M_PI, n)))
+  if (!(qstate_operate_qgate(qstate, ROTATION_Z, phs, 0.0, 0.0, qubit_id)))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
   SUC_RETURN(true);
@@ -848,21 +806,19 @@ bool qstate_measure_bell(QState* qstate, int shot_num, int qubit_num,
 			 int qubit_id[MAX_QUBIT_NUM], void** mdata_out)
 {
   MData*	mdata  = NULL;
-  int		q0     = qubit_id[0];
-  int		q1     = qubit_id[1];
   
   if ((qstate == NULL) || (shot_num < 1) || (qubit_num != 2))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
   /* equivalent transform to bell-basis */
   /* CX 0 1 */
-  if (!(_qstate_operate_qgate_2(qstate, CONTROLLED_X, q0, q1)))
+  if (!(qstate_operate_qgate(qstate, CONTROLLED_X, 0.0, 0.0, 0.0, qubit_id)))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
   /* H 0 */
-  if (!(_qstate_operate_qgate_1(qstate, HADAMARD, q0)))
+  if (!(qstate_operate_qgate(qstate, HADAMARD, 0.0, 0.0, 0.0, qubit_id)))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
   /* CX 0 1 */
-  if (!(_qstate_operate_qgate_2(qstate, CONTROLLED_X, q0, q1)))
+  if (!(qstate_operate_qgate(qstate, CONTROLLED_X, 0.0, 0.0, 0.0, qubit_id)))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
   /* execute Bell-mesurement */
@@ -871,13 +827,13 @@ bool qstate_measure_bell(QState* qstate, int shot_num, int qubit_num,
 
   /* equivalent transform to bell-basis (inverse) */
   /* CX 0 1 */
-  if (!(_qstate_operate_qgate_2(qstate, CONTROLLED_X, q0, q1)))
+  if (!(qstate_operate_qgate(qstate, CONTROLLED_X, 0.0, 0.0, 0.0, qubit_id)))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
   /* H 0 */
-  if (!(_qstate_operate_qgate_1(qstate, HADAMARD, q0)))
+  if (!(qstate_operate_qgate(qstate, HADAMARD, 0.0, 0.0, 0.0, qubit_id)))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
   /* CX 0 1 */
-  if (!(_qstate_operate_qgate_2(qstate, CONTROLLED_X, q0, q1)))
+  if (!(qstate_operate_qgate(qstate, CONTROLLED_X, 0.0, 0.0, 0.0, qubit_id)))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
   *mdata_out = mdata;
@@ -900,8 +856,13 @@ bool qstate_operate_qgate(QState* qstate, Kind kind, double alpha, double beta,
   else {
     if (!(gbank_get_unitary(qstate->gbank, kind, alpha, beta, gamma, &dim, (void**)&U)))
       ERR_RETURN(ERROR_GBANK_GET_UNITARY,false);
+#ifdef TEST_NEW_VERSION
+    if (!(_qstate_operate_unitary_new(qstate, U, dim, q0, q1)))
+      ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+#else
     if (!(_qstate_operate_unitary(qstate, U, dim, q0, q1)))
       ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+#endif
     free(U); U = NULL;
     SUC_RETURN(true);
   }
@@ -909,7 +870,8 @@ bool qstate_operate_qgate(QState* qstate, Kind kind, double alpha, double beta,
 
 static bool _qstate_evolve_spro(QState* qstate, SPro* spro, double time)
 {
-  int pre,now;
+  int	pre,now;
+  int	qubit_id[MAX_QUBIT_NUM];
   
   if ((qstate == NULL) || (spro == NULL))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
@@ -923,11 +885,13 @@ static bool _qstate_evolve_spro(QState* qstate, SPro* spro, double time)
     }
     /* operate G: G=H (if PauliX), G=Rx(-0.5) (if PauliY), G=I (if PauliZ) */
     if (spro->spin_type[now] == SIGMA_X) {
-      if (!(_qstate_operate_qgate_1(qstate, HADAMARD, now)))
+      qubit_id[0] = now;
+      if (!(qstate_operate_qgate(qstate, HADAMARD, 0.0, 0.0, 0.0, qubit_id)))
 	ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
     }
     else if (spro->spin_type[now] == SIGMA_Y) {
-      if (!(_qstate_operate_qgate_1_rot(qstate, X_AXIS, -0.5, M_PI, now)))
+      qubit_id[0] = now;
+      if (!(qstate_operate_qgate(qstate, ROTATION_X, -0.5, 0.0, 0.0, qubit_id)))
 	ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
     }
     else if (spro->spin_type[now] == SIGMA_Z) {
@@ -939,7 +903,9 @@ static bool _qstate_evolve_spro(QState* qstate, SPro* spro, double time)
     /* operate CX */
     if (pre >= 0) {
       if ((spro->spin_type[pre] != NONE) && (spro->spin_type[now] != NONE)) {
-	if (!(_qstate_operate_qgate_2(qstate, CONTROLLED_X, pre, now)))
+	qubit_id[0] = pre;
+	qubit_id[1] = now;
+	if (!(qstate_operate_qgate(qstate, CONTROLLED_X, 0.0, 0.0, 0.0, qubit_id)))
 	  ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
       }
     }
@@ -948,7 +914,8 @@ static bool _qstate_evolve_spro(QState* qstate, SPro* spro, double time)
   
   /* operate Rz(-2.0*t) */
   now = spro->spin_num-1;
-  if (!(_qstate_operate_qgate_1_rot(qstate, Z_AXIS, -2.0*time, M_PI, now)))
+  qubit_id[0] = now;
+  if (!(qstate_operate_qgate(qstate, ROTATION_Z, -2.0*time, 0.0, 0.0, qubit_id)))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
   pre = now; now--;
@@ -961,17 +928,21 @@ static bool _qstate_evolve_spro(QState* qstate, SPro* spro, double time)
     /* operate CX */
     if (now >= 0) {
       if ((spro->spin_type[pre] != NONE) && (spro->spin_type[now] != NONE)) {
-	if (!(_qstate_operate_qgate_2(qstate, CONTROLLED_X, now, pre)))
+	qubit_id[0] = now;
+	qubit_id[1] = pre;
+	if (!(qstate_operate_qgate(qstate, CONTROLLED_X, 0.0, 0.0, 0.0, qubit_id)))
 	  ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
       }
     }
     /* operate G+: G+=H (if PauliX), G+=Rx(+0.5) (if PauliY), G+=I (if PauliZ) */
     if (spro->spin_type[pre] == SIGMA_X) {
-      if (!(_qstate_operate_qgate_1(qstate, HADAMARD, pre)))
+      qubit_id[0] = pre;
+      if (!(qstate_operate_qgate(qstate, HADAMARD, 0.0, 0.0, 0.0, qubit_id)))
 	ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
     }
     else if (spro->spin_type[pre] == SIGMA_Y) {
-      if (!(_qstate_operate_qgate_1_rot(qstate, X_AXIS, 0.5, M_PI, pre)))
+      qubit_id[0] = pre;
+      if (!(qstate_operate_qgate(qstate, ROTATION_X, 0.5, 0.0, 0.0, qubit_id)))
 	ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
     }
     else if (spro->spin_type[pre] == SIGMA_Z) {
@@ -1034,7 +1005,8 @@ static bool _qstate_mul(QState* qstate, double mul)
 
 static QState* _qstate_apply_spro(QState* qstate, SPro* spro)
 {
-  QState* qstate_ob = NULL;
+  QState*	qstate_ob = NULL;
+  int		qubit_id[MAX_QUBIT_NUM];
 
   if ((qstate == NULL) || (spro == NULL))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
@@ -1043,23 +1015,24 @@ static QState* _qstate_apply_spro(QState* qstate, SPro* spro)
     ERR_RETURN(ERROR_QSTATE_COPY,NULL);
 
   for (int i=0; i<spro->spin_num; i++) {
+    qubit_id[0] = i;
     if (spro->spin_type[i] == NONE) {
       ;
     }
     else if (spro->spin_type[i] == SIGMA_X) {
-      if (!(_qstate_operate_qgate_1(qstate_ob, PAULI_X, i))) {
+      if (!(qstate_operate_qgate(qstate_ob, PAULI_X, 0.0, 0.0, 0.0, qubit_id))) {
 	qstate_free(qstate_ob); qstate_ob = NULL;
 	ERR_RETURN(ERROR_INVALID_ARGUMENT,NULL);
       }
     }
     else if (spro->spin_type[i] == SIGMA_Y) {
-      if (!(_qstate_operate_qgate_1(qstate_ob, PAULI_Y, i))) {
+      if (!(qstate_operate_qgate(qstate_ob, PAULI_Y, 0.0, 0.0, 0.0, qubit_id))) {
 	qstate_free(qstate_ob); qstate_ob = NULL;
 	ERR_RETURN(ERROR_INVALID_ARGUMENT,NULL);
       }
     }
     else if (spro->spin_type[i] == SIGMA_Z) {
-      if (!(_qstate_operate_qgate_1(qstate_ob, PAULI_Z, i))) {
+      if (!(qstate_operate_qgate(qstate_ob, PAULI_Z, 0.0, 0.0, 0.0, qubit_id))) {
 	qstate_free(qstate_ob); qstate_ob = NULL;
 	ERR_RETURN(ERROR_INVALID_ARGUMENT,NULL);
       }

@@ -11,7 +11,7 @@ from qlazypy.Observable import *
 
 MDATA_TABLE = {}
 
-lib = ctypes.CDLL('libQlazy.so',mode=ctypes.RTLD_GLOBAL)
+lib = ctypes.CDLL('libqlz.so',mode=ctypes.RTLD_GLOBAL)
 libc = ctypes.CDLL(find_library("c"),mode=ctypes.RTLD_GLOBAL)
 
 class QState(ctypes.Structure):
@@ -25,12 +25,12 @@ class QState(ctypes.Structure):
         ('gbank', ctypes.c_void_p),
     ]
 
-    def __new__(cls, qubit_num=0, seed=None, vector=None):
+    def __new__(cls, qubit_num=None, seed=None, vector=None):
 
         if seed is None:
             seed = random.randint(0,1000000)
 
-        if qubit_num != 0:
+        if qubit_num is not None:
             if qubit_num > MAX_QUBIT_NUM:
                 print("qubit number must be {0:d} or less.".format(MAX_QUBIT_NUM))
                 raise QState_FailToInitialize()
@@ -469,10 +469,10 @@ class QState(ctypes.Structure):
             ret = lib.qstate_reset(ctypes.byref(self),ctypes.c_int(qubit_num), qid_array)
 
             if ret == FALSE:
-                raise QState_FailToShow()
+                raise QState_FailToReset()
 
         except Exception:
-            raise QState_FailToShow()
+            raise QState_FailToReset()
         
     def qstate_print(self, qid=None):
 

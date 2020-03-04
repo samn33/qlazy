@@ -504,6 +504,25 @@ class TestDensOp_free_all(unittest.TestCase):
         de_B = [de_0, [de_1,de_2]]
         DensOp.free_all(de_B)
         
+class TestDensOp_reset(unittest.TestCase):
+    """ test 'DensOp' : 'reset'
+    """
+
+    def test_reset(self):
+        """test 'reset'
+        """
+        dim = 2
+        qs = [QState(vector=VECTORS_2[i]) for i in range(dim)]
+        pr = PROBS_2
+        de = DensOp(qstate=qs, prob=pr)
+        de.reset()
+        actual = de.element
+        expect = np.array([[1, 0],[0, 0]])
+        ans = equal_matrices(actual, expect)
+        [qs[i].free() for i in range(dim)]
+        de.free()
+        self.assertEqual(ans,True)
+
 class TestDensOp_clone(unittest.TestCase):
     """ test 'DensOp' : 'clone'
     """

@@ -5,7 +5,7 @@ command and library of quantum computer simulator
 
 ## Description
 
-'qlazy' is a command of quantum computer simulator. 'libqlazy.so' is
+'qlazy' is a command of quantum computer simulator. 'libqlz.so' is
 the library used by 'qlazy' that supports fundamental quantum gates
 and measurement.
  

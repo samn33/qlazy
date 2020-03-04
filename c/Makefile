@@ -4,7 +4,7 @@ PROG_SRC = qlazy.c
 
 INC = qlazy.h
 
-LIB = libQlazy.so
+LIB = libqlz.so
 LIB_OBJ_BASE = qsystem.o init.o qgate.o qcirc.o qstate.o mdata.o gbank.o spro.o \
         observable.o densop.o misc.o message.o help.o
 LIB_SRC_BASE = qsystem.c init.c qgate.c qcirc.c qstate.c mdata.c gbank.c spro.c \
@@ -30,7 +30,7 @@ LFLAG = -L.
 LIB_OPTION =  -lm -lreadline
 
 $(PROG): $(PROG_OBJ) $(LIB)
-	$(CC_LINK) -o $@ $(CFLAG_LINK) $(LFLAG) $(IFLAG) $(PROG_OBJ) $(LIB_OPTION) -lQlazy
+	$(CC_LINK) -o $@ $(CFLAG_LINK) $(LFLAG) $(IFLAG) $(PROG_OBJ) $(LIB_OPTION) -lqlz
 
 $(LIB): $(LIB_OBJ)
 	$(CC_LINK) $(CFLAG_LINK) $(IFLAG) -shared $(LIB_OBJ) -o $@ $(LIB_OPTION)

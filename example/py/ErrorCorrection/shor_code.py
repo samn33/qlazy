@@ -18,7 +18,7 @@ def noise(self, kind='', prob=0.0, qid=[]):
     [qchannel[kind](i, prob=prob) for i in qid]
     return self
 
-def code(self):
+def encode(self):
 
     self.cx(0,3).cx(0,6)
     self.h(0).h(3).h(6)
@@ -41,7 +41,7 @@ def correct(self):
 if __name__ == '__main__':
 
     # add custom gate
-    DensOp.add_method(code)
+    DensOp.add_method(encode)
     DensOp.add_method(noise)
     DensOp.add_method(correct)
 
@@ -56,7 +56,7 @@ if __name__ == '__main__':
 
     # error correction (shor code)
     de_ini, de_fin = create_densop()
-    de_fin.code()
+    de_fin.encode()
     de_fin.noise(kind=kind, prob=prob, qid=qid)
     de_fin.correct()
 

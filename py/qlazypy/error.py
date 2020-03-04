@@ -66,6 +66,10 @@ class QState_FailToBloch(Exception):
     def __str__(self):
         return "QState: fail to bloch"
 
+class QState_FailToReset(Exception):
+    def __str__(self):
+        return "QState: fail to reset"
+
 class QState_FailToFreeAll(Exception):
     def __str__(self):
         return "QState: fail to free all"
@@ -163,6 +167,10 @@ class DensOp_FailToOperateQGate(Exception):
 class DensOp_FailToTensorProduct(Exception):
     def __str__(self):
         return "DensOp: fail to tensor product"
+    
+class DensOp_FailToReset(Exception):
+    def __str__(self):
+        return "DensOp: fail to reset"
     
 class DensOp_FailToFreeAll(Exception):
     def __str__(self):

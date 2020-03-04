@@ -5,12 +5,12 @@ Quantum Computer Simulator
 
 ## Install
 
-### command and library - qlazy,libQlazy.so
+### command and library - qlazy,libqlz.so
 
     $ git clone https://github.com/samn33/qlazy.git
     $ cd qlazy/c
     $ mkdir build; cd build; cmake ..; make
-    $ mv libQlazy.so ~/lib; mv qlazy ~/bin
+    $ mv libqlz.so ~/lib; mv qlazy ~/bin
 	
 add followings to your ~/.bashrc
 

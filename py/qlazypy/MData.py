@@ -5,7 +5,7 @@ from ctypes.util import find_library
 from qlazypy.error import *
 from qlazypy.config import *
 
-lib = ctypes.CDLL('libQlazy.so',mode=ctypes.RTLD_GLOBAL)
+lib = ctypes.CDLL('libqlz.so',mode=ctypes.RTLD_GLOBAL)
 libc = ctypes.CDLL(find_library("c"),mode=ctypes.RTLD_GLOBAL)
 
 class MDataC(ctypes.Structure):
