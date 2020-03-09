@@ -1,3 +1,8 @@
+2020-03-10  Sam.N  <saminriver33@gmail.com>
+
+	* v0.0.36
+	- add function(py): load darwin library
+
 2020-03-05  Sam.N  <saminriver33@gmail.com>
 
 	* v0.0.35

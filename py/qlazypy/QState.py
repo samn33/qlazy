@@ -8,10 +8,11 @@ from qlazypy.error import *
 from qlazypy.config import *
 from qlazypy.MData import *
 from qlazypy.Observable import *
+from qlazypy.util import get_lib_ext
 
 MDATA_TABLE = {}
 
-lib = ctypes.CDLL('libqlz.so',mode=ctypes.RTLD_GLOBAL)
+lib = ctypes.CDLL('libqlz.'+get_lib_ext(),mode=ctypes.RTLD_GLOBAL)
 libc = ctypes.CDLL(find_library("c"),mode=ctypes.RTLD_GLOBAL)
 
 class QState(ctypes.Structure):

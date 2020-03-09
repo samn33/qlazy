@@ -5,8 +5,9 @@ import numpy as np
 from ctypes.util import find_library
 from qlazypy.error import *
 from qlazypy.config import *
+from qlazypy.util import get_lib_ext
 
-lib = ctypes.CDLL('libqlz.so',mode=ctypes.RTLD_GLOBAL)
+lib = ctypes.CDLL('libqlz.'+get_lib_ext(),mode=ctypes.RTLD_GLOBAL)
 libc = ctypes.CDLL(find_library("c"),mode=ctypes.RTLD_GLOBAL)
 
 class Observable(ctypes.Structure):

@@ -615,7 +615,7 @@ resultメソッドで参照する際にtagの指定を省略すると、'default
 合、インスタンスごとのタグ名で各測定結果が保持されますので、以下のよう
 に指定しても大丈夫です。
 
-    qs_0 = QState(1)
+    qs_0 = QState(1).h(0)
 	qs_0.m(shots=20, tag='bar')
     
     qs_1 = QState(2)

@@ -9,8 +9,9 @@ from qlazypy.config import *
 from qlazypy.QState import *
 from qlazypy.MData import *
 from qlazypy.Observable import *
+from qlazypy.util import get_lib_ext
 
-lib = ctypes.CDLL('libqlz.so',mode=ctypes.RTLD_GLOBAL)
+lib = ctypes.CDLL('libqlz.'+get_lib_ext(),mode=ctypes.RTLD_GLOBAL)
 libc = ctypes.CDLL(find_library("c"),mode=ctypes.RTLD_GLOBAL)
 
 class DensOp(ctypes.Structure):
