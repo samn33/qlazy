@@ -17,9 +17,9 @@ add followings to your ~/.bashrc
     export PATH=$PATH:~/bin
     export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/lib
 
-You may also need to install 'readline-dev'
+You may also need to install 'libreadline-dev'
 
-    $ sudo apt install readline-dev
+    $ sudo apt install libreadline-dev
 
 ### python package - qlazypy
 
@@ -108,8 +108,8 @@ another style to print measured result.
 
 ## Requirements
 
-    * Linux(Ubuntu16.04)
-    * Python3.5
+    * Linux(Ubuntu18.04)
+    * Python3.6.9
 
 ## Licence
 

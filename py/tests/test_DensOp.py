@@ -508,8 +508,8 @@ class TestDensOp_reset(unittest.TestCase):
     """ test 'DensOp' : 'reset'
     """
 
-    def test_reset(self):
-        """test 'reset'
+    def test_reset_all(self):
+        """test 'reset' (all)
         """
         dim = 2
         qs = [QState(vector=VECTORS_2[i]) for i in range(dim)]
@@ -523,6 +523,39 @@ class TestDensOp_reset(unittest.TestCase):
         de.free()
         self.assertEqual(ans,True)
 
+    def test_reset_partial(self):
+        """test 'reset' (partial)
+        """
+        qs_A = [QState(vector=VECTORS_2[i]) for i in range(2)]
+        pr_A = PROBS_2
+        de_A = DensOp(qstate=qs_A, prob=pr_A)
+
+        qs_B = [QState(vector=VECTORS_4[i]) for i in range(4)]
+        pr_B = PROBS_4
+        de_B = DensOp(qstate=qs_B, prob=pr_B)
+
+        qs_C = QState(2)
+        de_C = DensOp(qstate=[qs_C])
+
+        de_X = de_A.tenspro(de_B)
+        de_X.reset(qid=[1,2])
+        de_Y = de_A.tenspro(de_C)
+
+        actual = de_X.element
+        expect = de_Y.element
+        ans = equal_matrices(actual, expect)
+
+        [qs_A[i].free() for i in range(2)]
+        [qs_B[i].free() for i in range(4)]
+        qs_C.free()
+
+        de_A.free()
+        de_B.free()
+        de_C.free()
+        de_X.free()
+        de_Y.free()
+        self.assertEqual(ans,True)
+        
 class TestDensOp_clone(unittest.TestCase):
     """ test 'DensOp' : 'clone'
     """

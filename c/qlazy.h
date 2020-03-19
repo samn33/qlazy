@@ -15,7 +15,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
-#define VERSION "0.0.36"
+#define VERSION "0.0.37"
 
 //#define TEST_NEW_VERSION
 
@@ -139,6 +139,7 @@ typedef enum _ErrCode {
   ERROR_DENSOP_PATRACE,
   ERROR_DENSOP_APPLY_MATRIX,
   ERROR_DENSOP_PROBABILITY,
+  ERROR_DENSOP_TENSOR_PRODUCT,
 
   /* qlazy interactive mode */
   ERROR_NEED_TO_INITIALIZE,

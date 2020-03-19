@@ -1,3 +1,10 @@
+2020-03-19  Sam.N  <saminriver33@gmail.com>
+
+	* v0.0.37
+	- add option(c/py): DensOp - reset (reset partial qubits)
+	- update(doc): Tutorials (Tutorial_py, etc)
+	- add example(py): steane code
+
 2020-03-10  Sam.N  <saminriver33@gmail.com>
 
 	* v0.0.36

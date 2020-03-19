@@ -171,6 +171,9 @@ void error_msg(ErrCode err)
   case ERROR_DENSOP_PROBABILITY:
     fprintf(stderr, "ERROR: densop probability failure !\n");
     break;
+  case ERROR_DENSOP_TENSOR_PRODUCT:
+    fprintf(stderr, "ERROR: densop tensor product failure !\n");
+    break;
 
   case ERROR_NEED_TO_INITIALIZE:
     fprintf(stderr, "ERROR: need to initialize !\n");

@@ -83,58 +83,19 @@ bool densop_init_with_matrix(double* real, double* imag, int row, int col,
 
 bool densop_reset(DensOp* densop, int qubit_num, int qubit_id[MAX_QUBIT_NUM])
 {
-  DensOp*	densop_A  = NULL;
-  DensOp*	densop_B  = NULL; /* |0><0| */
-  DensOp*	densop_AB = NULL;
-  int		row,col;
-  int		row_B,col_B;
+  int row,col;
   
   if ((densop == NULL) || (densop->row != densop->col))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
   row = densop->row;
   col = densop->col;
-  row_B = (int)(pow(2.0, (double)qubit_num) + 0.5);
-  col_B = (int)(pow(2.0, (double)qubit_num) + 0.5);
-
-  /* reset whole system */
-  if ((row == row_B) && (col == col_B)) {
-    for (int i=0; i<row*col; i++) {
-      densop->elm[i] = 0.0;
-    }
-    densop->elm[0] = 1.0;
+  for (int i=0; i<row*col; i++) {
+    densop->elm[i] = 0.0;
+  }
+  densop->elm[0] = 1.0;
   
-    SUC_RETURN(true);
-  }
-
-  /* reset partial system */
-  else if ((row > row_B) && (col > col_B)) {
-    /* extract partial system (A) */
-    if (!(densop_patrace(densop, qubit_num, qubit_id, (void**)&densop_A)))
-      ERR_RETURN(ERROR_DENSOP_PATRACE,false);
-  
-    /* prepare |0><0| state (B) */
-    if(!(densop_B = _create_densop(row_B, col_B)))
-      ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
-    densop_B->elm[0] = 1.0;
-
-    /* tensor product A and B */
-    if (!(densop_tensor_product(densop_A, densop_B, (void**)&densop_AB)))
-      ERR_RETURN(ERROR_DENSOP_TENSOR_PRODUCT,false);
-    for (int i=0; i<row*col; i++) {
-      densop->elm[i] = densop_AB->elm[i];
-    }
-
-    densop_free(densop_A); densop_A = NULL;
-    densop_free(densop_B); densop_B = NULL;
-    densop_free(densop_AB); densop_AB = NULL;
-
-    SUC_RETURN(true);
-  }
-
-  else {
-    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
-  }
+  SUC_RETURN(true);
 }
 
 bool densop_copy(DensOp* densop_in, void** densop_out)

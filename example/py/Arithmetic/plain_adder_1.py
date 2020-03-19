@@ -62,7 +62,7 @@ def result(self,id_a,id_b):
     # measurement
     id_ab = id_a + id_b
     iid_ab = id_ab[::-1]
-    freq = self.m(id=iid_ab, shots=100).frq
+    freq = self.m(qid=iid_ab, shots=100).frq
     
     # set results
     a_list = []

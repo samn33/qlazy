@@ -12,6 +12,7 @@ directories=(
     VQE
     DeutschJozsa
     LogicalFunction
+    Arithmetic
     Shor
     Grover
     Toffoli

@@ -46,9 +46,9 @@ class DensOp(ctypes.Structure):
 
         return str(self.get_elm())
 
-    def reset(self):
+    def reset(self, qid=[]):
 
-        self.densop_reset()
+        self.densop_reset(qid=qid)
         
     @classmethod
     def mix(cls, densop=[], prob=[]):
@@ -75,6 +75,21 @@ class DensOp(ctypes.Structure):
 
         setattr(cls, method.__name__, method)
         
+    @classmethod
+    def create_register(cls, num):
+
+        return [0]*num
+
+    @classmethod
+    def init_register(cls, *args):
+
+        idx = 0
+        for i in range(len(args)):
+            for j in range(len(args[i])):
+                args[i][j] = idx
+                idx += 1
+        return idx
+    
     @classmethod
     def free_all(cls, *densops):
 
