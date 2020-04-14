@@ -29,7 +29,7 @@ class MDataC(ctypes.Structure):
         ret = lib.mdata_print(ctypes.byref(self))
 
         if ret == FALSE:
-            raise MData_FailToShow()
+            raise MData_Error_Show()
 
     @property
     def frq(self):
@@ -38,7 +38,7 @@ class MDataC(ctypes.Structure):
             freq = ctypes.cast(self.freq, ctypes.POINTER(ctypes.c_int*self.state_num))
             freq_list = [freq.contents[i] for i in range(self.state_num)]
         except Exception:
-            raise MData_FailToGetFrq()
+            raise MData_Error_GetFrq()
         
         return np.array(freq_list)
 
@@ -84,7 +84,7 @@ class MData:
             mval = self.last_state
             return mval
         else:
-            raise MData_FailToGetMeasuredData()
+            raise MData_Error_GetMeasuredData()
 
     def measured_bit(self, q, angle=0.0, phase=0.0):
 
@@ -94,7 +94,7 @@ class MData:
             mbit = (self.last_state >> pos) % 2  # measured value '0' or '1'
             return mbit
         else:
-            raise MData_FailToGetMeasuredData()
+            raise MData_Error_GetMeasuredData()
 
     def measured_is_zero(self, q, angle=0.0, phase=0.0):
 
@@ -103,7 +103,7 @@ class MData:
         elif self.measured_bit(q, angle=angle, phase=phase) == 1:
             return False
         else:
-            raise MData_FailToGetMeasuredData()
+            raise MData_Error_GetMeasuredData()
         
     def measured_is_one(self, q, angle=0.0, phase=0.0):
 
@@ -112,7 +112,7 @@ class MData:
         elif self.measured_bit(q, angle=angle, phase=phase) == 0:
             return False
         else:
-            raise MData_FailToGetMeasuredData()
+            raise MData_Error_GetMeasuredData()
 
     def measured_freq(self, angle=0.0, phase=0.0):
 
@@ -122,7 +122,7 @@ class MData:
                    for k,v in enumerate(self.frq) if v > 0}
             return Counter(res)
         else:
-            raise MData_FailToGetMeasuredData()
+            raise MData_Error_GetMeasuredData()
             
     @property
     def frq(self):

@@ -19,7 +19,7 @@ directories=(
     DensityOperator
     PartialTrace
     POVM
-    Schmidt
+    SchmidtDecomp
     Purification
     TraceDistance
     Fidelity

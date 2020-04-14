@@ -12,6 +12,15 @@ COS_PI_4 = math.cos(math.pi/4)
 SIN_PI_8 = math.sin(math.pi/8)
 SIN_PI_4 = math.sin(math.pi/4)
 
+VECTOR_16 = [-0.20483596+0.23441366j, -0.169582+0.27101216j,
+             -0.164284  +0.22521276j, -0.14760841-0.02810872j,
+             -0.14938938+0.10050371j, -0.13766646+0.19531029j,
+             -0.16514988-0.06170589j, 0.03489414+0.18582622j,
+             0.08001864+0.19883844j, 0.11670812-0.05657322j,
+             0.41775044+0.14179641j, -0.19339021+0.09413556j,
+             -0.08368439+0.1502309j, 0.25751741-0.20723416j,
+             -0.00226682+0.0068861j, 0.06875241-0.31143861j]
+
 def equal_values(val_0, val_1):
 
     dif = abs(val_0 - val_1)
@@ -1122,6 +1131,36 @@ class TestQState_measure(unittest.TestCase):
         actual = sum(freq.values())
         self.assertEqual(actual, 100)
         qs.free()
+
+class TestQState_schmidt_decocmp(unittest.TestCase):
+    """ test 'QState' : 'schmidt_decomp'
+    """
+
+    def test_schmidt_decomp(self):
+        """test 'schmidt_decomp'
+        """
+        qs_ori = QState(vector=VECTOR_16)
+        coef, qs_0, qs_1 = qs_ori.schmidt_decomp(qid_0=[0,1], qid_1=[2,3])
+        rank = len(coef)
+        qs_list = [qs_0[i].tenspro(qs_1[i]) for i in range(rank)]
+        vec_comp = np.zeros(qs_ori.state_num, dtype=np.complex)
+        for i in range(rank):
+            vec_comp = vec_comp + coef[i] * qs_list[i].get_amp()
+        qs_comp = QState(vector=vec_comp)
+        ans = equal_qstates(qs_ori, qs_comp)
+        qs_ori.free()
+        qs_comp.free()
+        self.assertEqual(ans,True)
+
+    def test_schmidt_coef(self):
+        """test 'schmidt_coef'
+        """
+        qs_ori = QState(vector=VECTOR_16)
+        actual = qs_ori.schmidt_coef(qid_0=[0,1], qid_1=[2,3])
+        expect = np.array([0.7617283446607606, 0.5858869297203181,
+                           0.266279733863013, 0.0748434222702293])
+        ans = equal_vectors(actual, expect)
+        self.assertEqual(ans, True)
 
 if __name__ == '__main__':
     unittest.main()

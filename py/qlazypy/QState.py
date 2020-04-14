@@ -34,7 +34,7 @@ class QState(ctypes.Structure):
         if qubit_num is not None:
             if qubit_num > MAX_QUBIT_NUM:
                 print("qubit number must be {0:d} or less.".format(MAX_QUBIT_NUM))
-                raise QState_FailToInitialize()
+                raise QState_Error_Initialize()
             
             return cls.qstate_init(qubit_num, seed)
 
@@ -78,7 +78,7 @@ class QState(ctypes.Structure):
             elif type(qs) is QState:
                 qs.free()
             else:
-                raise QState_FailToFreeAll()
+                raise QState_Error_FreeAll()
 
     @property
     def amp(self, qid=None):
@@ -140,6 +140,37 @@ class QState(ctypes.Structure):
     def apply(self, matrix=None, qid=None):
         self.qstate_apply_matrix(matrix=matrix, qid=qid)
         return self
+
+    def __schmidt_decomp(self, qid_0=[], qid_1=[]):
+
+        vec = self.get_amp(qid=qid_0+qid_1)
+
+        row = 2**len(qid_0)
+        col = 2**len(qid_1)
+        mat = np.zeros((row, col), dtype=np.complex)
+        for idx,comp in enumerate(vec):
+            mat[idx//col][idx%col] = comp
+    
+        U,D,V = np.linalg.svd(mat, full_matrices=False)
+        coef = np.array([d for d in D if d > EPS])
+        
+        vec_0 = [v for i,v in enumerate(U.T) if i < len(coef)]
+        vec_1 = [v for i,v in enumerate(V) if i < len(coef)]
+    
+        return (coef, vec_0, vec_1)
+
+    def schmidt_decomp(self, qid_0=[], qid_1=[]):
+
+        coef, vec_0, vec_1 = self.__schmidt_decomp(qid_0=qid_0, qid_1=qid_1)
+        qs_0 = [QState(vector=v) for i,v in enumerate(vec_0) if i < len(coef)]
+        qs_1 = [QState(vector=v) for i,v in enumerate(vec_1) if i < len(coef)]
+    
+        return (coef, qs_0, qs_1)
+
+    def schmidt_coef(self, qid_0=[], qid_1=[]):
+
+        coef, vec_0, vec_1 = self.__schmidt_decomp(qid_0=qid_0, qid_1=qid_1)
+        return coef
 
     # 1-qubit gate
 
@@ -411,7 +442,7 @@ class QState(ctypes.Structure):
         ret = lib.qstate_init(ctypes.c_int(qubit_num), c_qstate)
 
         if ret == FALSE:
-            raise QState_FailToInitialize()
+            raise QState_Error_Initialize()
 
         out = ctypes.cast(c_qstate.value, ctypes.POINTER(QState))
         
@@ -443,7 +474,7 @@ class QState(ctypes.Structure):
                                           c_qstate)
 
         if ret == FALSE:
-            raise QState_FailToInitialize()
+            raise QState_Error_Initialize()
 
         out = ctypes.cast(c_qstate.value, ctypes.POINTER(QState))
         
@@ -470,10 +501,10 @@ class QState(ctypes.Structure):
             ret = lib.qstate_reset(ctypes.byref(self),ctypes.c_int(qubit_num), qid_array)
 
             if ret == FALSE:
-                raise QState_FailToReset()
+                raise QState_Error_Reset()
 
         except Exception:
-            raise QState_FailToReset()
+            raise QState_Error_Reset()
         
     def qstate_print(self, qid=None):
 
@@ -496,10 +527,10 @@ class QState(ctypes.Structure):
             ret = lib.qstate_print(ctypes.byref(self),ctypes.c_int(qubit_num), qid_array)
 
             if ret == FALSE:
-                raise QState_FailToShow()
+                raise QState_Error_Show()
 
         except Exception:
-            raise QState_FailToShow()
+            raise QState_Error_Show()
         
     def qstate_copy(self):
 
@@ -513,14 +544,14 @@ class QState(ctypes.Structure):
             ret = lib.qstate_copy(ctypes.byref(self), c_qstate)
 
             if ret == FALSE:
-                raise QState_FailToClone()
+                raise QState_Error_Clone()
 
             out = ctypes.cast(c_qstate.value, ctypes.POINTER(QState))
 
             return out.contents
         
         except Exception:
-            raise QState_FailToClone()
+            raise QState_Error_Clone()
 
     def qstate_bloch(self, q=0):
 
@@ -541,7 +572,7 @@ class QState(ctypes.Structure):
                                    ctypes.byref(c_theta), ctypes.byref(c_phi))
 
             if ret == FALSE:
-                raise QState_FailToBloch()
+                raise QState_Error_Bloch()
 
             theta = c_theta.value
             phi = c_phi.value
@@ -549,7 +580,7 @@ class QState(ctypes.Structure):
             return theta,phi
 
         except Exception:
-            raise QState_FailToBloch()
+            raise QState_Error_Bloch()
 
     def qstate_inner_product(self, qstate):
 
@@ -569,7 +600,7 @@ class QState(ctypes.Structure):
                                            ctypes.byref(c_real), ctypes.byref(c_imag))
 
             if ret == FALSE:
-                raise QState_FailToInnerProduct()
+                raise QState_Error_InnerProduct()
 
             real = c_real.value
             imag = c_imag.value
@@ -577,7 +608,7 @@ class QState(ctypes.Structure):
             return complex(real, imag)
         
         except Exception:
-            raise QState_FailToInnerProduct()
+            raise QState_Error_InnerProduct()
 
     def qstate_tensor_product(self, qstate):
 
@@ -593,22 +624,22 @@ class QState(ctypes.Structure):
                                             c_qstate_out)
 
             if ret == FALSE:
-                raise QState_FailToTensorProduct()
+                raise QState_Error_TensorProduct()
 
             out = ctypes.cast(c_qstate_out.value, ctypes.POINTER(QState))
 
             return out.contents
 
         except Exception:
-            raise QState_FailToTensorProduct()
+            raise QState_Error_TensorProduct()
 
     def qstate_evolve(self, observable=None, time=0.0, iter=0):
 
         if iter < 1:
-            raise QState_FailToEvolve()
+            raise QState_Error_Evolve()
         
         if observable is None:
-            raise QState_FailToEvolve()
+            raise QState_Error_Evolve()
         
         try:
             lib.qstate_evolve.restype = ctypes.c_int
@@ -618,15 +649,15 @@ class QState(ctypes.Structure):
                                     ctypes.c_double(time), ctypes.c_int(iter))
 
             if ret == FALSE:
-                raise QState_FailToEvolve()
+                raise QState_Error_Evolve()
             
         except Exception:
-            raise QState_FailToEvolve()
+            raise QState_Error_Evolve()
 
     def qstate_expect_value(self, observable=None):
 
         if observable is None:
-            raise QState_FailToExpect()
+            raise QState_Error_Expect()
         
         try:
             val = 0.0
@@ -640,23 +671,23 @@ class QState(ctypes.Structure):
                                           ctypes.byref(c_val))
             
             if ret == FALSE:
-                raise QState_FailToExpect()
+                raise QState_Error_Expect()
 
             val = c_val.value
             
             return complex(val,0.0)
             
         except Exception:
-            raise QState_FailToExpect()
+            raise QState_Error_Expect()
 
         return out
 
     def qstate_apply_matrix(self, matrix=None, qid=None):
 
         if matrix is None:
-            raise QState_FailToApply()
+            raise QState_Error_Apply()
         if (matrix.shape[0] > self.state_num or matrix.shape[0] > self.state_num):
-            raise QState_FailToApply()
+            raise QState_Error_Apply()
         
         if qid is None or qid == []:
             qid = [i for i in range(self.qubit_num)]
@@ -696,10 +727,10 @@ class QState(ctypes.Structure):
                                           ctypes.c_int(row), ctypes.c_int(col))
 
             if ret == FALSE:
-                raise QState_FailToApply()
+                raise QState_Error_Apply()
 
         except Exception:
-            raise QState_FailToApply()
+            raise QState_Error_Apply()
 
     def qstate_get_camp(self, qid=None):
 
@@ -732,7 +763,7 @@ class QState(ctypes.Structure):
                                       qid_array, c_camp)
 
             if ret == FALSE:
-                raise QState_FailToGetAmp()
+                raise QState_Error_GetAmp()
                 
             o = ctypes.cast(c_camp.value, ctypes.POINTER(ctypes.c_double))
             
@@ -745,17 +776,17 @@ class QState(ctypes.Structure):
             libc.free(o)
 
         except Exception:
-            raise QState_FailToGetCmp()
+            raise QState_Error_GetCmp()
 
         return np.array(out)
         
     def qstate_measure(self, qid=None, shots=DEF_SHOTS, angle=0.0, phase=0.0, tag=None):
 
         global MDATA_TABLE
-        
+
         if qid is None or qid == []:
             qid = [i for i in range(self.qubit_num)]
-            
+
         # error check
         self.__check_args(kind=MEASURE, qid=qid, shots=shots, angle=angle, phase=phase)
 
@@ -769,7 +800,7 @@ class QState(ctypes.Structure):
 
         mdata = None
         c_mdata = ctypes.c_void_p(mdata)
-        
+
         lib.qstate_measure.restype = ctypes.c_int
         lib.qstate_measure.argtypes = [ctypes.POINTER(QState), ctypes.c_int,
                                        ctypes.c_double, ctypes.c_double,
@@ -780,7 +811,7 @@ class QState(ctypes.Structure):
                                  ctypes.c_int(qubit_num), qid_array, c_mdata)
 
         if ret == FALSE:
-            raise QState_FailToMeasure()
+            raise QState_Error_Measure()
 
         out = ctypes.cast(c_mdata.value, ctypes.POINTER(MDataC))
         
@@ -831,7 +862,7 @@ class QState(ctypes.Structure):
                                       ctypes.c_int(qubit_num), qid_array, c_mdata)
 
         if ret == FALSE:
-            raise QState_FailToMeasure()
+            raise QState_Error_Measure()
 
         out = ctypes.cast(c_mdata.value, ctypes.POINTER(MDataC))
         
@@ -877,7 +908,7 @@ class QState(ctypes.Structure):
                                        ctypes.c_double(phase2), qid_array)
 
         if ret == FALSE:
-            raise QState_FailToOperateQgate()
+            raise QState_Error_OperateQgate()
 
     def __check_args(self, kind=None, qid=None, shots=None, angle=None,
                      phase=None, phase1=None, phase2=None):

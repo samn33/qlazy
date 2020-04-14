@@ -35,7 +35,7 @@ class Observable(ctypes.Structure):
         ret = lib.observable_init(c_str, c_observ)
 
         if ret == FALSE:
-            raise Observable_FailToInitialize()
+            raise Observable_Error_Initialize()
         
         out = ctypes.cast(c_observ.value, ctypes.POINTER(Observable))
 

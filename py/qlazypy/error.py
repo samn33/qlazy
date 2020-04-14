@@ -2,27 +2,27 @@
 
 # QState
 
-class QState_FailToInitialize(Exception):
+class QState_Error_Initialize(Exception):
     def __str__(self):
         return "QState: fail to initialize"
 
-class QState_FailToGetCmp(Exception):
+class QState_Error_GetCmp(Exception):
     def __str__(self):
         return "QState: fail to get cmp"
 
-class QState_FailToShow(Exception):
+class QState_Error_Show(Exception):
     def __str__(self):
         return "QState: fail to show"
 
-class QState_FailToClone(Exception):
+class QState_Error_Clone(Exception):
     def __str__(self):
         return "QState: fail to clone"
 
-class QState_FailToInnerProduct(Exception):
+class QState_Error_InnerProduct(Exception):
     def __str__(self):
         return "QState: fail to inner product"
 
-class QState_FailToTensorProduct(Exception):
+class QState_Error_TensorProduct(Exception):
     def __str__(self):
         return "QState: fail to tensor product"
 
@@ -46,132 +46,132 @@ class QState_UnknownQgateKind(Exception):
     def __str__(self):
         return "QState: unknown qgate kind"
 
-class QState_FailToOperateQgate(Exception):
+class QState_Error_OperateQgate(Exception):
     def __str__(self):
         return "QState: fail to operate qgate"
 
-class QState_FailToEvolve(Exception):
+class QState_Error_Evolve(Exception):
     def __str__(self):
         return "QState: fail to evolve"
 
-class QState_FailToExpect(Exception):
+class QState_Error_Expect(Exception):
     def __str__(self):
         return "QState: fail to expect"
 
-class QState_FailToApply(Exception):
+class QState_Error_Apply(Exception):
     def __str__(self):
         return "QState: fail to apply"
 
-class QState_FailToBloch(Exception):
+class QState_Error_Bloch(Exception):
     def __str__(self):
         return "QState: fail to bloch"
 
-class QState_FailToReset(Exception):
+class QState_Error_Reset(Exception):
     def __str__(self):
         return "QState: fail to reset"
 
-class QState_FailToFreeAll(Exception):
+class QState_Error_FreeAll(Exception):
     def __str__(self):
         return "QState: fail to free all"
 
 # MData
 
-class MData_FailToGetFrq(Exception):
+class MData_Error_GetFrq(Exception):
     def __str__(self):
         return "MData: fail to get frq"
 
-class MData_FailToShow(Exception):
+class MData_Error_Show(Exception):
     def __str__(self):
         return "MData: fail to show"
 
-class MData_FailToGetMeasuredData(Exception):
+class MData_Error_GetMeasuredData(Exception):
     def __str__(self):
         return "MData: fail to get measured data (probably not measured yet)"
 
 # Observable
 
-class Observable_FailToInitialize(Exception):
+class Observable_Error_Initialize(Exception):
     def __str__(self):
         return "Observable: fail to initialize"
 
 # DensOp
 
-class DensOp_FailToInitialize(Exception):
+class DensOp_Error_Initialize(Exception):
     def __str__(self):
         return "DensOp: fail to initialize"
 
-class DensOp_FailToShow(Exception):
+class DensOp_Error_Show(Exception):
     def __str__(self):
         return "DensOp: fail to show"
 
-class DensOp_FailToClone(Exception):
+class DensOp_Error_Clone(Exception):
     def __str__(self):
         return "DensOp: fail to clone"
 
-class DensOp_FailToAdd(Exception):
+class DensOp_Error_Add(Exception):
     def __str__(self):
         return "DensOp: fail to add"
 
-class DensOp_FailToMul(Exception):
+class DensOp_Error_Mul(Exception):
     def __str__(self):
         return "DensOp: fail to mul"
 
-class DensOp_FailToGetElm(Exception):
+class DensOp_Error_GetElm(Exception):
     def __str__(self):
         return "DensOp: fail to get_elm"
 
-class DensOp_FailToTrace(Exception):
+class DensOp_Error_Trace(Exception):
     def __str__(self):
         return "DensOp: fail to trace"
 
-class DensOp_FailToSqTrace(Exception):
+class DensOp_Error_SqTrace(Exception):
     def __str__(self):
         return "DensOp: fail to square trace"
 
-class DensOp_FailToPaTrace(Exception):
+class DensOp_Error_PaTrace(Exception):
     def __str__(self):
         return "DensOp: fail to partial trace"
 
-class DensOp_FailToApply(Exception):
+class DensOp_Error_Apply(Exception):
     def __str__(self):
         return "DensOp: fail to apply"
 
-class DensOp_FailToProbability(Exception):
+class DensOp_Error_Probability(Exception):
     def __str__(self):
         return "DensOp: fail to probability"
 
-class DensOp_FailToInstrument(Exception):
+class DensOp_Error_Instrument(Exception):
     def __str__(self):
         return "DensOp: fail to instrument"
 
-class DensOp_FailToFidelity(Exception):
+class DensOp_Error_Fidelity(Exception):
     def __str__(self):
         return "DensOp: fail to get fidelity"
 
-class DensOp_FailToDistance(Exception):
+class DensOp_Error_Distance(Exception):
     def __str__(self):
         return "DensOp: fail to get distance"
 
-class DensOp_FailToSpectrum(Exception):
+class DensOp_Error_Spectrum(Exception):
     def __str__(self):
         return "DensOp: fail to get spectrum"
 
-class DensOp_FailToEntropy(Exception):
+class DensOp_Error_Entropy(Exception):
     def __str__(self):
         return "DensOp: fail to get entropy"
 
-class DensOp_FailToOperateQGate(Exception):
+class DensOp_Error_OperateQGate(Exception):
     def __str__(self):
         return "DensOp: fail to operate qgate"
 
-class DensOp_FailToTensorProduct(Exception):
+class DensOp_Error_TensorProduct(Exception):
     def __str__(self):
         return "DensOp: fail to tensor product"
     
-class DensOp_FailToReset(Exception):
+class DensOp_Error_Reset(Exception):
     def __str__(self):
         return "DensOp: fail to reset"
     
-class DensOp_FailToFreeAll(Exception):
+class DensOp_Error_FreeAll(Exception):
     def __str__(self):
         return "DensOp: fail to free all"

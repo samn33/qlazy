@@ -99,7 +99,7 @@ class DensOp(ctypes.Structure):
             elif type(de) is DensOp:
                 de.free()
             else:
-                raise DensOp_FailToFreeAll()
+                raise DensOp_Error_FreeAll()
 
     @property
     def element(self):
@@ -206,7 +206,7 @@ class DensOp(ctypes.Structure):
                 if abs(prob[i]) < EPS:
                     prob[i] = 0.0
         else:
-            raise DensOp_FailToProbability()
+            raise DensOp_Error_Probability()
                 
         return prob
 
@@ -217,7 +217,7 @@ class DensOp(ctypes.Structure):
             qid = [i for i in range(qnum)]
 
         if kraus == []:
-            raise DensOp_FailToInstrument()
+            raise DensOp_Error_Instrument()
         else:
             N = len(kraus)
 
@@ -237,7 +237,7 @@ class DensOp(ctypes.Structure):
         else:  # selective measurement
 
             if (measured_value < 0 or measured_value >= N):
-                raise DensOp_FailToInstrument()
+                raise DensOp_Error_Instrument()
             self.apply(matrix=kraus[measured_value],qid=qid)
             #prob = self.trace()
             #self.mul(factor=1.0/prob)
@@ -337,7 +337,7 @@ class DensOp(ctypes.Structure):
         mat2 = densop.get_elm(qid=qid)
 
         if mat1.shape != mat2.shape:
-            raise DensOp_FailToFidelity()
+            raise DensOp_Error_Fidelity()
 
         mat1_sqrt = self.__mat_sqrt(mat1)
         mat2_sqrt = self.__mat_sqrt(mat2)
@@ -352,7 +352,7 @@ class DensOp(ctypes.Structure):
         mat2 = densop.get_elm(qid=qid)
 
         if mat1.shape != mat2.shape:
-            raise DensOp_FailToDistance()
+            raise DensOp_Error_Distance()
 
         dis = 0.5 * self.__mat_norm(mat1-mat2)
             
@@ -392,7 +392,7 @@ class DensOp(ctypes.Structure):
             ent = self.__von_neumann_entropy()
         else:
             if (min(qid) < 0 or max(qid) >= qubit_num or len(qid)!=len(set(qid))):
-                raise DensOp_FailToEntropy()
+                raise DensOp_Error_Entropy()
             if len(qid) == qubit_num:
                 ent = self.__von_neumann_entropy()
             else:
@@ -411,7 +411,7 @@ class DensOp(ctypes.Structure):
             or min(qid_1) < 0 or max(qid_1) >= qubit_num
             or len(qid_0) != len(set(qid_0))
             or len(qid_1) != len(set(qid_1))):
-            raise DensOp_FailToEntropy()
+            raise DensOp_Error_Entropy()
         else:
             qid_merge = qid_0 + qid_1
             qid_whole = set(qid_merge)
@@ -428,7 +428,7 @@ class DensOp(ctypes.Structure):
             or min(qid_1) < 0 or max(qid_1) >= qubit_num
             or len(qid_0) != len(set(qid_0))
             or len(qid_1) != len(set(qid_1))):
-            raise DensOp_FailToEntropy()
+            raise DensOp_Error_Entropy()
         else:
             ent = self.entropy(qid_0) - self.cond_entropy(qid_0,qid_1)
             
@@ -437,7 +437,7 @@ class DensOp(ctypes.Structure):
     def relative_entropy(self, densop=None):  # relative entropy
 
         if self.row != densop.row:
-            raise DensOp_FailToEntropy()
+            raise DensOp_Error_Entropy()
         
         mat_A = self.get_elm()
         mat_B = densop.get_elm()
@@ -690,7 +690,7 @@ class DensOp(ctypes.Structure):
                               ctypes.c_int(num), c_densop)
 
         if ret == FALSE:
-            raise DensOp_FailToInitialize()
+            raise DensOp_Error_Initialize()
             
         out = ctypes.cast(c_densop.value, ctypes.POINTER(DensOp))
         
@@ -726,7 +726,7 @@ class DensOp(ctypes.Structure):
                                           c_densop)
         
         if ret == FALSE:
-            raise DensOp_FailToInitialize()
+            raise DensOp_Error_Initialize()
             
         out = ctypes.cast(c_densop.value, ctypes.POINTER(DensOp))
         
@@ -744,7 +744,7 @@ class DensOp(ctypes.Structure):
             ret = lib.densop_get_elm(ctypes.byref(self), c_elm)
 
             if ret == FALSE:
-                raise DensOp_FailToGetElm()
+                raise DensOp_Error_GetElm()
             
             o = ctypes.cast(c_elm.value, ctypes.POINTER(ctypes.c_double))
 
@@ -759,7 +759,7 @@ class DensOp(ctypes.Structure):
             return np.array(out).reshape([self.row,self.col])
 
         except Exception:
-            raise DensOp_FailToGetElm()
+            raise DensOp_Error_GetElm()
 
     def densop_reset(self, qid=None):
 
@@ -781,10 +781,10 @@ class DensOp(ctypes.Structure):
             ret = lib.densop_reset(ctypes.byref(self),ctypes.c_int(qubit_num), qid_array)
 
             if ret == FALSE:
-                raise DensOp_FailToReset()
+                raise DensOp_Error_Reset()
 
         except Exception:
-            raise DensOp_FailToReset()
+            raise DensOp_Error_Reset()
         
     def densop_print(self):
 
@@ -795,10 +795,10 @@ class DensOp(ctypes.Structure):
             ret = lib.densop_print(ctypes.byref(self))
 
             if ret == FALSE:
-                raise DensOp_FailToShow()
+                raise DensOp_Error_Show()
 
         except Exception:
-            raise DensOp_FailToShow()
+            raise DensOp_Error_Show()
 
     def densop_copy(self):
 
@@ -812,14 +812,14 @@ class DensOp(ctypes.Structure):
             ret = lib.densop_copy(ctypes.byref(self), c_densop)
 
             if ret == FALSE:
-                raise DensOp_FailToClone()
+                raise DensOp_Error_Clone()
 
             out = ctypes.cast(c_densop.value, ctypes.POINTER(DensOp))
 
             return out.contents
         
         except Exception:
-            raise DensOp_FailToClone()
+            raise DensOp_Error_Clone()
 
     def densop_add(self, densop=None):
 
@@ -829,10 +829,10 @@ class DensOp(ctypes.Structure):
             ret = lib.densop_add(ctypes.byref(self), ctypes.byref(densop))
 
             if ret == FALSE:
-                raise DensOp_FailToAdd()
+                raise DensOp_Error_Add()
         
         except Exception:
-            raise DensOp_FailToAdd()
+            raise DensOp_Error_Add()
 
     def densop_mul(self, factor=0.0):
 
@@ -843,10 +843,10 @@ class DensOp(ctypes.Structure):
             ret = lib.densop_mul(ctypes.byref(self), ctypes.c_double(factor))
 
             if ret == FALSE:
-                raise DensOp_FailToMul()
+                raise DensOp_Error_Mul()
 
         except Exception:
-            raise DensOp_FailToMul()
+            raise DensOp_Error_Mul()
 
     def densop_trace(self):
 
@@ -865,18 +865,18 @@ class DensOp(ctypes.Structure):
                                    ctypes.byref(c_imag))
 
             if ret == FALSE:
-                raise DensOp_FailToTrace()
+                raise DensOp_Error_Trace()
 
             real = round(c_real.value, 8)
             imag = round(c_imag.value, 8)
 
             if abs(imag) > EPS:
-                raise DensOp_FailToTrace()
+                raise DensOp_Error_Trace()
                 
             return real
         
         except Exception:
-            raise DensOp_FailToTrace()
+            raise DensOp_Error_Trace()
 
     def densop_sqtrace(self):
 
@@ -894,24 +894,24 @@ class DensOp(ctypes.Structure):
                                      ctypes.byref(c_imag))
 
             if ret == FALSE:
-                raise DensOp_FailToSqTrace()
+                raise DensOp_Error_SqTrace()
 
             real = round(c_real.value, 8)
             imag = round(c_imag.value, 8)
 
             if abs(imag) > EPS:
-                raise DensOp_FailToTrace()
+                raise DensOp_Error_Trace()
                 
             return real
         
         except Exception:
-            raise DensOp_FailToSqTrace()
+            raise DensOp_Error_SqTrace()
 
     def densop_patrace(self, qid=None):
 
         try:
             if qid == None:
-                raise DensOp_FailToPaTrace()
+                raise DensOp_Error_PaTrace()
             
             densop = None
             c_densop = ctypes.c_void_p(densop)
@@ -931,14 +931,14 @@ class DensOp(ctypes.Structure):
                                      qid_array, c_densop)
 
             if ret == FALSE:
-                raise DensOp_FailToPaTrace()
+                raise DensOp_Error_PaTrace()
             
             out = ctypes.cast(c_densop.value, ctypes.POINTER(DensOp))
         
             return out.contents
 
         except Exception:
-            raise DensOp_FailToPaTrace()
+            raise DensOp_Error_PaTrace()
 
     def densop_tensor_product(self, densop):
 
@@ -954,21 +954,21 @@ class DensOp(ctypes.Structure):
                                             c_densop_out)
 
             if ret == FALSE:
-                raise DensOp_FailToTensorProduct()
+                raise DensOp_Error_TensorProduct()
 
             out = ctypes.cast(c_densop_out.value, ctypes.POINTER(DensOp))
 
             return out.contents
 
         except Exception:
-            raise DensOp_FailToTensorProduct()
+            raise DensOp_Error_TensorProduct()
 
     def densop_apply_matrix(self, matrix=None, qid=[], dire='both'):
 
         if matrix is None:
-            raise DensOp_FailToApply()
+            raise DensOp_Error_Apply()
         if (matrix.shape[0] > self.row or matrix.shape[1] > self.col):
-            raise DensOp_FailToApply()
+            raise DensOp_Error_Apply()
         
         if qid is None or qid == []:
             qnum = int(math.log2(self.row))
@@ -981,7 +981,7 @@ class DensOp(ctypes.Structure):
         elif dire == 'both':
             adire = BOTH
         else:
-            raise DensOp_FailToApply()
+            raise DensOp_Error_Apply()
 
         try:
             qubit_num = len(qid)
@@ -1019,18 +1019,18 @@ class DensOp(ctypes.Structure):
                                           ctypes.c_int(row), ctypes.c_int(col))
 
             if ret == FALSE:
-                raise DensOp_FailToApply()
+                raise DensOp_Error_Apply()
 
         except Exception:
-            raise DensOp_FailToApply()
+            raise DensOp_Error_Apply()
         
 
     def densop_probability(self, matrix=None, qid=[], matrix_type=None):
 
         if matrix is None:
-            raise DensOp_FailToProbability()
+            raise DensOp_Error_Probability()
         if (matrix.shape[0] > self.row or matrix.shape[1] > self.col):
-            raise DensOp_FailToProbability()
+            raise DensOp_Error_Probability()
         
         if qid is None or qid == []:
             qnum = int(math.log2(self.row))
@@ -1041,7 +1041,7 @@ class DensOp(ctypes.Structure):
         elif matrix_type == 'povm':
             mtype = POVM
         else:
-            raise DensOp_FailToProbability()
+            raise DensOp_Error_Probability()
             
         try:
             qubit_num = len(qid)
@@ -1083,14 +1083,14 @@ class DensOp(ctypes.Structure):
                                          ctypes.byref(c_prob))
 
             if ret == FALSE:
-                raise DensOp_FailToProbability()
+                raise DensOp_Error_Probability()
 
             prob = round(c_prob.value, 8)
             
             return prob
 
         except Exception:
-            raise DensOp_FailToProbability()
+            raise DensOp_Error_Probability()
 
     def densop_free(self):
 
@@ -1119,7 +1119,7 @@ class DensOp(ctypes.Structure):
                                        ctypes.c_double(phase2), qid_array)
 
         if ret == FALSE:
-            raise DensOp_FailToOperateQGate()
+            raise DensOp_Error_OperateQGate()
 
     def __check_args(self, kind=None, qid=None, shots=None, angle=None,
                      phase=None, phase1=None, phase2=None):

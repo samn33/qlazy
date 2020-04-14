@@ -1,7 +1,7 @@
 qlazy
 =====
 
-Quantum Computer Simulator
+Quantum Computing Simulator
 
 ## Install
 

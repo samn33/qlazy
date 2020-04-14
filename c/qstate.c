@@ -798,7 +798,6 @@ bool qstate_measure(QState* qstate, int shot_num, double angle, double phase,
   mdata->last = mes_id;
 
   *mdata_out = mdata;
-  
   SUC_RETURN(true);
 }
 
