@@ -1,3 +1,10 @@
+2020-05-30  Sam.N  <saminriver33@gmail.com>
+
+	* v0.0.39
+	- add function(py): QState - add_methods (add custom gates)
+	- add function(py): DensOp - add_methods (add custom gates)
+	- add example(py): stabilizer code
+
 2020-04-15  Sam.N  <saminriver33@gmail.com>
 
 	* v0.0.38

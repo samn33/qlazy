@@ -51,9 +51,18 @@ class QState(ctypes.Structure):
         
     @classmethod
     def add_method(cls, method):
-
+    
         setattr(cls, method.__name__, method)
         
+    @classmethod
+    def add_methods(cls, *methods):
+
+        for method in methods:
+            if callable(method):
+                setattr(cls, method.__name__, method)
+            else:
+                raise QState_Error_AddMethods()
+            
     @classmethod
     def create_register(cls, num):
 

@@ -74,6 +74,10 @@ class QState_Error_FreeAll(Exception):
     def __str__(self):
         return "QState: fail to free all"
 
+class QState_Error_AddMethods(Exception):
+    def __str__(self):
+        return "QState: fail to add methods"
+
 # MData
 
 class MData_Error_GetFrq(Exception):
@@ -175,3 +179,7 @@ class DensOp_Error_Reset(Exception):
 class DensOp_Error_FreeAll(Exception):
     def __str__(self):
         return "DensOp: fail to free all"
+
+class DensOp_Error_AddMethods(Exception):
+    def __str__(self):
+        return "DensOp: fail to add methods"

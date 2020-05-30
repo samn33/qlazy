@@ -76,6 +76,15 @@ class DensOp(ctypes.Structure):
         setattr(cls, method.__name__, method)
         
     @classmethod
+    def add_methods(cls, *methods):
+
+        for method in methods:
+            if callable(method):
+                setattr(cls, method.__name__, method)
+            else:
+                raise DensOp_Error_AddMethods()
+            
+    @classmethod
     def create_register(cls, num):
 
         return [0]*num
