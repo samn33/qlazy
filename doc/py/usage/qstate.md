@@ -577,28 +577,6 @@ m_freqメソッドで参照する際にtagの指定を省略すると、'default
     print(qs.m_bit(0, tag='foo', boolean=True))
     >> True
 
-これと、同じことを（少しだけ短くかける）m_is_zero(),m_is_one()というメ
-ソッドもあります。
-
-    print(qs.m_is_zero(0, tag='foo'))
-    >> False
-    print(qs.m_is_one(0, tag='foo'))
-    >> True
-
-例えば、測定した量子ビットが0か1かに応じて、他の量子ビットに特定のゲー
-トを演算するかしないかを制御したい場合（制御ユニタリとは違いますよ、念
-ため）、以下のように割とコンパクトに書けるのではないかなー、と思います。
-
-    if qs.m_is_one(0): qs.x(1)
-
-あるいは、後置if（３項演算子）を使うと、
-
-    qs.x(1) if qs.m_is_one(0) else True
-
-こんな感じです（どうでもいいですが、'else True'はこの場合、意味がない
-です。が、こうしないとシンタックスエラーになります。Pythonの仕様なので
-仕方ないです）。
-
 ここまでの例は、mメソッドによる測定、つまりZ軸方向の測定でしたが、他
 の角度での測定の場合、結果を取得する際に角度を指定する必要があります。
 測定時と違う角度で結果を参照しようとすると、まだ測定されていないという、
@@ -608,8 +586,6 @@ m_freqメソッドで参照する際にtagの指定を省略すると、'default
     qs.mx(tag='foo')  # mメソッドにangle=0.5が指定されたのと同じ
     print(qs.m_value(tag='foo', angle=0.5))
     print(qs.m_bit(0, tag='foo', angle=0.5))
-    print(qs.m_is_zero(0, tag='foo', angle=0.5))
-    print(qs.m_is_one(0, tag='foo', angle=0.5))
     print(qs.m_freq(tag='foo', angle=0.5))
     qs.free()
 
@@ -619,8 +595,6 @@ m_freqメソッドで参照する際にtagの指定を省略すると、'default
     qs.m(tag='foo', angle=0.25, phase=0.25)
     print(qs.m_value(tag='foo', angle=0.25, phase=0.25))
     print(qs.m_bit(0, tag='foo', angle=0.25, phase=0.25))
-    print(qs.m_is_zero(0, tag='foo', angle=0.25, phase=0.25))
-    print(qs.m_is_one(0, tag='foo', angle=0.25, phase=0.25))
     print(qs.m_freq(tag='foo', angle=0.25, phase=0.25))
     qs.free()
 

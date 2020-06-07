@@ -130,8 +130,8 @@ def discover_order(a,N):
     md = qs.m(id_up,shots=100)
 
     order = 1
-    for i in range(len(md.freq_list)):
-        if md.freq_list[i] != 0:
+    for i in range(len(md.frq)):
+        if md.frq[i] != 0:
             s_r = i/(2**bitnum_up)  # s/r
             (s,r) = approx_frac(s_r)
             if r != 0 and r < N and (a**r)%N == 1 and r%2 == 0:

@@ -2,62 +2,38 @@
 import ctypes
 from collections import Counter
 from ctypes.util import find_library
-from qlazypy.error import *
+
 from qlazypy.config import *
-from qlazypy.util import get_lib_ext
-
-lib = ctypes.CDLL('libqlz.'+get_lib_ext(),mode=ctypes.RTLD_GLOBAL)
-libc = ctypes.CDLL(find_library("c"),mode=ctypes.RTLD_GLOBAL)
-
-class MDataC(ctypes.Structure):
-
-    _fields_ = [
-        ('qubit_num', ctypes.c_int),
-        ('state_num', ctypes.c_int),
-        ('shot_num', ctypes.c_int),
-        ('angle', ctypes.c_double),
-        ('phase', ctypes.c_double),
-        ('qubit_id', ctypes.c_int*MAX_QUBIT_NUM),
-        ('freq', ctypes.POINTER(ctypes.c_int)),
-        ('last', ctypes.c_int),
-    ]
-
-    def show(self):
-
-        lib.mdata_print.restype = ctypes.c_int
-        lib.mdata_print.argtypes = [ctypes.POINTER(MDataC)]
-        ret = lib.mdata_print(ctypes.byref(self))
-
-        if ret == FALSE:
-            raise MData_Error_Show()
-
-    @property
-    def frq(self):
-
-        try:
-            freq = ctypes.cast(self.freq, ctypes.POINTER(ctypes.c_int*self.state_num))
-            freq_list = [freq.contents[i] for i in range(self.state_num)]
-        except Exception:
-            raise MData_Error_GetFrq()
-        
-        return np.array(freq_list)
-
-    @property
-    def lst(self):
-
-        return self.last
-            
-    def free(self):
-
-        lib.mdata_free.argtypes = [ctypes.POINTER(MDataC)]
-        lib.mdata_free(ctypes.byref(self))
+from qlazypy.error import *
 
 class MData:
+    """ Measured Data
+
+    Attributes
+    ----------
+    frq : list of int
+        frequencies of measured value.
+    lst : int
+        last measured value.
+    qid : list of int
+        qubit id's list.
+    qubit_num : int
+        qubit number of the quantum state (= log(state_num)).
+    state_num : int
+        dimension of the quantum state vector (= 2**qubit_num).
+    angle : float
+        measured direction with Z-axis.
+    phase : float
+        measured direction with X-axis.
+    tag : str
+        tag of measurement.
+
+    """
 
     def __init__(self, freq_list=None, last_state=0, qid=None, qubit_num=0, state_num=0,
                  angle=0.0, phase=0.0, is_bell=False, tag=None):
-        self.freq_list = freq_list
-        self.last_state = last_state
+        self.frq = freq_list
+        self.lst = last_state
         self.qid = qid
         self.qubit_num = qubit_num
         self.state_num = state_num
@@ -74,14 +50,14 @@ class MData:
         s += "qubit num: {}\n".format(self.qubit_num)
         s += "state num: {}\n".format(self.state_num)
         s += "angle, phase: {0:}, {1:}\n".format(self.angle, self.phase)
-        s += "frequency: {}\n".format(self.freq_list)
-        s += "last state: {}".format(self.last_state)
+        s += "frequency: {}\n".format(self.frq)
+        s += "last state: {}".format(self.lst)
         return s
 
     def measured_value(self, angle=0.0, phase=0.0):
 
         if (self.angle == angle and self.phase == phase):
-            mval = self.last_state
+            mval = self.lst
             return mval
         else:
             raise MData_Error_GetMeasuredData()
@@ -91,26 +67,8 @@ class MData:
         if (q in self.qid and self.angle == angle and self.phase == phase):
             bits = len(self.qid)  # total number of qubits measured
             pos = bits - 1- self.qid.index(q)  # position of 'qid' in the 'last_state'
-            mbit = (self.last_state >> pos) % 2  # measured value '0' or '1'
+            mbit = (self.lst >> pos) % 2  # measured value '0' or '1'
             return mbit
-        else:
-            raise MData_Error_GetMeasuredData()
-
-    def measured_is_zero(self, q, angle=0.0, phase=0.0):
-
-        if self.measured_bit(q, angle=angle, phase=phase) == 0:
-            return True
-        elif self.measured_bit(q, angle=angle, phase=phase) == 1:
-            return False
-        else:
-            raise MData_Error_GetMeasuredData()
-        
-    def measured_is_one(self, q, angle=0.0, phase=0.0):
-
-        if self.measured_bit(q, angle=angle, phase=phase) == 1:
-            return True
-        elif self.measured_bit(q, angle=angle, phase=phase) == 0:
-            return False
         else:
             raise MData_Error_GetMeasuredData()
 
@@ -124,15 +82,29 @@ class MData:
         else:
             raise MData_Error_GetMeasuredData()
             
-    @property
-    def frq(self):
-        return self.freq_list
-
-    @property
-    def lst(self):
-        return self.last_state
-
     def show(self):
+        """
+        show the measured data.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        >>> qs = QState(2).h(0).cx(0,1)
+        >>> md = qs.m(shots=100)
+        >>> md.show()
+        direction of measurement: z-axis
+        frq[00] = 51
+        frq[11] = 49
+        last state => 11
+
+        """
         if self.is_bell == True:
             print("bell-measurement")
             self.__show_bell()
@@ -153,18 +125,18 @@ class MData:
     def __show_z(self):
         
         for i in range(self.state_num):
-            if self.freq_list[i] != 0:
+            if self.frq[i] != 0:
                 state_string = format(i,'b').zfill(self.qubit_num)
                 print("frq[{0:}] = {1:d}".
-                      format(state_string, self.freq_list[i]))
+                      format(state_string, self.frq[i]))
                 
-        state_string = format(self.last_state,'b').zfill(self.qubit_num)
+        state_string = format(self.lst,'b').zfill(self.qubit_num)
         print("last state =>", state_string)
 
     def __show_bell(self):
         
         for i in range(self.state_num):
-            if self.freq_list[i] != 0:
+            if self.frq[i] != 0:
                 if i == BELL_PHI_PLUS:
                     state_string = 'phi+'
                 elif i == BELL_PHI_MINUS:
@@ -174,27 +146,27 @@ class MData:
                 elif i == BELL_PSI_MINUS:
                     state_string = 'psi-'
                 print("frq[{0:}] = {1:d}".
-                      format(state_string, self.freq_list[i]))
+                      format(state_string, self.frq[i]))
 
-        if self.last_state == BELL_PHI_PLUS:
+        if self.lst == BELL_PHI_PLUS:
             state_string = 'phi+'
-        elif self.last_state == BELL_PHI_MINUS:
+        elif self.lst == BELL_PHI_MINUS:
             state_string = 'phi-'
-        elif self.last_state == BELL_PSI_PLUS:
+        elif self.lst == BELL_PSI_PLUS:
             state_string = 'psi+'
-        elif self.last_state == BELL_PSI_MINUS:
+        elif self.lst == BELL_PSI_MINUS:
             state_string = 'psi-'
         print("last state =>", state_string)
 
     def __show_any(self):
         
         for i in range(self.state_num):
-            if self.freq_list[i] != 0:
+            if self.frq[i] != 0:
                 state_string = format(i,'b').zfill(self.qubit_num)\
                                             .replace('0','u').replace('1','d')
                 print("frq[{0:}] = {1:d}".
-                      format(state_string, self.freq_list[i]))
+                      format(state_string, self.frq[i]))
                 
-        state_string = format(self.last_state,'b').zfill(self.qubit_num)\
+        state_string = format(self.lst,'b').zfill(self.qubit_num)\
                                                   .replace('0','u').replace('1','d')
         print("last state =>", state_string)

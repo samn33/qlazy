@@ -150,7 +150,7 @@ if __name__ == '__main__':
 
     # measure and judge
     cnt = 0
-    for freq in qs.m(id_in, shots=100).freq_list:
+    for freq in qs.m(id_in, shots=100).frq:
         if freq != 0: cnt += 1
     print("== judgement ==")
     if cnt == 1:
