@@ -30,9 +30,9 @@ simple example is following ...
     # measurement (ex: shots=50)
     md = qs.m(shots=50)
 	# result frequency of all measurements
-    print("* freq = ", md.frq)
+    print("* freq = ", md.frequency)
 	# last result of all measurements
-    print("* last = ", md.lst)
+    print("* last = ", md.last)
 
     # free object
     qs.free()

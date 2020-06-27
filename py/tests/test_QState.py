@@ -1105,23 +1105,6 @@ class TestQState_measure(unittest.TestCase):
                    or qs.m_bit(3, tag='foo', boolean=True) == True))
         self.assertEqual(actual, True)
         
-    # def test_m_is_zero_or_one(self):
-    #     """test 'm_is_zero','m_is_one'
-    #     """
-    #     qs = QState(qubit_num=4)
-    #     [qs.h(i) for i in range(4)]
-    #     qs.m([0,2,3], shots=100, tag='foo')
-    #     actual_0 = ((int(not qs.m_is_zero(0, tag='foo'))<<2)
-    #                 + (int(not qs.m_is_zero(2, tag='foo'))<<1)
-    #                 + (int(not qs.m_is_zero(3, tag='foo'))))
-    #     actual_1 = ((int(qs.m_is_one(0, tag='foo'))<<2)
-    #                 + (int(qs.m_is_one(2, tag='foo'))<<1)
-    #                 + (int(qs.m_is_one(3, tag='foo'))))
-    #     expect = qs.m_value(tag='foo')
-    #     qs.free()
-    #     self.assertEqual(actual_0, expect)
-    #     self.assertEqual(actual_1, expect)
-        
     def test_m_freq(self):
         """test 'm_freq'
         """

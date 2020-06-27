@@ -83,7 +83,7 @@ foo.py
     qs.cx(0,1)
     qs.show()
     md = qs.m(shots=100)
-    md.show()
+    print(md.frequency)
     
     qs.free()
 
@@ -94,17 +94,7 @@ execute the program
     c[01] = +0.0000+0.0000*i : 0.0000 |
     c[10] = +0.0000+0.0000*i : 0.0000 |
     c[11] = +0.7071+0.0000*i : 0.5000 |++++++
-    direction of measurement: z-axis
-    frq[00] = 46
-    frq[11] = 54
-    last state => 11
-
-another style to print measured result.
-
-    ...
-    qs.m(shots=100)
-	print(qs.m_freq())
-    >> Counter({'00': 46, '11': 54})
+    Counter({{'00':53,'11':47})
 
 ## Requirements
 

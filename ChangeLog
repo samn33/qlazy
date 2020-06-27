@@ -1,3 +1,9 @@
+2020-06-27  Sam.N  <saminriver33@gmail.com>
+
+	* v0.0.41
+	- add function(py): MData - last, freauency
+	- add example(py): fault tolerant
+
 2020-06-07  Sam.N  <saminriver33@gmail.com>
 
 	* v0.0.40

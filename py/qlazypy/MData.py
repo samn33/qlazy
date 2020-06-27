@@ -13,7 +13,11 @@ class MData:
     ----------
     frq : list of int
         frequencies of measured value.
+    frequency : Counter
+        frequencies of measured value.
     lst : int
+        last measured value.
+    last : str
         last measured value.
     qid : list of int
         qubit id's list.
@@ -41,6 +45,18 @@ class MData:
         self.phase = phase
         self.is_bell = is_bell
         self.tag = tag
+
+    @property
+    def last(self):
+        """ last measured value (binary string) """
+        mval = self.measured_value(angle=self.angle, phase=self.phase)
+        digits = len(self.qid)
+        return '{:0{digits}b}'.format(mval, digits=digits)
+
+    @property
+    def frequency(self):
+        """ frequencies of measured value (Counter) """
+        return self.measured_freq(angle=self.angle, phase=self.phase)
 
     def __str__(self):
 
