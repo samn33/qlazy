@@ -1,3 +1,11 @@
+2020-07-27  Sam.N  <saminriver33@gmail.com>
+
+	* v0.1.0
+	Added
+	- add example of error correction with surface code (toric code)
+	Changed
+	- update tutorials
+
 2020-06-27  Sam.N  <saminriver33@gmail.com>
 
 	* v0.0.41
