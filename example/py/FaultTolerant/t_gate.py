@@ -94,9 +94,9 @@ def faulttolerant_t(qs_in):
     # -H-T-
     qs_ABC.h(A[0])
     [qs_ABC.cx(A[0], A[i]) for i in range(1,7)]
-    [qs_ABC.cx(A[i],B[i]).cs(A[i],B[i]).cz(A[i],B[i]).t_dg(A[i]) for i in range(7)]
+    [qs_ABC.cx(A[i],B[i]).cs(A[i],B[i]).cz(A[i],B[i]) for i in range(7)]
     [qs_ABC.cx(A[0], A[i]) for i in range(1,7)]
-    qs_ABC.h(A[0])
+    qs_ABC.t_dg(A[0]).h(A[0])
     mval = qs_ABC.m(qid=[A[0]]).last
     if mval == '1': [qs_ABC.z(q) for q in B]
     qs_ABC.reset(qid=A)
