@@ -96,10 +96,14 @@ execute the program
     c[11] = +0.7071+0.0000*i : 0.5000 |++++++
     Counter({{'00':53,'11':47})
 
+## Tutorial
+
+    * [Tutorial (japanese)](doc/Tutorial.md)
+
 ## Requirements
 
     * Linux(Ubuntu18.04)
-    * Python3.6.9
+    * Python3.6
 
 ## Licence
 
