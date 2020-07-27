@@ -2,7 +2,7 @@
 import os
 from setuptools import setup, find_packages
 
-VERSION = '0.0.41'
+VERSION = '0.1.0'
 
 try:
     with open('README.md') as f:
@@ -20,7 +20,9 @@ setup(
     long_description=README,
     packages=find_packages(),
     include_package_data=True,
-    install_requires=[],
+    install_requires=[
+        'numpy'
+    ],
     license='Apace License 2.0',
     classifiers={
         'Development Status :: 4 - Beta',
