@@ -98,7 +98,7 @@ execute the program
 
 ## Tutorial
 
-    * [Tutorial (japanese)](doc/Tutorial.md)
+- [Tutorial(japanese)](doc/Tutorial.md)
 
 ## Requirements
 
