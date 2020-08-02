@@ -46,11 +46,11 @@ def equal_qstates(qs_0, qs_1):
         return False
 
 class TestQState_init(unittest.TestCase):
-    """ test 'QState' : '__init__'
+    """ test 'QState' : '__new__'
     """
 
     def test_init(self):
-        """test '__init__' (qubit_num)
+        """test '__new__' (qubit_num)
         """
         qs = QState(qubit_num=3)
         actual = qs.amp
@@ -60,7 +60,7 @@ class TestQState_init(unittest.TestCase):
         self.assertEqual(ans,True)
 
     def test_init_with_vector(self):
-        """test '__init__' (vector)
+        """test '__new__' (vector)
         """
         vec = np.array([2j, 0j, 0j, 0j, 0j, 0j, 0j, 0j])
         qs = QState(vector=vec)

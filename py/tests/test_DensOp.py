@@ -449,11 +449,11 @@ def equal_densops(de_0, de_1):
         return False
 
 class TestDensOp_init(unittest.TestCase):
-    """ test 'DensOp' : '__init__'
+    """ test 'DensOp' : '__new__'
     """
 
     def test_init(self):
-        """test '__init__' (qstate, prob)
+        """test '__new__' (qstate, prob)
         """
         dim = 4
         qs = [QState(vector=VECTORS_4[i]) for i in range(dim)]
@@ -467,7 +467,7 @@ class TestDensOp_init(unittest.TestCase):
         self.assertEqual(ans,True)
 
     def test_init_with_matrix(self):
-        """test '__init__' (matrix)
+        """test '__new__' (matrix)
         """
         mat = make_densop_matrix(VECTORS_4, PROBS_4)
         de = DensOp(matrix=mat)

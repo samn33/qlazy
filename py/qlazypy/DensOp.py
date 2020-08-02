@@ -355,7 +355,11 @@ class DensOp(ctypes.Structure):
 
         Returns
         -------
-        None
+        self : instance of DensOp
+
+        Notes
+        -----
+        This method change the original density operator.
 
         """
         densop_add(self, densop=densop)
@@ -372,7 +376,11 @@ class DensOp(ctypes.Structure):
 
         Returns
         -------
-        None
+        self : instance of DensOp
+
+        Notes
+        -----
+        This method change the original density operator.
 
         """
         densop_mul(self, factor=factor)
@@ -618,7 +626,7 @@ class DensOp(ctypes.Structure):
 
         Returns
         -------
-        None
+        self : instance of DensOp
 
         Notes
         -----
@@ -675,7 +683,7 @@ class DensOp(ctypes.Structure):
 
         Returns
         -------
-        None
+        self : instance of DensOp
 
         """
         Sigma_0 = np.eye(2)
@@ -702,7 +710,7 @@ class DensOp(ctypes.Structure):
 
         Returns
         -------
-        None
+        self : instance of DensOp
 
         """
         Sigma_0 = np.eye(2)
@@ -729,7 +737,7 @@ class DensOp(ctypes.Structure):
 
         Returns
         -------
-        None
+        self : instance of DensOp
 
         """
         Sigma_0 = np.eye(2)
@@ -756,7 +764,7 @@ class DensOp(ctypes.Structure):
 
         Returns
         -------
-        None
+        self : instance of DensOp
 
         """
         Sigma_0 = np.eye(2)
@@ -785,7 +793,7 @@ class DensOp(ctypes.Structure):
 
         Returns
         -------
-        None
+        self : instance of DensOp
 
         """
         transmit = math.sqrt(1.0-prob)
@@ -807,7 +815,7 @@ class DensOp(ctypes.Structure):
 
         Returns
         -------
-        None
+        self : instance of DensOp
 
         """
         transmit = math.sqrt(1.0-prob)
@@ -1078,7 +1086,7 @@ class DensOp(ctypes.Structure):
 
         Returns
         -------
-        None
+        self : instance of DensOp
 
         """
         densop_operate_qgate(self, kind=PAULI_X, phase=DEF_PHASE, qid=[q0])
@@ -1095,7 +1103,7 @@ class DensOp(ctypes.Structure):
 
         Returns
         -------
-        None
+        self : instance of DensOp
 
         """
         densop_operate_qgate(self, kind=PAULI_Y, phase=DEF_PHASE, qid=[q0])
@@ -1112,7 +1120,7 @@ class DensOp(ctypes.Structure):
 
         Returns
         -------
-        None
+        self : instance of DensOp
 
         """
         densop_operate_qgate(self, kind=PAULI_Z, phase=DEF_PHASE, qid=[q0])
@@ -1129,7 +1137,7 @@ class DensOp(ctypes.Structure):
 
         Returns
         -------
-        None
+        self : instance of DensOp
 
         """
         densop_operate_qgate(self,kind=ROOT_PAULI_X, phase=DEF_PHASE, qid=[q0])
@@ -1147,7 +1155,7 @@ class DensOp(ctypes.Structure):
 
         Returns
         -------
-        None
+        self : instance of DensOp
 
         """
         densop_operate_qgate(self, kind=ROOT_PAULI_X_, phase=DEF_PHASE, qid=[q0])
@@ -1164,7 +1172,7 @@ class DensOp(ctypes.Structure):
 
         Returns
         -------
-        None
+        self : instance of DensOp
 
         """
         densop_operate_qgate(self, kind=HADAMARD, phase=DEF_PHASE, qid=[q0])
@@ -1181,7 +1189,7 @@ class DensOp(ctypes.Structure):
 
         Returns
         -------
-        None
+        self : instance of DensOp
 
         """
         densop_operate_qgate(self, kind=PHASE_SHIFT_S, phase=DEF_PHASE, qid=[q0])
@@ -1198,7 +1206,7 @@ class DensOp(ctypes.Structure):
 
         Returns
         -------
-        None
+        self : instance of DensOp
 
         """
         densop_operate_qgate(self, kind=PHASE_SHIFT_S_, phase=DEF_PHASE, qid=[q0])
@@ -1215,7 +1223,7 @@ class DensOp(ctypes.Structure):
 
         Returns
         -------
-        None
+        self : instance of DensOp
 
         """
         densop_operate_qgate(self, kind=PHASE_SHIFT_T, phase=DEF_PHASE, qid=[q0])
@@ -1232,7 +1240,7 @@ class DensOp(ctypes.Structure):
 
         Returns
         -------
-        None
+        self : instance of DensOp
 
         """
         densop_operate_qgate(self, kind=PHASE_SHIFT_T_, phase=DEF_PHASE, qid=[q0])
@@ -1251,7 +1259,7 @@ class DensOp(ctypes.Structure):
 
         Returns
         -------
-        None
+        self : instance of DensOp
 
         """
         densop_operate_qgate(self, kind=ROTATION_X, phase=phase, qid=[q0])
@@ -1270,7 +1278,7 @@ class DensOp(ctypes.Structure):
 
         Returns
         -------
-        None
+        self : instance of DensOp
 
         """
         densop_operate_qgate(self, kind=ROTATION_Y, phase=phase, qid=[q0])
@@ -1289,7 +1297,7 @@ class DensOp(ctypes.Structure):
 
         Returns
         -------
-        None
+        self : instance of DensOp
 
         """
         densop_operate_qgate(self, kind=ROTATION_Z, phase=phase, qid=[q0])
@@ -1308,7 +1316,7 @@ class DensOp(ctypes.Structure):
 
         Returns
         -------
-        None
+        self : instance of DensOp
 
         Notes
         -----
@@ -1333,7 +1341,7 @@ class DensOp(ctypes.Structure):
 
         Returns
         -------
-        None
+        self : instance of DensOp
 
         Notes
         -----
@@ -1358,7 +1366,7 @@ class DensOp(ctypes.Structure):
 
         Returns
         -------
-        None
+        self : instance of DensOp
 
         Notes
         -----
@@ -1389,7 +1397,7 @@ class DensOp(ctypes.Structure):
 
         Returns
         -------
-        None
+        self : instance of DensOp
 
         Notes
         -----
@@ -1416,7 +1424,7 @@ class DensOp(ctypes.Structure):
 
         Returns
         -------
-        None
+        self : instance of DensOp
 
         """
         densop_operate_qgate(self, kind=CONTROLLED_X, phase=DEF_PHASE, qid=[q0,q1])
@@ -1435,7 +1443,7 @@ class DensOp(ctypes.Structure):
 
         Returns
         -------
-        None
+        self : instance of DensOp
 
         """
         densop_operate_qgate(self, kind=CONTROLLED_Y, phase=DEF_PHASE, qid=[q0,q1])
@@ -1454,7 +1462,7 @@ class DensOp(ctypes.Structure):
 
         Returns
         -------
-        None
+        self : instance of DensOp
 
         """
         densop_operate_qgate(self, kind=CONTROLLED_Z, phase=DEF_PHASE, qid=[q0,q1])
@@ -1473,7 +1481,7 @@ class DensOp(ctypes.Structure):
 
         Returns
         -------
-        None
+        self : instance of DensOp
 
         """
         densop_operate_qgate(self, kind=CONTROLLED_XR, phase=DEF_PHASE, qid=[q0,q1])
@@ -1492,7 +1500,7 @@ class DensOp(ctypes.Structure):
 
         Returns
         -------
-        None
+        self : instance of DensOp
 
         """
         densop_operate_qgate(self, kind=CONTROLLED_XR_, phase=DEF_PHASE, qid=[q0,q1])
@@ -1511,7 +1519,7 @@ class DensOp(ctypes.Structure):
 
         Returns
         -------
-        None
+        self : instance of DensOp
 
         """
         densop_operate_qgate(self, kind=CONTROLLED_H, phase=DEF_PHASE, qid=[q0,q1])
@@ -1530,7 +1538,7 @@ class DensOp(ctypes.Structure):
 
         Returns
         -------
-        None
+        self : instance of DensOp
 
         """
         densop_operate_qgate(self, kind=CONTROLLED_S, phase=DEF_PHASE, qid=[q0,q1])
@@ -1549,7 +1557,7 @@ class DensOp(ctypes.Structure):
 
         Returns
         -------
-        None
+        self : instance of DensOp
 
         """
         densop_operate_qgate(self, kind=CONTROLLED_S_, phase=DEF_PHASE, qid=[q0,q1])
@@ -1568,7 +1576,7 @@ class DensOp(ctypes.Structure):
 
         Returns
         -------
-        None
+        self : instance of DensOp
 
         """
         densop_operate_qgate(self, kind=CONTROLLED_T, phase=DEF_PHASE, qid=[q0,q1])
@@ -1587,7 +1595,7 @@ class DensOp(ctypes.Structure):
 
         Returns
         -------
-        None
+        self : instance of DensOp
 
         """
         densop_operate_qgate(self, kind=CONTROLLED_T_, phase=DEF_PHASE, qid=[q0,q1])
@@ -1606,7 +1614,7 @@ class DensOp(ctypes.Structure):
 
         Returns
         -------
-        None
+        self : instance of DensOp
 
         """
         densop_operate_qgate(self, kind=SWAP, phase=DEF_PHASE, qid=[q0,q1])
@@ -1625,7 +1633,7 @@ class DensOp(ctypes.Structure):
 
         Returns
         -------
-        None
+        self : instance of DensOp
 
         """
         densop_operate_qgate(self, kind=CONTROLLED_P, phase=phase, qid=[q0,q1])
@@ -1646,7 +1654,7 @@ class DensOp(ctypes.Structure):
 
         Returns
         -------
-        None
+        self : instance of DensOp
 
         """
         densop_operate_qgate(self, kind=CONTROLLED_RX, phase=phase, qid=[q0,q1])
@@ -1667,7 +1675,7 @@ class DensOp(ctypes.Structure):
 
         Returns
         -------
-        None
+        self : instance of DensOp
 
         """
         densop_operate_qgate(self, kind=CONTROLLED_RY, phase=phase, qid=[q0,q1])
@@ -1688,7 +1696,7 @@ class DensOp(ctypes.Structure):
 
         Returns
         -------
-        None
+        self : instance of DensOp
 
         """
         densop_operate_qgate(self, kind=CONTROLLED_RZ, phase=phase, qid=[q0,q1])
@@ -1709,7 +1717,7 @@ class DensOp(ctypes.Structure):
 
         Returns
         -------
-        None
+        self : instance of DensOp
 
         """
         densop_operate_qgate(self, kind=CONTROLLED_U1, phase=alpha, qid=[q0,q1])
@@ -1732,7 +1740,7 @@ class DensOp(ctypes.Structure):
 
         Returns
         -------
-        None
+        self : instance of DensOp
 
         """
         densop_operate_qgate(self, kind=CONTROLLED_U2, phase=alpha, phase1=beta,
@@ -1758,7 +1766,7 @@ class DensOp(ctypes.Structure):
 
         Returns
         -------
-        None
+        self : instance of DensOp
 
         """
         densop_operate_qgate(self, kind=CONTROLLED_U3, phase=alpha, phase1=beta,
@@ -1782,7 +1790,7 @@ class DensOp(ctypes.Structure):
 
         Returns
         -------
-        None
+        self : instance of DensOp
 
         """
         self.cxr(q1,q2).cx(q0,q1).cxr_dg(q1,q2).cx(q0,q1).cxr(q0,q2)
@@ -1803,7 +1811,7 @@ class DensOp(ctypes.Structure):
 
         Returns
         -------
-        None
+        self : instance of DensOp
 
         """
         self.cx(q2,q1).ccx(q0,q1,q2).cx(q2,q1)
@@ -1822,7 +1830,7 @@ class DensOp(ctypes.Structure):
     
         Returns
         -------
-        None
+        self : instance of DensOp
         
         """
         densop_mcx(self, qid)
@@ -1839,6 +1847,7 @@ class DensOp(ctypes.Structure):
         Returns
         -------
         None
+        self : instance of DensOp
 
         """
         # return self.densop_free()
