@@ -7,6 +7,7 @@ Pythonパッケージ(qlazypy)
 - [量子状態(QStateクラス)](usage/qstate.md)
 - [密度演算子(DensOpクラス)](usage/densop.md)
 - [オブザーバブル(Observableクラス)](usage/observable.md)
+- [スタビライザー(Stabilizerクラス)](usage/stabilizer.md)
 
 ## 使用例
 

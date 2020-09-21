@@ -174,6 +174,30 @@ void error_msg(ErrCode err)
   case ERROR_DENSOP_TENSOR_PRODUCT:
     fprintf(stderr, "ERROR: densop tensor product failure !\n");
     break;
+  case ERROR_STABILIZER_INIT:
+    fprintf(stderr, "ERROR: stabilizer init failure !\n");
+    break;
+  case ERROR_STABILIZER_COPY:
+    fprintf(stderr, "ERROR: stabilizer copy failure !\n");
+    break;
+  case ERROR_STABILIZER_SET_PAULI_OP:
+    fprintf(stderr, "ERROR: stabilizer set pauli op failure !\n");
+    break;
+  case ERROR_STABILIZER_GET_PAULI_OP:
+    fprintf(stderr, "ERROR: stabilizer get pauli op failure !\n");
+    break;
+  case ERROR_STABILIZER_SET_PAULI_FAC:
+    fprintf(stderr, "ERROR: stabilizer set pauli fac failure !\n");
+    break;
+  case ERROR_STABILIZER_GET_PAULI_FAC:
+    fprintf(stderr, "ERROR: stabilizer get pauli fac failure !\n");
+    break;
+  case ERROR_STABILIZER_OPERATE_QGATE:
+    fprintf(stderr, "ERROR: stabilizer operate qgate failure !\n");
+    break;
+  case ERROR_STABILIZER_MEASURE:
+    fprintf(stderr, "ERROR: stabilizer measure failure !\n");
+    break;
 
   case ERROR_NEED_TO_INITIALIZE:
     fprintf(stderr, "ERROR: need to initialize !\n");

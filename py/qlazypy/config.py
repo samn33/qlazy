@@ -76,6 +76,7 @@ MEASURE_Y      = 202
 MEASURE_Z      = 203
 MEASURE_BELL   = 204
 NOT_A_GATE     = 1000
+IDENTITY       = 2000
 
 GATE = {'x':PAULI_X}
 
@@ -85,8 +86,15 @@ GATE = {'x':PAULI_X}
 KRAUS = 1
 POVM  = 2
 
-# AppiDir
+# ApplyDir
 
 LEFT  = 0
 RIGHT = 1
 BOTH  = 2
+
+# ComplexAxis
+
+REAL_PLUS  = 0
+IMAG_PLUS  = 1
+REAL_MINUS = 2
+IMAG_MINUS = 3

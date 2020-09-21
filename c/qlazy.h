@@ -15,7 +15,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
-#define VERSION "0.1.0"
+#define VERSION "0.1.1"
 
 //#define TEST_NEW_VERSION
 
@@ -140,6 +140,14 @@ typedef enum _ErrCode {
   ERROR_DENSOP_APPLY_MATRIX,
   ERROR_DENSOP_PROBABILITY,
   ERROR_DENSOP_TENSOR_PRODUCT,
+  ERROR_STABILIZER_INIT,
+  ERROR_STABILIZER_COPY,
+  ERROR_STABILIZER_SET_PAULI_OP,
+  ERROR_STABILIZER_GET_PAULI_OP,
+  ERROR_STABILIZER_SET_PAULI_FAC,
+  ERROR_STABILIZER_GET_PAULI_FAC,
+  ERROR_STABILIZER_OPERATE_QGATE,
+  ERROR_STABILIZER_MEASURE,
 
   /* qlazy interactive mode */
   ERROR_NEED_TO_INITIALIZE,
@@ -208,6 +216,7 @@ typedef enum _Kind {
   MEASURE_Z	 = 203,	 	/* symbol: 'MZ','mz'     */
   MEASURE_BELL	 = 204,	 	/* symbol: 'MB','mb'     */
   NOT_A_GATE	 = 1000,
+  IDENTITY       = 2000,
 } Kind;
 
 typedef enum _Axis {
@@ -342,6 +351,20 @@ typedef struct _DensOp {
   COMPLEX*	elm;
   GBank*        gbank;
 } DensOp;
+
+typedef enum _ComplexAxis {
+  REAL_PLUS  = 0,
+  IMAG_PLUS  = 1,
+  REAL_MINUS = 2,
+  IMAG_MINUS = 3,
+} ComplexAxis;
+
+typedef struct _Stabilizer {
+  int		gene_num;
+  int		qubit_num;
+  ComplexAxis*	pauli_factor;	/* number of array = gene_num */
+  int*		check_matrix;	/* number of array = 2 * qubit_num * gene_num */
+} Stabilizer;
 
 /*====================================================================*/
 /*  Global Variables                                                  */
@@ -482,5 +505,17 @@ bool     densop_operate_qgate(DensOp* densop, Kind kind, double alpha, double be
 			      double gamma, int qubit_id[MAX_QUBIT_NUM]);
 bool     densop_tensor_product(DensOp* densop_0, DensOp* densop_1, void** densop_out);
 void     densop_free(DensOp* densop);
+
+/* stabilizer.c */
+bool	stabilizer_init(int gene_num, int qubit_num, int seed, void** stab_out);
+bool	stabilizer_copy(Stabilizer* stab, void** stab_out);
+bool	stabilizer_set_pauli_op(Stabilizer* stab, int gene_id, int qubit_id, Kind pauli_op);
+bool	stabilizer_get_pauli_op(Stabilizer* stab, int gene_id, int qubit_id, Kind* pauli_op);
+bool	stabilizer_set_pauli_fac(Stabilizer* stab, int gene_id, ComplexAxis pauli_fac);
+bool	stabilizer_get_pauli_fac(Stabilizer* stab, int gene_id, ComplexAxis* pauli_fac);
+bool	stabilizer_operate_qgate(Stabilizer* stab, Kind kind, int q0, int q1);
+bool    stabilizer_get_rank(Stabilizer* stab, int* rank_out);
+bool	stabilizer_measure(Stabilizer* stab, int q, double prob_out[2], int* mval_out);
+void	stabilizer_free(Stabilizer* stab);
 
 #endif

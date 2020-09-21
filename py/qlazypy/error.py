@@ -183,3 +183,53 @@ class DensOp_Error_FreeAll(Exception):
 class DensOp_Error_AddMethods(Exception):
     def __str__(self):
         return "DensOp: fail to add methods"
+
+# Stabilizer
+
+class Stabilizer_Error_Initialize(Exception):
+    def __str__(self):
+        return "Stabilizer: fail to initialize"
+
+class Stabilizer_Error_Clone(Exception):
+    def __str__(self):
+        return "Stabilizer: fail to clone"
+
+class Stabilizer_Error_AddMethos(Exception):
+    def __str__(self):
+        return "Stabilizer: fail to add methods"
+
+class Stabilizer_Error_SetPauliFac(Exception):
+    def __str__(self):
+        return "Stabilizer: fail to set pauli factor."
+
+class Stabilizer_Error_GetPauliFac(Exception):
+    def __str__(self):
+        return "Stabilizer: fail to get pauli factor."
+
+class Stabilizer_Error_SetPauliOp(Exception):
+    def __str__(self):
+        return "Stabilizer: fail to set pauli op."
+
+class Stabilizer_Error_GetPauliOp(Exception):
+    def __str__(self):
+        return "Stabilizer: fail to get pauli op."
+
+class Stabilizer_Error_GetRank(Exception):
+    def __str__(self):
+        return "Stabilizer: fail to get rank."
+
+class Stabilizer_Error_OperateQgate(Exception):
+    def __str__(self):
+        return "Stabilizer: fail to operate qgate."
+
+class Stabilizer_Error_GetRank(Exception):
+    def __str__(self):
+        return "Stabilizer: fail to get rank."
+
+class Stabilizer_Error_Measure(Exception):
+    def __str__(self):
+        return "Stabilizer: fail to measure qubits."
+
+class Stabilizer_Error_FreeAll(Exception):
+    def __str__(self):
+        return "Stabilizer: fail to free all"
