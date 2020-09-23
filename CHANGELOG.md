@@ -1,5 +1,10 @@
 # Change Log
 
+## [0.1.1] - 2020-09-24
+### Added
+- Stablizer class
+- example of defect braiding with surface code
+
 ## [0.1.0] - 2020-07-27
 ### Added
 - add example of error correction with surface code (toric code)
