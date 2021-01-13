@@ -371,6 +371,7 @@ static bool _stabilizer_operate_s_dg(Stabilizer* stab, int q)
     stabilizer_get_pauli_op(stab, i, q, &pauli_op);
     if (pauli_op == PAULI_X) {
       stabilizer_set_pauli_op(stab, i, q, PAULI_Y);
+      stab->pauli_factor[i] = _mul_complex_axis(stab->pauli_factor[i], REAL_MINUS);
     }
     else if (pauli_op == PAULI_Y) {
       stabilizer_set_pauli_op(stab, i, q, PAULI_X);
