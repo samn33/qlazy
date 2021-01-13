@@ -1,5 +1,5 @@
 *.o
 *.so
 c/build
-py/*.egg-info
-py/qlazy/__pycache__
+__pycache__
+*.egg-info

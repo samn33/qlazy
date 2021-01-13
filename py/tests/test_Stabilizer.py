@@ -504,7 +504,7 @@ class TestStabilizer_s_dg(unittest.TestCase):
         sb.set_pauli_op(0,0,'X')
         sb.s_dg(0)
         actual = sb.get_str()
-        expect = "  Y\n"
+        expect = " -Y\n"
         sb.free()
         self.assertEqual(actual, expect)
         
@@ -725,7 +725,7 @@ class TestStabilizer_cy(unittest.TestCase):
     """ test 'Stabilizer' : 'CY'
     """
 
-    def test_y_1(self):
+    def test_cy_1(self):
         """test 'CY' (input:II)
         """
         sb = Stabilizer(gene_num=1, qubit_num=2)
@@ -736,7 +736,7 @@ class TestStabilizer_cy(unittest.TestCase):
         sb.free()
         self.assertEqual(actual, expect)
         
-    def test_y_2(self):
+    def test_cy_2(self):
         """test 'CY' (input:XI)
         """
         sb = Stabilizer(gene_num=1, qubit_num=2)
@@ -747,7 +747,7 @@ class TestStabilizer_cy(unittest.TestCase):
         sb.free()
         self.assertEqual(actual, expect)
 
-    def test_y_3(self):
+    def test_cy_3(self):
         """test 'CY' (input:IX)
         """
         sb = Stabilizer(gene_num=1, qubit_num=2)
@@ -758,7 +758,7 @@ class TestStabilizer_cy(unittest.TestCase):
         sb.free()
         self.assertEqual(actual, expect)
 
-    def test_y_4(self):
+    def test_cy_4(self):
         """test 'CY' (input:YI)
         """
         sb = Stabilizer(gene_num=1, qubit_num=2)
@@ -769,7 +769,7 @@ class TestStabilizer_cy(unittest.TestCase):
         sb.free()
         self.assertEqual(actual, expect)
 
-    def test_y_5(self):
+    def test_cy_5(self):
         """test 'CY' (input:IY)
         """
         sb = Stabilizer(gene_num=1, qubit_num=2)
@@ -780,7 +780,7 @@ class TestStabilizer_cy(unittest.TestCase):
         sb.free()
         self.assertEqual(actual, expect)
 
-    def test_y_6(self):
+    def test_cy_6(self):
         """test 'CY' (input:ZI)
         """
         sb = Stabilizer(gene_num=1, qubit_num=2)
@@ -791,7 +791,7 @@ class TestStabilizer_cy(unittest.TestCase):
         sb.free()
         self.assertEqual(actual, expect)
 
-    def test_y_7(self):
+    def test_cy_7(self):
         """test 'CY' (input:IZ)
         """
         sb = Stabilizer(gene_num=1, qubit_num=2)
@@ -802,7 +802,7 @@ class TestStabilizer_cy(unittest.TestCase):
         sb.free()
         self.assertEqual(actual, expect)
 
-    def test_y_8(self):
+    def test_cy_8(self):
         """test 'CY' (input:XX)
         """
         sb = Stabilizer(gene_num=1, qubit_num=2)
@@ -813,7 +813,7 @@ class TestStabilizer_cy(unittest.TestCase):
         sb.free()
         self.assertEqual(actual, expect)
 
-    def test_y_9(self):
+    def test_cy_9(self):
         """test 'CY' (input:XY)
         """
         sb = Stabilizer(gene_num=1, qubit_num=2)
@@ -824,7 +824,7 @@ class TestStabilizer_cy(unittest.TestCase):
         sb.free()
         self.assertEqual(actual, expect)
 
-    def test_y_10(self):
+    def test_cy_10(self):
         """test 'CY' (input:XZ)
         """
         sb = Stabilizer(gene_num=1, qubit_num=2)
@@ -835,7 +835,7 @@ class TestStabilizer_cy(unittest.TestCase):
         sb.free()
         self.assertEqual(actual, expect)
 
-    def test_y_11(self):
+    def test_cy_11(self):
         """test 'CY' (input:YX)
         """
         sb = Stabilizer(gene_num=1, qubit_num=2)
@@ -846,7 +846,7 @@ class TestStabilizer_cy(unittest.TestCase):
         sb.free()
         self.assertEqual(actual, expect)
         
-    def test_y_12(self):
+    def test_cy_12(self):
         """test 'CY' (input:YY)
         """
         sb = Stabilizer(gene_num=1, qubit_num=2)
@@ -857,7 +857,7 @@ class TestStabilizer_cy(unittest.TestCase):
         sb.free()
         self.assertEqual(actual, expect)
         
-    def test_y_13(self):
+    def test_cy_13(self):
         """test 'CY' (input:YZ)
         """
         sb = Stabilizer(gene_num=1, qubit_num=2)
@@ -868,7 +868,7 @@ class TestStabilizer_cy(unittest.TestCase):
         sb.free()
         self.assertEqual(actual, expect)
 
-    def test_y_14(self):
+    def test_cy_14(self):
         """test 'CY' (input:ZX)
         """
         sb = Stabilizer(gene_num=1, qubit_num=2)
@@ -879,7 +879,7 @@ class TestStabilizer_cy(unittest.TestCase):
         sb.free()
         self.assertEqual(actual, expect)
         
-    def test_y_15(self):
+    def test_cy_15(self):
         """test 'CY' (input:ZY)
         """
         sb = Stabilizer(gene_num=1, qubit_num=2)
@@ -890,7 +890,7 @@ class TestStabilizer_cy(unittest.TestCase):
         sb.free()
         self.assertEqual(actual, expect)
         
-    def test_y_16(self):
+    def test_cy_16(self):
         """test 'CY' (input:ZZ)
         """
         sb = Stabilizer(gene_num=1, qubit_num=2)
