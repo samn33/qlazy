@@ -1,6 +1,7 @@
 /*
  *  densop.c
  */
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 
 #include "qlazy.h"
 
@@ -27,7 +28,7 @@ static DensOp* _create_densop(int row, int col)
 bool densop_init(QState* qstate, double* prob, int num, void** densop_out)
 {
   DensOp*	densop = NULL;
-  int		state_num;
+  int		state_num = 0;
 
   if ((qstate == NULL) || (prob == NULL)) {
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);

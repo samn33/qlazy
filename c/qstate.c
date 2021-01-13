@@ -1,6 +1,7 @@
 /*
  *  qstate.c
  */
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 
 #include "qlazy.h"
 
