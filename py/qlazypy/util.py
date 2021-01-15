@@ -157,3 +157,20 @@ def get_qgate_qubit_num(kind=None):
         return 2
     else:
         raise QState_UnknownQgateKind()
+
+def is_clifford_gate(kind):
+
+    if kind in (PAULI_X, PAULI_Y, PAULI_Z, HADAMARD,
+                PHASE_SHIFT_S, PHASE_SHIFT_S_,
+                CONTROLLED_X, CONTROLLED_Y, CONTROLLED_Z):
+        return True
+    else:
+        return False
+
+def is_measurement_gate(kind):
+
+    if kind in (MEASURE, MEASURE_X, MEASURE_Y, MEASURE_Z, MEASURE_BELL):
+        return True
+    else:
+        return False
+
