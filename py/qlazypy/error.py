@@ -233,3 +233,23 @@ class Stabilizer_Error_Measure(Exception):
 class Stabilizer_Error_FreeAll(Exception):
     def __str__(self):
         return "Stabilizer: fail to free all"
+
+# QComp
+
+class QComp_Error_QgateNotSupported(Exception):
+    def __str__(self):
+        return "QComp: qgate is not supported"
+
+class QComp_Error_BackendNotSupported(Exception):
+    def __str__(self):
+        return "QComp: backend is not supported"
+
+class QComp_Error_NumberOfClassicalReg(Exception):
+    def __str__(self):
+        return "QComp: number of classical register must be equal to corresponding quantum register"
+
+# Backend
+
+class Backend_Error_NameNotSupported(Exception):
+    def __str__(self):
+        return "Backend: name is not supported"
