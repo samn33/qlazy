@@ -8,6 +8,7 @@ Pythonパッケージ(qlazypy)
 - [密度演算子(DensOpクラス)](usage/densop.md)
 - [オブザーバブル(Observableクラス)](usage/observable.md)
 - [スタビライザー(Stabilizerクラス)](usage/stabilizer.md)
+- [量子コンピュータ(QCompクラス, Backendクラス)](usage/qcomp.md)
 
 ## 使用例
 
