@@ -1,5 +1,13 @@
 # Change Log
 
+## [0.1.2] - 2021-01-18
+### Added
+- QComp class - quantum computer
+- Backend class - backend quantum device (support qlazy simulator only)
+- Register tools
+### Fixed
+- bug fix: s_dg operation in Stabizer
+
 ## [0.1.1] - 2020-09-24
 ### Added
 - Stablizer class
@@ -8,7 +16,6 @@
 ## [0.1.0] - 2020-07-27
 ### Added
 - add example of error correction with surface code (toric code)
-
 ### Changed
 - update tutorials
 
