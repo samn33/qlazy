@@ -3,3 +3,6 @@
 c/build
 __pycache__
 *.egg-info
+backup
+old
+tmp
