@@ -91,8 +91,8 @@ resultはNoneになります)。resultをprintすると、
     print(result)
     >>> {'measured_qid': [0, 1], 'frequency': Counter({'00': 6, '11': 4})}
 
-という具合に表示されます。runの返却値は、measured_idとfrequencyという2
-つのキーからなる辞書データになっていることがわかります。
+という具合に表示されます。runの返却値は、measured_qidとfrequencyという
+2つのキーからなる辞書データになっていることがわかります。
 
 古典レジスタに途中の測定結果を格納して、それで以降のゲート制御をしたい
 場合があります。その例を以下に示します。
