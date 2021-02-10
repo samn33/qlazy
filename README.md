@@ -102,8 +102,8 @@ execute the program
 
 ## Requirements
 
-    * Linux(Ubuntu18.04)
-    * Python3.6
+    * Linux(Ubuntu20.04)
+    * Python3.8
 
 ## Licence
 
