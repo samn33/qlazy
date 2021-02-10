@@ -809,6 +809,16 @@ class TestQComp_measure_qstate_simulator(unittest.TestCase):
     """ test 'QComp' : various kind of measurements
     """
 
+    def test_measure_mesurement_only(self):
+        """test 'm' (measurement only)
+        """
+        bk = Backend('qlazy_qstate_simulator')
+        qc = QComp(qubit_num=2, backend=bk)
+        res = qc.measure([0,1]).run(shots=10)
+        qc.free()
+        self.assertEqual(res['measured_qid'], [0,1])
+        self.assertEqual(res['frequency']['00'], 10)
+
     def test_measure_simple(self):
         """test 'm' (simple case)
         """
@@ -1121,6 +1131,16 @@ class TestQComp_2_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
 class TestQComp_measure_stabilizer_simulator(unittest.TestCase):
     """ test 'QComp' : various kind of measurements
     """
+
+    def test_measure_mesurement_only(self):
+        """test 'm' (measurement only)
+        """
+        bk = Backend('qlazy_stabilizer_simulator')
+        qc = QComp(qubit_num=2, backend=bk)
+        res = qc.measure([0,1]).run(shots=10)
+        qc.free()
+        self.assertEqual(res['measured_qid'], [0,1])
+        self.assertEqual(res['frequency']['00'], 10)
 
     def test_measure_simple(self):
         """test 'm' (simple case)
