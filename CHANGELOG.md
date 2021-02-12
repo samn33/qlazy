@@ -1,5 +1,11 @@
 # Change Log
 
+## [0.1.3] - 2021-02-12
+### Added
+- example of surface code with QComp class (braiding_hadamard.py)
+### Fixed
+- bug fix: run_qlazy.py
+
 ## [0.1.2] - 2021-01-18
 ### Added
 - QComp class - quantum computer
