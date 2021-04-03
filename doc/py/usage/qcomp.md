@@ -34,9 +34,16 @@ qlazyの「スタビライザー計算シミュレータ」を使用したい場
 
     bk = Backend(name='qlazy_stabilizer_simulator')
 
-とします。現在のバージョンで対応しているのは、この2つのバックエンドの
-みです(今後、他のシミュレータやクラウドサービスも指定できるようにして
-いく予定です)。
+とします。その他、現在のバージョンで対応しているバックエンドは、
+[qulacsとqulacs-gpu](https://github.com/qulacs/qulacs)です。
+各々以下のように指定します。
+
+    bk = Backend(name='qulacs_simulator')
+    bk = Backend(name='qulacs_gpu_simulator')
+
+qulacsのインストールについては
+[Installation - Qulacs ドキュメント](http://docs.qulacs.org/ja/latest/intro/1_install.html)
+をご覧ください。
 
 これでいろんな量子計算を実行する準備ができたのですが、量子計算途中の測
 定値を古典レジスタに格納しておき、その値によってその後のゲート演算の制
@@ -64,9 +71,9 @@ qlazyの「スタビライザー計算シミュレータ」を使用したい場
 
 のようにゲートをつなげて書いてもOKです。これで量子コンピュータ内部に、
 
-    --H--*---
-         |
-    -----X---
+    q0 --H--*---
+            |
+    q1 -----X---
 	
 という回路が設定されたことになります。QStateクラスやDensOpクラスと違い、
 この段階ではまだゲート演算は実行されていません。以下のようにrunメソッ
@@ -85,14 +92,14 @@ qlazyの「スタビライザー計算シミュレータ」を使用したい場
 1行目のmeasureメソッドは計算基底で測定するためのゲートで、qidに測定す
 る量子ビット番号(量子レジスタ番号)を指定します。2行目のrunメソッドに指
 定されているshotsは実行回数(=測定回数)を表しています。これで測定結果が
-result変数に格納されることになります(最後に測定がない回路をrunした場合、
-resultはNoneになります)。resultをprintすると、
+result変数に格納されることになります。resultをprintすると、
 
     print(result)
     >>> {'measured_qid': [0, 1], 'frequency': Counter({'00': 6, '11': 4})}
 
 という具合に表示されます。runの返却値は、measured_qidとfrequencyという
-2つのキーからなる辞書データになっていることがわかります。
+2つのキーからなる辞書データになっていることがわかります。最後に測定が
+ない回路をrunした場合、resultはNoneになります。
 
 古典レジスタに途中の測定結果を格納して、それで以降のゲート制御をしたい
 場合があります。その例を以下に示します。
@@ -140,10 +147,6 @@ QCompクラスでは、ctrlという引数も指定することができます�
 
     qc.free()
 
-量子状態計算やスタビライザー計算はC言語のライブラリをctypeで呼び出す形
-にしていて、C言語で確保したメモリは明示的に解放しないといけないみたい
-なので、一応このようにします。
-
 基本は以上です。
 
 ### 対応している量子ゲート
@@ -156,7 +159,7 @@ DensOpクラスのものと同様で、さらに上で説明したctrlという�
 
 - x,y,z: Pauli X/Y/Z gate
 - h: Hadamard gate
-- xr,x_dg: root X and root X dagger gate
+- xr,xr_dg: root X and root X dagger gate
 - s,s_dg: S and S dagger gate
 - t,t_dg: T and T dagger gate
 - p: phase shift gate
@@ -177,7 +180,7 @@ DensOpクラスのものと同様で、さらに上で説明したctrlという�
 
 #### 3量子ビットゲート
 
-- ccx: CCX gate (or toffoli gate, controlled controlled X gate)
+- ccx: toffoli gate (or CCX gate, controlled controlled X gate)
 - csw: fredkin gate (or controlled swap gate)
 
 #### 測定ゲート
