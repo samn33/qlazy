@@ -916,7 +916,7 @@ bool help_print(char* item)
   case CONTROLLED_U3:
     _help_print_cu3();
     break;
-  case SWAP:
+  case SWAP_QUBITS:
     _help_print_sw();
     break;
   default:

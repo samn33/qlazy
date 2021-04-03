@@ -403,7 +403,7 @@ static bool _qsystem_execute_one_line(QSystem* qsystem, char* line)
   case CONTROLLED_S_:
   case CONTROLLED_T:
   case CONTROLLED_T_:
-  case SWAP:
+  case SWAP_QUBITS:
     /* 2-qubit gate */
     if ((qcirc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
     if (tnum > 3) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);

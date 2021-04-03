@@ -236,7 +236,7 @@ bool qcirc_set_cimage(QCirc* qcirc)
       }
       pos++;
       break;
-    case SWAP:
+    case SWAP_QUBITS:
       qcirc->cimage->ch[qcirc->qgate[i].qubit_id[0]][pos] = 'x';
       qcirc->cimage->ch[qcirc->qgate[i].qubit_id[1]][pos] = 'x';
       pos++;
@@ -367,7 +367,7 @@ bool qcirc_write_file(QCirc* qcirc, char* fname)
     case CONTROLLED_S_:
     case CONTROLLED_T:
     case CONTROLLED_T_:
-    case SWAP:
+    case SWAP_QUBITS:
       fprintf(fp, "%s %d %d\n", symbol, qubit_id[0], qubit_id[1]);
       break;
     case CONTROLLED_RX:
@@ -631,7 +631,7 @@ bool qcirc_read_file(char* fname, void** qcirc_out)
     case CONTROLLED_S_:
     case CONTROLLED_T:
     case CONTROLLED_T_:
-    case SWAP:
+    case SWAP_QUBITS:
       /* 2-qubit gate */
       terminal_num = 2;
       qubit_id[0] = strtol(token[1], NULL, 10);

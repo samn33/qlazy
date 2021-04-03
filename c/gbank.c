@@ -516,7 +516,7 @@ static bool _gbank_get(GBank* gbank, Kind kind, void** matrix_out)
   case CONTROLLED_S_:
   case CONTROLLED_T:
   case CONTROLLED_T_:
-  case SWAP:
+  case SWAP_QUBITS:
     size = 16;
     break;
     
@@ -590,7 +590,7 @@ static bool _gbank_get(GBank* gbank, Kind kind, void** matrix_out)
   case CONTROLLED_T_:
     memcpy(matrix, gbank->ControlledT_, sizeof(COMPLEX)*size);
     break;
-  case SWAP:
+  case SWAP_QUBITS:
     memcpy(matrix, gbank->Swap, sizeof(COMPLEX)*size);
     break;
   default:
@@ -686,7 +686,7 @@ bool gbank_get_unitary(GBank* gbank, Kind kind, double phase, double phase1,
   case CONTROLLED_S_:
   case CONTROLLED_T:
   case CONTROLLED_T_:
-  case SWAP:
+  case SWAP_QUBITS:
     /* 2-qubit gate */
     dim = 4;
     if (!(_gbank_get(gbank, kind, (void**)&matrix)))
