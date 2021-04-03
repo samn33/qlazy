@@ -1141,7 +1141,7 @@ class QState(ctypes.Structure):
         self : instance of QState
 
         """
-        qstate_operate_qgate(self, kind=SWAP, phase=DEF_PHASE, qid=[q0,q1])
+        qstate_operate_qgate(self, kind=SWAP_QUBITS, phase=DEF_PHASE, qid=[q0,q1])
         return self
 
     def cp(self, q0, q1, phase=DEF_PHASE):
