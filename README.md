@@ -3,9 +3,16 @@ qlazy
 
 Quantum Computing Simulator
 
+## Feature
+
+- Command line tool to perform simple quantum calculation.
+- Python package for performing complex quantum calculations.
+- Supports three types of quantum states: 1) quantum state vector, 2) density operator (matrix), 3) stabilizer state.
+- Other quantum computing simulators can be uesd as a backend: [qulacs/qulacs-gpu](https://github.com/qulacs/qulacs) (at present).
+
 ## Install
 
-### command and library - qlazy,libqlz.so
+### Command line tool and Library ('qlazy', 'libqlz.so')
 
     $ git clone https://github.com/samn33/qlazy.git
     $ cd qlazy/c
@@ -21,14 +28,16 @@ You may also need to install 'libreadline-dev'
 
     $ sudo apt install libreadline-dev
 
-### python package - qlazypy
+### Python package ('qlazypy')
 
     $ cd ../../py
     $ pip install -e .
 
 ## Usage
 
-### qlazy (read-file)
+### Command line tool ('qlazy')
+
+#### read file
 
 foo.qc
 
@@ -49,7 +58,7 @@ print help
 	
     $ qlazy -h
 
-### qlazy (interactive-mode)
+#### interactive mode
 
     $ qlazy
 	>> init 2
@@ -72,7 +81,9 @@ print help
 	>> help
 	>> help <item>
 
-### qlazypy
+### Python package ('qlazypy')
+
+#### Example of QState class
 
 foo.py
 	
@@ -96,7 +107,15 @@ execute the program
     c[11] = +0.7071+0.0000*i : 0.5000 |++++++
     Counter({{'00':53,'11':47})
 
-## Tutorial
+#### Classes
+
+- QState: class for operating quantum state vectors.
+- DensOp: class for operating density operators.
+- Stabilizer: class for operating stabilizer states.
+- Observable: class for specifying observables.
+- QComp, Backend: class for quantum computers, and class for specifying backend.
+
+## Documents
 
 - [Tutorial(japanese)](doc/Tutorial.md)
 

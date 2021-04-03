@@ -15,7 +15,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
-#define VERSION "0.1.3"
+#define VERSION "0.1.4"
 
 //#define TEST_NEW_VERSION
 
@@ -209,7 +209,7 @@ typedef enum _Kind {
   CONTROLLED_U1  = 174,		/* symbol: 'CU1','cu1'   */
   CONTROLLED_U2  = 175,		/* symbol: 'CU1','cu1'   */
   CONTROLLED_U3  = 176,		/* symbol: 'CU1','cu1'   */
-  SWAP	         = 180,		/* symbol: 'SW','sw'     */
+  SWAP_QUBITS	 = 180,		/* symbol: 'SW','sw'     */
   MEASURE	 = 200,	 	/* symbol: 'M','m'       */
   MEASURE_X	 = 201,	 	/* symbol: 'MX','mx'     */
   MEASURE_Y	 = 202,	 	/* symbol: 'MY','my'     */

@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.1.4] - 2021-04-03
+### Added
+- backend: qulacs, qulacs-gpu
+
 ## [0.1.3] - 2021-02-12
 ### Added
 - example of surface code with QComp class (braiding_hadamard.py)
