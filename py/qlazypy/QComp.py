@@ -1,11 +1,7 @@
 # -*- coding: utf-8 -*-
 from qlazypy.config import *
+from qlazypy.util import *
 from qlazypy.error import *
-from qlazypy.run_qlazy import *
-from qlazypy.lib.qstate_c import *
-from qlazypy.lib.stabilizer_c import *
-from qlazypy.QState import *
-from qlazypy.Stabilizer import *
 from qlazypy.Backend import *
 
 class QComp:
@@ -21,13 +17,10 @@ class QComp:
         classical memory
     qcirc : dict
         quantum circuit
-    qstate : instance of QState
-        quantum state (for 'qlazy_qstate_simulator')
-    stab : instance of Stabilizer
-        stabilizer group (for 'qlazy_stabilizer_simulator')
+    qstate : instance of quantum state
+        quantum state
 
     """
-
     def __init__(self, qubit_num, cmem_num=0, backend=None):
 
         self.qubit_num = qubit_num
@@ -42,24 +35,62 @@ class QComp:
             
         # qlazy qstate simulator
         if self.backend.name == 'qlazy_qstate_simulator':
-            self.qstate = QState(qubit_num=qubit_num)
-        else:
-            self.qstate = None
+            from qlazypy.backend.qlazy_qstate_simulator import init, run, reset, free
+            self.__init = init
+            self.__run = run
+            self.__reset = reset
+            self.__free = free
 
         # qlazy stabilizer simulator
-        if self.backend.name == 'qlazy_stabilizer_simulator':
-            self.stab = Stabilizer(qubit_num=qubit_num)
-            self.stab.set_all('Z')
+        elif self.backend.name == 'qlazy_stabilizer_simulator':
+            from qlazypy.backend.qlazy_stabilizer_simulator import init, run, reset, free
+            self.__init = init
+            self.__run = run
+            self.__reset = reset
+            self.__free = free
+
+        # qulacs
+        elif self.backend.name == 'qulacs_simulator':
+            from qlazypy.backend.qulacs_simulator import init, run, reset, free
+            self.__init = init
+            self.__run = run
+            self.__reset = reset
+            self.__free = free
+
+        # qulacs-gpu
+        elif self.backend.name == 'qulacs_gpu_simulator':
+            from qlazypy.backend.qulacs_gpu_simulator import init, run, reset, free
+            self.__init = init
+            self.__run = run
+            self.__reset = reset
+            self.__free = free
+
         else:
-            self.stab = None
+            raise ValueError("Error: not supported backend name")
 
+        self.qstate = self.__init(qubit_num=qubit_num, backend=self.backend)
+            
     def reset(self, reset_qubits=True, reset_cmem=True, reset_qcirc=True):
+        """
+        reset quantum state, quantum circuit, and classical memory
 
+        Parameters
+        ----------
+        reset_qubits : bool, default True
+            reset quantum state or not.
+        reset_cmem : bool, default True
+            reset classical memory or not.
+        reset_qcirc : bool, default True
+            reset quantum circuit or not.
+
+        Returns
+        -------
+        None
+
+        """
         if reset_qubits == True:
             if self.qstate != None:
-                self.qstate.reset()
-            if self.stab != None:
-                self.stab.set_all('Z')
+                self.__reset(qstate=self.qstate, backend=self.backend)
 
         if reset_cmem == True:
             del self.cmem
@@ -70,12 +101,23 @@ class QComp:
             self.qcirc = []
 
     def free(self):
-        self.reset()
+        """
+        free quantum state, quantum circuit, and classical memory
 
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        """
         if self.qstate != None:
-            self.qstate.free()
-        elif self.stab != None:
-            self.stab.free()
+            self.__free(qstate=self.qstate, backend=self.backend)
+
+        del self.cmem
+        del self.qcirc
 
     def run(self, shots=DEF_SHOTS, reset_qubits=True, reset_cmem=True, reset_qcirc=True):
         """
@@ -85,6 +127,12 @@ class QComp:
         ----------
         shots : int, default 1
             number of measurements.
+        reset_qubits : bool, default True
+            reset quantum state or not.
+        reset_cmem : bool, default True
+            reset classical memory or not.
+        reset_qcirc : bool, default True
+            reset quantum circuit or not.
 
         Returns
         -------
@@ -99,15 +147,10 @@ class QComp:
         {'measured_qid': [0,1], 'frequency': Counter({'00': 5, '11': 5})}
 
         """
-        if self.backend.name == 'qlazy_qstate_simulator':
-            result = run_qlazy_qstate_simulator(self.qstate, self.qcirc, self.cmem, shots=shots)
-            self.reset(reset_qubits, reset_cmem, reset_qcirc)
-        elif self.backend.name == 'qlazy_stabilizer_simulator':
-            result = run_qlazy_stabilizer_simulator(self.stab, self.qcirc, self.cmem, shots=shots)
-            self.reset(reset_qubits, reset_cmem, reset_qcirc)
-        else:
-            raise QComp_Error_BackendNotSupported()
-            
+        result = self.__run(qubit_num=self.qubit_num, cmem_num=self.cmem_num,
+                            qstate=self.qstate, qcirc=self.qcirc, cmem=self.cmem, shots=shots,
+                            backend=self.backend)
+        self.reset(reset_qubits=reset_qubits, reset_cmem=reset_cmem, reset_qcirc=reset_qcirc)
         return result
 
     def measure(self, qid, cid=None, ctrl=None):
@@ -737,7 +780,7 @@ class QComp:
         self : instance of QComp.
 
         """
-        self.__add_quantum_gate(kind=SWAP, qid=[q0,q1], ctrl=ctrl)
+        self.__add_quantum_gate(kind=SWAP_QUBITS, qid=[q0,q1], ctrl=ctrl)
         return self
 
     def cp(self, q0, q1, phase=DEF_PHASE, ctrl=None):
