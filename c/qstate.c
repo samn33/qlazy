@@ -39,6 +39,9 @@ static void _qstate_set_none(QState* qstate)
   for (int i=0; i<qstate->state_num; i++) {
     qstate->camp[i] = 0.0 + 0.0i;
   }
+  for (int i=0; i<qstate->state_num; i++) {
+    qstate->camp_tmp[i] = 0.0 + 0.0i;
+  }
 }
 
 static void _qstate_set_0(QState* qstate)
@@ -253,6 +256,9 @@ bool qstate_init(int qubit_num, void** qstate_out)
   qstate->state_num = state_num;
 
   if (!(qstate->camp = (COMPLEX*)malloc(sizeof(COMPLEX)*state_num)))
+    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
+
+  if (!(qstate->camp_tmp = (COMPLEX*)malloc(sizeof(COMPLEX)*state_num)))
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
 
   if (!(gbank_init((void**)&(qstate->gbank))))
@@ -482,6 +488,7 @@ static bool _qstate_operate_unitary2(COMPLEX* camp_out, COMPLEX* camp_in, COMPLE
 {
   int nn = qubit_num - n - 1;
   
+  # pragma omp parallel for
   for (int i=0; i<state_num; i++) {
     if ((i >> nn) %2 == 0) {
       camp_out[i]
@@ -504,6 +511,7 @@ static bool _qstate_operate_unitary4(COMPLEX* camp_out, COMPLEX* camp_in, COMPLE
   int mm = qubit_num - m - 1;
   int nn = qubit_num - n - 1;
 
+  # pragma omp parallel for
   for (int i=0; i<state_num; i++) {
     if (((i >> mm) % 2 == 0) && ((i >> nn) % 2 == 0)) {
       camp_out[i]
@@ -590,21 +598,16 @@ static bool _qstate_operate_unitary_new(QState* qstate, COMPLEX* U, int dim, int
 
 static bool _qstate_operate_unitary(QState* qstate, COMPLEX* U, int dim, int m, int n)
 {
-  QState* qstate_tmp = NULL;
-
   if ((qstate == NULL) || (dim < 0))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
-  if (!(qstate_init(qstate->qubit_num, (void**)&qstate_tmp)))
-    ERR_RETURN(ERROR_QSTATE_INIT,false);
-  
   if (dim == 2) {
-    if (!(_qstate_operate_unitary2(qstate_tmp->camp, qstate->camp, U,
+    if (!(_qstate_operate_unitary2(qstate->camp_tmp, qstate->camp, U,
 				   qstate->qubit_num, qstate->state_num, m)))
       ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
   }
   else if (dim == 4) {
-    if (!(_qstate_operate_unitary4(qstate_tmp->camp, qstate->camp, U,
+    if (!(_qstate_operate_unitary4(qstate->camp_tmp, qstate->camp, U,
 				   qstate->qubit_num, qstate->state_num, m, n)))
       ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
   }
@@ -612,8 +615,7 @@ static bool _qstate_operate_unitary(QState* qstate, COMPLEX* U, int dim, int m, 
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
   }
 
-  memcpy(qstate->camp, qstate_tmp->camp, sizeof(COMPLEX)*qstate->state_num);
-  qstate_free(qstate_tmp); qstate_tmp = NULL;
+  memcpy(qstate->camp, qstate->camp_tmp, sizeof(COMPLEX)*qstate->state_num);
 
   SUC_RETURN(true);
 }
@@ -1183,17 +1185,6 @@ bool qstate_apply_matrix(QState* qstate, int qnum_part, int qid[MAX_QUBIT_NUM],
       coef = real[ii*col+jj] + 1.0i * imag[ii*col+jj];
       qstate->camp[i] += (coef * qstate_tmp->camp[j]);
     }
-
-    /*
-    for (int j=0; j<qstate->state_num; j++) {
-      jj = index[j]>>shift;
-      jjj = index[j]%(1<<shift);
-      if (iii == jjj) {
-	coef = real[ii*col+jj] + 1.0i * imag[ii*col+jj];
-	qstate->camp[i] += (coef * qstate_tmp->camp[j]);
-      }
-    }
-    */
   }
 
   free(index); index = NULL;
@@ -1209,6 +1200,9 @@ void qstate_free(QState* qstate)
   
   if (qstate->camp != NULL) {
     free(qstate->camp); qstate->camp = NULL;
+  }
+  if (qstate->camp_tmp != NULL) {
+    free(qstate->camp_tmp); qstate->camp_tmp = NULL;
   }
   if (qstate->gbank != NULL) {
     free(qstate->gbank); qstate->gbank = NULL;

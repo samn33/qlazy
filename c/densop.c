@@ -16,9 +16,14 @@ static DensOp* _create_densop(int row, int col)
   densop->col = col;
   if (!(densop->elm = (COMPLEX*)malloc(sizeof(COMPLEX)*size)))
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,NULL);
+  if (!(densop->elm_tmp = (COMPLEX*)malloc(sizeof(COMPLEX)*size)))
+    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,NULL);
 
-  for (int i=0; i<size; i++) densop->elm[i] = 0.0 + 0.0i;
-
+  for (int i=0; i<size; i++) {
+    densop->elm[i] = 0.0 + 0.0i;
+    densop->elm_tmp[i] = 0.0 + 0.0i;
+  }
+  
   if (!(gbank_init((void**)&(densop->gbank))))
       ERR_RETURN(ERROR_GBANK_INIT,NULL);
 
@@ -149,6 +154,8 @@ bool densop_copy(DensOp* densop_in, void** densop_out)
   densop->row = densop_in->row;
   densop->col = densop_in->col;
   if (!(densop->elm = (COMPLEX*)malloc(sizeof(COMPLEX)*(densop->row)*(densop->col))))
+    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
+  if (!(densop->elm_tmp = (COMPLEX*)malloc(sizeof(COMPLEX)*(densop->row)*(densop->col))))
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
 
   memcpy(densop->elm, densop_in->elm, sizeof(COMPLEX)*(densop->row)*(densop->col));
@@ -356,6 +363,8 @@ bool densop_patrace(DensOp* densop_in, int qubit_num, int qubit_id[MAX_QUBIT_NUM
   densop->row = densop->col = dim;
   if (!(densop->elm = (COMPLEX*)malloc(sizeof(COMPLEX)*dim*dim)))
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
+  if (!(densop->elm_tmp = (COMPLEX*)malloc(sizeof(COMPLEX)*dim*dim)))
+    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
   for (int n=0; n<dim*dim; n++) densop->elm[n] = 0.0+0.0i;
 
   qsort(qubit_id, qubit_num, sizeof(int), _cmp_for_sort);
@@ -412,7 +421,6 @@ static bool _densop_rapply_matrix(DensOp* densop, int qnum_part, int qid[MAX_QUB
   densop' = densop * matrix
 */
 {
-  DensOp*	densop_tmp = NULL;
   int*		index	   = NULL;
   int*		inv_index  = NULL;
   COMPLEX	coef	   = 0.0 + 0.0i;
@@ -426,8 +434,7 @@ static bool _densop_rapply_matrix(DensOp* densop, int qnum_part, int qid[MAX_QUB
       (1<<qnum_part != row))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
-  if (!(densop_copy(densop, (void**)&densop_tmp)))
-    ERR_RETURN(ERROR_DENSOP_COPY,false);
+  memcpy(densop->elm_tmp, densop->elm, sizeof(COMPLEX) * densop->row * densop->col);
 
   qnum = (int)log2(densop->row);
   index = bit_permutation_array(densop->row, qnum, qnum_part, qid);
@@ -440,6 +447,7 @@ static bool _densop_rapply_matrix(DensOp* densop, int qnum_part, int qid[MAX_QUB
   shift = qnum-qnum_part;
   N = 1<<(qnum-shift);
 
+  # pragma omp parallel for
   for (int i=0; i<densop->row; i++) {
     ii = index[i]>>shift;
     iii = index[i]%(1<<shift);
@@ -453,26 +461,13 @@ static bool _densop_rapply_matrix(DensOp* densop, int qnum_part, int qid[MAX_QUB
 	kk = index[k]>>shift;
 	kkk = index[k]%(1<<shift);
 	coef = real[kk*col+jj]+1.0i*imag[kk*col+jj];
-	densop->elm[i*densop->col+j] += (densop_tmp->elm[i*densop->col+k] * coef);
+	densop->elm[i*densop->col+j] += (densop->elm_tmp[i*densop->col+k] * coef);
       }
-
-      /*
-      for (int k=0; k<densop->row; k++) {
-	kk = index[k]>>shift;
-	kkk = index[k]%(1<<shift);
-	if (jjj == kkk) {
-	  coef = real[kk*col+jj]+1.0i*imag[kk*col+jj];
-	  densop->elm[i*densop->col+j] += (densop_tmp->elm[i*densop->col+k] * coef);
-	}
-      }
-      */
-      
     }
   }
 
   free(index); index = NULL;
   free(inv_index); inv_index = NULL;
-  densop_free(densop_tmp); densop_tmp = NULL;
 
   SUC_RETURN(true);
 }
@@ -483,7 +478,6 @@ static bool _densop_lapply_matrix(DensOp* densop, int qnum_part, int qid[MAX_QUB
   densop' = matrix * densop
 */
 {
-  DensOp*	densop_tmp = NULL;
   int*		index	   = NULL;
   int*		inv_index  = NULL;
   COMPLEX	coef	   = 0.0 + 0.0i;
@@ -497,8 +491,7 @@ static bool _densop_lapply_matrix(DensOp* densop, int qnum_part, int qid[MAX_QUB
       (1<<qnum_part != row))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
-  if (!(densop_copy(densop, (void**)&densop_tmp)))
-    ERR_RETURN(ERROR_DENSOP_COPY,false);
+  memcpy(densop->elm_tmp, densop->elm, sizeof(COMPLEX) * densop->row * densop->col);
 
   qnum = (int)log2(densop->row);
   index = bit_permutation_array(densop->row, qnum, qnum_part, qid);
@@ -511,6 +504,7 @@ static bool _densop_lapply_matrix(DensOp* densop, int qnum_part, int qid[MAX_QUB
   shift = qnum-qnum_part;
   N = 1<<(qnum-shift);
 
+  # pragma omp parallel for
   for (int i=0; i<densop->row; i++) {
     ii = index[i]>>shift;
     iii = index[i]%(1<<shift);
@@ -524,26 +518,13 @@ static bool _densop_lapply_matrix(DensOp* densop, int qnum_part, int qid[MAX_QUB
 	kk = index[k]>>shift;
 	kkk = index[k]%(1<<shift);
 	coef = real[ii*col+kk]+1.0i*imag[ii*col+kk];
-	densop->elm[i*densop->col+j] += (coef * densop_tmp->elm[k*densop->col+j]);
+	densop->elm[i*densop->col+j] += (coef * densop->elm_tmp[k*densop->col+j]);
       }
-
-      /*
-      for (int k=0; k<densop->row; k++) {
-	kk = index[k]>>shift;
-	kkk = index[k]%(1<<shift);
-	if (iii == kkk) {
-	  coef = real[ii*col+kk]+1.0i*imag[ii*col+kk];
-	  densop->elm[i*densop->col+j] += (coef * densop_tmp->elm[k*densop->col+j]);
-	}
-      }
-      */
-      
     }
   }
 
   free(index); index = NULL;
   free(inv_index); inv_index = NULL;
-  densop_free(densop_tmp); densop_tmp = NULL;
 
   SUC_RETURN(true);
 }
@@ -777,6 +758,9 @@ void densop_free(DensOp* densop)
   if (densop != NULL) {
     if (densop->elm != NULL) {
       free(densop->elm); densop->elm = NULL;
+    }
+    if (densop->elm_tmp != NULL) {
+      free(densop->elm_tmp); densop->elm_tmp = NULL;
     }
     free(densop); densop = NULL;
   }

@@ -15,7 +15,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
-#define VERSION "0.1.4"
+#define VERSION "0.1.5"
 
 //#define TEST_NEW_VERSION
 
@@ -310,6 +310,7 @@ typedef struct _QState {
   int		qubit_num;	/* number of qubits */
   int		state_num;	/* number of quantum state (dim = 2^num) */
   COMPLEX*	camp;           /* complex amplitude of the quantum state */
+  COMPLEX*	camp_tmp;       /* complex amplitude of the quantum state (temporary) */
   GBank*        gbank;
 } QState;
 
@@ -349,6 +350,7 @@ typedef struct _DensOp {
   int		row;
   int		col;
   COMPLEX*	elm;
+  COMPLEX*	elm_tmp;
   GBank*        gbank;
 } DensOp;
 
