@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from qulacs import QuantumStateGpu
-from qlazypy.backend.qulacs_simulator import run, reset, free
+from qlazypy.backend.qulacs_cpu_simulator import run, reset, free
 
 def init(qubit_num=0, backend=None):
 
