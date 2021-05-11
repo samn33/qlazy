@@ -314,7 +314,7 @@ class Stabilizer(ctypes.Structure):
     
     def get_pauli_op(self, gene_id, qubit_id):
         """
-        get pauli factor of generator ('+1','-1','+i','-i').
+        get pauli operator ('I','X','Y','Z').
 
         Parameters
         ----------
