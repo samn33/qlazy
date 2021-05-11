@@ -29,6 +29,7 @@ class QState(ctypes.Structure):
         ('qubit_num', ctypes.c_int),
         ('state_num', ctypes.c_int),
         ('camp', ctypes.c_void_p),
+        ('camp_tmp', ctypes.c_void_p),
         ('gbank', ctypes.c_void_p),
     ]
 

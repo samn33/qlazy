@@ -26,6 +26,7 @@ class DensOp(ctypes.Structure):
         ('row', ctypes.c_int),
         ('col', ctypes.c_int),
         ('elm', ctypes.c_void_p),
+        ('elm_tmp', ctypes.c_void_p),
     ]
     
     def __new__(cls, qubit_num=0, qstate=[], prob=[], matrix=None):
