@@ -110,7 +110,7 @@ def reset(qstate=None, backend=None):
         qstate.reset()
         qstate.set_all('Z')
 
-    return True
+    # return True
 
 def free(qstate=None, backend=None):
 

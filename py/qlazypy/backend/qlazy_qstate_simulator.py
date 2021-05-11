@@ -81,7 +81,7 @@ def reset(qstate=None, backend=None):
     if qstate != None:
         qstate.reset()
 
-    return True
+    # return True
 
 def free(qstate=None, backend=None):
 
