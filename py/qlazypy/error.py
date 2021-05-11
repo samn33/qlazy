@@ -253,3 +253,11 @@ class QComp_Error_NumberOfClassicalReg(Exception):
 class Backend_Error_NameNotSupported(Exception):
     def __str__(self):
         return "Backend: name is not supported"
+
+class Backend_Error_DeviceNotSupported(Exception):
+    def __str__(self):
+        return "Backend: device is not supported"
+
+class Backend_Error_NameNotSpecified(Exception):
+    def __str__(self):
+        return "Backend: name is not specified"
