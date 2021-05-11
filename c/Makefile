@@ -21,7 +21,8 @@ LIB_SRC = $(LIB_SRC_BASE)
 CC = gcc
 CC_LINK = gcc
 
-CFLAG_CC = -fPIC -Wall -O2 -DDEV
+CFLAG_CC = -fPIC -fopenmp -Wall -O2 -DDEV
+# CFLAG_CC = -fPIC -Wall -O2 -DDEV
 CFLAG_LINK = $(CFLAG_CC)
 
 IFLAG = -I.
