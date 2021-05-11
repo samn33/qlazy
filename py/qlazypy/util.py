@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import math
+import numpy as np
 from qlazypy.error import *
 from qlazypy.config import *
 
@@ -197,4 +198,19 @@ def is_measurement_gate(kind):
         return True
     else:
         return False
+
+def reverse_bit_order(vec_in):
+
+    vec_out = [0] * len(vec_in)
+    digits = np.log2(len(vec_in))
+    if not digits.is_integer():
+        raise ValueError("length of vector must be power of two")
+        
+    for idx, val in enumerate(vec_in):
+        idx_binstr = '{:0{digits}b}'.format(idx, digits=int(digits))
+        idx_binstr_rev = ''.join(reversed(list(idx_binstr)))
+        idx_rev = int(idx_binstr_rev, 2)
+        vec_out[idx_rev] = val
+
+    return vec_out
 
