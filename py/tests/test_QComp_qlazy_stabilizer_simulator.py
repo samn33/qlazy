@@ -59,7 +59,7 @@ class TestQComp_init(unittest.TestCase):
     def test_init_qlazy_stabilizer_simulator(self):
         """test '__init__' (qlazy_stabilizer_simulator)
         """
-        bk = Backend('qlazy_stabilizer_simulator')
+        bk = Backend(name='qlazy', device='stabilizer_simulator')
         qc = QComp(qubit_num=3, cmem_num=2, backend=bk)
         actual = qc.qstate.get_str()
         expect = "  ZII\n  IZI\n  IIZ\n"
@@ -77,7 +77,7 @@ class TestQComp_reset(unittest.TestCase):
     def test_reset_qlazy_stabilizer_simulator(self):
         """test 'reset' (qlazy_stabilizer_simulator)
         """
-        bk = Backend('qlazy_stabilizer_simulator')
+        bk = Backend(name='qlazy', device='stabilizer_simulator')
         qc = QComp(qubit_num=3, cmem_num=2, backend=bk)
         qc.h(0).h(1).h(2).run()
         qc.reset()
@@ -97,7 +97,7 @@ class TestQComp_1_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
     def test_x(self):
         """test 'x' gate
         """
-        bk = Backend('qlazy_stabilizer_simulator')
+        bk = Backend(name='qlazy', device='stabilizer_simulator')
         qc = QComp(qubit_num=1, backend=bk)
         res = qc.x(0).run(reset_qubits=False)
         actual = qc.qstate.get_str()
@@ -108,7 +108,7 @@ class TestQComp_1_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
     def test_h_x(self):
         """test 'x' gate (following 'h' gate)
         """
-        bk = Backend('qlazy_stabilizer_simulator')
+        bk = Backend(name='qlazy', device='stabilizer_simulator')
         qc = QComp(qubit_num=1, backend=bk)
         res = qc.h(0).x(0).run(reset_qubits=False)
         actual = qc.qstate.get_str()
@@ -119,7 +119,7 @@ class TestQComp_1_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
     def test_y(self):
         """test 'y' gate
         """
-        bk = Backend('qlazy_stabilizer_simulator')
+        bk = Backend(name='qlazy', device='stabilizer_simulator')
         qc = QComp(qubit_num=1, backend=bk)
         res = qc.y(0).run(reset_qubits=False)
         actual = qc.qstate.get_str()
@@ -130,7 +130,7 @@ class TestQComp_1_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
     def test_h_y(self):
         """test 'y' gate (following 'h' gate)
         """
-        bk = Backend('qlazy_stabilizer_simulator')
+        bk = Backend(name='qlazy', device='stabilizer_simulator')
         qc = QComp(qubit_num=1, backend=bk)
         res = qc.h(0).y(0).run(reset_qubits=False)
         actual = qc.qstate.get_str()
@@ -141,7 +141,7 @@ class TestQComp_1_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
     def test_z(self):
         """test 'z' gate
         """
-        bk = Backend('qlazy_stabilizer_simulator')
+        bk = Backend(name='qlazy', device='stabilizer_simulator')
         qc = QComp(qubit_num=1, backend=bk)
         res = qc.z(0).run(reset_qubits=False)
         actual = qc.qstate.get_str()
@@ -152,7 +152,7 @@ class TestQComp_1_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
     def test_h_z(self):
         """test 'z' gate (following 'h' gate)
         """
-        bk = Backend('qlazy_stabilizer_simulator')
+        bk = Backend(name='qlazy', device='stabilizer_simulator')
         qc = QComp(qubit_num=1, backend=bk)
         res = qc.h(0).z(0).run(reset_qubits=False)
         actual = qc.qstate.get_str()
@@ -163,7 +163,7 @@ class TestQComp_1_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
     def test_h(self):
         """test 'h' gate
         """
-        bk = Backend('qlazy_stabilizer_simulator')
+        bk = Backend(name='qlazy', device='stabilizer_simulator')
         qc = QComp(qubit_num=1, backend=bk)
         res = qc.h(0).run(reset_qubits=False)
         actual = qc.qstate.get_str()
@@ -174,7 +174,7 @@ class TestQComp_1_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
     def test_h_h(self):
         """test 'h' gate (following 'h' gate)
         """
-        bk = Backend('qlazy_stabilizer_simulator')
+        bk = Backend(name='qlazy', device='stabilizer_simulator')
         qc = QComp(qubit_num=1, backend=bk)
         res = qc.h(0).h(0).run(reset_qubits=False)
         actual = qc.qstate.get_str()
@@ -185,7 +185,7 @@ class TestQComp_1_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
     def test_s(self):
         """test 's' gate
         """
-        bk = Backend('qlazy_stabilizer_simulator')
+        bk = Backend(name='qlazy', device='stabilizer_simulator')
         qc = QComp(qubit_num=1, backend=bk)
         res = qc.s(0).run(reset_qubits=False)
         actual = qc.qstate.get_str()
@@ -196,7 +196,7 @@ class TestQComp_1_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
     def test_h_s(self):
         """test 's' gate (following 'h' gate)
         """
-        bk = Backend('qlazy_stabilizer_simulator')
+        bk = Backend(name='qlazy', device='stabilizer_simulator')
         qc = QComp(qubit_num=1, backend=bk)
         res = qc.h(0).s(0).run(reset_qubits=False)
         actual = qc.qstate.get_str()
@@ -207,7 +207,7 @@ class TestQComp_1_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
     def test_s_dg(self):
         """test 's+' gate
         """
-        bk = Backend('qlazy_stabilizer_simulator')
+        bk = Backend(name='qlazy', device='stabilizer_simulator')
         qc = QComp(qubit_num=1, backend=bk)
         res = qc.s(0).run(reset_qubits=False)
         actual = qc.qstate.get_str()
@@ -218,7 +218,7 @@ class TestQComp_1_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
     def test_h_s_dg(self):
         """test 's+' gate (following 'h' gate)
         """
-        bk = Backend('qlazy_stabilizer_simulator')
+        bk = Backend(name='qlazy', device='stabilizer_simulator')
         qc = QComp(qubit_num=1, backend=bk)
         res = qc.h(0).s_dg(0).run(reset_qubits=False)
         actual = qc.qstate.get_str()
@@ -237,7 +237,7 @@ class TestQComp_2_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
     def test_cx(self):
         """test 'CX'
         """
-        bk = Backend('qlazy_stabilizer_simulator')
+        bk = Backend(name='qlazy', device='stabilizer_simulator')
         qc = QComp(qubit_num=2, backend=bk)
         res = qc.cx(0,1).run(reset_qubits=False)
         actual = qc.qstate.get_str()
@@ -248,7 +248,7 @@ class TestQComp_2_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
     def test_hh_cx(self):
         """test 'CX' (following 'h' gate)
         """
-        bk = Backend('qlazy_stabilizer_simulator')
+        bk = Backend(name='qlazy', device='stabilizer_simulator')
         qc = QComp(qubit_num=2, backend=bk)
         res = qc.h(0).h(1).cx(0,1).run(reset_qubits=False)
         actual = qc.qstate.get_str()
@@ -259,7 +259,7 @@ class TestQComp_2_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
     def test_cy(self):
         """test 'CY'
         """
-        bk = Backend('qlazy_stabilizer_simulator')
+        bk = Backend(name='qlazy', device='stabilizer_simulator')
         qc = QComp(qubit_num=2, backend=bk)
         res = qc.cy(0,1).run(reset_qubits=False)
         actual = qc.qstate.get_str()
@@ -270,7 +270,7 @@ class TestQComp_2_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
     def test_hh_cy(self):
         """test 'CY' (following 'h' gate)
         """
-        bk = Backend('qlazy_stabilizer_simulator')
+        bk = Backend(name='qlazy', device='stabilizer_simulator')
         qc = QComp(qubit_num=2, backend=bk)
         res = qc.h(0).h(1).cy(0,1).run(reset_qubits=False)
         actual = qc.qstate.get_str()
@@ -281,7 +281,7 @@ class TestQComp_2_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
     def test_cz(self):
         """test 'CZ'
         """
-        bk = Backend('qlazy_stabilizer_simulator')
+        bk = Backend(name='qlazy', device='stabilizer_simulator')
         qc = QComp(qubit_num=2, backend=bk)
         res = qc.cz(0,1).run(reset_qubits=False)
         actual = qc.qstate.get_str()
@@ -292,7 +292,7 @@ class TestQComp_2_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
     def test_hh_cz(self):
         """test 'CZ' (folowint 'h' gate)
         """
-        bk = Backend('qlazy_stabilizer_simulator')
+        bk = Backend(name='qlazy', device='stabilizer_simulator')
         qc = QComp(qubit_num=2, backend=bk)
         res = qc.h(0).h(1).cz(0,1).run(reset_qubits=False)
         actual = qc.qstate.get_str()
@@ -311,7 +311,7 @@ class TestQComp_measure_stabilizer_simulator(unittest.TestCase):
     def test_measure_mesurement_only(self):
         """test 'm' (measurement only)
         """
-        bk = Backend('qlazy_stabilizer_simulator')
+        bk = Backend(name='qlazy', device='stabilizer_simulator')
         qc = QComp(qubit_num=2, backend=bk)
         res = qc.measure([0,1]).run(shots=10)
         qc.free()
@@ -321,7 +321,7 @@ class TestQComp_measure_stabilizer_simulator(unittest.TestCase):
     def test_measure_simple(self):
         """test 'm' (simple case)
         """
-        bk = Backend('qlazy_stabilizer_simulator')
+        bk = Backend(name='qlazy', device='stabilizer_simulator')
         qc = QComp(qubit_num=2, backend=bk)
         res = qc.h(0).cx(0,1).measure([0,1]).run(shots=10)
         qc.free()
@@ -331,7 +331,7 @@ class TestQComp_measure_stabilizer_simulator(unittest.TestCase):
     def test_measure_use_cmem(self):
         """test 'm' (use classical memory)
         """
-        bk = Backend('qlazy_stabilizer_simulator')
+        bk = Backend(name='qlazy', device='stabilizer_simulator')
         qc = QComp(qubit_num=2, cmem_num=3, backend=bk)
         res = qc.h(0).cx(0,1).measure([0,1],[0,1]).run(shots=10, reset_cmem=False)
         self.assertEqual(res['measured_qid'], [0,1])
@@ -342,7 +342,7 @@ class TestQComp_measure_stabilizer_simulator(unittest.TestCase):
     def test_measure_control_qubit(self):
         """test 'm' (control qubit using classical memory)
         """
-        bk = Backend('qlazy_stabilizer_simulator')
+        bk = Backend(name='qlazy', device='stabilizer_simulator')
         qc = QComp(qubit_num=2, cmem_num=3, backend=bk)
         res = qc.h(0).cx(0,1).measure([0],[0]).x(0, ctrl=0).x(1, ctrl=0).measure([0,1]).run(shots=10)
         qc.free()
@@ -360,7 +360,7 @@ class TestQComp_inheritance_stabilizer_simulator(unittest.TestCase):
     def test_inheritance(self):
         """test 'inheritance'
         """
-        bk = Backend('qlazy_stabilizer_simulator')
+        bk = Backend(name='qlazy', device='stabilizer_simulator')
         qc = MyQComp(backend=bk, qubit_num=2, cmem_num=3)
         res = qc.bell(0,1).measure(qid=[0,1]).run(shots=10)
         qc.free()

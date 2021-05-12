@@ -70,7 +70,7 @@ class TestQComp_init(unittest.TestCase):
     def test_init_qlazy_qstate_simulator(self):
         """test '__init__' (qlazy_qstate_simulator)
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=3, cmem_num=2, backend=bk)
         actual = qc.qstate.amp
         expect = np.array([1j, 0j, 0j, 0j, 0j, 0j, 0j, 0j])
@@ -89,7 +89,7 @@ class TestQComp_reset(unittest.TestCase):
     def test_reset_qlazy_qstate_simulator(self):
         """test 'reset' (qlazy_qstate_simulator)
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=3, cmem_num=2, backend=bk)
         qc.h(0).h(1).h(2).run()
         qc.reset()
@@ -110,7 +110,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_x(self):
         """test 'x' gate
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=1, backend=bk)
         res = qc.x(0).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -122,7 +122,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_h_x(self):
         """test 'x' gate (following 'h' gate)
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=1, backend=bk)
         res = qc.h(0).x(0).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -134,7 +134,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_y(self):
         """test 'y' gate
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=1, backend=bk)
         res = qc.y(0).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -146,7 +146,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_h_y(self):
         """test 'y' gate (following 'h' gate)
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=1, backend=bk)
         res = qc.h(0).y(0).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -158,7 +158,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_z(self):
         """test 'z' gate
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=1, backend=bk)
         res = qc.z(0).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -170,7 +170,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_h_z(self):
         """test 'z' gate (following 'h' gate)
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=1, backend=bk)
         res = qc.h(0).z(0).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -182,7 +182,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_xr(self):
         """test 'xr' gate
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=1, backend=bk)
         res = qc.xr(0).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -194,7 +194,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_h_xr(self):
         """test 'xr' gate (following 'h' gate)
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=1, backend=bk)
         res = qc.h(0).xr(0).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -206,7 +206,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_xr_dg(self):
         """test 'xr_dg' gate
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=1, backend=bk)
         res = qc.xr_dg(0).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -218,7 +218,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_h_xr_dg(self):
         """test 'xr_dg' gate (following 'h' gate)
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=1, backend=bk)
         res = qc.h(0).xr_dg(0).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -230,7 +230,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_h(self):
         """test 'h' gate
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=1, backend=bk)
         res = qc.h(0).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -242,7 +242,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_h_h(self):
         """test 'h' gate (following 'h')
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=1, backend=bk)
         res = qc.h(0).h(0).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -254,7 +254,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_s(self):
         """test 's' gate
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=1, backend=bk)
         res = qc.s(0).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -266,7 +266,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_h_s(self):
         """test 's' gate (following 'h' gate)
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=1, backend=bk)
         res = qc.h(0).s(0).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -278,7 +278,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_s_dg(self):
         """test 's_dg' gate
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=1, backend=bk)
         res = qc.s_dg(0).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -290,7 +290,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_h_s_dg(self):
         """test 's_dg' gate (following 'h' gate)
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=1, backend=bk)
         res = qc.h(0).s_dg(0).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -302,7 +302,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_t(self):
         """test 't' gate
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=1, backend=bk)
         res = qc.t(0).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -314,7 +314,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_h_t(self):
         """test 't' gate (following 'h' gate)
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=1, backend=bk)
         res = qc.h(0).t(0).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -326,7 +326,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_t_dg(self):
         """test 't_dg' gate
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=1, backend=bk)
         res = qc.t_dg(0).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -338,7 +338,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_h_t_dg(self):
         """test 't_dg' gate (following 'h' gate)
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=1, backend=bk)
         res = qc.h(0).t_dg(0).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -350,7 +350,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_rx(self):
         """test 'rx' gate
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=1, backend=bk)
         res = qc.rx(0, phase=0.25).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -362,7 +362,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_h_rx(self):
         """test 'rx' gate (following 'h' gate)
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=1, backend=bk)
         res = qc.h(0).rx(0, phase=0.25).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -374,7 +374,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_ry(self):
         """test 'ry' gate
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=1, backend=bk)
         res = qc.ry(0, phase=0.25).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -386,7 +386,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_h_ry(self):
         """test 'ry' gate (following 'h' gate)
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=1, backend=bk)
         res = qc.h(0).ry(0, phase=0.25).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -398,7 +398,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_rz(self):
         """test 'rz' gate
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=1, backend=bk)
         res = qc.rz(0, phase=0.25).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -410,7 +410,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_h_rz(self):
         """test 'rz' gate (following 'h' gate)
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=1, backend=bk)
         res = qc.h(0).rz(0, phase=0.25).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -422,7 +422,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_p(self):
         """test 'p' gate
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=1, backend=bk)
         res = qc.p(0, phase=0.25).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -434,7 +434,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_h_p(self):
         """test 'p' gate (following 'h' gate)
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=1, backend=bk)
         res = qc.h(0).p(0, phase=0.25).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -446,7 +446,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_u1(self):
         """test 'u1' gate
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=1, backend=bk)
         res = qc.u1(0, alpha=0.1).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -458,7 +458,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_h_u1(self):
         """test 'u1' gate (following 'h' gate)
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=1, backend=bk)
         res = qc.h(0).u1(0, alpha=0.1).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -470,7 +470,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_u2(self):
         """test 'u2' gate
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=1, backend=bk)
         res = qc.u2(0, alpha=0.1, beta=0.2).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -482,7 +482,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_h_u2(self):
         """test 'u2' gate (following 'h' gate)
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=1, backend=bk)
         res = qc.h(0).u2(0, alpha=0.1, beta=0.2).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -494,7 +494,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_u3(self):
         """test 'u3' gate
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=1, backend=bk)
         res = qc.u3(0, alpha=0.1, beta=0.2, gamma=0.3).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -506,7 +506,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_h_u3(self):
         """test 'u3' gate (following 'h' gate)
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=1, backend=bk)
         res = qc.h(0).u3(0, alpha=0.1, beta=0.2, gamma=0.3).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -526,7 +526,7 @@ class TestQComp_2_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_cx(self):
         """test 'cx' gate
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=2, backend=bk)
         res = qc.h(0).h(1).cx(0,1).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -538,7 +538,7 @@ class TestQComp_2_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_cy(self):
         """test 'cy' gate
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=2, backend=bk)
         res = qc.h(0).h(1).cy(0,1).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -550,7 +550,7 @@ class TestQComp_2_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_cz(self):
         """test 'cz' gate
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=2, backend=bk)
         res = qc.h(0).h(1).cz(0,1).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -562,7 +562,7 @@ class TestQComp_2_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_cxr(self):
         """test 'cxr' gate
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=2, backend=bk)
         res = qc.h(0).h(1).cxr(0,1).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -574,7 +574,7 @@ class TestQComp_2_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_cxr_dg(self):
         """test 'cxr_dg' gate
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=2, backend=bk)
         res = qc.h(0).h(1).cxr_dg(0,1).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -586,7 +586,7 @@ class TestQComp_2_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_ch(self):
         """test 'ch' gate
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=2, backend=bk)
         res = qc.h(0).h(1).ch(0,1).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -598,7 +598,7 @@ class TestQComp_2_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_cs(self):
         """test 'cs' gate
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=2, backend=bk)
         res = qc.h(0).h(1).cs(0,1).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -610,7 +610,7 @@ class TestQComp_2_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_cs_dg(self):
         """test 'cs_dg' gate
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=2, backend=bk)
         res = qc.h(0).h(1).cs_dg(0,1).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -622,7 +622,7 @@ class TestQComp_2_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_ct(self):
         """test 'ct' gate
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=2, backend=bk)
         res = qc.h(0).h(1).ct(0,1).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -635,7 +635,7 @@ class TestQComp_2_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_ct_dg(self):
         """test 'ct_dg' gate
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=2, backend=bk)
         res = qc.h(0).h(1).ct_dg(0,1).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -648,7 +648,7 @@ class TestQComp_2_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_sw(self):
         """test 'sw' gate
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=2, backend=bk)
         res = qc.h(0).h(1).sw(0,1).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -657,10 +657,10 @@ class TestQComp_2_qubit_qlazy_qstate_simulator(unittest.TestCase):
         qc.free()
         self.assertEqual(ans,True)
 
-    def test_sw(self):
+    def test_x_sw(self):
         """test 'sw' gate (following 'x' gate, not 'h' gates)
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=2, backend=bk)
         res = qc.x(0).sw(0,1).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -672,7 +672,7 @@ class TestQComp_2_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_cp(self):
         """test 'cp'gate
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=2, backend=bk)
         res = qc.h(0).h(1).cp(0,1, phase=0.25).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -685,7 +685,7 @@ class TestQComp_2_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_crx(self):
         """test 'crx' gate
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=2, backend=bk)
         res = qc.h(0).h(1).crx(0,1, phase=0.25).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -698,7 +698,7 @@ class TestQComp_2_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_cry(self):
         """test 'cry' gate
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=2, backend=bk)
         res = qc.h(0).h(1).cry(0,1, phase=0.25).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -711,7 +711,7 @@ class TestQComp_2_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_crz(self):
         """test 'crz' gate
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=2, backend=bk)
         res = qc.h(0).h(1).crz(0,1, phase=0.25).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -724,7 +724,7 @@ class TestQComp_2_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_cu1(self):
         """test 'cu1' gate
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=2, backend=bk)
         res = qc.h(0).h(1).cu1(0,1, alpha=0.1).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -737,7 +737,7 @@ class TestQComp_2_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_cu2(self):
         """test 'cu2' gate
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=2, backend=bk)
         res = qc.h(0).h(1).cu2(0,1, alpha=0.1, beta=0.2).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -750,7 +750,7 @@ class TestQComp_2_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_cu3(self):
         """test 'cu3' gate
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=2, backend=bk)
         res = qc.h(0).h(1).cu3(0,1, alpha=0.1, beta=0.2, gamma=0.3).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -771,7 +771,7 @@ class TestQComp_3_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_ccx(self):
         """test 'ccx' gate
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=3, backend=bk)
         res = qc.x(0).x(1).ccx(0,1,2).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -783,7 +783,7 @@ class TestQComp_3_qubit_qlazy_qstate_simulator(unittest.TestCase):
     def test_x_x_csw(self):
         """test 'csw' gate
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=3, backend=bk)
         res = qc.x(0).x(1).csw(0,1,2).run(reset_qubits=False)
         actual = qc.qstate.amp
@@ -803,7 +803,7 @@ class TestQComp_measure_qstate_simulator(unittest.TestCase):
     def test_measure_mesurement_only(self):
         """test 'm' (measurement only)
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=2, backend=bk)
         res = qc.measure([0,1]).run(shots=10)
         qc.free()
@@ -813,7 +813,7 @@ class TestQComp_measure_qstate_simulator(unittest.TestCase):
     def test_measure_simple(self):
         """test 'm' (simple case)
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=2, backend=bk)
         res = qc.h(0).cx(0,1).measure([0,1]).run(shots=10)
         qc.free()
@@ -823,7 +823,7 @@ class TestQComp_measure_qstate_simulator(unittest.TestCase):
     def test_measure_use_cmem(self):
         """test 'm' (use classical memory)
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=2, cmem_num=3, backend=bk)
         res = qc.h(0).cx(0,1).measure([0,1],[0,1]).run(shots=10, reset_cmem=False)
         self.assertEqual(res['measured_qid'], [0,1])
@@ -834,7 +834,7 @@ class TestQComp_measure_qstate_simulator(unittest.TestCase):
     def test_measure_control_qubit(self):
         """test 'm' (control qubit using classical memory)
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=2, cmem_num=3, backend=bk)
         res = qc.h(0).cx(0,1).measure([0],[0]).x(0, ctrl=0).x(1, ctrl=0).measure([0,1]).run(shots=10)
         qc.free()
@@ -852,7 +852,7 @@ class TestQComp_inheritance_qstate_simulator(unittest.TestCase):
     def test_inheritance(self):
         """test 'inheritance'
         """
-        bk = Backend('qlazy_qstate_simulator')
+        bk = Backend(name='qlazy', device='qstate_simulator')
         qc = MyQComp(backend=bk, qubit_num=2, cmem_num=3)
         res = qc.bell(0,1).measure(qid=[0,1]).run(shots=10)
         qc.free()
