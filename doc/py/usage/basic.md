@@ -19,7 +19,7 @@
     print(md.frequency)  # 頻度リスト(python標準のCounter形式)
 	print(md.last)       # 最後の結果(0または1からなるの文字列)
 
-    # 後始末（メモリ開放）
+    # 後始末（メモリ解放）
     qs.free()
 
 何をやっているか順に説明します。まず、QState()で量子ビットを各々|0>に
