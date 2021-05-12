@@ -1,8 +1,16 @@
 # Change Log
 
+## [0.1.5] - 2021-05-12
+### Changed
+- Performance improvement: use OpenMP, reduce malloc/free functions etc
+- Backend API: specify 'name' only -> specify 'name' and 'device
+### Added
+- Backend: ibmq
+- Example of T gate operation with clifford and measurement (T_gate.py)
+
 ## [0.1.4] - 2021-04-03
 ### Added
-- backend: qulacs, qulacs-gpu
+- Backend: qulacs, qulacs-gpu
 
 ## [0.1.3] - 2021-02-12
 ### Added

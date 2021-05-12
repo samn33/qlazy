@@ -5,14 +5,16 @@ Quantum Computing Simulator
 
 ## Feature
 
-- Command line tool to perform simple quantum calculation.
-- Python package for performing complex quantum calculations.
-- Supports three types of quantum states: 1) quantum state vector, 2) density operator (matrix), 3) stabilizer state.
-- Other quantum computing simulators can be uesd as a backend: [qulacs/qulacs-gpu](https://github.com/qulacs/qulacs) (at present).
+- Simple quantum calculations are possible with command line tool.
+- Quantum state operations or quantum computing simulations are possible with Python package.
+- Support three types of quantum states: 1) quantum state vector, 2) density operator, 3) stabilizer state.
+- Other quantum computing services or simulators can be uesd as backend (followings are supported).
+    - [qulacs](https://github.com/qulacs/qulacs)
+    - [IBM Quantum(IBMQ)](https://quantum-computing.ibm.com/)
 
 ## Install
 
-### Command line tool and Library ('qlazy', 'libqlz.so')
+### Command line tool and Library
 
     $ git clone https://github.com/samn33/qlazy.git
     $ cd qlazy/c
@@ -28,14 +30,14 @@ You may also need to install 'libreadline-dev'
 
     $ sudo apt install libreadline-dev
 
-### Python package ('qlazypy')
+### Python package
 
     $ cd ../../py
     $ pip install -e .
 
 ## Usage
 
-### Command line tool ('qlazy')
+### Command line tool
 
 #### read file
 
@@ -81,9 +83,9 @@ print help
 	>> help
 	>> help <item>
 
-### Python package ('qlazypy')
+### Python package
 
-#### Example of QState class
+#### QState class (for operating quantum state vectors)
 
 foo.py
 	
@@ -107,17 +109,18 @@ execute the program
     c[11] = +0.7071+0.0000*i : 0.5000 |++++++
     Counter({{'00':53,'11':47})
 
-#### Classes
+#### Other classes
 
-- QState: class for operating quantum state vectors.
-- DensOp: class for operating density operators.
-- Stabilizer: class for operating stabilizer states.
-- Observable: class for specifying observables.
-- QComp, Backend: class for quantum computers, and class for specifying backend.
+- DensOp class: for operating density operators.
+- Stabilizer class: for operating stabilizer states.
+- Observable class: for specifying observables.
+- QComp, Backend class: for quantum computer simulation/executing and specifying backend.
 
 ## Documents
 
-- [Tutorial(japanese)](doc/Tutorial.md)
+- [Welcome to qlazy's documentations!](http://samn33.github.io/qlazy-docs/index.html)
+    - [Tutorial (japanese)](http://samn33.github.io/qlazy-docs/Tutorial_jp.html)
+    - [Python API](http://samn33.github.io/qlazy-docs/qlazypy.html)
 
 ## Requirements
 
