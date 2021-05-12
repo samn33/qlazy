@@ -21,29 +21,25 @@ QCompクラスは、そのような一連の操作を実行できるように量
 	
 です。QCompのqubit_numには計算に必要な量子ビット数を指定します。これで
 2量子ビットの計算ができる量子コンピュータが用意できました。Backendを指
-定していない場合は、qlazyの「量子状態計算シミュレータ」
-('qlazy_qstate_simulator')がセットされます。Backendを明示的に指定する
-場合は、
+定していない場合は、qlazyの「量子状態計算シミュレータ」('qlazy'という
+名前の'qstate_simulator'というデバイス)がセットされます。Backendを明示
+的に指定する場合は、
 
     from qlazypy import QComp, Backend
-	bk = Backend(name='qlazy_qstate_simulator')
+	bk = Backend(name='qlazy', device='qstate_simulator')
 	qc = QComp(qubit_num=2, backend=bk)
 	
 のようにします。Backendのnameには使用したいバックエンド名を指定します。
-qlazyの「スタビライザー計算シミュレータ」を使用したい場合は、
+deviceにはそのバックエンドでサポートされているデバイス名を指定します
+（今の例の場合、シミュレータですが）。qlazyの「スタビライザー計算シミュ
+レータ」を使用したい場合は、
 
-    bk = Backend(name='qlazy_stabilizer_simulator')
+    bk = Backend(name='qlazy', device='stabilizer_simulator')
 
 とします。その他、現在のバージョンで対応しているバックエンドは、
-[qulacsとqulacs-gpu](https://github.com/qulacs/qulacs)です。
-各々以下のように指定します。
-
-    bk = Backend(name='qulacs_simulator')
-    bk = Backend(name='qulacs_gpu_simulator')
-
-qulacsのインストールについては
-[Installation - Qulacs ドキュメント](http://docs.qulacs.org/ja/latest/intro/1_install.html)
-をご覧ください。
+[qulacs](https://github.com/qulacs/qulacs)と
+[IBM Quantum(IBMQ)](https://quantum-computing.ibm.com/)です。
+使用法などの詳細は「対応しているバックエンド」(後述)をご参照ください。
 
 これでいろんな量子計算を実行する準備ができたのですが、量子計算途中の測
 定値を古典レジスタに格納しておき、その値によってその後のゲート演算の制
@@ -98,11 +94,11 @@ result変数に格納されることになります。resultをprintすると、
     >>> {'measured_qid': [0, 1], 'frequency': Counter({'00': 6, '11': 4})}
 
 という具合に表示されます。runの返却値は、measured_qidとfrequencyという
-2つのキーからなる辞書データになっていることがわかります。最後に測定が
+2つのキーからなる辞書データになっていることがわかります。一番最後に測定が
 ない回路をrunした場合、resultはNoneになります。
 
 古典レジスタに途中の測定結果を格納して、それで以降のゲート制御をしたい
-場合があります。その例を以下に示します。
+場合の例を以下に示します。
 
     qc = QComp(qubit_num=2, cmem_num=3)
     qc.h(0).cx(0,1).measure(qid=[0],cid=[0]).x(0, ctrl=0).x(1, ctrl=0).measure(qid=[0,1])
@@ -356,5 +352,103 @@ QCompクラスを継承することで、自分専用の量子ゲートを簡単
 
 これは非常に簡単な例なのであまりご利益を感じないかもしれませんが、大き
 な量子回路を繰り返し使いたい場合など、便利に使える場面は多いと思います。
+
+
+## 対応しているバックエンド
+
+現在のバージョンで対応しているバックエンドは[qulacs](https://github.com/qulacs/qulacs)と
+[IBM Quantum](https://quantum-computing.ibm.com/)です。
+各々の使い方について、以下で説明します。
+
+### qulacs
+
+[qulacs](https://github.com/qulacs/qulacs)は、[株式会社
+QunaSys](https://qunasys.com/)が提供しているオープンソースの量子回路シ
+ミュレータで、GPUを利用して高速計算が実行できるという特徴があります。
+
+[qlazy](https://quantum-computing.ibm.com/)の簡単なインターフェースで
+GPUを利用した高速計算を実行したい場合、このバックエンドがおすすめです。
+
+#### 準備
+
+まず、[Installation - Qulacs ドキュメント](http://docs.qulacs.org/ja/latest/intro/1_install.html)
+あたりを参照しながらインストールしてください。
+
+### 使用法
+
+GPUを利用しないシミュレータで計算させたい場合、
+
+    bk = Backend(name='qulacs', device='cpu_simulator')
+
+GPUを利用したシミュレータで計算させたい場合、
+
+    bk = Backend(name='qulacs', device='gpu_simulator')
+
+のように指定します(deviceを省略した場合のデフォルト値は'cpu_simulator'です)。
+
+あとは上述したように、
+
+	qc = QComp(qubit_num=2, backend=bk)
+    qc.h(0).cx(0,1).measure(qid=[0,1])
+	result = qc.run(shots=100)
+
+のようにすれば、qulacsを使った計算ができます。
+
+### IBM Quantum
+
+[IBM Quantum(IBMQ)](https://quantum-computing.ibm.com/)は、
+[IBM](https://www.ibm.com/jp-ja)が開発した量子コンピュータ（およびシミュ
+レータ）を利用するためのクラウドサービスです。
+
+[qlazy](https://quantum-computing.ibm.com/)の簡単なインターフェースで
+本物の量子コンピュータを利用した計算を実行したい場合、このバックエンドが
+おすすめです。
+
+#### 準備
+
+IBMQやローカルシミュレータをPythonから利用するためのライブラリである
+[qiskit](https://qiskit.org/)をインストールして、量子計算を実行できる
+環境を整えてください。例えば、[Quantum Native
+Dojo!](https://dojo.qulacs.org/ja/latest/)の[3-2. QiskitとIBM Q
+Experienceの使い
+方](https://dojo.qulacs.org/ja/latest/notebooks/3.2_Qiskit_IBMQ.html)
+に一連の手続きからサンプルコードまで含めて日本語でやさしく書かれていま
+すので、これを参考にやってみるのが早いと思います。ただし、IBMQへのリン
+クが古いみたいです。正しくは
+[https://quantum-computing.ibm.com/](https://quantum-computing.ibm.com/)
+です。
+
+#### 使用法
+
+本物の量子コンピュータを利用しないでローカルなシミュレータで計算させたい場合、
+
+    bk = Backend(name='ibmq', device='qasm_simulator')
+
+のように指定します。本物の量子コンピュータを利用したい場合は、例えば、
+
+    bk = Backend(name='ibmq', device='least_busy')
+
+のように指定します。'least_busy'というのは、自分のアカウントで利用可能
+な量子コンピュータシステムの中で、現在最も空いているシステムを自動選択して実行する
+ためのものです。実行するシステムを明示的に指定することもできます。
+例えば、'ibmq_athens'で実行したい場合、
+
+    bk = Backend(name='ibmq', device='ibmq_athens')
+	
+のように指定します(deviceを省略した場合のデフォルト値は'qasm_simulator'です)。
+
+あとは上述したように、
+
+	qc = QComp(qubit_num=2, backend=bk)
+    qc.h(0).cx(0,1).measure(qid=[0,1])
+	result = qc.run(shots=100)
+
+のようにすれば、IBMQを使った計算ができます。
+
+本物の量子コンピュータを使った計算に関して一点注意事項があります。量子
+回路を設定してrunする際に、reset_qubits=Falseは指定できません。一度run
+して結果が返ってきたら、IBMQ側の量子状態は有無を言わさず解放されるので
+(少なくとも現在のIBMQでは...)、qlazy側でそれを保持しておく手段がないからです。
+
 
 以上

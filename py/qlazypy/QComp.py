@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import warnings
+
 from qlazypy.config import *
 from qlazypy.util import *
 from qlazypy.error import *
@@ -18,7 +20,7 @@ class QComp:
     qcirc : dict
         quantum circuit
     qstate : instance of quantum state
-        quantum state
+        quantum state (depend on backend)
 
     """
     def __init__(self, qubit_num, cmem_num=0, backend=None):
@@ -29,18 +31,76 @@ class QComp:
         self.qcirc = []
 
         if backend is None:
-            self.backend = Backend('qlazy_qstate_simulator')
+            self.backend = Backend()
         else:
             self.backend = backend
+
+        # qlazy
+        if self.backend.name == 'qlazy':
+
+            # qstate simulator
+            if self.backend.device == 'qstate_simulator':
+                from qlazypy.backend.qlazy_qstate_simulator import init, run, reset, free
+                self.__init = init
+                self.__run = run
+                self.__reset = reset
+                self.__free = free
+        
+            # stabilizer simulator
+            elif self.backend.device == 'stabilizer_simulator':
+                from qlazypy.backend.qlazy_stabilizer_simulator import init, run, reset, free
+                self.__init = init
+                self.__run = run
+                self.__reset = reset
+                self.__free = free
+                
+            else:
+                raise Backend_Error_DeviceNotSupported()
             
-        # qlazy qstate simulator
-        if self.backend.name == 'qlazy_qstate_simulator':
-            from qlazypy.backend.qlazy_qstate_simulator import init, run, reset, free
+        # qulacs
+        elif self.backend.name == 'qulacs':
+
+            # cpu_simulator
+            if self.backend.device == 'cpu_simulator':
+                from qlazypy.backend.qulacs_cpu_simulator import init, run, reset, free
+                self.__init = init
+                self.__run = run
+                self.__reset = reset
+                self.__free = free
+        
+            # gpu_simulator
+            elif self.backend.device == 'gpu_simulator':
+                from qlazypy.backend.qulacs_gpu_simulator import init, run, reset, free
+                self.__init = init
+                self.__run = run
+                self.__reset = reset
+                self.__free = free
+                
+            else:
+                raise Backend_Error_DeviceNotSupported()
+        
+        # ibmq
+        elif self.backend.name == 'ibmq':
+            
+            from qlazypy.backend.ibmq import init, run, reset, free
             self.__init = init
             self.__run = run
             self.__reset = reset
             self.__free = free
 
+        # 
+        # note: followings are not supported in the near future
+        #
+        
+        # qlazy qstate simulator
+        elif self.backend.name == 'qlazy_qstate_simulator':
+            from qlazypy.backend.qlazy_qstate_simulator import init, run, reset, free
+            self.__init = init
+            self.__run = run
+            self.__reset = reset
+            self.__free = free
+            warnings.warn("You should use name='qlazy',device='qstate_simulator', because name='qlazy_qstate_simulator' will be not supported in the near future")
+        
         # qlazy stabilizer simulator
         elif self.backend.name == 'qlazy_stabilizer_simulator':
             from qlazypy.backend.qlazy_stabilizer_simulator import init, run, reset, free
@@ -48,15 +108,17 @@ class QComp:
             self.__run = run
             self.__reset = reset
             self.__free = free
-
+            warnings.warn("You should use name='qlazy',device='stabilizer_simulator', because name='qlazy_stabilizer_simulator' will be not supported in the near future")
+        
         # qulacs
         elif self.backend.name == 'qulacs_simulator':
-            from qlazypy.backend.qulacs_simulator import init, run, reset, free
+            from qlazypy.backend.qulacs_cpu_simulator import init, run, reset, free
             self.__init = init
             self.__run = run
             self.__reset = reset
             self.__free = free
-
+            warnings.warn("You should use name='qulacs',device='cpu_simulator', because name='qulacs_simulator' will be not supported in the near future")
+        
         # qulacs-gpu
         elif self.backend.name == 'qulacs_gpu_simulator':
             from qlazypy.backend.qulacs_gpu_simulator import init, run, reset, free
@@ -64,9 +126,10 @@ class QComp:
             self.__run = run
             self.__reset = reset
             self.__free = free
-
+            warnings.warn("You should use name='qulacs',device='gpu_simulator', because name='qulacs_gpu_simulator' will be not supported in the near future")
+        
         else:
-            raise ValueError("Error: not supported backend name")
+            raise Backend_Error_NameNotSupported()
 
         self.qstate = self.__init(qubit_num=qubit_num, backend=self.backend)
             
@@ -91,13 +154,14 @@ class QComp:
         if reset_qubits == True:
             if self.qstate != None:
                 self.__reset(qstate=self.qstate, backend=self.backend)
+        else:
+            if self.backend.name == 'ibmq':
+                raise ValueError("reset_qubits must be True (can't maintain quantum state, when you reset QComp)")
 
         if reset_cmem == True:
-            del self.cmem
             self.cmem = [0] * self.cmem_num
 
         if reset_qcirc == True:
-            del self.qcirc
             self.qcirc = []
 
     def free(self):
@@ -141,10 +205,18 @@ class QComp:
 
         Examples
         --------
+        >>> # simple example
         >>> qc = QComp(2).h(0).cx(0,1).measure(qid=[0,1])  # add quantum gates, set circuit
-        >>> result = qc.run(shots=100)  # run the circuit, get measured result
+        >>> result = qc.run(shots=10)  # run the circuit, get measured result
         >>> print(result)
         {'measured_qid': [0,1], 'frequency': Counter({'00': 5, '11': 5})}
+        >>> ...
+        >>> # control qubits by measured results
+        >>> qc = QComp(qubit_num=2, cmem_num=2)  # set quantum and classical register 
+        >>> qc.h(0).cx(0,1).measure(qid=[0],cid=[0]).x(0, ctrl=0).x(1, ctrl=0).measure(qid=[0,1])
+	>>> result = qc.run(shots=10)
+	>>> print(result)
+        {'measured_qid': [0, 1], 'frequency': Counter({'00': 10})}
 
         """
         result = self.__run(qubit_num=self.qubit_num, cmem_num=self.cmem_num,
@@ -168,7 +240,7 @@ class QComp:
 
         Returns
         -------
-        self : instance of QCirc
+        self : instance of QComp
 
         Notes
         -----
