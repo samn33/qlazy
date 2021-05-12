@@ -603,7 +603,7 @@ class TestQState_2_qubit(unittest.TestCase):
         qs.free()
         self.assertEqual(ans,True)
 
-    def test_sw(self):
+    def test_x_sw(self):
         """test 'sw' gate (following 'x' gate, not 'h' gates)
         """
         qs = QState(qubit_num=2).x(0).sw(0,1)
