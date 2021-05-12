@@ -134,15 +134,15 @@ class DensOp(ctypes.Structure):
         method : func
             method (custum gate) to add.
 
-        Example
-        -------
-        def bell(self, q0, q1):
-            self.h(q0).cx(q0,q1)
-        ...
-        DensOp.add_method(bell)
-        qs = DensOp(qubit_num=2)
-        qs.bell(0,1)
-        ...
+        Examples
+        --------
+        >>> def bell(self, q0, q1):
+        >>>     self.h(q0).cx(q0,q1)
+        >>> ...
+        >>> DensOp.add_method(bell)
+        >>> qs = DensOp(qubit_num=2)
+        >>> qs.bell(0,1)
+        >>> ...
         
         """
         setattr(cls, method.__name__, method)
@@ -157,8 +157,8 @@ class DensOp(ctypes.Structure):
         methods : func, func, ...
             arguments of methods (custum gates) to add.
 
-        Example
-        -------
+        Examples
+        --------
         >>> def bell(self, q0, q1):
         >>>     self.h(q0).cx(q0,q1)
         >>>     return self
