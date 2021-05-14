@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.1.6.beta] - 2021-05-14
+### Added
+- nonzero' option to 'show' method of QState, DensOp for printing only non-zero elments
+
 ## [0.1.5] - 2021-05-12
 ### Changed
 - Performance improvement: use OpenMP, reduce malloc/free functions etc
