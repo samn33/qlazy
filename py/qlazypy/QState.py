@@ -275,7 +275,7 @@ class QState(ctypes.Structure):
         qs = QState(vector=vec)
         return qs
         
-    def show(self, qid=None):
+    def show(self, qid=None, nonzero=False):
         """
         show the quantum state 
         (elements of the state vector and probabilities).
@@ -284,6 +284,8 @@ class QState(ctypes.Structure):
         ----------
         qid : list of int, default - list of all of the qubit id
             qubit id's list to show.
+        nonzero : bool, default False
+            if True, only non-zero amplitudes are printed.
 
         Returns
         -------
@@ -306,9 +308,17 @@ class QState(ctypes.Structure):
         c[01] = +0.0000+0.0000*i : 0.0000 |
         c[10] = +0.0000+0.0000*i : 0.0000 |
         c[11] = +0.7071+0.0000*i : 0.5000 |++++++
+        ...
+        >>> qs.show(qid=[0])
+        c[0] = +1.0000+0.0000*i : 1.0000 |+++++++++++
+        c[1] = +0.0000+0.0000*i : 0.0000 |
+        ...
+        >>> qs.show(nonzero=True)
+        c[00] = +0.7071+0.0000*i : 0.5000 |++++++
+        c[11] = +0.7071+0.0000*i : 0.5000 |++++++
 
         """
-        qstate_print(self, qid)
+        qstate_print(self, qid, nonzero)
 
     def clone(self):
         """

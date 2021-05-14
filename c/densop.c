@@ -190,7 +190,7 @@ bool densop_get_elm(DensOp* densop, void** elm_out)
   SUC_RETURN(true);
 }
 
-bool densop_print(DensOp* densop)
+bool densop_print(DensOp* densop, bool nonzero)
 {
   int idx = 0;
 
@@ -207,9 +207,11 @@ bool densop_print(DensOp* densop)
       if (fabs(absval) < MIN_DOUBLE) absval_level = 0;
       else absval_level = (int)(absval/0.1 + 1.5);
       
-      printf("elm[%d][%d] = %+.4f%+.4f*i : %.4f |", i, j, dreal, dimag, absval);
-      for (int k=0; k<absval_level; k++) printf("+");
-      printf("\n");
+      if ((nonzero == false) || (nonzero == true && fabs(absval) > MIN_DOUBLE)) {
+	printf("elm[%d][%d] = %+.4f%+.4f*i : %.4f |", i, j, dreal, dimag, absval);
+	for (int k=0; k<absval_level; k++) printf("+");
+	printf("\n");
+      }
       idx++;
     }
   }

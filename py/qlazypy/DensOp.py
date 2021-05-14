@@ -293,7 +293,7 @@ class DensOp(ctypes.Structure):
         de_part.free()
         return elm
     
-    def show(self, qid=[]):
+    def show(self, qid=[], nonzero=False):
         """
         show the elements of density operator.
 
@@ -301,6 +301,8 @@ class DensOp(ctypes.Structure):
         ----------
         qid : list of int, default - list of all of the qubit id
             qubit id's list to show.
+        nonzero : bool, default False
+            if True, only non-zero elements are printed.
 
         Returns
         -------
@@ -322,10 +324,14 @@ class DensOp(ctypes.Structure):
         elm[0][1] = +0.0000+0.0000*i : 0.0000 |
         elm[1][0] = +0.0000+0.0000*i : 0.0000 |
         elm[1][1] = +0.5000+0.0000*i : 0.2500 |++++
+        ...
+        >>> de.show(nonzero=True)
+        elm[0][0] = +0.5000+0.0000*i : 0.2500 |++++
+        elm[1][1] = +0.5000+0.0000*i : 0.2500 |++++
 
         """
         de_part = self.partial(qid=qid)
-        densop_print(de_part)
+        densop_print(de_part, nonzero)
         de_part.free()
 
     def clone(self):

@@ -15,7 +15,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
-#define VERSION "0.1.5"
+#define VERSION "0.1.6"
 
 //#define TEST_NEW_VERSION
 
@@ -444,7 +444,7 @@ bool	 qstate_reset(QState* qstate, int qubit_num, int qubit_id[MAX_QUBIT_NUM]);
 bool	 qstate_copy(QState* qstate, void** qstate_out);
 bool     qstate_get_camp(QState* qstate, int qubit_num, int qubit_id[MAX_QUBIT_NUM],
 			 void** camp_out);
-bool	 qstate_print(QState* qstate, int qubit_num, int qubit_id[MAX_QUBIT_NUM]);
+bool	 qstate_print(QState* qstate, int qubit_num, int qubit_id[MAX_QUBIT_NUM], bool nonzero);
 bool     qstate_bloch(QState* qstate, int qid, double* theta, double* phi);
 bool     qstate_print_bloch(QState* qstate, int qid);
 bool	 qstate_measure(QState* qstate, int shot_num, double angle, double phase,
@@ -491,7 +491,7 @@ bool     densop_init_with_matrix(double* real, double* imag, int row, int col,
 bool	 densop_reset(DensOp* densop, int qubit_num, int qubit_id[MAX_QUBIT_NUM]);
 bool	 densop_copy(DensOp* densop_in, void** densop_out);
 bool     densop_get_elm(DensOp* densop, void** densop_out);
-bool     densop_print(DensOp* densop);
+bool     densop_print(DensOp* densop, bool nonzero);
 bool     densop_add(DensOp* densop, DensOp* densop_add);
 bool     densop_mul(DensOp* densop, double factor);
 bool     densop_trace(DensOp* densop, double* real, double* imag);

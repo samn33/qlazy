@@ -378,7 +378,7 @@ bool qstate_get_camp(QState* qstate, int qubit_num, int qubit_id[MAX_QUBIT_NUM],
   SUC_RETURN(true);
 }
 
-bool qstate_print(QState* qstate_in, int qubit_num, int qubit_id[MAX_QUBIT_NUM])
+bool qstate_print(QState* qstate_in, int qubit_num, int qubit_id[MAX_QUBIT_NUM], bool nonzero)
 {
   double	qreal,qimag,prob;
   int		prob_level = 0;
@@ -426,9 +426,11 @@ bool qstate_print(QState* qstate_in, int qubit_num, int qubit_id[MAX_QUBIT_NUM])
     if (fabs(prob) < MIN_DOUBLE) prob_level = 0;
     else prob_level = (int)(prob/0.1 + 1.5);
     
-    printf("c[%s] = %+.4f%+.4f*i : %.4f |", state, qreal, qimag, prob);
-    for (int k=0; k<prob_level; k++) printf("+");
-    printf("\n");
+    if ((nonzero == false) || (nonzero == true && prob > MIN_DOUBLE)) {
+      printf("c[%s] = %+.4f%+.4f*i : %.4f |", state, qreal, qimag, prob);
+      for (int k=0; k<prob_level; k++) printf("+");
+      printf("\n");
+    }
   }
 
   /* free temporal qstate and mdata */

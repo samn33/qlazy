@@ -92,7 +92,7 @@ def qstate_reset(qs, qid=None):
         raise QState_Error_Reset()
 
     
-def qstate_print(qs, qid=None):
+def qstate_print(qs, qid=None, nonzero=False):
 
     if qid is None or qid == []:
         qid = [i for i in range(qs.qubit_num)]
@@ -107,10 +107,12 @@ def qstate_print(qs, qid=None):
 
         IntArray = ctypes.c_int * MAX_QUBIT_NUM
         qid_array = IntArray(*qubit_id)
+
+        
             
         lib.qstate_print.restype = ctypes.c_int
-        lib.qstate_print.argtypes = [ctypes.POINTER(QState),ctypes.c_int, IntArray]
-        ret = lib.qstate_print(ctypes.byref(qs),ctypes.c_int(qubit_num), qid_array)
+        lib.qstate_print.argtypes = [ctypes.POINTER(QState),ctypes.c_int, IntArray, ctypes.c_bool]
+        ret = lib.qstate_print(ctypes.byref(qs),ctypes.c_int(qubit_num), qid_array, ctypes.c_bool(nonzero))
 
         if ret == FALSE:
             raise QState_Error_Show()

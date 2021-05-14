@@ -108,7 +108,7 @@ static bool _qsystem_execute_one_line(QSystem* qsystem, char* line)
 	qubit_id[i] = i;
       }
     }
-    if (!(qstate_print(qstate, terminal_num, qubit_id)))
+    if (!(qstate_print(qstate, terminal_num, qubit_id, false)))
       ERR_RETURN(ERROR_CANT_PRINT_QSTATE,false);
     SUC_RETURN(true);
   case BLOCH:

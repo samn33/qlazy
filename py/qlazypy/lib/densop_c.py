@@ -131,12 +131,12 @@ def densop_reset(de, qid=None):
     except Exception:
         raise DensOp_Error_Reset()
 
-def densop_print(de):
+def densop_print(de, nonzero=False):
 
     try:
         lib.densop_print.restype = ctypes.c_int
-        lib.densop_print.argtypes = [ctypes.POINTER(DensOp)]
-        ret = lib.densop_print(ctypes.byref(de))
+        lib.densop_print.argtypes = [ctypes.POINTER(DensOp), ctypes.c_bool]
+        ret = lib.densop_print(ctypes.byref(de), ctypes.c_bool(nonzero))
 
         if ret == FALSE:
             raise DensOp_Error_Show()

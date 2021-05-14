@@ -72,6 +72,8 @@ def main():
     # show final quantum state
     print("== final quantum state ==")
     qs_total.show(sub_qid)
+    print("== final quantum state (only non-zero) ==")
+    qs_total.show(qid=sub_qid, nonzero=True)
 
     # mesurement
     print("== result of measurement ==")
