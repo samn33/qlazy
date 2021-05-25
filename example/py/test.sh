@@ -29,6 +29,7 @@ directories=(
     QuantumTomography
     DataCompression
     ErrorCorrection
+    SurfaceCode
 )
 for dir in ${directories[@]}; do
 
@@ -37,7 +38,7 @@ for dir in ${directories[@]}; do
     py_list=`ls *.py`
     for py in ${py_list[@]}; do
 	echo "***** ${dir}/${py} *****"
-	python ${py}
+	python3 ${py}
 	read -p "Hit enter: "
 	echo ""
     done

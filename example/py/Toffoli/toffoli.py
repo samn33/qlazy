@@ -1,7 +1,7 @@
 #
 # 参考：上坂、「量子コンピュータの基礎数理」、コロナ社
 #
-from qlazypy import QState
+from qlazy import QState
 
 # custom gates
 

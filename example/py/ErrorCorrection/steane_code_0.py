@@ -1,5 +1,5 @@
 import numpy as np
-from qlazypy import QState
+from qlazy import QState
 
 Hamming   = np.array([[0,1,1,1,1,0,0], [1,0,1,1,0,1,0], [1,1,0,1,0,0,1]])
 Hamming_T = Hamming.T

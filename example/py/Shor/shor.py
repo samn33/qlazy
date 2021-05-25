@@ -2,7 +2,7 @@ import sys
 import random
 import math
 import numpy as np
-from qlazypy import QState
+from qlazy import QState
 
 #
 # custom gates

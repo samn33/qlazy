@@ -1,4 +1,4 @@
-from qlazypy import QState,DensOp
+from qlazy import QState,DensOp
 
 qs_pure = QState(1).h(0)     # (|0> + |1>) / sqrt(2.0)
 de_pure = DensOp(qstate=[qs_pure], prob=[1.0])

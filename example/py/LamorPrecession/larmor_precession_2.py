@@ -1,4 +1,4 @@
-from qlazypy import QState,Observable
+from qlazy import QState,Observable
 
 def main():
 

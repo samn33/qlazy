@@ -1,4 +1,4 @@
-from qlazypy import QState
+from qlazy import QState
 
 BELL_PHI_PLUS  = 0
 BELL_PHI_MINUS = 3

@@ -6,7 +6,7 @@
 算もできます。オブザーバブルを利用可能とするために、QStateクラスに加え、
 Observableクラスをimportする必要があります。
 
-    from qlazypy import QState,Observable
+    from qlazy import QState,Observable
 
 利用可能な計算は、
 

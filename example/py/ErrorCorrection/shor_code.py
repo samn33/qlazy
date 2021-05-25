@@ -1,5 +1,5 @@
 import random
-from qlazypy import DensOp
+from qlazy import DensOp
 
 def create_densop():
 

@@ -1,5 +1,5 @@
 import numpy as np
-from qlazypy import QState
+from qlazy import QState
 
 def logic_x(self, qid):
 

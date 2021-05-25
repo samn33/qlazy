@@ -1,6 +1,6 @@
 import numpy as np
 import scipy.optimize
-from qlazypy import QState,Observable
+from qlazy import QState,Observable
 
 #------------------------------------
 #  functions

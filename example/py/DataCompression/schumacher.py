@@ -1,5 +1,5 @@
 import numpy as np
-from qlazypy import QState,DensOp
+from qlazy import QState,DensOp
 
 PERM = {'0000':'0000', '0001':'0001', '0010':'0010', '0100':'0011',
         '1000':'0100', '0011':'0101', '0101':'0110', '0110':'0111', 

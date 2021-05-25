@@ -1,4 +1,4 @@
-from qlazypy import QState
+from qlazy import QState
 
 def sum(self,q0,q1,q2):
 

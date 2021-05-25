@@ -1,4 +1,4 @@
-from qlazypy import QState
+from qlazy import QState
 
 def hadamard_test_real():
     

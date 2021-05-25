@@ -1,4 +1,4 @@
-from qlazypy import QState
+from qlazy import QState
 
 Lattice = [{'edge': 0, 'faces':[0, 6], 'vertices':[0, 1]},
            {'edge': 1, 'faces':[1, 7], 'vertices':[1, 2]},

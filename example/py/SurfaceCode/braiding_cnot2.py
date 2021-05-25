@@ -1,5 +1,5 @@
 from collections import Counter
-from qlazypy import Stabilizer
+from qlazy import Stabilizer
 
 XBASE = {'0':'+', '1':'-'}
 OBJECT = {'p':'face', 'd':'vertex'}

@@ -1,8 +1,8 @@
 import copy
 import networkx as nx
 
-from qlazypy import QComp, Backend
-from qlazypy.tools.Register import CreateRegister, InitRegister
+from qlazy import QComp, Backend
+from qlazy.tools.Register import CreateRegister, InitRegister
 
 class QComp_SurfaceCode(QComp):
 
@@ -347,7 +347,7 @@ def main():
     qid = CreateRegister(row_length, col_length)  # 量子ビットは2次元配列(格子)に置く
     qubit_num = InitRegister(qid)
     
-    bk = Backend(name='qlazy_stabilizer_simulator')
+    bk = Backend(name='qlazy', device='stabilizer_simulator')
     qc = QComp_SurfaceCode(qubit_num=qubit_num, qid=qid, backend=bk)
 
     qc.initialize()        # 真空状態を作成

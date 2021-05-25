@@ -2,7 +2,7 @@ import random
 import cmath
 import numpy as np
 import pandas as pd
-from qlazypy import QState, DensOp
+from qlazy import QState, DensOp
 
 MIN_DOUBLE = 0.000001
 

@@ -3,7 +3,7 @@
 
 まず、簡単な使用例を示します。
 
-    from qlazypy import QState
+    from qlazy import QState
     
     # ２つの量子ビットを|0>に初期化
     qs = QState(2)

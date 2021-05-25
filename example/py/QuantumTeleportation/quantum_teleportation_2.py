@@ -1,4 +1,4 @@
-from qlazypy import QState
+from qlazy import QState
 
 qs = QState(3)
 

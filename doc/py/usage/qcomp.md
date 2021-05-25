@@ -16,7 +16,7 @@ QCompクラスは、そのような一連の操作を実行できるように量
 量子計算を実行するためには、当たり前ですが、まず量子コンピュータを用意
 する必要があります。一番簡単な方法は、
 
-    from qlazypy import QComp
+    from qlazy import QComp
     qc = QComp(qubit_num=2)
 	
 です。QCompのqubit_numには計算に必要な量子ビット数を指定します。これで
@@ -25,7 +25,7 @@ QCompクラスは、そのような一連の操作を実行できるように量
 名前の'qstate_simulator'というデバイス)がセットされます。Backendを明示
 的に指定する場合は、
 
-    from qlazypy import QComp, Backend
+    from qlazy import QComp, Backend
 	bk = Backend(name='qlazy', device='qstate_simulator')
 	qc = QComp(qubit_num=2, backend=bk)
 	
@@ -202,7 +202,7 @@ DensOpクラスのものと同様で、さらに上で説明したctrlという�
 
 例えば、
 
-    from qlazypy import QComp, Backend
+    from qlazy import QComp, Backend
 	bk = Backend(name='qlazy_qstate_simulator')
 	qc = QComp(qubit_num=2, backend=bk)
     qc.h(0).cx(0,1).measure(qid=[0,1])
@@ -265,7 +265,7 @@ reset_cmemのデフォルト値はTrueです。なので、
 
 まず、
 
-    from qlazypy.tools.Register import CreateRegister,InitRegister
+    from qlazy.tools.Register import CreateRegister,InitRegister
 
 という具合に、CreateRegister関数とInitRegister関数をインポートします。
 典型的な使い方は以下の通りです。

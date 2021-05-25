@@ -1,6 +1,6 @@
 import numpy as np
 from pprint import pprint
-from qlazypy import QState
+from qlazy import QState
 
 def swap(self,q0,q1):
 

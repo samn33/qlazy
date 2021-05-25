@@ -1,6 +1,6 @@
 import sys
 import random
-from qlazypy import QState
+from qlazy import QState
 
 # custom gates
 

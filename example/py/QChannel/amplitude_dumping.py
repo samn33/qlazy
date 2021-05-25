@@ -1,6 +1,6 @@
 import math
 import numpy as np
-from qlazypy import DensOp
+from qlazy import DensOp
 
 # Pauli Matrix
 

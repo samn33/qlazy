@@ -1,6 +1,6 @@
 import math
 import numpy as np
-from qlazypy import QState, DensOp
+from qlazy import QState, DensOp
 
 def make_povm(theta=0.0):
 

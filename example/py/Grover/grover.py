@@ -1,5 +1,5 @@
 import math
-from qlazypy import QState
+from qlazy import QState
 
 # custom gates
 

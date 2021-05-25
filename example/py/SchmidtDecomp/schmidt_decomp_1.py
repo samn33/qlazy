@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.stats import unitary_group
-from qlazypy import QState
+from qlazy import QState
 
 def generate_qstate(qid_0, qid_1, entangle=True): # random pure state (entangle or not)
 

@@ -3,7 +3,7 @@ import math
 import numpy as np
 from scipy.stats import unitary_group
 from collections import Counter
-from qlazypy import QState, DensOp
+from qlazy import QState, DensOp
 
 def random_qstate(qnum):  # random pure state
 

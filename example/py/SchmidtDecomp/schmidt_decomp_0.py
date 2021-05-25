@@ -2,7 +2,7 @@ import random
 import numpy as np
 from scipy.stats import unitary_group
 from scipy.linalg import eigh
-from qlazypy import QState, DensOp
+from qlazy import QState, DensOp
 
 MIN_DOUBLE = 0.000001
 

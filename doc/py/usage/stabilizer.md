@@ -19,7 +19,7 @@ qlazyには、スタビライザーを作成してクリフォード演算によ
 
 Stabilizerクラスがスタビライザーを表します。使用例を以下に示します。
 
-    from qlazypy import Stabilizer
+    from qlazy import Stabilizer
     sb = Stabilizer(qubit_num=3)
 
 これで量子ビット数3の状態を特定するためのスタビライザーsbを生成します。

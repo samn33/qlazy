@@ -1,7 +1,7 @@
 import random
 import math
 import numpy as np
-from qlazypy import QState, DensOp
+from qlazy import QState, DensOp
 
 def computational_basis(dim,rank):
 

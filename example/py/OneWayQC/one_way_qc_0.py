@@ -1,5 +1,5 @@
 import random
-from qlazypy import QState
+from qlazy import QState
 
 def main():
 

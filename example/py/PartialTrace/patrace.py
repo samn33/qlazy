@@ -1,4 +1,4 @@
-from qlazypy import QState, DensOp
+from qlazy import QState, DensOp
 
 qs = QState(4)
 

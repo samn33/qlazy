@@ -1,5 +1,5 @@
-Pythonパッケージ(qlazypy)
-=========================
+Python Package
+==============
 
 ## 使用方法
 
@@ -12,5 +12,4 @@ Pythonパッケージ(qlazypy)
 
 ## 使用例
 
-- [サンプルいろいろ](../../example/py/)
-
+- [サンプルいろいろ](https://github.com/samn33/qlazy/tree/master/example/py)

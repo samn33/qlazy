@@ -2,7 +2,7 @@ import random
 import math
 import numpy as np
 from scipy.stats import unitary_group
-from qlazypy import QState,DensOp
+from qlazy import QState,DensOp
 
 def random_qstate_ensemble(qubit_num, mimxed_num):
 

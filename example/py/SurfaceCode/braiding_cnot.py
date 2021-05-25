@@ -1,5 +1,5 @@
 from collections import Counter
-from qlazypy import Stabilizer
+from qlazy import Stabilizer
 
 def get_common_qid(obj_A, obj_B):
 
