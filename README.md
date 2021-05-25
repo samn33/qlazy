@@ -14,26 +14,27 @@ Quantum Computing Simulator
 
 ## Install
 
-### Command line tool and Library
+### Quick install
+
+    $ pip install qlazy
+
+### Build from source code
 
     $ git clone https://github.com/samn33/qlazy.git
-    $ cd qlazy/c
-    $ mkdir build; cd build; cmake ..; make
-    $ mv libqlz.so ~/lib; mv qlazy ~/bin
-	
-add followings to your ~/.bashrc
-
-    export PATH=$PATH:~/bin
-    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/lib
+    $ cd qlazy
+    $ python setup install --user
 
 You may also need to install 'libreadline-dev'
 
     $ sudo apt install libreadline-dev
 
-### Python package
+### Uninstall
 
-    $ cd ../../py
-    $ pip install -e .
+    $ pip uninstall qlazy
+
+### Uninstall (old version <= 0.1.5)
+
+    $ rm ~/bin/qlazy ~/lib/libqlz.so
 
 ## Usage
 
@@ -89,7 +90,7 @@ print help
 
 foo.py
 	
-    from qlazypy import QState
+    from qlazy import QState
     
     qs = QState(2)
     qs.h(0)
@@ -114,18 +115,18 @@ execute the program
 - DensOp class: for operating density operators.
 - Stabilizer class: for operating stabilizer states.
 - Observable class: for specifying observables.
-- QComp, Backend class: for quantum computer simulation/executing and specifying backend.
+- QComp, Backend class: for quantum computer simulation/execution and specifying backend.
 
 ## Documents
 
 - [Welcome to qlazy's documentations!](http://samn33.github.io/qlazy-docs/index.html)
     - [Tutorial (japanese)](http://samn33.github.io/qlazy-docs/Tutorial_jp.html)
-    - [Python API](http://samn33.github.io/qlazy-docs/qlazypy.html)
+    - [Python API](http://samn33.github.io/qlazy-docs/python-api/qlazypy.html)
 
 ## Requirements
 
-    * Linux(Ubuntu20.04)
-    * Python3.8
+- Linux(Ubuntu20.04)
+- Python3.8
 
 ## Licence
 

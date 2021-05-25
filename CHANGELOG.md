@@ -1,8 +1,12 @@
 # Change Log
 
-## [0.1.6.beta] - 2021-05-14
+## [0.2.0] - 2021-05-25
+### Changed
+- Quick install supported: "pip install qlazy"
+- Python package name changed: 'qlazypy' --> 'qlazy'
 ### Added
-- nonzero' option to 'show' method of QState, DensOp for printing only non-zero elments
+- New option added: 'nonzero' option of 'show' method (for printing only non-zero elements)
+    - ex) qs = QState(2).h(0).cx(0,1); qs.show(nonzero=True)
 
 ## [0.1.5] - 2021-05-12
 ### Changed
