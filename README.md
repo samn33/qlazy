@@ -64,25 +64,25 @@ print help
 #### interactive mode
 
     $ qlazy
-	>> init 2
-	>> h 0
-	>> cx 0 1
-	>> show   # show the current quantum state
+    >> init 2
+    >> h 0
+    >> cx 0 1
+    >> show   # show the current quantum state
     c[00] = +0.7071+0.0000*i : 0.5000 |++++++
     c[01] = +0.0000+0.0000*i : 0.0000 |
     c[10] = +0.0000+0.0000*i : 0.0000 |
     c[11] = +0.7071+0.0000*i : 0.5000 |++++++
-	>> m
+    >> m
     direction of measurement: z-axis
     frq[00] = 49
     frq[11] = 51
     last state => 00
-	>> quit
+    >> quit
 
 print help
 
-	>> help
-	>> help <item>
+    >> help
+    >> help <item>
 
 ### Python package
 

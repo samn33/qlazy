@@ -6,12 +6,6 @@ from setuptools.command.build_ext import build_ext as build_ext_orig
 
 _VERSION = '0.2.0'
 
-try:
-    with open('README.md') as f:
-        _README = f.read()
-except IOError:
-    _README = ''
-
 class CMakeExtension(Extension):
 
     def __init__(self, name):
@@ -53,17 +47,17 @@ setup(
     author='Sam.N',
     author_email='saminriver33@gmail.com',
     description='Quantum Computing Simulator',
-    long_description=_README,
+    long_description='',
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
         'numpy'
     ],
-    license='Apace License 2.0',
+    license='Apache Software License',
     classifiers=[
         'Development Status :: 4 - Beta',
         'Programming Language :: Python',
-        'License :: OSI Approved :: Apache License 2.0',
+        'License :: OSI Approved :: Apache Software License',
     ],
     keywords=['quantum', 'simulator'],
     ext_modules=[CMakeExtension('qlazy/lib/c/qlz')],
