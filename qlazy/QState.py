@@ -99,6 +99,7 @@ class QState(ctypes.Structure):
         --------
         >>> def bell(self, q0, q1):
         >>>     self.h(q0).cx(q0,q1)
+        >>>     return self
         >>> ...
         >>> QState.add_method(bell)
         >>> qs = QState(qubit_num=2)

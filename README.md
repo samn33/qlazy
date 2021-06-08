@@ -121,7 +121,7 @@ execute the program
 
 - [Welcome to qlazy's documentations!](http://samn33.github.io/qlazy-docs/index.html)
     - [Tutorial (japanese)](http://samn33.github.io/qlazy-docs/Tutorial_jp.html)
-    - [Python API](http://samn33.github.io/qlazy-docs/python-api/qlazypy.html)
+    - [Python API](http://samn33.github.io/qlazy-docs/python-api/qlazy.html)
 
 ## Requirements
 
