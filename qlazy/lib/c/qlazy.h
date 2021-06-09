@@ -36,7 +36,7 @@
 #define MAX_ERR_MSG_LENGTH 1024	    /* max string length of err message  */
 
 #define DEF_QUBIT_NUM      5
-#define DEF_QCIRC_STEPS    100
+#define DEF_QC_STEPS    100
 #define MAX_QUBIT_NUM      30
 #define DEF_QLAZYINIT       "./.qlazyinit"
 
@@ -96,13 +96,13 @@ typedef enum _ErrCode {
   ERROR_HELP_PRINT,
   ERROR_QGATE_GET_SYMBOL,
   ERROR_QGATE_GET_KIND,
-  ERROR_QCIRC_INIT,
-  ERROR_QCIRC_APPEND_QGATE,
-  ERROR_QCIRC_SET_CIMAGE,
-  ERROR_QCIRC_PRINT_QCIRC,
-  ERROR_QCIRC_PRINT_QGATES,
-  ERROR_QCIRC_READ_FILE,
-  ERROR_QCIRC_WRITE_FILE,
+  ERROR_QC_INIT,
+  ERROR_QC_APPEND_QGATE,
+  ERROR_QC_SET_CIMAGE,
+  ERROR_QC_PRINT_QC,
+  ERROR_QC_PRINT_QGATES,
+  ERROR_QC_READ_FILE,
+  ERROR_QC_WRITE_FILE,
   ERROR_GBANK_INIT,
   ERROR_GBANK_GET_UNITARY,
   ERROR_QSTATE_INIT,
@@ -298,13 +298,13 @@ typedef struct _GBank {
   COMPLEX Swap[16];
 } GBank;
 
-typedef struct _QCirc {
+typedef struct _QC {
   int		qubit_num;
   int		step_num;
   int           buf_length;
   QGate*	qgate;
   CImage*       cimage;
-} QCirc;
+} QC;
 
 typedef struct _QState {
   int		qubit_num;	/* number of qubits */
@@ -326,7 +326,7 @@ typedef struct _MData {
 } MData;
 
 typedef struct _QSystem {
-  QCirc*	qcirc;
+  QC*	qc;
   QState*	qstate;
   int           qubit_num;
 } QSystem;
@@ -421,16 +421,16 @@ bool	 help_print(char* item);
 bool	 qgate_get_symbol(Kind kind, char* symbol_out);
 bool	 qgate_get_kind(char* symbol, Kind* kind_out);
 
-/* qcirc.c */
-bool	 qcirc_init(int qubit_num, int buf_length, void** qcirc_out);
-bool	 qcirc_append_qgate(QCirc* qcirc, Kind kind, int terminal_num,
-			    Para* para, int qubit_id[MAX_QUBIT_NUM]);
-bool	 qcirc_set_cimage(QCirc* qcirc);
-bool	 qcirc_print_qcirc(QCirc* qcirc);
-bool	 qcirc_print_qgates(QCirc* qcirc);
-bool	 qcirc_read_file(char* fname, void** qcirc_out);
-bool	 qcirc_write_file(QCirc* qcirc, char* fname);
-void	 qcirc_free(QCirc* qcirc);
+/* qc.c */
+bool	 qc_init(int qubit_num, int buf_length, void** qc_out);
+bool	 qc_append_qgate(QC* qc, Kind kind, int terminal_num,
+			 Para* para, int qubit_id[MAX_QUBIT_NUM]);
+bool	 qc_set_cimage(QC* qc);
+bool	 qc_print_qc(QC* qc);
+bool	 qc_print_qgates(QC* qc);
+bool	 qc_read_file(char* fname, void** qc_out);
+bool	 qc_write_file(QC* qc, char* fname);
+void	 qc_free(QC* qc);
 
 /* gbank.c */
 bool	 gbank_init(void** gbank_out);

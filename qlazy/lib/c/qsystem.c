@@ -10,7 +10,7 @@ bool qsystem_init(void** qsystem_out)
 
   if (!(qsystem = (QSystem*)malloc(sizeof(QSystem))))
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
-  qsystem->qcirc = NULL;
+  qsystem->qc = NULL;
   qsystem->qstate = NULL;
   qsystem->qubit_num = 0;
 
@@ -73,7 +73,7 @@ static bool _qsystem_execute_one_line(QSystem* qsystem, char* line)
   int           terminal_num = 0;
   int           qubit_id[MAX_QUBIT_NUM];
   QGate*        qgate	     = NULL;
-  QCirc*	qcirc	     = qsystem->qcirc;
+  QC*	qc	     = qsystem->qc;
   QState*       qstate	     = qsystem->qstate;
   int		qubit_num    = qsystem->qubit_num;
 
@@ -96,7 +96,7 @@ static bool _qsystem_execute_one_line(QSystem* qsystem, char* line)
     if (tnum > qubit_num + 1) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
     terminal_num = tnum - 1;  /* number of qubits to measure */
     if (anum > 1) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
-    if ((qcirc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
+    if ((qc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
     for (int i=0; i<terminal_num; i++) {
       qubit_id[i] = strtol(token[1+i], NULL, 10);
       if (qubit_num < qubit_id[i] + 1) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
@@ -129,16 +129,16 @@ static bool _qsystem_execute_one_line(QSystem* qsystem, char* line)
     /* print quantum circuit */
     if (tnum > 1) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
     if (anum > 1) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
-    if ((qcirc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
-    if (!(qcirc_set_cimage(qcirc))) ERR_RETURN(ERROR_CANT_INITIALIZE,false); 
-    if (!(qcirc_print_qcirc(qcirc))) ERR_RETURN(ERROR_CANT_PRINT_CIRC,false);
+    if ((qc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
+    if (!(qc_set_cimage(qc))) ERR_RETURN(ERROR_CANT_INITIALIZE,false); 
+    if (!(qc_print_qc(qc))) ERR_RETURN(ERROR_CANT_PRINT_CIRC,false);
     SUC_RETURN(true);
   case GATES:
     /* print quantum gates */
     if (tnum > 1) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
     if (anum > 1) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
-    if ((qcirc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
-    if (!(qcirc_print_qgates(qcirc))) ERR_RETURN(ERROR_CANT_PRINT_GATES,false);
+    if ((qc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
+    if (!(qc_print_qgates(qc))) ERR_RETURN(ERROR_CANT_PRINT_GATES,false);
     SUC_RETURN(true);
   case ECHO:
     /* echo string */
@@ -150,8 +150,8 @@ static bool _qsystem_execute_one_line(QSystem* qsystem, char* line)
     if (tnum > 2) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
     if (tnum < 2) ERR_RETURN(ERROR_NEED_MORE_ARGUMENTS,false);
     if (anum > 1) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
-    if ((qcirc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
-    if (!(qcirc_write_file(qcirc, token[1]))) ERR_RETURN(ERROR_CANT_WRITE_FILE,false);
+    if ((qc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
+    if (!(qc_write_file(qc, token[1]))) ERR_RETURN(ERROR_CANT_WRITE_FILE,false);
     printf("output file : %s\n", token[1]);
     SUC_RETURN(true);
   case HELP:
@@ -188,15 +188,15 @@ static bool _qsystem_execute_one_line(QSystem* qsystem, char* line)
     if ((qubit_num <= 0) || (qubit_num > MAX_QUBIT_NUM))
       ERR_RETURN(ERROR_OUT_OF_BOUND,false);
     if (qstate != NULL) { qstate_free(qstate); qstate = NULL; }
-    if (qcirc != NULL) { qcirc_free(qcirc); qcirc = NULL; }
-    if (!(qcirc_init(qubit_num, DEF_QCIRC_STEPS, (void**)&qcirc)))
+    if (qc != NULL) { qc_free(qc); qc = NULL; }
+    if (!(qc_init(qubit_num, DEF_QC_STEPS, (void**)&qc)))
       ERR_RETURN(ERROR_CANT_INITIALIZE,false);
     if (!(qstate_init(qubit_num, (void**)&qstate)))
       ERR_RETURN(ERROR_CANT_INITIALIZE,false);
     break;
   case MEASURE:
     /* measurement */
-    if ((qcirc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
+    if ((qc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
     if (tnum > qubit_num + 1) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
     terminal_num = tnum - 1;  /* number of qubits to measure */
     if (anum == 1) {
@@ -236,7 +236,7 @@ static bool _qsystem_execute_one_line(QSystem* qsystem, char* line)
   case MEASURE_Y:
   case MEASURE_Z:
     /* measurement */
-    if ((qcirc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
+    if ((qc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
     if (tnum > qubit_num + 1) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
     terminal_num = tnum - 1;  /* number of qubits to measure */
     if (anum == 1) {
@@ -274,7 +274,7 @@ static bool _qsystem_execute_one_line(QSystem* qsystem, char* line)
     break;
   case MEASURE_BELL:
     /* measurement */
-    if ((qcirc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
+    if ((qc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
     if (tnum < 3) ERR_RETURN(ERROR_NEED_MORE_ARGUMENTS,false);
     if (tnum > 3) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
     terminal_num = 2;  /* number of qubits to measure */
@@ -302,7 +302,7 @@ static bool _qsystem_execute_one_line(QSystem* qsystem, char* line)
   case PHASE_SHIFT_S_:
   case HADAMARD:
     /* 1-qubit gate */
-    if ((qcirc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
+    if ((qc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
     if (tnum > 2) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
     if (tnum < 2) ERR_RETURN(ERROR_NEED_MORE_ARGUMENTS,false);
     if (anum > 1) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
@@ -317,7 +317,7 @@ static bool _qsystem_execute_one_line(QSystem* qsystem, char* line)
   case PHASE_SHIFT:
   case ROTATION_U1:
     /* 1-qubit 1-parameter gate */
-    if ((qcirc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
+    if ((qc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
     if (tnum > 2) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
     if (tnum < 2) ERR_RETURN(ERROR_NEED_MORE_ARGUMENTS,false);
     terminal_num = 1;
@@ -338,7 +338,7 @@ static bool _qsystem_execute_one_line(QSystem* qsystem, char* line)
     break;
   case ROTATION_U2:
     /* 1-qubit 2-parameter gate */
-    if ((qcirc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
+    if ((qc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
     if (tnum > 2) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
     if (tnum < 2) ERR_RETURN(ERROR_NEED_MORE_ARGUMENTS,false);
     terminal_num = 1;
@@ -364,7 +364,7 @@ static bool _qsystem_execute_one_line(QSystem* qsystem, char* line)
     break;
   case ROTATION_U3:
     /* 1-qubit 3-parameter gate */
-    if ((qcirc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
+    if ((qc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
     if (tnum > 2) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
     if (tnum < 2) ERR_RETURN(ERROR_NEED_MORE_ARGUMENTS,false);
     terminal_num = 1;
@@ -405,7 +405,7 @@ static bool _qsystem_execute_one_line(QSystem* qsystem, char* line)
   case CONTROLLED_T_:
   case SWAP_QUBITS:
     /* 2-qubit gate */
-    if ((qcirc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
+    if ((qc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
     if (tnum > 3) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
     if (tnum < 3) ERR_RETURN(ERROR_NEED_MORE_ARGUMENTS,false);
 
@@ -425,7 +425,7 @@ static bool _qsystem_execute_one_line(QSystem* qsystem, char* line)
   case CONTROLLED_RZ:
   case CONTROLLED_U1:
     /* 2-qubit, 1-parameter gate */
-    if ((qcirc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
+    if ((qc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
     if (tnum > 3) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
     if (tnum < 3) ERR_RETURN(ERROR_NEED_MORE_ARGUMENTS,false);
     terminal_num = 2;
@@ -450,7 +450,7 @@ static bool _qsystem_execute_one_line(QSystem* qsystem, char* line)
     break;
   case CONTROLLED_U2:
     /* 2-qubit, 2-parameter gate */
-    if ((qcirc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
+    if ((qc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
     if (tnum > 3) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
     if (tnum < 3) ERR_RETURN(ERROR_NEED_MORE_ARGUMENTS,false);
     terminal_num = 2;
@@ -480,7 +480,7 @@ static bool _qsystem_execute_one_line(QSystem* qsystem, char* line)
     break;
   case CONTROLLED_U3:
     /* 2-qubit, 3-parameter gate */
-    if ((qcirc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
+    if ((qc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
     if (tnum > 3) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
     if (tnum < 3) ERR_RETURN(ERROR_NEED_MORE_ARGUMENTS,false);
     terminal_num = 2;
@@ -517,14 +517,14 @@ static bool _qsystem_execute_one_line(QSystem* qsystem, char* line)
     ERR_RETURN(ERROR_UNKNOWN_GATE,false);
   }
 
-  if (!(qcirc_append_qgate(qcirc, kind, terminal_num, &para, qubit_id))) /* set para */
-    ERR_RETURN(ERROR_QCIRC_APPEND_QGATE,false);
+  if (!(qc_append_qgate(qc, kind, terminal_num, &para, qubit_id))) /* set para */
+    ERR_RETURN(ERROR_QC_APPEND_QGATE,false);
 
-  qgate = &(qcirc->qgate[qcirc->step_num - 1]);
+  qgate = &(qc->qgate[qc->step_num - 1]);
   if (!(_operate_qgate(qstate, qgate)))
     ERR_RETURN(ERROR_QSTATE_OPERATE_QGATE,false);
 
-  qsystem->qcirc = qcirc;
+  qsystem->qc = qc;
   qsystem->qstate = qstate;
   qsystem->qubit_num = qubit_num;
 
@@ -595,8 +595,8 @@ bool qsystem_intmode(QSystem* qsystem, char* fname_ini)
 void qsystem_free(QSystem* qsystem)
 {
   if (qsystem != NULL) {
-    if (qsystem->qcirc != NULL) {
-      qcirc_free(qsystem->qcirc); qsystem->qcirc = NULL;
+    if (qsystem->qc != NULL) {
+      qc_free(qsystem->qc); qsystem->qc = NULL;
     }
     if (qsystem->qstate != NULL) {
       qstate_free(qsystem->qstate); qsystem->qstate = NULL;

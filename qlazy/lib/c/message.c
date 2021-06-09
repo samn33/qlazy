@@ -34,26 +34,26 @@ void error_msg(ErrCode err)
     fprintf(stderr, "ERROR: qgate get kind failure !\n");
     break;
 
-  case ERROR_QCIRC_INIT:
-    fprintf(stderr, "ERROR: qcirc init failure !\n");
+  case ERROR_QC_INIT:
+    fprintf(stderr, "ERROR: qc init failure !\n");
     break;
-  case ERROR_QCIRC_APPEND_QGATE:
-    fprintf(stderr, "ERROR: qcirc append qgate failure !\n");
+  case ERROR_QC_APPEND_QGATE:
+    fprintf(stderr, "ERROR: qc append qgate failure !\n");
     break;
-  case ERROR_QCIRC_SET_CIMAGE:
-    fprintf(stderr, "ERROR: qcirc set cimage failure !\n");
+  case ERROR_QC_SET_CIMAGE:
+    fprintf(stderr, "ERROR: qc set cimage failure !\n");
     break;
-  case ERROR_QCIRC_PRINT_QCIRC:
-    fprintf(stderr, "ERROR: qcirc print qcirc failure !\n");
+  case ERROR_QC_PRINT_QC:
+    fprintf(stderr, "ERROR: qc print qc failure !\n");
     break;
-  case ERROR_QCIRC_PRINT_QGATES:
-    fprintf(stderr, "ERROR: qcirc print qgates failure !\n");
+  case ERROR_QC_PRINT_QGATES:
+    fprintf(stderr, "ERROR: qc print qgates failure !\n");
     break;
-  case ERROR_QCIRC_READ_FILE:
-    fprintf(stderr, "ERROR: qcirc read file failure !\n");
+  case ERROR_QC_READ_FILE:
+    fprintf(stderr, "ERROR: qc read file failure !\n");
     break;
-  case ERROR_QCIRC_WRITE_FILE:
-    fprintf(stderr, "ERROR: qcirc write file failure !\n");
+  case ERROR_QC_WRITE_FILE:
+    fprintf(stderr, "ERROR: qc write file failure !\n");
     break;
 
   case ERROR_GBANK_INIT:

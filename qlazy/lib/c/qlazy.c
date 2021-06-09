@@ -55,7 +55,7 @@ int main(int argc, char** argv)
   clock_t	c_start		     = 0;
   clock_t	c_end		     = 0;
   double        proc_time            = 0.0;
-  QCirc*        qcirc		     = NULL;
+  QC*           qc		     = NULL;
   QSystem*      qsystem		     = NULL;
   char          fname_ini[FNAME_LEN] = DEF_QLAZYINIT;
 
@@ -102,10 +102,10 @@ int main(int argc, char** argv)
   if (!qsystem_init((void**)&qsystem)) ERR_RETURN(ERROR_QSYSTEM_INIT,1);
   
   if (pr == ON) {  /* print quantum circuit only */
-    if (!(qcirc_read_file(fname_qc, (void**)&qcirc)))
-      ERR_RETURN(ERROR_QCIRC_READ_FILE,1);
-    qcirc_print_qcirc(qcirc);
-    qcirc_free(qcirc); qcirc = NULL;
+    if (!(qc_read_file(fname_qc, (void**)&qc)))
+      ERR_RETURN(ERROR_QC_READ_FILE,1);
+    qc_print_qc(qc);
+    qc_free(qc); qc = NULL;
   }
   else if (interactive == ON) {  /* execute in interactive mode */
     printf("interactive mode\n");
