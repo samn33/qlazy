@@ -17,8 +17,18 @@ class QComp:
         size of classical memory
     cmem : list
         classical memory
-    qcirc : dict
+    qcirc : list of dict
         quantum circuit
+        dict = {'kind': kind, 'qid': qid, 'cid': cid, 
+                'phase': phase, 'phase1': phase1, 'phase2': phase2,
+                'ctrl': ctrl}
+        kind: int
+        qid: list of int
+        cid: list of int
+        phase: float
+        phase1: float
+        phase2: float
+        ctrl: int
     qstate : instance of quantum state
         quantum state (depend on backend)
 
