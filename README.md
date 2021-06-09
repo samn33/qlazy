@@ -22,7 +22,7 @@ Quantum Computing Simulator
 
     $ git clone https://github.com/samn33/qlazy.git
     $ cd qlazy
-    $ python setup install --user
+    $ python setup.py install --user
 
 You may also need to install 'libreadline-dev'
 
