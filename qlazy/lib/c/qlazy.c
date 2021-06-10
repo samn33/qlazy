@@ -12,7 +12,8 @@ static void _qlazy_print_help()
   -qc FILE : quantum circuit file name \n\
   -i       : quantum circuit file from stdin \n\
   -sd SEED : seed of randam generation for measurement (default:time)\n\
-  -tm      : output processing time \n\
+  -tm      : output CPU time \n\
+  -etm     : output elapsed time \n\
   -pr      : print circuit and exit (don't run) \n\
   -h       : print this usage and exit\n\
   -v       : print this version and exit\n\
@@ -50,15 +51,20 @@ int main(int argc, char** argv)
   unsigned int  seed		     = (unsigned int)time(NULL);
   int           pr		     = OFF;
   int           tm		     = OFF;
+  int           etm		     = OFF;
   int           interactive	     = OFF;
   int           stdinput	     = OFF;
-  clock_t	c_start		     = 0;
-  clock_t	c_end		     = 0;
-  double        proc_time            = 0.0;
   QC*           qc		     = NULL;
   QSystem*      qsystem		     = NULL;
   char          fname_ini[FNAME_LEN] = DEF_QLAZYINIT;
-
+  
+  clock_t	  c_start	     = 0;
+  clock_t	  c_end		     = 0;
+  double          cpu_time           = 0.0;
+  double          elapsed_time       = 0.0;
+  int		  sec, nsec;
+  struct timespec e_start, e_end;
+  
   /* get command line arguments */
 
   if (argc == 1) { interactive = ON; }
@@ -89,6 +95,9 @@ int main(int argc, char** argv)
       else if (strcmp(argv[n],"-tm") == 0) {
 	tm = ON;
       }
+      else if (strcmp(argv[n],"-etm") == 0) {
+	etm = ON;
+      }
       else {
 	ERR_RETURN(ERROR_INVALID_ARGUMENT,1);
       }
@@ -114,11 +123,17 @@ int main(int argc, char** argv)
   }
   else {  /* execute quantum circuit file */
     c_start = clock();
+    clock_gettime(CLOCK_REALTIME, &e_start);
     if (!(qsystem_execute(qsystem, fname_qc)))
       ERR_RETURN(ERROR_QSYSTEM_EXECUTE,1);
     c_end = clock();
-    proc_time = (double)(c_end-c_start)/CLOCKS_PER_SEC;
-    if (tm == ON) printf("[[ time = %f sec ]]\n", proc_time);
+    clock_gettime(CLOCK_REALTIME, &e_end);
+    cpu_time = (double)(c_end-c_start)/CLOCKS_PER_SEC;
+    sec	= e_end.tv_sec - e_start.tv_sec;
+    nsec = e_end.tv_nsec - e_start.tv_nsec;
+    elapsed_time = (double)sec + (double)nsec / (1000 * 1000 * 1000);
+    if (tm == ON) printf("* CPU time = %f sec\n", cpu_time);
+    if (etm == ON) printf("* elapsed time = %f sec\n", elapsed_time);
   }
   
   qsystem_free(qsystem);
