@@ -5,6 +5,8 @@
 
 #include "qlazy.h"
 
+#define METHOD_0
+
 static bool _select_bits(int* bits_out, int bits_in, int digits_out, int digits_in,
 			int digit_array[MAX_QUBIT_NUM])
 {
@@ -485,11 +487,13 @@ bool qstate_print_bloch(QState* qstate, int qid)
   SUC_RETURN(true);
 }
 
+#ifdef METHOD_0
+
 static bool _qstate_operate_unitary2(COMPLEX* camp_out, COMPLEX* camp_in, COMPLEX* U2,
 				     int qubit_num, int state_num, int n)
 {
   int nn = qubit_num - n - 1;
-  
+
   # pragma omp parallel for
   for (int i=0; i<state_num; i++) {
     if ((i >> nn) %2 == 0) {
@@ -548,55 +552,205 @@ static bool _qstate_operate_unitary4(COMPLEX* camp_out, COMPLEX* camp_in, COMPLE
   SUC_RETURN(true);
 }
 
-#ifdef TEST_NEW_VERSION
+#endif
 
-static bool _qstate_operate_unitary_new(QState* qstate, COMPLEX* U, int dim, int m, int n)
+#ifdef METHOD_1
+
+static bool _qstate_operate_unitary2(COMPLEX* camp_out, COMPLEX* camp_in, COMPLEX* U2,
+				     int qubit_num, int state_num, int n)
 {
-  int		qnum_part;
-  int		qid[MAX_QUBIT_NUM];
-  double	real[16];
-  double	imag[16];
-  int		row,col;
+  int flg[4];  // flag represent whether matrix element is zero or non-zero (0:zero, 1:non-zero)
+  int nn = qubit_num - n - 1;
 
-  if ((qstate == NULL) || (dim < 0))
-    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
-  if ((m < 0) || (m >= qstate->state_num))
-    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+  /* set flags */
+  for (int i=0; i<4; i++) {
+    if (U2[i] == 0.0) flg[i] = 0;
+    else flg[i] = 1;
+  }
   
-  if (dim == 2) {
-    qnum_part = 1;
-    row = col = 2;
-    qid[0] = m;
-    for (int i=0; i<dim*dim; i++) {
-      real[i] = creal(U[i]);
-      imag[i] = cimag(U[i]);
+  # pragma omp parallel for
+  for (int i=0; i<state_num; i++) {
+    camp_out[i] = 0.0;
+    if ((i >> nn) %2 == 0) {
+      int a = IDX2(0,0);
+      int b = IDX2(0,1);
+      if (flg[a] == 1) camp_out[i] += U2[a] * camp_in[i];
+      if (flg[b] == 1) camp_out[i] += U2[b] * camp_in[i + (1 << nn)];
     }
-    if (!(qstate_apply_matrix(qstate, qnum_part, qid, real, imag, row, col)))
-      ERR_RETURN(ERROR_QSTATE_APPLY_MATRIX,false);
-  }
-
-  else if (dim == 4) {
-    if ((n < 0) || (n >= qstate->state_num) || (m == n))
-      ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
-    qnum_part = 2;
-    row = col = 4;
-    qid[0] = m; qid[1] = n;
-    for (int i=0; i<dim*dim; i++) {
-      real[i] = creal(U[i]);
-      imag[i] = cimag(U[i]);
+    else {
+      int a = IDX2(1,0);
+      int b = IDX2(1,1);
+      if (flg[a] == 1) camp_out[i] += U2[a] * camp_in[i - (1 << nn)];
+      if (flg[b] == 1) camp_out[i] += U2[b] * camp_in[i];
     }
-    if (!(qstate_apply_matrix(qstate, qnum_part, qid, real, imag, row, col)))
-      ERR_RETURN(ERROR_QSTATE_APPLY_MATRIX,false);
-  }
-
-  else {
-    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
   }
   
   SUC_RETURN(true);
 }
 
-#else
+static bool _qstate_operate_unitary4(COMPLEX* camp_out, COMPLEX* camp_in, COMPLEX* U4,
+				     int qubit_num, int state_num, int m, int n)
+{
+  int flg[16];  // flag represent whether matrix element is zero or non-zero (0:zero, 1:non-zero)
+  int mm = qubit_num - m - 1;
+  int nn = qubit_num - n - 1;
+
+  /* set flags */
+  for (int i=0; i<16; i++) {
+    if (U4[i] == 0.0) flg[i] = 0;
+    else flg[i] = 1;
+  }
+  
+  # pragma omp parallel for
+  for (int i=0; i<state_num; i++) {
+
+    camp_out[i] = 0.0;
+    if (((i >> mm) % 2 == 0) && ((i >> nn) % 2 == 0)) {
+      int a = IDX4(0,0);
+      int b = IDX4(0,1);
+      int c = IDX4(0,2);
+      int d = IDX4(0,3);
+      if (flg[a] == 1) camp_out[i] += U4[a] * camp_in[i];
+      if (flg[b] == 1) camp_out[i] += U4[b] * camp_in[i + (1 << nn)];
+      if (flg[c] == 1) camp_out[i] += U4[c] * camp_in[i + (1 << mm)];
+      if (flg[d] == 1) camp_out[i] += U4[d] * camp_in[i + (1 << nn) + (1 << mm)];
+    }
+    else if (((i >> mm) % 2 == 0) && ((i >> nn) % 2 == 1)) {
+      int a = IDX4(1,0);
+      int b = IDX4(1,1);
+      int c = IDX4(1,2);
+      int d = IDX4(1,3);
+      if (flg[a] == 1) camp_out[i] += U4[a] * camp_in[i - (1 << nn)];
+      if (flg[b] == 1) camp_out[i] += U4[b] * camp_in[i];
+      if (flg[c] == 1) camp_out[i] += U4[c] * camp_in[i - (1 << nn) + (1 << mm)];
+      if (flg[c] == 1) camp_out[i] += U4[d] * camp_in[i + (1 << mm)];
+    }
+    else if (((i >> mm) % 2 == 1) && ((i >> nn) % 2 == 0)) {
+      int a = IDX4(2,0);
+      int b = IDX4(2,1);
+      int c = IDX4(2,2);
+      int d = IDX4(2,3);
+      if (flg[a] == 1) camp_out[i] += U4[a] * camp_in[i - (1 << mm)];
+      if (flg[b] == 1) camp_out[i] += U4[b] * camp_in[i + (1 << nn) - (1 << mm)];
+      if (flg[c] == 1) camp_out[i] += U4[c] * camp_in[i];
+      if (flg[d] == 1) camp_out[i] += U4[d] * camp_in[i + (1 << nn)];
+    }
+    else {
+      int a = IDX4(3,0);
+      int b = IDX4(3,1);
+      int c = IDX4(3,2);
+      int d = IDX4(3,3);
+      if (flg[a] == 1) camp_out[i] += U4[a] * camp_in[i - (1 << nn) - (1 << mm)];
+      if (flg[b] == 1) camp_out[i] += U4[b] * camp_in[i - (1 << mm)];
+      if (flg[c] == 1) camp_out[i] += U4[c] * camp_in[i - (1 << nn)];
+      if (flg[d] == 1) camp_out[i] += U4[d] * camp_in[i];
+    }
+  }
+  
+  SUC_RETURN(true);
+}
+
+#endif
+
+#ifdef METHOD_2
+
+static bool _qstate_operate_unitary2(COMPLEX* camp_out, COMPLEX* camp_in, COMPLEX* U2,
+				     int qubit_num, int state_num, int n)
+{
+  int nn = qubit_num - n - 1;
+
+  # pragma omp parallel for
+  for (int i=0; i<state_num; i++) {
+    int p = (i >> nn) % 2;
+    int pp = p ^ 1;
+    int sign = (pp << 1) - 1; // b=0 -> -1, b=1 -> +1 (bを2倍して1を引く)
+    int offset = sign * (1 << nn);
+    camp_out[i] = U2[IDX2(p,p)] * camp_in[i] + U2[IDX2(p,pp)] * camp_in[i + offset];
+  }
+  
+  SUC_RETURN(true);
+}
+
+static bool _qstate_operate_unitary4(COMPLEX* camp_out, COMPLEX* camp_in, COMPLEX* U4,
+				     int qubit_num, int state_num, int m, int n)
+{
+  int mm = qubit_num - m - 1;
+  int nn = qubit_num - n - 1;
+
+  # pragma omp parallel for
+  for (int i=0; i<state_num; i++) {
+
+    int p = (i >> mm) % 2;
+    int pp = p ^ 1;
+    int q = (i >> nn) % 2;
+    int qq = q ^ 1;
+
+    int l = (p << 1) + q;
+
+    int sign_p = (pp << 1) - 1;
+    int sign_q = (qq << 1) - 1;
+
+    int off_p = sign_p * (1 << mm);
+    int off_q = sign_q * (1 << nn);
+
+    camp_out[i]
+      = U4[IDX4(l, l)] * camp_in[i]
+      + U4[IDX4(l, (l^1))] * camp_in[i + off_q]
+      + U4[IDX4(l, (l^2))] * camp_in[i + off_p]
+      + U4[IDX4(l, (l^3))] * camp_in[i + off_q + off_p];
+  }
+  
+  SUC_RETURN(true);
+}
+
+#endif
+
+//static bool _qstate_operate_unitary(QState* qstate, COMPLEX* U, int dim, int m, int n)
+//{
+//  int		qnum_part;
+//  int		qid[MAX_QUBIT_NUM];
+//  double	real[16];
+//  double	imag[16];
+//  int		row,col;
+//
+//  if ((qstate == NULL) || (dim < 0))
+//    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+//  if ((m < 0) || (m >= qstate->state_num))
+//    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+//  
+//  if (dim == 2) {
+//    qnum_part = 1;
+//    row = col = 2;
+//    qid[0] = m;
+//    for (int i=0; i<dim*dim; i++) {
+//      real[i] = creal(U[i]);
+//      imag[i] = cimag(U[i]);
+//    }
+//    if (!(qstate_apply_matrix(qstate, qnum_part, qid, real, imag, row, col)))
+//      ERR_RETURN(ERROR_QSTATE_APPLY_MATRIX,false);
+//  }
+//
+//  else if (dim == 4) {
+//    if ((n < 0) || (n >= qstate->state_num) || (m == n))
+//      ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+//    qnum_part = 2;
+//    row = col = 4;
+//    qid[0] = m; qid[1] = n;
+//    for (int i=0; i<dim*dim; i++) {
+//      real[i] = creal(U[i]);
+//      imag[i] = cimag(U[i]);
+//    }
+//    if (!(qstate_apply_matrix(qstate, qnum_part, qid, real, imag, row, col)))
+//      ERR_RETURN(ERROR_QSTATE_APPLY_MATRIX,false);
+//  }
+//
+//  else {
+//    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+//  }
+//  
+//  SUC_RETURN(true);
+//}
+//
 
 static bool _qstate_operate_unitary(QState* qstate, COMPLEX* U, int dim, int m, int n)
 {
@@ -621,8 +775,6 @@ static bool _qstate_operate_unitary(QState* qstate, COMPLEX* U, int dim, int m, 
 
   SUC_RETURN(true);
 }
-
-#endif
 
 static bool _qstate_transform_basis(QState* qstate, double angle, double phase, int n)
 {

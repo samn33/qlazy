@@ -15,7 +15,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
-#define VERSION "0.2.0"
+#define VERSION "0.2.1a"
 
 //#define TEST_NEW_VERSION
 
@@ -36,7 +36,8 @@
 #define MAX_ERR_MSG_LENGTH 1024	    /* max string length of err message  */
 
 #define DEF_QUBIT_NUM      5
-#define DEF_QC_STEPS    100
+#define DEF_QC_STEPS       100
+#define DEF_QCIRC_DEPTH    100
 #define MAX_QUBIT_NUM      30
 #define DEF_QLAZYINIT       "./.qlazyinit"
 
@@ -305,6 +306,33 @@ typedef struct _QC {
   QGate*	qgate;
   CImage*       cimage;
 } QC;
+
+// typedef struct _QCirc {
+//   int		qubit_num;
+//   int		cmem_num;
+//   int           depth;
+//   int**		qid_list;
+//   int**		cid_list;
+//   double*	phase_list;
+//   double*	phase1_list;
+//   double*	phase2_list;
+//   int*		ctrl_list;
+// } QCirc;
+// 
+// typedef struct _CMem {
+//   int	        cmem_num;
+//   int*	        bit;
+// } CMem;
+// 
+// /* qcirc.c */
+// bool qcirc_init(int qubit_num, int cmem_num, int depth, void** qcirc_out);
+// bool qcirc_append_gate(QCirc* qcirc, int* qid, int* cid, double phase, double phase1, double phase2, int ctrl);
+// 
+// /* cmem.c */
+// bool qcirc_init(int cmem_num, void** cmem_out);
+// 
+// /* qstate.c */
+// bool qstate_operate_qcirc(QState* qstate, CMem* cmem, QCirc* qcirc);
 
 typedef struct _QState {
   int		qubit_num;	/* number of qubits */

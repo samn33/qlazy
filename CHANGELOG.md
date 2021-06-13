@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.2.1a] - 2021-06-13
+### Added
+- elapsed time option (-etm) added: ex) $ qstate -qc foo.qc -etm
+
 ## [0.2.0] - 2021-05-25
 ### Changed
 - Quick install supported: "pip install qlazy"
