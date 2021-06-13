@@ -28,8 +28,10 @@ class QState(ctypes.Structure):
     _fields_ = [
         ('qubit_num', ctypes.c_int),
         ('state_num', ctypes.c_int),
+        ('buf_id', ctypes.c_int),
         ('camp', ctypes.c_void_p),
-        ('camp_tmp', ctypes.c_void_p),
+        ('buffer_0', ctypes.c_void_p),
+        ('buffer_1', ctypes.c_void_p),
         ('gbank', ctypes.c_void_p),
     ]
 

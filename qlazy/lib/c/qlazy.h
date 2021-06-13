@@ -337,8 +337,10 @@ typedef struct _QC {
 typedef struct _QState {
   int		qubit_num;	/* number of qubits */
   int		state_num;	/* number of quantum state (dim = 2^num) */
-  COMPLEX*	camp;           /* complex amplitude of the quantum state */
-  COMPLEX*	camp_tmp;       /* complex amplitude of the quantum state (temporary) */
+  int           buf_id;         /* official buffer id (0: buffer_0, 1: buffer_1)*/
+  COMPLEX*	camp;           /* complex amplitude of the quantum state (pointer to buffer #0 or #1) */
+  COMPLEX*	buffer_0;       /* complex amplitude of the quantum state (buffer #0) */
+  COMPLEX*	buffer_1;       /* complex amplitude of the quantum state (buffer #1) */
   GBank*        gbank;
 } QState;
 
@@ -374,11 +376,21 @@ typedef struct _Observable {
   SPro**	spro_array;
 } Observable;
 
+// typedef struct _DensOp {
+//   int		row;
+//   int		col;
+//   COMPLEX*	elm;
+//   COMPLEX*	elm_tmp;
+//   GBank*        gbank;
+// } DensOp;
+
 typedef struct _DensOp {
   int		row;
   int		col;
+  int           buf_id;
   COMPLEX*	elm;
-  COMPLEX*	elm_tmp;
+  COMPLEX*	buffer_0;
+  COMPLEX*	buffer_1;
   GBank*        gbank;
 } DensOp;
 
