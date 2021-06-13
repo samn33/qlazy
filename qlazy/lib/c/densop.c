@@ -14,14 +14,16 @@ static DensOp* _create_densop(int row, int col)
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,NULL);
   densop->row = row;
   densop->col = col;
-  if (!(densop->elm = (COMPLEX*)malloc(sizeof(COMPLEX)*size)))
+  densop->buf_id = 0;
+  if (!(densop->buffer_0 = (COMPLEX*)malloc(sizeof(COMPLEX)*size)))
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,NULL);
-  if (!(densop->elm_tmp = (COMPLEX*)malloc(sizeof(COMPLEX)*size)))
+  if (!(densop->buffer_1 = (COMPLEX*)malloc(sizeof(COMPLEX)*size)))
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,NULL);
+  densop->elm = densop->buffer_0;
 
   for (int i=0; i<size; i++) {
-    densop->elm[i] = 0.0 + 0.0i;
-    densop->elm_tmp[i] = 0.0 + 0.0i;
+    densop->buffer_0[i] = 0.0 + 0.0i;
+    densop->buffer_1[i] = 0.0 + 0.0i;
   }
   
   if (!(gbank_init((void**)&(densop->gbank))))
@@ -153,10 +155,12 @@ bool densop_copy(DensOp* densop_in, void** densop_out)
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
   densop->row = densop_in->row;
   densop->col = densop_in->col;
-  if (!(densop->elm = (COMPLEX*)malloc(sizeof(COMPLEX)*(densop->row)*(densop->col))))
+  densop->buf_id = 0;
+  if (!(densop->buffer_0 = (COMPLEX*)malloc(sizeof(COMPLEX)*(densop->row)*(densop->col))))
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
-  if (!(densop->elm_tmp = (COMPLEX*)malloc(sizeof(COMPLEX)*(densop->row)*(densop->col))))
+  if (!(densop->buffer_1 = (COMPLEX*)malloc(sizeof(COMPLEX)*(densop->row)*(densop->col))))
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
+  densop->elm = densop->buffer_0;
 
   memcpy(densop->elm, densop_in->elm, sizeof(COMPLEX)*(densop->row)*(densop->col));
 
@@ -363,10 +367,12 @@ bool densop_patrace(DensOp* densop_in, int qubit_num, int qubit_id[MAX_QUBIT_NUM
   if (!(densop = (DensOp*)malloc(sizeof(DensOp))))
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
   densop->row = densop->col = dim;
-  if (!(densop->elm = (COMPLEX*)malloc(sizeof(COMPLEX)*dim*dim)))
+  densop->buf_id = 0;
+  if (!(densop->buffer_0 = (COMPLEX*)malloc(sizeof(COMPLEX)*dim*dim)))
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
-  if (!(densop->elm_tmp = (COMPLEX*)malloc(sizeof(COMPLEX)*dim*dim)))
+  if (!(densop->buffer_1 = (COMPLEX*)malloc(sizeof(COMPLEX)*dim*dim)))
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
+  densop->elm = densop->buffer_0;
   for (int n=0; n<dim*dim; n++) densop->elm[n] = 0.0+0.0i;
 
   qsort(qubit_id, qubit_num, sizeof(int), _cmp_for_sort);
@@ -431,12 +437,22 @@ static bool _densop_rapply_matrix(DensOp* densop, int qnum_part, int qid[MAX_QUB
   int           N	   = 0;
   int		ii,iii,jj,jjj,kk,kkk;
 
+  COMPLEX*      buffer_in;
+  COMPLEX*      buffer_out;
+
   if ((densop == NULL) || (real == NULL) || (imag == NULL) ||
       (densop->row < row) || (densop->col < col) || (row != col) ||
       (1<<qnum_part != row))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
-  memcpy(densop->elm_tmp, densop->elm, sizeof(COMPLEX) * densop->row * densop->col);
+  if (densop->buf_id == 0) {
+    buffer_in = densop->buffer_0;
+    buffer_out = densop->buffer_1;
+  }
+  else {
+    buffer_in = densop->buffer_1;
+    buffer_out = densop->buffer_0;
+  }
 
   qnum = (int)log2(densop->row);
   index = bit_permutation_array(densop->row, qnum, qnum_part, qid);
@@ -456,17 +472,21 @@ static bool _densop_rapply_matrix(DensOp* densop, int qnum_part, int qid[MAX_QUB
     for (int j=0; j<densop->col; j++) {
       jj = index[j]>>shift;
       jjj = index[j]%(1<<shift);
-      densop->elm[i*densop->col+j] = 0.0 + 0.0i;
+      buffer_out[i*densop->col+j] = 0.0 + 0.0i;
 
       for (int l=0; l<N; l++) {
 	int k = inv_index[(l<<shift)+jjj];
 	kk = index[k]>>shift;
 	kkk = index[k]%(1<<shift);
 	coef = real[kk*col+jj]+1.0i*imag[kk*col+jj];
-	densop->elm[i*densop->col+j] += (densop->elm_tmp[i*densop->col+k] * coef);
+	buffer_out[i*densop->col+j] += (buffer_in[i*densop->col+k] * coef);
       }
     }
   }
+
+  if (densop->buf_id == 0) densop->buf_id = 1;
+  else densop->buf_id = 0;
+  densop->elm = buffer_out;
 
   free(index); index = NULL;
   free(inv_index); inv_index = NULL;
@@ -487,13 +507,23 @@ static bool _densop_lapply_matrix(DensOp* densop, int qnum_part, int qid[MAX_QUB
   int		shift	   = 0;
   int           N	   = 0;
   int		ii,iii,jj,jjj,kk,kkk;
+
+  COMPLEX*      buffer_in;
+  COMPLEX*      buffer_out;
   
   if ((densop == NULL) || (real == NULL) || (imag == NULL) ||
       (densop->row < row) || (densop->col < col) || (row != col) ||
       (1<<qnum_part != row))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
-  memcpy(densop->elm_tmp, densop->elm, sizeof(COMPLEX) * densop->row * densop->col);
+  if (densop->buf_id == 0) {
+    buffer_in = densop->buffer_0;
+    buffer_out = densop->buffer_1;
+  }
+  else {
+    buffer_in = densop->buffer_1;
+    buffer_out = densop->buffer_0;
+  }
 
   qnum = (int)log2(densop->row);
   index = bit_permutation_array(densop->row, qnum, qnum_part, qid);
@@ -513,17 +543,21 @@ static bool _densop_lapply_matrix(DensOp* densop, int qnum_part, int qid[MAX_QUB
     for (int j=0; j<densop->col; j++) {
       jj = index[j]>>shift;
       jjj = index[j]%(1<<shift);
-      densop->elm[i*densop->col+j] = 0.0 + 0.0i;
+      buffer_out[i*densop->col+j] = 0.0 + 0.0i;
 
       for (int l=0; l<N; l++) {
 	int k = inv_index[(l<<shift)+iii];
 	kk = index[k]>>shift;
 	kkk = index[k]%(1<<shift);
 	coef = real[ii*col+kk]+1.0i*imag[ii*col+kk];
-	densop->elm[i*densop->col+j] += (coef * densop->elm_tmp[k*densop->col+j]);
+	buffer_out[i*densop->col+j] += (coef * buffer_in[k*densop->col+j]);
       }
     }
   }
+
+  if (densop->buf_id == 0) densop->buf_id = 1;
+  else densop->buf_id = 0;
+  densop->elm = buffer_out;
 
   free(index); index = NULL;
   free(inv_index); inv_index = NULL;
@@ -758,11 +792,11 @@ bool densop_tensor_product(DensOp* densop_0, DensOp* densop_1, void** densop_out
 void densop_free(DensOp* densop)
 {
   if (densop != NULL) {
-    if (densop->elm != NULL) {
-      free(densop->elm); densop->elm = NULL;
+    if (densop->buffer_0 != NULL) {
+      free(densop->buffer_0); densop->buffer_0 = NULL;
     }
-    if (densop->elm_tmp != NULL) {
-      free(densop->elm_tmp); densop->elm_tmp = NULL;
+    if (densop->buffer_1 != NULL) {
+      free(densop->buffer_1); densop->buffer_1 = NULL;
     }
     free(densop); densop = NULL;
   }

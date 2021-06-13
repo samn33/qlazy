@@ -39,10 +39,10 @@ static bool _select_bits(int* bits_out, int bits_in, int digits_out, int digits_
 static void _qstate_set_none(QState* qstate)
 {
   for (int i=0; i<qstate->state_num; i++) {
-    qstate->camp[i] = 0.0 + 0.0i;
+    qstate->buffer_0[i] = 0.0 + 0.0i;
   }
   for (int i=0; i<qstate->state_num; i++) {
-    qstate->camp_tmp[i] = 0.0 + 0.0i;
+    qstate->buffer_1[i] = 0.0 + 0.0i;
   }
 }
 
@@ -257,11 +257,15 @@ bool qstate_init(int qubit_num, void** qstate_out)
   state_num = (1 << qubit_num);
   qstate->state_num = state_num;
 
-  if (!(qstate->camp = (COMPLEX*)malloc(sizeof(COMPLEX)*state_num)))
+  qstate->buf_id = 0;
+
+  if (!(qstate->buffer_0 = (COMPLEX*)malloc(sizeof(COMPLEX)*state_num)))
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
 
-  if (!(qstate->camp_tmp = (COMPLEX*)malloc(sizeof(COMPLEX)*state_num)))
+  if (!(qstate->buffer_1 = (COMPLEX*)malloc(sizeof(COMPLEX)*state_num)))
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
+
+  qstate->camp = qstate->buffer_0;
 
   if (!(gbank_init((void**)&(qstate->gbank))))
       ERR_RETURN(ERROR_GBANK_INIT,false);
@@ -493,18 +497,22 @@ static bool _qstate_operate_unitary2(COMPLEX* camp_out, COMPLEX* camp_in, COMPLE
 				     int qubit_num, int state_num, int n)
 {
   int nn = qubit_num - n - 1;
+  COMPLEX u_00 = U2[IDX2(0,0)];
+  COMPLEX u_01 = U2[IDX2(0,1)];
+  COMPLEX u_10 = U2[IDX2(1,0)];
+  COMPLEX u_11 = U2[IDX2(1,1)];
 
   # pragma omp parallel for
   for (int i=0; i<state_num; i++) {
     if ((i >> nn) %2 == 0) {
       camp_out[i]
-	= U2[IDX2(0,0)] * camp_in[i]
-	+ U2[IDX2(0,1)] * camp_in[i + (1 << nn)];
+	= u_00 * camp_in[i]
+	+ u_01 * camp_in[i + (1 << nn)];
     }
     else {
       camp_out[i]
-	= U2[IDX2(1,0)] * camp_in[i - (1 << nn)]
-	+ U2[IDX2(1,1)] * camp_in[i];
+	= u_10 * camp_in[i - (1 << nn)]
+	+ u_11 * camp_in[i];
     }
   }
   
@@ -516,36 +524,52 @@ static bool _qstate_operate_unitary4(COMPLEX* camp_out, COMPLEX* camp_in, COMPLE
 {
   int mm = qubit_num - m - 1;
   int nn = qubit_num - n - 1;
+  COMPLEX u_00 = U4[IDX4(0,0)];
+  COMPLEX u_01 = U4[IDX4(0,1)];
+  COMPLEX u_02 = U4[IDX4(0,2)];
+  COMPLEX u_03 = U4[IDX4(0,3)];
+  COMPLEX u_10 = U4[IDX4(1,0)];
+  COMPLEX u_11 = U4[IDX4(1,1)];
+  COMPLEX u_12 = U4[IDX4(1,2)];
+  COMPLEX u_13 = U4[IDX4(1,3)];
+  COMPLEX u_20 = U4[IDX4(2,0)];
+  COMPLEX u_21 = U4[IDX4(2,1)];
+  COMPLEX u_22 = U4[IDX4(2,2)];
+  COMPLEX u_23 = U4[IDX4(2,3)];
+  COMPLEX u_30 = U4[IDX4(3,0)];
+  COMPLEX u_31 = U4[IDX4(3,1)];
+  COMPLEX u_32 = U4[IDX4(3,2)];
+  COMPLEX u_33 = U4[IDX4(3,3)];
 
   # pragma omp parallel for
   for (int i=0; i<state_num; i++) {
     if (((i >> mm) % 2 == 0) && ((i >> nn) % 2 == 0)) {
       camp_out[i]
-	= U4[IDX4(0,0)] * camp_in[i]
-	+ U4[IDX4(0,1)] * camp_in[i + (1 << nn)]
-	+ U4[IDX4(0,2)] * camp_in[i + (1 << mm)]
-	+ U4[IDX4(0,3)] * camp_in[i + (1 << nn) + (1 << mm)];
+	= u_00 * camp_in[i]
+	+ u_01 * camp_in[i + (1 << nn)]
+	+ u_02 * camp_in[i + (1 << mm)]
+	+ u_03 * camp_in[i + (1 << nn) + (1 << mm)];
     }
     else if (((i >> mm) % 2 == 0) && ((i >> nn) % 2 == 1)) {
       camp_out[i]
-	= U4[IDX4(1,0)] * camp_in[i - (1 << nn)]
-	+ U4[IDX4(1,1)] * camp_in[i]
-	+ U4[IDX4(1,2)] * camp_in[i - (1 << nn) + (1 << mm)]
-	+ U4[IDX4(1,3)] * camp_in[i + (1 << mm)];
+	= u_10 * camp_in[i - (1 << nn)]
+	+ u_11 * camp_in[i]
+	+ u_12 * camp_in[i - (1 << nn) + (1 << mm)]
+	+ u_13 * camp_in[i + (1 << mm)];
     }
     else if (((i >> mm) % 2 == 1) && ((i >> nn) % 2 == 0)) {
       camp_out[i]
-	= U4[IDX4(2,0)] * camp_in[i - (1 << mm)]
-	+ U4[IDX4(2,1)] * camp_in[i + (1 << nn) - (1 << mm)]
-	+ U4[IDX4(2,2)] * camp_in[i]
-	+ U4[IDX4(2,3)] * camp_in[i + (1 << nn)];
+	= u_20 * camp_in[i - (1 << mm)]
+	+ u_21 * camp_in[i + (1 << nn) - (1 << mm)]
+	+ u_22 * camp_in[i]
+	+ u_23 * camp_in[i + (1 << nn)];
     }
     else {
       camp_out[i]
-	= U4[IDX4(3,0)] * camp_in[i - (1 << nn) - (1 << mm)]
-	+ U4[IDX4(3,1)] * camp_in[i - (1 << mm)]
-	+ U4[IDX4(3,2)] * camp_in[i - (1 << nn)]
-	+ U4[IDX4(3,3)] * camp_in[i];
+	= u_30 * camp_in[i - (1 << nn) - (1 << mm)]
+	+ u_31 * camp_in[i - (1 << mm)]
+	+ u_32 * camp_in[i - (1 << nn)]
+	+ u_33 * camp_in[i];
     }
   }
   
@@ -705,73 +729,49 @@ static bool _qstate_operate_unitary4(COMPLEX* camp_out, COMPLEX* camp_in, COMPLE
 
 #endif
 
-//static bool _qstate_operate_unitary(QState* qstate, COMPLEX* U, int dim, int m, int n)
-//{
-//  int		qnum_part;
-//  int		qid[MAX_QUBIT_NUM];
-//  double	real[16];
-//  double	imag[16];
-//  int		row,col;
-//
-//  if ((qstate == NULL) || (dim < 0))
-//    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
-//  if ((m < 0) || (m >= qstate->state_num))
-//    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
-//  
-//  if (dim == 2) {
-//    qnum_part = 1;
-//    row = col = 2;
-//    qid[0] = m;
-//    for (int i=0; i<dim*dim; i++) {
-//      real[i] = creal(U[i]);
-//      imag[i] = cimag(U[i]);
-//    }
-//    if (!(qstate_apply_matrix(qstate, qnum_part, qid, real, imag, row, col)))
-//      ERR_RETURN(ERROR_QSTATE_APPLY_MATRIX,false);
-//  }
-//
-//  else if (dim == 4) {
-//    if ((n < 0) || (n >= qstate->state_num) || (m == n))
-//      ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
-//    qnum_part = 2;
-//    row = col = 4;
-//    qid[0] = m; qid[1] = n;
-//    for (int i=0; i<dim*dim; i++) {
-//      real[i] = creal(U[i]);
-//      imag[i] = cimag(U[i]);
-//    }
-//    if (!(qstate_apply_matrix(qstate, qnum_part, qid, real, imag, row, col)))
-//      ERR_RETURN(ERROR_QSTATE_APPLY_MATRIX,false);
-//  }
-//
-//  else {
-//    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
-//  }
-//  
-//  SUC_RETURN(true);
-//}
-//
-
 static bool _qstate_operate_unitary(QState* qstate, COMPLEX* U, int dim, int m, int n)
 {
   if ((qstate == NULL) || (dim < 0))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
   if (dim == 2) {
-    if (!(_qstate_operate_unitary2(qstate->camp_tmp, qstate->camp, U,
-				   qstate->qubit_num, qstate->state_num, m)))
-      ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+
+    if (qstate->buf_id == 0) {
+      if (!(_qstate_operate_unitary2(qstate->buffer_1, qstate->buffer_0, U,
+				     qstate->qubit_num, qstate->state_num, m)))
+	ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+      qstate->buf_id = 1;
+      qstate->camp = qstate->buffer_1;
+    }
+    else {
+      if (!(_qstate_operate_unitary2(qstate->buffer_0, qstate->buffer_1, U,
+				     qstate->qubit_num, qstate->state_num, m)))
+	ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+      qstate->buf_id = 0;
+      qstate->camp = qstate->buffer_0;
+    }
   }
+
   else if (dim == 4) {
-    if (!(_qstate_operate_unitary4(qstate->camp_tmp, qstate->camp, U,
-				   qstate->qubit_num, qstate->state_num, m, n)))
-      ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+
+    if (qstate->buf_id == 0) {
+      if (!(_qstate_operate_unitary4(qstate->buffer_1, qstate->buffer_0, U,
+				     qstate->qubit_num, qstate->state_num, m, n)))
+	ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+      qstate->buf_id = 1;
+      qstate->camp = qstate->buffer_1;
+    }
+    else {
+      if (!(_qstate_operate_unitary4(qstate->buffer_0, qstate->buffer_1, U,
+				     qstate->qubit_num, qstate->state_num, m, n)))
+	ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+      qstate->buf_id = 0;
+      qstate->camp = qstate->buffer_0;
+    }
   }
   else {
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
   }
-
-  memcpy(qstate->camp, qstate->camp_tmp, sizeof(COMPLEX)*qstate->state_num);
 
   SUC_RETURN(true);
 }
@@ -1352,11 +1352,11 @@ void qstate_free(QState* qstate)
 {
   if (qstate == NULL) return;
   
-  if (qstate->camp != NULL) {
-    free(qstate->camp); qstate->camp = NULL;
+  if (qstate->buffer_0 != NULL) {
+    free(qstate->buffer_0); qstate->buffer_0 = NULL;
   }
-  if (qstate->camp_tmp != NULL) {
-    free(qstate->camp_tmp); qstate->camp_tmp = NULL;
+  if (qstate->buffer_1 != NULL) {
+    free(qstate->buffer_1); qstate->buffer_1 = NULL;
   }
   if (qstate->gbank != NULL) {
     free(qstate->gbank); qstate->gbank = NULL;
