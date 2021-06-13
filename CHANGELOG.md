@@ -1,8 +1,10 @@
 # Change Log
 
 ## [0.2.1a] - 2021-06-13
+### Changed
+- Performance improvement: reduce number of 'memcpy' functions
 ### Added
-- elapsed time option (-etm) added: ex) $ qstate -qc foo.qc -etm
+- Elapsed time option (-etm) added: ex) $ qstate -qc foo.qc -etm
 
 ## [0.2.0] - 2021-05-25
 ### Changed
