@@ -1,10 +1,10 @@
 /*
- *  qgate.c
+ *  qg.c
  */
 
 #include "qlazy.h"
 
-bool qgate_get_symbol(Kind kind, char* symbol)
+bool qg_get_symbol(Kind kind, char* symbol)
 {
   switch (kind) {
   case INIT:
@@ -161,7 +161,7 @@ bool qgate_get_symbol(Kind kind, char* symbol)
   SUC_RETURN(true);
 }
 
-bool qgate_get_kind(char* symbol, Kind* kind_out)
+bool qg_get_kind(char* symbol, Kind* kind_out)
 {
   Kind kind;
 
