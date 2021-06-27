@@ -36,6 +36,16 @@ def equal_vectors(vec_0, vec_1):
     else:
         return False
 
+# def equal_vectors(vec_0, vec_1):
+# 
+#     vec = vec_0 - vec_1
+#     dif = abs(np.dot(np.conjugate(vec), vec))
+#     print("***** dif =", dif)
+#     if dif < EPS:
+#         return True
+#     else:
+#         return False
+
 def equal_qstates(qs_0, qs_1):
 
     fid = qs_0.fidelity(qs_1)
@@ -808,6 +818,29 @@ class TestQComp_measure_qstate_simulator(unittest.TestCase):
         qc.free()
         self.assertEqual(res['measured_qid'], [0,1])
         self.assertEqual(res['frequency']['00'], 10)
+
+    def test_measure_mesurement_only_use_cmem(self):
+        """test 'm' (measurement only, use cmem)
+        """
+        bk = Backend(name='qlazy', device='qstate_simulator')
+        qc = QComp(qubit_num=2, cmem_num=3, backend=bk)
+        res = qc.measure(qid=[0,1], cid=[1,2]).run(shots=10)
+        qc.free()
+        self.assertEqual(res['measured_qid'], [0,1])
+        self.assertEqual(res['frequency']['00'], 10)
+
+    def test_measure_mesurement_and_unitary(self):
+        """test 'm' (measurement only, use cmem)
+        """
+        bk = Backend(name='qlazy', device='qstate_simulator')
+        qc = QComp(qubit_num=2, cmem_num=3, backend=bk)
+        res = qc.measure(qid=[0,1], cid=[1,2]).h(0).cx(0,1).run(shots=10, reset_qubits=False)
+        expect = np.array([(0.7071067811865476+0j), 0j, 0j, (0.7071067811865476+0j)])
+        actual = qc.qstate.amp
+        ans = equal_vectors(actual, expect)
+        self.assertEqual(ans, True)
+        self.assertEqual(res is None, True)
+        qc.free()
 
     def test_measure_simple(self):
         """test 'm' (simple case)

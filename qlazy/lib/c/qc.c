@@ -53,7 +53,7 @@ static QC* _qc_alloc(int buf_length)
   qc->qubit_num = 0;
   qc->buf_length = buf_length;
 
-  if (!(qc->qgate = (QGate*)malloc(sizeof(QGate)*buf_length))) {
+  if (!(qc->qgate = (QG*)malloc(sizeof(QG)*buf_length))) {
     qc_free(qc); qc = NULL;
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,NULL);
   }
@@ -64,13 +64,13 @@ static QC* _qc_alloc(int buf_length)
 
 static bool _qc_realloc(QC* qc)
 {
-  QGate* qgate = NULL;
+  QG* qgate = NULL;
   
   if (qc == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
   qc->buf_length *= 2;
 
-  qgate = (QGate*)realloc(qc->qgate, sizeof(QGate)*qc->buf_length);
+  qgate = (QG*)realloc(qc->qgate, sizeof(QG)*qc->buf_length);
   if (qgate == NULL) ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
   if (qgate != qc->qgate) qc->qgate = qgate;
 
@@ -163,8 +163,8 @@ bool qc_set_cimage(QC* qc)
   
   /* set gate charactor */
   for (int i=0; i<qc->step_num; i++) {
-    if (!(qgate_get_symbol(qc->qgate[i].kind, symbol)))
-      ERR_RETURN(ERROR_QGATE_GET_SYMBOL,false);
+    if (!(qg_get_symbol(qc->qgate[i].kind, symbol)))
+      ERR_RETURN(ERROR_QG_GET_SYMBOL,false);
     p = 0;
 
     switch (qc->qgate[i].kind) {
@@ -312,8 +312,8 @@ bool qc_write_file(QC* qc, char* fname)
     terminal_num = qc->qgate[i].terminal_num;
     para = &(qc->qgate[i].para);
     qubit_id = qc->qgate[i].qubit_id;
-    if (!(qgate_get_symbol(kind, symbol)))
-      ERR_RETURN(ERROR_QGATE_GET_SYMBOL,false);
+    if (!(qg_get_symbol(kind, symbol)))
+      ERR_RETURN(ERROR_QG_GET_SYMBOL,false);
 
     switch (kind) {
     case INIT:
@@ -430,7 +430,7 @@ bool qc_read_file(char* fname, void** qc_out)
     if (!line_split(line, " ", token, &tnum)) ERR_RETURN(ERROR_CANT_READ_LINE,false);
     if (!line_getargs(token[0], args, &anum)) ERR_RETURN(ERROR_CANT_READ_LINE,false);
 
-    qgate_get_kind(args[0], &kind);
+    qg_get_kind(args[0], &kind);
 
     switch (kind) {
     case INIT:

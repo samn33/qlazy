@@ -19,7 +19,7 @@ bool qsystem_init(void** qsystem_out)
   SUC_RETURN(true);
 }
 
-static bool _operate_qgate(QState* qstate, QGate* qgate)
+static bool _operate_qgate(QState* qstate, QG* qgate)
 {
   Kind		kind	     = qgate->kind;
   Para*         para	     = &(qgate->para);
@@ -72,7 +72,7 @@ static bool _qsystem_execute_one_line(QSystem* qsystem, char* line)
   Para          para;
   int           terminal_num = 0;
   int           qubit_id[MAX_QUBIT_NUM];
-  QGate*        qgate	     = NULL;
+  QG*           qgate	     = NULL;
   QC*	qc	     = qsystem->qc;
   QState*       qstate	     = qsystem->qstate;
   int		qubit_num    = qsystem->qubit_num;
@@ -86,7 +86,7 @@ static bool _qsystem_execute_one_line(QSystem* qsystem, char* line)
   if (!line_split(line, " ", token, &tnum)) ERR_RETURN(ERROR_CANT_READ_LINE,false);
   if (!line_getargs(token[0], args, &anum)) ERR_RETURN(ERROR_CANT_READ_LINE,false);
 
-  qgate_get_kind(args[0], &kind);
+  qg_get_kind(args[0], &kind);
 
   /* operate command */
   

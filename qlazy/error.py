@@ -78,6 +78,10 @@ class QState_Error_AddMethods(Exception):
     def __str__(self):
         return "QState: fail to add methods"
 
+class QState_Error_OperateQcirc(Exception):
+    def __str__(self):
+        return "QState: fail to operate qcirc"
+
 # MData
 
 class MData_Error_GetFrq(Exception):
@@ -261,3 +265,20 @@ class Backend_Error_DeviceNotSupported(Exception):
 class Backend_Error_NameNotSpecified(Exception):
     def __str__(self):
         return "Backend: name is not specified"
+
+# QCirc
+
+class QCirc_Error_Initialize(Exception):
+    def __str__(self):
+        return "QCirc: fail to initialize"
+
+class QCirc_Error_AppendGate(Exception):
+    def __str__(self):
+        return "QCirc: fail to append gate"
+
+# CMem
+
+class CMem_Error_Initialize(Exception):
+    def __str__(self):
+        return "CMem: fail to initialize"
+

@@ -769,7 +769,7 @@ bool help_print(char* item)
     SUC_RETURN(true);
   }
   
-  qgate_get_kind(item, &kind);
+  qg_get_kind(item, &kind);
 
   switch (kind) {
   case INIT:

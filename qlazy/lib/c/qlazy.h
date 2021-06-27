@@ -95,8 +95,8 @@ typedef enum _ErrCode {
 
   /* qlazy functions */
   ERROR_HELP_PRINT,
-  ERROR_QGATE_GET_SYMBOL,
-  ERROR_QGATE_GET_KIND,
+  ERROR_QG_GET_SYMBOL,
+  ERROR_QG_GET_KIND,
   ERROR_QC_INIT,
   ERROR_QC_APPEND_QGATE,
   ERROR_QC_SET_CIMAGE,
@@ -149,6 +149,8 @@ typedef enum _ErrCode {
   ERROR_STABILIZER_GET_PAULI_FAC,
   ERROR_STABILIZER_OPERATE_QGATE,
   ERROR_STABILIZER_MEASURE,
+  ERROR_CMEM_INIT,
+  ERROR_CMEM_COPY,
 
   /* qlazy interactive mode */
   ERROR_NEED_TO_INITIALIZE,
@@ -263,12 +265,12 @@ typedef union _Para {
   ParaMes	mes;		/* measurement parameter (for M) */
 } Para;
   
-typedef struct _QGate {
+typedef struct _QG {
   Kind	        kind;
   Para          para;
   int		terminal_num;
   int		qubit_id[MAX_QUBIT_NUM];
-} QGate;
+} QG;
 
 typedef struct _CImage {
   int		qubit_num;
@@ -303,36 +305,32 @@ typedef struct _QC {
   int		qubit_num;
   int		step_num;
   int           buf_length;
-  QGate*	qgate;
+  QG*	        qgate;
   CImage*       cimage;
 } QC;
 
-// typedef struct _QCirc {
-//   int		qubit_num;
-//   int		cmem_num;
-//   int           depth;
-//   int**		qid_list;
-//   int**		cid_list;
-//   double*	phase_list;
-//   double*	phase1_list;
-//   double*	phase2_list;
-//   int*		ctrl_list;
-// } QCirc;
-// 
-// typedef struct _CMem {
-//   int	        cmem_num;
-//   int*	        bit;
-// } CMem;
-// 
-// /* qcirc.c */
-// bool qcirc_init(int qubit_num, int cmem_num, int depth, void** qcirc_out);
-// bool qcirc_append_gate(QCirc* qcirc, int* qid, int* cid, double phase, double phase1, double phase2, int ctrl);
-// 
-// /* cmem.c */
-// bool qcirc_init(int cmem_num, void** cmem_out);
-// 
-// /* qstate.c */
-// bool qstate_operate_qcirc(QState* qstate, CMem* cmem, QCirc* qcirc);
+typedef struct _QGate {
+  Kind			kind;    /* kind of qgate */
+  int			qid[2];	 /* array of qubit id */
+  double		para[3]; /* array of gate parameters (ex: phases of rotation gate)*/
+  int			c;       /* classical register id for storing measurement result (0 or 1) */
+  int			ctrl;    /* classical register id for controlling quantum gate */
+  struct _QGate*        prev;
+  struct _QGate*        next;
+} QGate;
+
+typedef struct _QCirc {
+  int           qubit_num;
+  int           cmem_num;
+  int           gate_num;
+  QGate*        first;
+  QGate*        last;
+} QCirc;
+
+typedef struct _CMem {
+  int	        cmem_num;
+  int*	        bit_array;
+} CMem;
 
 typedef struct _QState {
   int		qubit_num;	/* number of qubits */
@@ -375,14 +373,6 @@ typedef struct _Observable {
   int		array_num;
   SPro**	spro_array;
 } Observable;
-
-// typedef struct _DensOp {
-//   int		row;
-//   int		col;
-//   COMPLEX*	elm;
-//   COMPLEX*	elm_tmp;
-//   GBank*        gbank;
-// } DensOp;
 
 typedef struct _DensOp {
   int		row;
@@ -447,6 +437,10 @@ bool	 binstr_from_decimal(char* binstr, int qubit_num, int decimal, int zflag);
 int      bit_permutation(int bits_in, int qnum, int qnum_part, int qid[MAX_QUBIT_NUM]);
 int*     bit_permutation_array(int length, int qnum, int qnum_part, int qid[MAX_QUBIT_NUM]);
 bool     is_power_of_2(int n);
+int      kind_get_qid_size(Kind kind);
+int      kind_get_para_size(Kind kind);
+bool     kind_is_measurement(Kind kind);
+bool     kind_is_unitary(Kind kind);
 
 /* init.c */
 void	 init_qlazy(unsigned int seed);
@@ -457,9 +451,9 @@ void	 error_msg(ErrCode err);
 /* help.c */
 bool	 help_print(char* item);
 
-/* qgate.c */
-bool	 qgate_get_symbol(Kind kind, char* symbol_out);
-bool	 qgate_get_kind(char* symbol, Kind* kind_out);
+/* qg.c */
+bool	 qg_get_symbol(Kind kind, char* symbol_out);
+bool	 qg_get_kind(char* symbol, Kind* kind_out);
 
 /* qc.c */
 bool	 qc_init(int qubit_num, int buf_length, void** qc_out);
@@ -500,6 +494,7 @@ bool     qstate_tensor_product(QState* qstate_0, QState* qstate_1, void** qstate
 bool     qstate_expect_value(QState* qstate, Observable* observ, double* value);
 bool     qstate_apply_matrix(QState* qstate, int qnum, int qid[MAX_QUBIT_NUM],
 			     double* real, double *imag, int row, int col);
+bool     qstate_operate_qcirc(QState* qstate, CMem* cmem, QCirc* qcirc, int shots, void** mdata);
 void	 qstate_free(QState* qstate);
 
 /* mdata.c */
@@ -559,5 +554,15 @@ bool	stabilizer_operate_qgate(Stabilizer* stab, Kind kind, int q0, int q1);
 bool    stabilizer_get_rank(Stabilizer* stab, int* rank_out);
 bool	stabilizer_measure(Stabilizer* stab, int q, double prob_out[2], int* mval_out);
 void	stabilizer_free(Stabilizer* stab);
+
+/* qcirc.c */
+bool qcirc_init(void** qcirc_out);
+bool qcirc_append_gate(QCirc* qcirc, Kind kind, int* qid, double* para, int c, int ctrl);
+void qcirc_free(QCirc* qcirc);
+
+/* cmem.c */
+bool cmem_init(int cmem_num, void** cmem_out);
+bool cmem_copy(CMem* cmem_in, void** cmem_out);
+void cmem_free(CMem* cmem);
 
 #endif

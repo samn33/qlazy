@@ -27,11 +27,11 @@ void error_msg(ErrCode err)
     fprintf(stderr, "ERROR: help print failure !\n");
     break;
 
-  case ERROR_QGATE_GET_SYMBOL:
-    fprintf(stderr, "ERROR: qgate get symbol failure !\n");
+  case ERROR_QG_GET_SYMBOL:
+    fprintf(stderr, "ERROR: qg get symbol failure !\n");
     break;
-  case ERROR_QGATE_GET_KIND:
-    fprintf(stderr, "ERROR: qgate get kind failure !\n");
+  case ERROR_QG_GET_KIND:
+    fprintf(stderr, "ERROR: qg get kind failure !\n");
     break;
 
   case ERROR_QC_INIT:

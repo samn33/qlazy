@@ -10,6 +10,8 @@ from qlazy.util import *
 from qlazy.QState import QState
 from qlazy.MData import *
 from qlazy.Observable import Observable
+from qlazy.QCirc import QCirc
+from qlazy.CMem import CMem
 from qlazy.lib.mdata_c import *
 
 lib= ctypes.CDLL(str(pathlib.Path(__file__).with_name('libqlz.'+get_lib_ext())))
@@ -32,7 +34,6 @@ def qstate_init(qubit_num=None, seed=None):
     out = ctypes.cast(c_qstate.value, ctypes.POINTER(QState))
         
     return out.contents
-
 
 def qstate_init_with_vector(vector=None, seed=None):
         
@@ -455,7 +456,6 @@ def qstate_measure(qs, MDATA_TABLE, qid=None, shots=DEF_SHOTS, angle=0.0, phase=
 
     return md
 
-
 def qstate_measure_bell(qs, MDATA_TABLE, qid=None, shots=DEF_SHOTS, tag=None):
 
     # global MDATA_TABLE
@@ -506,12 +506,45 @@ def qstate_measure_bell(qs, MDATA_TABLE, qid=None, shots=DEF_SHOTS, tag=None):
     
     return md
 
+def qstate_operate_qcirc(qstate, cmem_list, qcirc, shots):
+
+    cmem_num = len(cmem_list)
+    cmem = CMem(cmem_num)
+    
+    mdata = None
+    c_mdata = ctypes.c_void_p(mdata)
+
+    lib.qstate_operate_qcirc.restype = ctypes.c_int
+    lib.qstate_operate_qcirc.argtypes = [ctypes.POINTER(QState), ctypes.POINTER(CMem), ctypes.POINTER(QCirc),
+                                         ctypes.c_int, ctypes.POINTER(ctypes.c_void_p)]
+    ret = lib.qstate_operate_qcirc(ctypes.byref(qstate), ctypes.byref(cmem), ctypes.byref(qcirc),
+                                   ctypes.c_int(shots), c_mdata)
+    
+    if ret == FALSE:
+        raise QState_Error_OperateQcirc()
+
+    if c_mdata.value == None:
+        return None
+        
+    out = ctypes.cast(c_mdata.value, ctypes.POINTER(MDataC))
+        
+    qubit_num = out.contents.qubit_num
+    state_num = out.contents.state_num
+    last_state = out.contents.last
+    qid = [out.contents.qubit_id[i] for i in range(qubit_num)]
+    freq = ctypes.cast(out.contents.freq, ctypes.POINTER(ctypes.c_int*state_num))
+    freq_list = [freq.contents[i] for i in range(state_num)]
+    md = MData(freq_list=freq_list, last_state=last_state, qid=qid,
+               qubit_num=qubit_num, state_num=state_num, angle=0.0, phase=0.0,
+               is_bell=False)
+    out.contents.free()
+
+    return md
+    
 def qstate_free(qs):
 
     lib.qstate_free.argtypes = [ctypes.POINTER(QState)]
     lib.qstate_free(ctypes.byref(qs))
-
-
 
 def __gray_code(qs, n):
 

@@ -262,3 +262,194 @@ bool is_power_of_2(int n)
   if (fabs(diff) < MIN_DOUBLE) return true;
   else return false;
 }
+
+int kind_get_qid_size(Kind kind)
+{
+  int qid_size;
+
+  switch (kind) {
+  case PAULI_X:
+  case PAULI_Y:
+  case PAULI_Z:
+  case ROOT_PAULI_X:
+  case ROOT_PAULI_X_:
+  case HADAMARD:
+  case PHASE_SHIFT_S:
+  case PHASE_SHIFT_S_:
+  case PHASE_SHIFT_T:
+  case PHASE_SHIFT_T_:
+  case PHASE_SHIFT:
+  case ROTATION_X:
+  case ROTATION_Y:
+  case ROTATION_Z:
+  case ROTATION_U1:
+  case ROTATION_U2:
+  case ROTATION_U3:
+  case MEASURE:
+  case MEASURE_X:
+  case MEASURE_Y:
+  case MEASURE_Z:
+    qid_size = 1;
+    break;
+  case CONTROLLED_X:
+  case CONTROLLED_Y:
+  case CONTROLLED_Z:
+  case CONTROLLED_XR:
+  case CONTROLLED_XR_:
+  case CONTROLLED_H:
+  case CONTROLLED_S:
+  case CONTROLLED_S_:
+  case CONTROLLED_T:
+  case CONTROLLED_T_:
+  case CONTROLLED_P:
+  case CONTROLLED_RX:
+  case CONTROLLED_RY:
+  case CONTROLLED_RZ:
+  case CONTROLLED_U1:
+  case CONTROLLED_U2:
+  case CONTROLLED_U3:
+  case SWAP_QUBITS:
+  case MEASURE_BELL:
+  case IDENTITY:
+    qid_size = 2;
+    break;
+  default:
+    qid_size = -1; /* error */
+    break;
+  }
+  
+  return qid_size;
+}
+
+int kind_get_para_size(Kind kind)
+{
+  int para_size;
+
+  switch (kind) {
+  case PAULI_X:
+  case PAULI_Y:
+  case PAULI_Z:
+  case ROOT_PAULI_X:
+  case ROOT_PAULI_X_:
+  case HADAMARD:
+  case PHASE_SHIFT_S:
+  case PHASE_SHIFT_S_:
+  case PHASE_SHIFT_T:
+  case PHASE_SHIFT_T_:
+  case MEASURE:
+  case MEASURE_X:
+  case MEASURE_Y:
+  case MEASURE_Z:
+  case CONTROLLED_X:
+  case CONTROLLED_Y:
+  case CONTROLLED_Z:
+  case CONTROLLED_XR:
+  case CONTROLLED_XR_:
+  case CONTROLLED_H:
+  case CONTROLLED_S:
+  case CONTROLLED_S_:
+  case CONTROLLED_T:
+  case CONTROLLED_T_:
+  case SWAP_QUBITS:
+  case MEASURE_BELL:
+  case IDENTITY:
+    para_size = 0;
+    break;
+  case PHASE_SHIFT:
+  case ROTATION_X:
+  case ROTATION_Y:
+  case ROTATION_Z:
+  case ROTATION_U1:
+  case CONTROLLED_P:
+  case CONTROLLED_RX:
+  case CONTROLLED_RY:
+  case CONTROLLED_RZ:
+  case CONTROLLED_U1:
+    para_size = 1;
+    break;
+  case ROTATION_U2:
+  case CONTROLLED_U2:
+    para_size = 2;
+    break;
+  case ROTATION_U3:
+  case CONTROLLED_U3:
+    para_size = 3;
+    break;
+  default:
+    para_size = -1;  /* error */
+    break;
+  }
+  
+  return para_size;
+}
+
+bool kind_is_measurement(Kind kind)
+{
+  bool is_measurement;
+  
+  switch (kind) {
+  case MEASURE:
+  case MEASURE_X:
+  case MEASURE_Y:
+  case MEASURE_Z:
+  case MEASURE_BELL:
+    is_measurement = true;
+    break;
+  default:
+    is_measurement = false;
+    break;
+  }
+
+  return is_measurement;
+}
+
+bool kind_is_unitary(Kind kind)
+{
+  bool is_unitary;
+  
+  switch (kind) {
+  case PAULI_X:
+  case PAULI_Y:
+  case PAULI_Z:
+  case ROOT_PAULI_X:
+  case ROOT_PAULI_X_:
+  case HADAMARD:
+  case PHASE_SHIFT_S:
+  case PHASE_SHIFT_S_:
+  case PHASE_SHIFT_T:
+  case PHASE_SHIFT_T_:
+  case CONTROLLED_X:
+  case CONTROLLED_Y:
+  case CONTROLLED_Z:
+  case CONTROLLED_XR:
+  case CONTROLLED_XR_:
+  case CONTROLLED_H:
+  case CONTROLLED_S:
+  case CONTROLLED_S_:
+  case CONTROLLED_T:
+  case CONTROLLED_T_:
+  case SWAP_QUBITS:
+  case IDENTITY:
+  case PHASE_SHIFT:
+  case ROTATION_X:
+  case ROTATION_Y:
+  case ROTATION_Z:
+  case ROTATION_U1:
+  case CONTROLLED_P:
+  case CONTROLLED_RX:
+  case CONTROLLED_RY:
+  case CONTROLLED_RZ:
+  case CONTROLLED_U1:
+  case ROTATION_U2:
+  case CONTROLLED_U2:
+  case ROTATION_U3:
+  case CONTROLLED_U3:
+    is_unitary = true;
+    break;
+  default:
+    is_unitary = false;
+    break;
+  }
+  
+  return is_unitary;
+}

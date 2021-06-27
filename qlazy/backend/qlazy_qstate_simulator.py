@@ -14,6 +14,40 @@ def init(qubit_num=0, backend=None):
 
 def run(qubit_num=0, cmem_num=0, qstate=None, qcirc=[], cmem=[], shots=1, backend=None):
 
+    qcc = QCirc()
+    for i, gate in enumerate(qcirc):
+        kind = gate['kind']
+        qid = gate['qid']
+        cid = gate['cid']
+        phase = gate['phase']
+        phase1 = gate['phase1']
+        phase2 = gate['phase2']
+        ctrl = gate['ctrl']
+        para = [phase, phase1, phase2]
+        if is_measurement_gate(kind) == True:
+            for i, q in enumerate(qid):
+                qid = [q]
+                if cid is not None:
+                    c = cid[i]
+                else:
+                    c = None
+                qcc.append_gate(kind, qid, para, c, ctrl)
+        else:
+            c = None
+            qcc.append_gate(kind, qid, para, c, ctrl)
+
+    mdata = qstate_operate_qcirc(qstate, cmem, qcc, shots)
+
+    if mdata is not None:
+        result = {'measured_qid': mdata.qid, 'frequency': mdata.frequency}
+    else:
+        result = None
+        
+    return result
+    
+
+def run_old(qubit_num=0, cmem_num=0, qstate=None, qcirc=[], cmem=[], shots=1, backend=None):
+
     # number of measurement (measurement_cnt)
     # and its position of last measurement (end_of_measurements)
     measurement_cnt = 0

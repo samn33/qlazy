@@ -63,7 +63,7 @@ class QState(ctypes.Structure):
 
         else:
             return qstate_init_with_vector(vector, seed)
-            
+
     def __str__(self):
 
         return str(self.get_amp())
