@@ -687,7 +687,7 @@ static bool _qstate_operate_unitary2(COMPLEX* camp_out, COMPLEX* camp_in, COMPLE
   for (int i=0; i<state_num; i++) {
     int p = (i >> nn) % 2;
     int pp = p ^ 1;
-    int sign = (pp << 1) - 1; // b=0 -> -1, b=1 -> +1 (bを2倍して1を引く)
+    int sign = (pp << 1) - 1; // b=0 -> -1, b=1 -> +1
     int offset = sign * (1 << nn);
     camp_out[i] = U2[IDX2(p,p)] * camp_in[i] + U2[IDX2(p,pp)] * camp_in[i + offset];
   }
