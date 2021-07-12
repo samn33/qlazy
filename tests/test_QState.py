@@ -942,6 +942,28 @@ class TestQState_composite(unittest.TestCase):
         expect.free()
         self.assertEqual(ans,True)
 
+class TestQState_join(unittest.TestCase):
+    """ test 'QState' : 'join'
+    """
+
+    def test_join(self):
+        """test 'join'
+        """
+        expect = QState(qubit_num=6).h(0).cx(0,1)
+        expect.h(2).rz(2, phase=0.2)
+        expect.rx(3, phase=0.3)
+        expect.h(4).cx(4,5)
+
+        qs_tmp = QState(qubit_num=2).h(0).cx(0,1)
+        qs_list = [QState(qubit_num=1).h(0).rz(0, phase=0.2),
+                   QState(qubit_num=1).rx(0, phase=0.3),
+                   QState(qubit_num=2).h(0).cx(0,1)]
+        actual = qs_tmp.join(qs_list)
+        
+        ans = equal_qstates(actual, expect)
+        QState.free_all(expect, qs_tmp, qs_list, actual)
+        self.assertEqual(ans,True)
+        
 class TestQState_evolve(unittest.TestCase):
     """ test 'QState' : 'evolve'
     """

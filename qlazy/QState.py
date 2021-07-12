@@ -470,6 +470,29 @@ class QState(ctypes.Structure):
                 qs_tmp.free()
             return qs
         
+    def join(self, qs_list):
+        """
+        get tensor product state of the quantum states' list.
+
+        Parameters
+        ----------
+        qs_list : list (QState)
+            list of quantum states.
+
+        Returns
+        -------
+        qs_out : instance of QState
+            tensor product state.
+
+        """
+        qs_out = self.clone()
+        for qs in qs_list:
+            qs_tmp = qs_out.clone()
+            qs_out.free()
+            qs_out = qs_tmp.tenspro(qs)
+            qs_tmp.free()
+        return qs_out
+
     def evolve(self, observable=None, time=0.0, iter=0):
         """
         evolve the quantum state.

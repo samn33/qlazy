@@ -697,6 +697,28 @@ class TestDensOp_composite(unittest.TestCase):
         de_8.free()
         self.assertEqual(ans,True)
 
+class TestDensOp_join(unittest.TestCase):
+    """ test 'DensOp' : 'join'
+    """
+
+    def test_join(self):
+        """test 'join'
+        """
+        expect = DensOp(qubit_num=6).h(0).cx(0,1)
+        expect.h(2).rz(2, phase=0.2)
+        expect.rx(3, phase=0.3)
+        expect.h(4).cx(4,5)
+
+        de_tmp = DensOp(qubit_num=2).h(0).cx(0,1)
+        de_list = [DensOp(qubit_num=1).h(0).rz(0, phase=0.2),
+                   DensOp(qubit_num=1).rx(0, phase=0.3),
+                   DensOp(qubit_num=2).h(0).cx(0,1)]
+        actual = de_tmp.join(de_list)
+        
+        ans = equal_densops(actual, expect)
+        DensOp.free_all(expect, de_tmp, de_list, actual)
+        self.assertEqual(ans,True)
+        
 class TestDensOp_expect(unittest.TestCase):
     """ test 'DensOp' : 'expect'
     """

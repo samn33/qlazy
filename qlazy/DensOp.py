@@ -47,7 +47,7 @@ class DensOp(ctypes.Structure):
         >>> import numpy as np
         >>> qs_0 = QState(2)
         >>> qs_1 = QState(2).h(0).cx(0,1)
-        >>> de_A = DensOp(qubit_num=2)  # = |00..0><00..0|
+        >>> de_A = DensOp(qubit_num=5)  # = |00..0><00..0|
         >>> de_B = DensOp(qstate=[qs_0,qs_1], prob=[0.2,0.8])
         >>> de_C = DensOp(matrix=np.array([[0.7,0.0],[0.0,0.3]]))
 
@@ -516,6 +516,29 @@ class DensOp(ctypes.Structure):
                 de_tmp.free()
             return de
         
+    def join(self, de_list):
+        """
+        get tensor product state (density operator) of the density operators' list.
+
+        Parameters
+        ----------
+        de_list : list (DensOp)
+            list of density operators.
+
+        Returns
+        -------
+        de_out : instance of DensOp
+            tensor product state (density operator).
+
+        """
+        de_out = self.clone()
+        for de in de_list:
+            de_tmp = de_out.clone()
+            de_out.free()
+            de_out = de_tmp.tenspro(de)
+            de_tmp.free()
+        return de_out
+
     def expect(self, matrix=None):
         """
         get the expectation value of matrix under this density operator.
