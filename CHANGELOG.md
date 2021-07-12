@@ -1,10 +1,11 @@
 # Change Log
 
-## [0.2.1a] - 2021-06-xx
+## [0.2.1b] - 2021-07-12
 ### Changed
-- Performance improvement: reduce 'memcpy' functions etc
+- performance improvement (reduce 'memcpy' functions etc)
 ### Added
-- Elapsed time option (-etm) added: [ex] $ qstate -qc foo.qc -etm
+- join method (for making tensor product of quantum states)
+- elapsed time option (-etm) for command line tool ($ qlazy -qc foo.qc -etm)
 
 ## [0.2.0] - 2021-05-25
 ### Changed
