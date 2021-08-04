@@ -1,11 +1,12 @@
 # Change Log
 
-## [0.2.1b] - 2021-07-12
-### Changed
-- performance improvement (reduce 'memcpy' functions etc)
+## [0.2.1b] - 2021-08-xx
 ### Added
-- join method (for making tensor product of quantum states)
+- 'PauliProduct' class and 'operate' method (to operate pauli product to quantum state)
+- 'join' method (for making tensor product of many quantum states)
 - elapsed time option (-etm) for command line tool ($ qlazy -qc foo.qc -etm)
+### Changed
+- performance improvement (reduce 'memcpy' etc)
 
 ## [0.2.0] - 2021-05-25
 ### Changed

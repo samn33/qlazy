@@ -116,6 +116,7 @@ execute the program
 - Stabilizer class: for operating stabilizer states.
 - Observable class: for specifying observables.
 - QComp, Backend class: for quantum computer simulation/execution and specifying backend.
+- PauliProduct: for operations related to pauli product.
 
 ## Documents
 
