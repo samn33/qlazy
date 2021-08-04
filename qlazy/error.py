@@ -252,6 +252,10 @@ class QComp_Error_NumberOfClassicalReg(Exception):
     def __str__(self):
         return "QComp: number of classical register must be equal to corresponding quantum register"
 
+class QComp_Error_FreeAll(Exception):
+    def __str__(self):
+        return "QComp: fail to free all"
+    
 # Backend
 
 class Backend_Error_NameNotSupported(Exception):

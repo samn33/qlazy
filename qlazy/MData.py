@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-import ctypes
 from collections import Counter
-from ctypes.util import find_library
 
 from qlazy.config import *
 from qlazy.error import *

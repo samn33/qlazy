@@ -1866,6 +1866,52 @@ class DensOp(ctypes.Structure):
         densop_mcx(self, qid)
         return self
 
+    def operate(self, pauli_product=None, ctrl=None):
+        """
+        operate unitary operator to density operator.
+
+        Parameters
+        ----------
+        pauli_product : instance of PauliProduct
+            pauli product to operate
+        ctrl : int
+            contoroll qubit id for controlled pauli product
+
+        Returns
+        -------
+        self : instance of DensOp
+            density operator after operation
+
+        """
+        pauli_list = pauli_product.pauli_list
+        qid = pauli_product.qid
+    
+        if ctrl is None:
+            for q, pauli in zip(qid, pauli_list):
+                if pauli == 'X':
+                    self.x(q)
+                elif pauli == 'Y':
+                    self.y(q)
+                elif pauli == 'Z':
+                    self.z(q)
+                else:
+                    continue
+        else:
+            if ctrl in qid:
+                raise ValueError("controll and target qubit id conflict")
+        
+            for q, pauli in zip(qid, pauli_list):
+                if pauli == 'X':
+                    self.cx(ctrl, q)
+                elif pauli == 'Y':
+                    self.cy(ctrl, q)
+                elif pauli == 'Z':
+                    self.cz(ctrl, q)
+                else:
+                    continue
+    
+        return self
+
     def free(self):
         """
         free memory of quantum state.
@@ -1880,7 +1926,6 @@ class DensOp(ctypes.Structure):
         self : instance of DensOp
 
         """
-        # return self.densop_free()
         return densop_free(self)
 
     

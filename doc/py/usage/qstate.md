@@ -247,6 +247,27 @@ qlazyでは、数が不定の量子ビット番号を指定する必要がある
 
     QState.add_methods(foo, bar, hoge)
 
+### パウリ積の演算
+
+パウリ演算子X,Y,Zのテンソル積を定義して量子状態に演算することができま
+す。パウリ積を扱うために、まず、
+
+    from qlazy import QState, PauliProduct
+	
+のようにPauliProductクラスをimportする必要があります。例えば、3量子ビッ
+トの状態に対して、X2 Y0 Z1というパウリ積を演算したい場合、
+
+    qs = QState(qubit_num=3)
+	pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
+	qs.operate(pauli_product=pp)
+	
+のようにします。制御化されたパウリ積はoperateメソッドにctrlオプション
+を与えることで実現できます。以下のようにします。
+
+    qs = QState(qubit_num=4)
+	pp = PauliProduct(pauli_str="XYZ", qid=[0,1,2])
+	qs.operate(pauli_product=pp, ctlr=3)
+
 
 ## 量子状態の表示
 

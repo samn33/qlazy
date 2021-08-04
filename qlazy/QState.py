@@ -7,6 +7,7 @@ from qlazy.config import *
 from qlazy.error import *
 from qlazy.MData import *
 from qlazy.Observable import *
+from qlazy.PauliProduct import *
 from qlazy.lib.qstate_mcx import *
 
 MDATA_TABLE = {}
@@ -1630,6 +1631,52 @@ class QState(ctypes.Structure):
         tag_long = repr(self) + '.' + tag
         mfrq = MDATA_TABLE[tag_long].measured_freq(angle=angle, phase=phase)
         return mfrq
+
+    def operate(self, pauli_product=None, ctrl=None):
+        """
+        operate unitary operator to quantum state.
+
+        Parameters
+        ----------
+        pauli_product : instance of PauliProduct
+            pauli product to operate
+        ctrl : int
+            contoroll qubit id for controlled pauli product
+
+        Returns
+        -------
+        self : instance of QState
+            quantum state after operation
+
+        """
+        pauli_list = pauli_product.pauli_list
+        qid = pauli_product.qid
+    
+        if ctrl is None:
+            for q, pauli in zip(qid, pauli_list):
+                if pauli == 'X':
+                    self.x(q)
+                elif pauli == 'Y':
+                    self.y(q)
+                elif pauli == 'Z':
+                    self.z(q)
+                else:
+                    continue
+        else:
+            if ctrl in qid:
+                raise ValueError("controll and target qubit id conflict")
+        
+            for q, pauli in zip(qid, pauli_list):
+                if pauli == 'X':
+                    self.cx(ctrl, q)
+                elif pauli == 'Y':
+                    self.cy(ctrl, q)
+                elif pauli == 'Z':
+                    self.cz(ctrl, q)
+                else:
+                    continue
+    
+        return self
 
     def free(self):
         """

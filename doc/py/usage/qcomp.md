@@ -71,10 +71,10 @@ deviceにはそのバックエンドでサポートされているデバイス�
             |
     q1 -----X---
 	
-という回路が設定されたことになります。QStateクラスやDensOpクラスと違い、
-この段階ではまだゲート演算は実行されていません。以下のようにrunメソッ
-ドを適用することではじめて実行されます(初期状態は常に|00...0>です。い
-まの例は2量子ビットなので|00>です)。
+という回路が設定されたことになります。QStateクラスやDensOpクラスや
+Stabilizerクラスと違い、この段階ではまだゲート演算は実行されていません。
+以下のようにrunメソッドを適用することではじめて実行されます(初期状態は
+常に|00...0>です。いまの例は2量子ビットなので|00>です)。
 
     qc.h(0).cx(0,1).run()
 
@@ -187,6 +187,33 @@ DensOpクラスのものと同様で、さらに上で説明したctrlという�
 
 'qlazy_stabilizer_simulator'の場合、実行できるのはクリフォードゲート
 (x,y,z,h,s,s_dg,cx,cy,cz)のみです。
+
+
+### パウリ積の演算
+
+パウリ演算子X,Y,Zのテンソル積を定義して量子コンピュータに設定すること
+ができます。パウリ積を扱うために、まず、
+
+    from qlazy import QState, PauliProduct
+	
+のようにPauliProductクラスをimportする必要があります。例えば、3量子ビッ
+トの状態に対して、X2 Y0 Z1というパウリ積を演算したい場合、
+
+    qs = QState(qubit_num=3)
+	pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
+	qs.operate(pauli_product=pp)
+	
+のようにします。制御化されたパウリ積はoperateメソッドにctrlオプション
+を与えることで実現できます。以下のようにします。
+
+    qs = QState(qubit_num=4)
+	pp = PauliProduct(pauli_str="XYZ", qid=[0,1,2])
+	qs.operate(pauli_product=pp, ctlr=3)
+	
+量子ゲートの設定の場合と同様、operateメソッドを実行しただけでは実際の
+演算は実行されていません。runメソッド（およびその前にmeasurementメソッ
+ドがないと意味ある結果が得られません）を適用することではじめて実行され
+ます。
 
 
 ## 少し高度な技

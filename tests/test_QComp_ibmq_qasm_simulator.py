@@ -4,8 +4,7 @@ import math
 import numpy as np
 import sys
 
-# from qlazy import QState, QComp, Backend
-from qlazy import QComp, Backend
+from qlazy import QComp, Backend, PauliProduct
 
 EPS = 1.0e-6
 
@@ -773,6 +772,104 @@ class TestQComp_3_qubit_qlazy_qstate_simulator(unittest.TestCase):
         qc.free()
         self.assertEqual(ans,True)
 
+#
+# operate
+#
+
+class TestQComp_operate_ibmq_qasm_simulator(unittest.TestCase):
+    """ test 'QComp' : operate
+    """
+
+    def test_operate_x(self):
+        """test 'operate' (x)
+        """
+        bk = Backend(name='ibmq', device='qasm_simulator')
+        qc_expect = QComp(qubit_num=1, backend=bk).x(0)
+        res = qc_expect.run()
+        expect = qc_expect.qstate
+        pp = PauliProduct(pauli_str="X")
+        qc_actual = QComp(qubit_num=1, backend=bk).operate(pauli_product=pp)
+        res = qc_actual.run()
+        actual = qc_actual.qstate
+        ans = equal_vectors(actual, expect)
+        self.assertEqual(ans,True)
+        QComp.free_all(qc_expect, qc_actual)
+
+    def test_operate_h_x(self):
+        """test 'operate' (x followed by h)
+        """
+        bk = Backend(name='ibmq', device='qasm_simulator')
+        qc_expect = QComp(qubit_num=1, backend=bk).h(0).x(0)
+        res = qc_expect.run()
+        expect = qc_expect.qstate
+        pp = PauliProduct(pauli_str="X")
+        qc_actual = QComp(qubit_num=1, backend=bk).h(0).operate(pauli_product=pp)
+        res = qc_actual.run()
+        actual = qc_actual.qstate
+        ans = equal_vectors(actual, expect)
+        self.assertEqual(ans,True)
+        QComp.free_all(qc_expect, qc_actual)
+
+    def test_operate_h_y(self):
+        """test 'operate' (Y followed by h)
+        """
+        bk = Backend(name='ibmq', device='qasm_simulator')
+        qc_expect = QComp(qubit_num=1, backend=bk).h(0).y(0)
+        res = qc_expect.run()
+        expect = qc_expect.qstate
+        pp = PauliProduct(pauli_str="Y")
+        qc_actual = QComp(qubit_num=1, backend=bk).h(0).operate(pauli_product=pp)
+        res = qc_actual.run()
+        actual = qc_actual.qstate
+        ans = equal_vectors(actual, expect)
+        self.assertEqual(ans,True)
+        QComp.free_all(qc_expect, qc_actual)
+
+    def test_operate_h_z(self):
+        """test 'operate' (Z followed by h)
+        """
+        bk = Backend(name='ibmq', device='qasm_simulator')
+        qc_expect = QComp(qubit_num=1, backend=bk).h(0).z(0)
+        res = qc_expect.run()
+        expect = qc_expect.qstate
+        pp = PauliProduct(pauli_str="Z")
+        qc_actual = QComp(qubit_num=1, backend=bk).h(0).operate(pauli_product=pp)
+        res = qc_actual.run()
+        actual = qc_actual.qstate
+        ans = equal_vectors(actual, expect)
+        self.assertEqual(ans,True)
+        QComp.free_all(qc_expect, qc_actual)
+
+    def test_operate_xyz(self):
+        """test 'operate' (xyz)
+        """
+        bk = Backend(name='ibmq', device='qasm_simulator')
+        qc_expect = QComp(qubit_num=3, backend=bk).x(2).y(0).z(1)
+        res = qc_expect.run()
+        expect = qc_expect.qstate
+        pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
+        qc_actual = QComp(qubit_num=3, backend=bk).operate(pauli_product=pp)
+        res = qc_actual.run()
+        actual = qc_actual.qstate
+        ans = equal_vectors(actual, expect)
+        self.assertEqual(ans,True)
+        QComp.free_all(qc_expect, qc_actual)
+
+    def test_operate_controlled_xyz(self):
+        """test 'operate' (controlled_xyz)
+        """
+        bk = Backend(name='ibmq', device='qasm_simulator')
+        qc_expect = QComp(qubit_num=4, backend=bk).cx(3,2).cy(3,0).cz(3,1)
+        res = qc_expect.run()
+        expect = qc_expect.qstate
+        pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
+        qc_actual = QComp(qubit_num=4, backend=bk).operate(pauli_product=pp, ctrl=3)
+        res = qc_actual.run()
+        actual = qc_actual.qstate
+        ans = equal_vectors(actual, expect)
+        self.assertEqual(ans,True)
+        QComp.free_all(qc_expect, qc_actual)
+        
 #
 # measurement
 #

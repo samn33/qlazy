@@ -81,6 +81,25 @@ numpyの行列（２次元配列）を指定して生成することもできま
 
     DensOp.add_methods(foo, bar, hoge)
 
+### パウリ積の演算
+
+パウリ演算子X,Y,Zのテンソル積を定義して密度演算子に演算することができま
+す。パウリ積を扱うために、まず、
+
+    from qlazy import DensOp, PauliProduct
+	
+のようにPauliProductクラスをimportする必要があります。例えば、3量子ビッ
+トの密度演算子deに対して、X2 Y0 Z1というパウリ積を演算したい場合、
+
+	pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
+	de.operate(pauli_product=pp)
+	
+のようにします。制御化されたパウリ積はoperateメソッドにctrlオプション
+を与えることで実現できます。以下のようにします。
+
+	pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
+	qs.operate(pauli_product=pp, ctlr=3)
+
 
 ### 量子チャネル
 

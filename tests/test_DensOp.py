@@ -2,7 +2,7 @@
 import unittest
 import math
 import numpy as np
-from qlazy import QState, DensOp
+from qlazy import QState, DensOp, PauliProduct
 
 EPS = 1.0e-6
 
@@ -1682,8 +1682,8 @@ class TestDensOp_3_qubit(unittest.TestCase):
         expect.free()
         self.assertEqual(ans,True)
 
-class TestQState_n_qubit(unittest.TestCase):
-    """ test 'QState' : n-qubit gate
+class TestDensOp_n_qubit(unittest.TestCase):
+    """ test 'DensOp' : n-qubit gate
     """
 
     def test_mcx_3(self):
@@ -1714,5 +1714,75 @@ class TestQState_n_qubit(unittest.TestCase):
         expect.free()
         self.assertEqual(ans,True)
 
+class TestDensOp_operate(unittest.TestCase):
+    """ test 'DensOp' : 'operate'
+    """
+
+    def test_operate_x(self):
+        """test 'operate' (x)
+        """
+        mat = make_densop_matrix(VECTORS_2, PROBS_2)
+        expect = DensOp(matrix=mat).x(0)
+        pp = PauliProduct(pauli_str="X")
+        actual = DensOp(matrix=mat).operate(pauli_product=pp)
+        ans = equal_densops(expect, actual)
+        DensOp.free_all(expect, actual)
+        self.assertEqual(ans,True)
+        
+    def test_operate_h_x(self):
+        """test 'operate' (x followed by h)
+        """
+        mat = make_densop_matrix(VECTORS_2, PROBS_2)
+        expect = DensOp(matrix=mat).h(0).x(0)
+        pp = PauliProduct(pauli_str="X")
+        actual = DensOp(matrix=mat).h(0).operate(pauli_product=pp)
+        ans = equal_densops(expect, actual)
+        DensOp.free_all(expect, actual)
+        self.assertEqual(ans,True)
+        
+    def test_operate_h_y(self):
+        """test 'operate' (y followed by h)
+        """
+        mat = make_densop_matrix(VECTORS_2, PROBS_2)
+        expect = DensOp(matrix=mat).h(0).y(0)
+        pp = PauliProduct(pauli_str="Y")
+        actual = DensOp(matrix=mat).h(0).operate(pauli_product=pp)
+        ans = equal_densops(expect, actual)
+        DensOp.free_all(expect, actual)
+        self.assertEqual(ans,True)
+        
+    def test_operate_h_z(self):
+        """test 'operate' (z followed by h)
+        """
+        mat = make_densop_matrix(VECTORS_2, PROBS_2)
+        expect = DensOp(matrix=mat).h(0).z(0)
+        pp = PauliProduct(pauli_str="Z")
+        actual = DensOp(matrix=mat).h(0).operate(pauli_product=pp)
+        ans = equal_densops(expect, actual)
+        DensOp.free_all(expect, actual)
+        self.assertEqual(ans,True)
+        
+    def test_operate_xyz(self):
+        """test 'operate' (xyz)
+        """
+        mat = make_densop_matrix(VECTORS_8, PROBS_8)
+        expect = DensOp(matrix=mat).x(2).y(0).z(1)
+        pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
+        actual = DensOp(matrix=mat).operate(pauli_product=pp)
+        ans = equal_densops(expect, actual)
+        DensOp.free_all(expect, actual)
+        self.assertEqual(ans,True)
+        
+    def test_operate_controlled_xz(self):
+        """test 'operate' (controlled_xz)
+        """
+        mat = make_densop_matrix(VECTORS_8, PROBS_8)
+        expect = DensOp(matrix=mat).cx(2,0).cz(2,1)
+        pp = PauliProduct(pauli_str="XZ", qid=[0,1])
+        actual = DensOp(matrix=mat).operate(pauli_product=pp, ctrl=2)
+        ans = equal_densops(expect, actual)
+        DensOp.free_all(expect, actual)
+        self.assertEqual(ans,True)
+        
 if __name__ == '__main__':
     unittest.main()

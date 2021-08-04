@@ -193,6 +193,29 @@ class QComp:
         del self.cmem
         del self.qcirc
 
+    @classmethod
+    def free_all(cls, *qcomps):
+        """
+        free memory of the all quantum computers.
+
+        Parameters
+        ----------
+        qcomps : instance of QComp,instance of QComp,...
+            set of QComp instances
+
+        Returns
+        -------
+        None
+
+        """
+        for qc in qcomps:
+            if type(qc) is list or type(qc) is tuple:
+                cls.free_all(*qc)
+            elif type(qc) is QComp:
+                qc.free()
+            else:
+                raise QComp_Error_FreeAll()
+
     def run(self, shots=DEF_SHOTS, reset_qubits=True, reset_cmem=True, reset_qcirc=True):
         """
         run the quantum circuit.
@@ -1078,6 +1101,52 @@ class QComp:
 
         """
         self.cx(q2,q1,ctrl=ctrl).ccx(q0,q1,q2,ctrl=ctrl).cx(q2,q1,ctrl=ctrl)
+        return self
+
+    def operate(self, pauli_product=None, ctrl=None):
+        """
+        add unitary operator.
+
+        Parameters
+        ----------
+        pauli_product : instance of PauliProduct
+            pauli product to operate
+        ctrl : int
+            contoroll qubit id for controlled pauli product
+
+        Returns
+        -------
+        self : instance of QComp
+            quantum computer after adding
+
+        """
+        pauli_list = pauli_product.pauli_list
+        qid = pauli_product.qid
+    
+        if ctrl is None:
+            for q, pauli in zip(qid, pauli_list):
+                if pauli == 'X':
+                    self.x(q)
+                elif pauli == 'Y':
+                    self.y(q)
+                elif pauli == 'Z':
+                    self.z(q)
+                else:
+                    continue
+        else:
+            if ctrl in qid:
+                raise ValueError("controll and target qubit id conflict")
+        
+            for q, pauli in zip(qid, pauli_list):
+                if pauli == 'X':
+                    self.cx(ctrl, q)
+                elif pauli == 'Y':
+                    self.cy(ctrl, q)
+                elif pauli == 'Z':
+                    self.cz(ctrl, q)
+                else:
+                    continue
+    
         return self
 
     def __add_quantum_gate(self, kind=None, qid=None, cid=None,
