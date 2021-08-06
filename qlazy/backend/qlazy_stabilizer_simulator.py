@@ -84,7 +84,8 @@ def run(qubit_num=0, cmem_num=0, qstate=None, qcirc=[], cmem=[], shots=1, backen
                             cmem[qcirc[-1]['cid'][k]] = mval
 
                     if i < shots-1:
-                        qstate_tmp.free()
+                        # qstate_tmp.free()
+                        del qstate_tmp
                 break
             
         if only_one_measurement_end == True:
@@ -115,4 +116,5 @@ def reset(qstate=None, backend=None):
 def free(qstate=None, backend=None):
 
     if qstate != None:
-        qstate.free()
+        # qstate.free()
+        del qstate

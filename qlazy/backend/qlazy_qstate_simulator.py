@@ -120,5 +120,6 @@ def reset(qstate=None, backend=None):
 def free(qstate=None, backend=None):
 
     if qstate != None:
-        qstate.free()
+        # qstate.free()
+        del qstate
 
