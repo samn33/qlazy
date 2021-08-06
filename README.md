@@ -98,8 +98,6 @@ foo.py
     qs.show()
     md = qs.m(shots=100)
     print(md.frequency)
-    
-    qs.free()
 
 execute the program
 
