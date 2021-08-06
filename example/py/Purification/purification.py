@@ -32,8 +32,8 @@ def random_mixed_state(qubit_num, mixed_num):
     de_A = DensOp(qstate=qs_A, prob=prob_mixed)
 
     # free memory
-    for i in range(mixed_num):
-        qs_A[i].free()
+    # for i in range(mixed_num):
+    #     qs_A[i].free()
     
     return de_A
     
@@ -83,7 +83,7 @@ def purification(de_A):
     de_AR = DensOp(qstate=[qs_AR], prob=[1.0])
 
     # free memory
-    qs_AR.free()
+    # qs_AR.free()
 
     return de_AR
 
@@ -124,6 +124,6 @@ if __name__ == '__main__':
     else:
         print("* NG!")
 
-    de_A.free()
-    de_AR.free()
-    de_AR_pat.free()
+    # de_A.free()
+    # de_AR.free()
+    # de_AR_pat.free()

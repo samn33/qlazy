@@ -175,4 +175,4 @@ if __name__ == '__main__':
     res = qs.decode(id_r)
     print("(ctr={0:}) {1:}*{2:} mod {3:} -> {4:}".format(ctr,a,x,N,res))
 
-    qs.free()
+    # qs.free()

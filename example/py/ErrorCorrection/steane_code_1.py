@@ -31,7 +31,7 @@ def generate_qstate(qid_C, qid_S):
     de_ini = DensOp(qstate=[qs])
     de_fin = de_ini.clone()
 
-    QState.free_all(qs_C, qs_S, qs)
+    # QState.free_all(qs_C, qs_S, qs)
     return de_ini, de_fin
 
 def noise(self, kind='', prob=0.0, qid=[]):
@@ -92,4 +92,4 @@ if __name__ == '__main__':
     print("== result ==")
     print("- fidelity = {:.6f}".format(de_fin.fidelity(de_ini, qid=qid_C)))
 
-    DensOp.free_all(de_ini, de_fin)
+    # DensOp.free_all(de_ini, de_fin)

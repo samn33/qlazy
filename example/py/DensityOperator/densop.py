@@ -26,9 +26,9 @@ de_mixed.show(nonzero=True)
 print("* trace =", de_mixed.trace())
 print("* square trace =", de_mixed.sqtrace())
     
-qs_pure.free()
-qs_pure_1.free()
-qs_pure_2.free()
-    
-de_pure.free()
-de_mixed.free()
+# qs_pure.free()
+# qs_pure_1.free()
+# qs_pure_2.free()
+#     
+# de_pure.free()
+# de_mixed.free()

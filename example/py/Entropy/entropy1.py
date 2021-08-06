@@ -32,5 +32,5 @@ if __name__ == '__main__':
     print("** S(A)    = {:.4f}".format(ent_A))
     print("** S(B)    = {:.4f}".format(ent_B))
 
-    qs.free()
-    de.free()
+    # qs.free()
+    # de.free()

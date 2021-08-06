@@ -83,7 +83,7 @@ class TestRegisterQComp(unittest.TestCase):
         res = qc.run(shots=10)
         self.assertEqual(res['measured_qid'], [1,4])
         self.assertEqual(res['frequency']['00']+res['frequency']['11'], 10)
-        qc.free()
+        # qc.free()
 
 if __name__ == '__main__':
     unittest.main()

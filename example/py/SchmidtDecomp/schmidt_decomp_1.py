@@ -25,7 +25,7 @@ def generate_qstate(qid_0, qid_1, entangle=True): # random pure state (entangle 
         qs_0 = QState(vector=vec_0)
         qs_1 = QState(vector=vec_1)
         qs = qs_0.tenspro(qs_1)
-        QState.free_all(qs_0, qs_1)
+        # QState.free_all(qs_0, qs_1)
     return qs
 
 if __name__ == '__main__':
@@ -55,4 +55,4 @@ if __name__ == '__main__':
     # evaluation
     print("fidelity = {:.6f}".format(qs_ori.fidelity(qs_comp))) # 1.000000
     
-    QState.free_all(qs_ori, qs_0, qs_1, qs_comp)
+    # QState.free_all(qs_ori, qs_0, qs_1, qs_comp)

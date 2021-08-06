@@ -13,7 +13,7 @@ def measure(phase):
     print("[measured] prob. of up-spin = {0:.4f}".format(prob))
     print("[theoretical] cos(phase/2)^2 = {0:.4f}".format((math.cos(phase*math.pi/2))**2))
 
-    qs.free()
+    # qs.free()
 
 def main():
 

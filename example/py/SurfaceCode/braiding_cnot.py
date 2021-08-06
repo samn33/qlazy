@@ -128,7 +128,7 @@ def measure_logical_Z(sb, face, chain, shots=10):
         mval = (str(sum([int(s) for s in list(mval_0)])%2)
                 + str(sum([int(s) for s in list(mval_1)])%2))
         mval_list.append(mval)
-        sb_tmp.free()
+        # sb_tmp.free()
     return Counter(mval_list)
 
 if __name__ == '__main__':
@@ -162,4 +162,4 @@ if __name__ == '__main__':
     freq = measure_logical_Z(sb, face, chain, shots=100)
     print(freq)
 
-    sb.free()
+    # sb.free()

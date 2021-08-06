@@ -156,7 +156,7 @@ def toffoli_test(qnum):
         res = qs.decode(id_tar)
         print("x = {0:0{size}b}, res = {1:}".format(x,res,size=qnum_ctr))
 
-        qs.free()
+        # qs.free()
 
 def toffoli2_test(qnum):
 
@@ -176,7 +176,7 @@ def toffoli2_test(qnum):
 
         print("x = {0:0{size}b}, res = {1:}".format(x,qs.decode(id_tar),size=qnum_ctr))
 
-        qs.free()
+        # qs.free()
     
 def toffoli3_test(qnum):
 
@@ -196,7 +196,7 @@ def toffoli3_test(qnum):
 
         print("x = {0:0{size}b}, res = {1:}".format(x,qs.decode(id_tar),size=qnum_ctr))
 
-        qs.free()
+        # qs.free()
     
 if __name__ == '__main__':
 

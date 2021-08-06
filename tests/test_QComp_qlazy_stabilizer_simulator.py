@@ -63,7 +63,7 @@ class TestQComp_init(unittest.TestCase):
         qc = QComp(qubit_num=3, cmem_num=2, backend=bk)
         actual = qc.qstate.get_str()
         expect = "  ZII\n  IZI\n  IIZ\n"
-        qc.free()
+        # qc.free()
         self.assertEqual(actual, expect)
 
 #
@@ -83,7 +83,7 @@ class TestQComp_reset(unittest.TestCase):
         qc.reset()
         actual = qc.qstate.get_str()
         expect = "  ZII\n  IZI\n  IIZ\n"
-        qc.free()
+        # qc.free()
         self.assertEqual(actual, expect)
 
 #
@@ -103,7 +103,7 @@ class TestQComp_1_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
         actual = qc.qstate.get_str()
         expect = " -Z\n"
         self.assertEqual(actual, expect)
-        qc.free()
+        # qc.free()
         
     def test_h_x(self):
         """test 'x' gate (following 'h' gate)
@@ -114,7 +114,7 @@ class TestQComp_1_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
         actual = qc.qstate.get_str()
         expect = "  X\n"
         self.assertEqual(actual, expect)
-        qc.free()
+        # qc.free()
         
     def test_y(self):
         """test 'y' gate
@@ -125,7 +125,7 @@ class TestQComp_1_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
         actual = qc.qstate.get_str()
         expect = " -Z\n"
         self.assertEqual(actual, expect)
-        qc.free()
+        # qc.free()
         
     def test_h_y(self):
         """test 'y' gate (following 'h' gate)
@@ -136,7 +136,7 @@ class TestQComp_1_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
         actual = qc.qstate.get_str()
         expect = " -X\n"
         self.assertEqual(actual, expect)
-        qc.free()
+        # qc.free()
         
     def test_z(self):
         """test 'z' gate
@@ -147,7 +147,7 @@ class TestQComp_1_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
         actual = qc.qstate.get_str()
         expect = "  Z\n"
         self.assertEqual(actual, expect)
-        qc.free()
+        # qc.free()
         
     def test_h_z(self):
         """test 'z' gate (following 'h' gate)
@@ -158,7 +158,7 @@ class TestQComp_1_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
         actual = qc.qstate.get_str()
         expect = " -X\n"
         self.assertEqual(actual, expect)
-        qc.free()
+        # qc.free()
         
     def test_h(self):
         """test 'h' gate
@@ -169,7 +169,7 @@ class TestQComp_1_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
         actual = qc.qstate.get_str()
         expect = "  X\n"
         self.assertEqual(actual, expect)
-        qc.free()
+        # qc.free()
         
     def test_h_h(self):
         """test 'h' gate (following 'h' gate)
@@ -180,7 +180,7 @@ class TestQComp_1_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
         actual = qc.qstate.get_str()
         expect = "  Z\n"
         self.assertEqual(actual, expect)
-        qc.free()
+        # qc.free()
         
     def test_s(self):
         """test 's' gate
@@ -191,7 +191,7 @@ class TestQComp_1_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
         actual = qc.qstate.get_str()
         expect = "  Z\n"
         self.assertEqual(actual, expect)
-        qc.free()
+        # qc.free()
         
     def test_h_s(self):
         """test 's' gate (following 'h' gate)
@@ -202,7 +202,7 @@ class TestQComp_1_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
         actual = qc.qstate.get_str()
         expect = "  Y\n"
         self.assertEqual(actual, expect)
-        qc.free()
+        # qc.free()
         
     def test_s_dg(self):
         """test 's+' gate
@@ -213,7 +213,7 @@ class TestQComp_1_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
         actual = qc.qstate.get_str()
         expect = "  Z\n"
         self.assertEqual(actual, expect)
-        qc.free()
+        # qc.free()
         
     def test_h_s_dg(self):
         """test 's+' gate (following 'h' gate)
@@ -224,7 +224,7 @@ class TestQComp_1_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
         actual = qc.qstate.get_str()
         expect = " -Y\n"
         self.assertEqual(actual, expect)
-        qc.free()
+        # qc.free()
         
 #
 # 2-qubit gate
@@ -242,7 +242,7 @@ class TestQComp_2_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
         res = qc.cx(0,1).run(reset_qubits=False)
         actual = qc.qstate.get_str()
         expect = "  ZI\n  ZZ\n"
-        qc.free()
+        # qc.free()
         self.assertEqual(actual, expect)
 
     def test_hh_cx(self):
@@ -253,7 +253,7 @@ class TestQComp_2_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
         res = qc.h(0).h(1).cx(0,1).run(reset_qubits=False)
         actual = qc.qstate.get_str()
         expect = "  XX\n  IX\n"
-        qc.free()
+        # qc.free()
         self.assertEqual(actual, expect)
 
     def test_cy(self):
@@ -264,7 +264,7 @@ class TestQComp_2_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
         res = qc.cy(0,1).run(reset_qubits=False)
         actual = qc.qstate.get_str()
         expect = "  ZI\n  ZZ\n"
-        qc.free()
+        # qc.free()
         self.assertEqual(actual, expect)
 
     def test_hh_cy(self):
@@ -275,7 +275,7 @@ class TestQComp_2_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
         res = qc.h(0).h(1).cy(0,1).run(reset_qubits=False)
         actual = qc.qstate.get_str()
         expect = "-iXY\n  ZX\n"
-        qc.free()
+        # qc.free()
         self.assertEqual(actual, expect)
 
     def test_cz(self):
@@ -286,7 +286,7 @@ class TestQComp_2_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
         res = qc.cz(0,1).run(reset_qubits=False)
         actual = qc.qstate.get_str()
         expect = "  ZI\n  IZ\n"
-        qc.free()
+        # qc.free()
         self.assertEqual(actual, expect)
 
     def test_hh_cz(self):
@@ -297,7 +297,7 @@ class TestQComp_2_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
         res = qc.h(0).h(1).cz(0,1).run(reset_qubits=False)
         actual = qc.qstate.get_str()
         expect = "  XZ\n  ZX\n"
-        qc.free()
+        # qc.free()
         self.assertEqual(actual, expect)
 
 #
@@ -320,7 +320,7 @@ class TestQComp_operate_qlazy_stabilizer_simulator(unittest.TestCase):
         res = qc_actual.run(reset_qubits=False)
         actual = qc_actual.qstate.get_str()
         self.assertEqual(expect, actual)
-        QComp.free_all(qc_expect, qc_actual)
+        # QComp.free_all(qc_expect, qc_actual)
 
     def test_operate_h_x(self):
         """test 'operate' (x followed by h)
@@ -334,7 +334,7 @@ class TestQComp_operate_qlazy_stabilizer_simulator(unittest.TestCase):
         res = qc_actual.run(reset_qubits=False)
         actual = qc_actual.qstate.get_str()
         self.assertEqual(expect, actual)
-        QComp.free_all(qc_expect, qc_actual)
+        # QComp.free_all(qc_expect, qc_actual)
 
     def test_operate_h_y(self):
         """test 'operate' (Y followed by h)
@@ -348,7 +348,7 @@ class TestQComp_operate_qlazy_stabilizer_simulator(unittest.TestCase):
         res = qc_actual.run(reset_qubits=False)
         actual = qc_actual.qstate.get_str()
         self.assertEqual(expect, actual)
-        QComp.free_all(qc_expect, qc_actual)
+        # QComp.free_all(qc_expect, qc_actual)
 
     def test_operate_h_z(self):
         """test 'operate' (Z followed by h)
@@ -362,7 +362,7 @@ class TestQComp_operate_qlazy_stabilizer_simulator(unittest.TestCase):
         res = qc_actual.run(reset_qubits=False)
         actual = qc_actual.qstate.get_str()
         self.assertEqual(expect, actual)
-        QComp.free_all(qc_expect, qc_actual)
+        # QComp.free_all(qc_expect, qc_actual)
 
     def test_operate_xyz(self):
         """test 'operate' (xyz)
@@ -376,7 +376,7 @@ class TestQComp_operate_qlazy_stabilizer_simulator(unittest.TestCase):
         res = qc_actual.run(reset_qubits=False)
         actual = qc_actual.qstate.get_str()
         self.assertEqual(expect, actual)
-        QComp.free_all(qc_expect, qc_actual)
+        # QComp.free_all(qc_expect, qc_actual)
 
     def test_operate_controlled_xyz(self):
         """test 'operate' (controlled_xyz)
@@ -390,7 +390,7 @@ class TestQComp_operate_qlazy_stabilizer_simulator(unittest.TestCase):
         res = qc_actual.run(reset_qubits=False)
         actual = qc_actual.qstate.get_str()
         self.assertEqual(expect, actual)
-        QComp.free_all(qc_expect, qc_actual)
+        # QComp.free_all(qc_expect, qc_actual)
         
 #
 # measurement
@@ -406,7 +406,7 @@ class TestQComp_measure_stabilizer_simulator(unittest.TestCase):
         bk = Backend(name='qlazy', device='stabilizer_simulator')
         qc = QComp(qubit_num=2, backend=bk)
         res = qc.measure([0,1]).run(shots=10)
-        qc.free()
+        # qc.free()
         self.assertEqual(res['measured_qid'], [0,1])
         self.assertEqual(res['frequency']['00'], 10)
 
@@ -416,7 +416,7 @@ class TestQComp_measure_stabilizer_simulator(unittest.TestCase):
         bk = Backend(name='qlazy', device='stabilizer_simulator')
         qc = QComp(qubit_num=2, backend=bk)
         res = qc.h(0).cx(0,1).measure([0,1]).run(shots=10)
-        qc.free()
+        # qc.free()
         self.assertEqual(res['measured_qid'], [0,1])
         self.assertEqual(res['frequency']['00']+res['frequency']['11'], 10)
 
@@ -429,7 +429,7 @@ class TestQComp_measure_stabilizer_simulator(unittest.TestCase):
         self.assertEqual(res['measured_qid'], [0,1])
         self.assertEqual(res['frequency']['00']+res['frequency']['11'], 10)
         self.assertEqual(qc.cmem==[0,0,0] or qc.cmem==[1,1,0], True)
-        qc.free()
+        # qc.free()
 
     def test_measure_control_qubit(self):
         """test 'm' (control qubit using classical memory)
@@ -437,7 +437,7 @@ class TestQComp_measure_stabilizer_simulator(unittest.TestCase):
         bk = Backend(name='qlazy', device='stabilizer_simulator')
         qc = QComp(qubit_num=2, cmem_num=3, backend=bk)
         res = qc.h(0).cx(0,1).measure([0],[0]).x(0, ctrl=0).x(1, ctrl=0).measure([0,1]).run(shots=10)
-        qc.free()
+        # qc.free()
         self.assertEqual(res['measured_qid'], [0,1])
         self.assertEqual(res['frequency']['00'], 10)
 
@@ -455,7 +455,7 @@ class TestQComp_inheritance_stabilizer_simulator(unittest.TestCase):
         bk = Backend(name='qlazy', device='stabilizer_simulator')
         qc = MyQComp(backend=bk, qubit_num=2, cmem_num=3)
         res = qc.bell(0,1).measure(qid=[0,1]).run(shots=10)
-        qc.free()
+        # qc.free()
         self.assertEqual(res['measured_qid'], [0,1])
         self.assertEqual(res['frequency']['00']+res['frequency']['11'], 10)
 

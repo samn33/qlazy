@@ -137,7 +137,7 @@ def discover_order(a,N):
             if r != 0 and r < N and (a**r)%N == 1 and r%2 == 0:
                 order = r
                 break
-    qs.free()
+    # qs.free()
     
     return r  # return 1 if order discovery failure
 

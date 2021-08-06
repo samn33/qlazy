@@ -172,4 +172,4 @@ if __name__ == '__main__':
     fid = qs_ini.fidelity(qs_fin, qid=qid_cod)
     print("* fidelity = {:.6f}".format(fid))
     
-    QState.free_all(qs_ini, qs_fin)
+    # QState.free_all(qs_ini, qs_fin)

@@ -30,7 +30,7 @@ def generate_qstate(qid_C, qid_S):
     print("- a = {:.4f}".format(a))
     print("- b = {:.4f}".format(b))
 
-    QState.free_all(qs_C, qs_S)
+    # QState.free_all(qs_C, qs_S)
     return qs_ini, qs_fin
 
 def noise(self, qid):
@@ -91,4 +91,4 @@ if __name__ == '__main__':
     print("== result ==")
     print("- fidelity = {:.6f}".format(qs_fin.fidelity(qs_ini, qid=qid_C)))
 
-    QState.free_all(qs_ini, qs_fin)
+    # QState.free_all(qs_ini, qs_fin)

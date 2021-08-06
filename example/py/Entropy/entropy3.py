@@ -74,4 +74,4 @@ if __name__ == '__main__':
     print("** S(B)      = {:.4f}".format(ent_B))
     print("** S(B)-S(A) = {:.4f}".format(ent_B-ent_A))
 
-    de.free()
+    # de.free()

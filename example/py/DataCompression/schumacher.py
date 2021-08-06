@@ -25,7 +25,7 @@ def create_densop():
     mat_1 = np.array([[0.75,0.25],[0.25,0.25]])
     de_1 = DensOp(matrix=mat_1)
     de_ini = de_1.composite(num=4)
-    de_1.free()
+    # de_1.free()
 
     return de_ini
 
@@ -35,7 +35,7 @@ def coder(de_ini, id_all, id_comp, theta, perm_mat):
     [de_tmp.ry(i, phase=-theta) for i in id_all]
     de_tmp.apply(perm_mat)
     de_comp = de_tmp.partial(id_comp)  # 4-qubit -> 3-qubit state
-    de_tmp.free()
+    # de_tmp.free()
 
     return de_comp
 
@@ -47,8 +47,8 @@ def decoder(de_comp, id_all, theta, iperm_mat):
     de_fin.apply(iperm_mat)
     [de_fin.ry(i, phase=theta) for i in id_all]
 
-    qs_0.free()
-    de_0.free()
+    # qs_0.free()
+    # de_0.free()
 
     return de_fin
     
@@ -72,6 +72,6 @@ if __name__ == '__main__':
     # fidelity
     print("fidelity = {:.6f}".format(de_fin.fidelity(de_ini)))
 
-    de_ini.free()
-    de_comp.free()
-    de_fin.free()
+    # de_ini.free()
+    # de_comp.free()
+    # de_fin.free()

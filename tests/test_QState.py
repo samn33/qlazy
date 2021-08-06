@@ -56,7 +56,7 @@ class TestQState_init(unittest.TestCase):
         actual = qs.amp
         expect = np.array([1j, 0j, 0j, 0j, 0j, 0j, 0j, 0j])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_init_with_vector(self):
@@ -67,32 +67,56 @@ class TestQState_init(unittest.TestCase):
         actual = qs.amp
         expect = np.array([1j, 0j, 0j, 0j, 0j, 0j, 0j, 0j])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
-class TestQState_free_all(unittest.TestCase):
-    """ test 'QState' : 'free_all'
+# class TestQState_free_all(unittest.TestCase):
+#     """ test 'QState' : 'free_all'
+#     """
+# 
+#     def test_free_all(self):
+#         """test 'free_all'
+#         """
+#         qs_0 = QState(1)
+#         qs_1 = QState(1).x(0)
+#         qs_2 = QState(1).h(0)
+#         QState.free_all(qs_0,qs_1,qs_2)
+# 
+#         qs_0 = QState(1)
+#         qs_1 = QState(1).x(0)
+#         qs_2 = QState(1).h(0)
+#         qs_A = [qs_1,qs_2]
+#         QState.free_all(qs_0,qs_A)
+# 
+#         qs_0 = QState(1)
+#         qs_1 = QState(1).x(0)
+#         qs_2 = QState(1).h(0)
+#         qs_B = [qs_0,[qs_1,qs_2]]
+#         QState.free_all(qs_B)
+        
+class TestQState_del_all(unittest.TestCase):
+    """ test 'QState' : 'del_all'
     """
 
-    def test_free_all(self):
+    def test_del_all(self):
         """test 'free_all'
         """
         qs_0 = QState(1)
         qs_1 = QState(1).x(0)
         qs_2 = QState(1).h(0)
-        QState.free_all(qs_0,qs_1,qs_2)
+        QState.del_all(qs_0,qs_1,qs_2)
 
         qs_0 = QState(1)
         qs_1 = QState(1).x(0)
         qs_2 = QState(1).h(0)
         qs_A = [qs_1,qs_2]
-        QState.free_all(qs_0,qs_A)
+        QState.del_all(qs_0,qs_A)
 
         qs_0 = QState(1)
         qs_1 = QState(1).x(0)
         qs_2 = QState(1).h(0)
         qs_B = [qs_0,[qs_1,qs_2]]
-        QState.free_all(qs_B)
+        QState.del_all(qs_B)
         
 class TestQState_reset(unittest.TestCase):
     """ test 'QState' : 'reset'
@@ -106,7 +130,7 @@ class TestQState_reset(unittest.TestCase):
         actual = qs.amp
         expect = np.array([1j, 0j, 0j, 0j, 0j, 0j, 0j, 0j])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
 class TestQState_1_qubit(unittest.TestCase):
@@ -120,7 +144,7 @@ class TestQState_1_qubit(unittest.TestCase):
         actual = qs.amp
         expect = np.array([0.0, 1.0])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_h_x(self):
@@ -130,7 +154,7 @@ class TestQState_1_qubit(unittest.TestCase):
         actual = qs.amp
         expect = np.array([1.0/SQRT_2, 1.0/SQRT_2])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_y(self):
@@ -140,7 +164,7 @@ class TestQState_1_qubit(unittest.TestCase):
         actual = qs.amp
         expect = np.array([0.0, 1.0j])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_h_y(self):
@@ -150,7 +174,7 @@ class TestQState_1_qubit(unittest.TestCase):
         actual = qs.amp
         expect = np.array([-1.0j/SQRT_2, 1.0j/SQRT_2])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_z(self):
@@ -160,7 +184,7 @@ class TestQState_1_qubit(unittest.TestCase):
         actual = qs.amp
         expect = np.array([1.0, 0.0])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_h_z(self):
@@ -170,7 +194,7 @@ class TestQState_1_qubit(unittest.TestCase):
         actual = qs.amp
         expect = np.array([1.0/SQRT_2, -1.0/SQRT_2])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_xr(self):
@@ -180,7 +204,7 @@ class TestQState_1_qubit(unittest.TestCase):
         actual = qs.amp
         expect = np.array([0.5+0.5j, 0.5-0.5j])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_h_xr(self):
@@ -190,7 +214,7 @@ class TestQState_1_qubit(unittest.TestCase):
         actual = qs.amp
         expect = np.array([1.0/SQRT_2, 1.0/SQRT_2])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_xr_dg(self):
@@ -200,7 +224,7 @@ class TestQState_1_qubit(unittest.TestCase):
         actual = qs.amp
         expect = np.array([0.5-0.5j, 0.5+0.5j])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_h_xr_dg(self):
@@ -210,7 +234,7 @@ class TestQState_1_qubit(unittest.TestCase):
         actual = qs.amp
         expect = np.array([1.0/SQRT_2, 1.0/SQRT_2])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_h(self):
@@ -220,7 +244,7 @@ class TestQState_1_qubit(unittest.TestCase):
         actual = qs.amp
         expect = np.array([1.0/SQRT_2, 1.0/SQRT_2])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_h_h(self):
@@ -230,7 +254,7 @@ class TestQState_1_qubit(unittest.TestCase):
         actual = qs.amp
         expect = np.array([1.0, 0.0])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_s(self):
@@ -240,7 +264,7 @@ class TestQState_1_qubit(unittest.TestCase):
         actual = qs.amp
         expect = np.array([1.0, 0.0])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_h_s(self):
@@ -250,7 +274,7 @@ class TestQState_1_qubit(unittest.TestCase):
         actual = qs.amp
         expect = np.array([1.0/SQRT_2, 1.0j/SQRT_2])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_s_dg(self):
@@ -260,7 +284,7 @@ class TestQState_1_qubit(unittest.TestCase):
         actual = qs.amp
         expect = np.array([1.0, 0.0])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_h_s_dg(self):
@@ -270,7 +294,7 @@ class TestQState_1_qubit(unittest.TestCase):
         actual = qs.amp
         expect = np.array([1.0/SQRT_2, -1.0j/SQRT_2])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_t(self):
@@ -280,7 +304,7 @@ class TestQState_1_qubit(unittest.TestCase):
         actual = qs.amp
         expect = np.array([1.0, 0.0])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_h_t(self):
@@ -290,7 +314,7 @@ class TestQState_1_qubit(unittest.TestCase):
         actual = qs.amp
         expect = np.array([1.0/SQRT_2, 0.5+0.5j])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_t_dg(self):
@@ -300,7 +324,7 @@ class TestQState_1_qubit(unittest.TestCase):
         actual = qs.amp
         expect = np.array([1.0, 0.0])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_h_t_dg(self):
@@ -310,7 +334,7 @@ class TestQState_1_qubit(unittest.TestCase):
         actual = qs.amp
         expect = np.array([1.0/SQRT_2, 0.5-0.5j])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_rx(self):
@@ -320,7 +344,7 @@ class TestQState_1_qubit(unittest.TestCase):
         actual = qs.amp
         expect = np.array([COS_PI_8, -SIN_PI_8*1.0j])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_h_rx(self):
@@ -330,7 +354,7 @@ class TestQState_1_qubit(unittest.TestCase):
         actual = qs.amp
         expect = np.array([0.65328148-0.27059805j, 0.65328148-0.27059805j])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_ry(self):
@@ -340,7 +364,7 @@ class TestQState_1_qubit(unittest.TestCase):
         actual = qs.amp
         expect = np.array([COS_PI_8, SIN_PI_8])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_h_ry(self):
@@ -350,7 +374,7 @@ class TestQState_1_qubit(unittest.TestCase):
         actual = qs.amp
         expect = np.array([0.38268343+0.j, 0.92387953+0.j])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_rz(self):
@@ -360,7 +384,7 @@ class TestQState_1_qubit(unittest.TestCase):
         actual = qs.amp
         expect = np.array([1.0, 0.0])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_h_rz(self):
@@ -370,7 +394,7 @@ class TestQState_1_qubit(unittest.TestCase):
         actual = qs.amp
         expect = np.array([0.65328148-0.27059805j, 0.65328148+0.27059805j])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_p(self):
@@ -380,7 +404,7 @@ class TestQState_1_qubit(unittest.TestCase):
         actual = qs.amp
         expect = np.array([1.0, 0.0])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_h_p(self):
@@ -390,7 +414,7 @@ class TestQState_1_qubit(unittest.TestCase):
         actual = qs.amp
         expect = np.array([0.70710678, 0.5+0.5j])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_u1(self):
@@ -400,7 +424,7 @@ class TestQState_1_qubit(unittest.TestCase):
         actual = qs.amp
         expect = np.array([1.0, 0.0])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_h_u1(self):
@@ -410,7 +434,7 @@ class TestQState_1_qubit(unittest.TestCase):
         actual = qs.amp
         expect = np.array([0.70710678+0.j, 0.67249851+0.21850801j])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_u2(self):
@@ -420,7 +444,7 @@ class TestQState_1_qubit(unittest.TestCase):
         actual = qs.amp
         expect = np.array([0.70710678+0.j, 0.5720614 +0.41562694j])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_h_u2(self):
@@ -430,7 +454,7 @@ class TestQState_1_qubit(unittest.TestCase):
         actual = qs.amp
         expect = np.array([0.02447174-0.1545085j,0.69840112+0.69840112j])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_u3(self):
@@ -440,7 +464,7 @@ class TestQState_1_qubit(unittest.TestCase):
         actual = qs.amp
         expect = np.array([0.89100652+0.j, 0.36728603+0.26684892j])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_h_u3(self):
@@ -450,7 +474,7 @@ class TestQState_1_qubit(unittest.TestCase):
         actual = qs.amp
         expect = np.array([0.32472882-0.09920056j, 0.63003676+0.69840112j])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
 class TestQState_1_qubit_in_3_reg(unittest.TestCase):
@@ -464,7 +488,7 @@ class TestQState_1_qubit_in_3_reg(unittest.TestCase):
         actual = qs.amp
         expect = np.array([0.92387953, 0.0, 0.0, 0.0, -0.38268343j, 0.0, 0.0, 0.0])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_rx_1(self):
@@ -474,7 +498,7 @@ class TestQState_1_qubit_in_3_reg(unittest.TestCase):
         actual = qs.amp
         expect = np.array([0.92387953, 0.0, -0.38268343j, 0.0, 0.0, 0.0, 0.0, 0.0])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_rx_2(self):
@@ -484,7 +508,7 @@ class TestQState_1_qubit_in_3_reg(unittest.TestCase):
         actual = qs.amp
         expect = np.array([0.92387953, -0.38268343j, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
 class TestQState_2_qubit(unittest.TestCase):
@@ -498,7 +522,7 @@ class TestQState_2_qubit(unittest.TestCase):
         actual = qs.amp
         expect = np.array([(0.5+0j), (0.5+0j), (0.5+0j), (0.5+0j)])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_cy(self):
@@ -508,7 +532,7 @@ class TestQState_2_qubit(unittest.TestCase):
         actual = qs.amp
         expect = np.array([(0.5+0j), (0.5+0j), -0.5j, 0.5j])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_cz(self):
@@ -518,7 +542,7 @@ class TestQState_2_qubit(unittest.TestCase):
         actual = qs.amp
         expect = np.array([(0.5+0j), (0.5+0j), (0.5+0j), (-0.5+0j)])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_cxr(self):
@@ -528,7 +552,7 @@ class TestQState_2_qubit(unittest.TestCase):
         actual = qs.amp
         expect = np.array([(0.5+0j), (0.5+0j), (0.5+0j), (0.5+0j)])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_cxr_dg(self):
@@ -538,7 +562,7 @@ class TestQState_2_qubit(unittest.TestCase):
         actual = qs.amp
         expect = np.array([(0.5+0j), (0.5+0j), (0.5+0j), (0.5+0j)])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_ch(self):
@@ -548,7 +572,7 @@ class TestQState_2_qubit(unittest.TestCase):
         actual = qs.amp
         expect = np.array([(0.5+0j), (0.5+0j), (0.7071067811865475+0j), 0j])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_cs(self):
@@ -558,7 +582,7 @@ class TestQState_2_qubit(unittest.TestCase):
         actual = qs.amp
         expect = np.array([(0.5+0j), (0.5+0j), (0.5+0j), 0.5j])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_cs_dg(self):
@@ -568,7 +592,7 @@ class TestQState_2_qubit(unittest.TestCase):
         actual = qs.amp
         expect = np.array([(0.5+0j), (0.5+0j), (0.5+0j), -0.5j])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_ct(self):
@@ -579,7 +603,7 @@ class TestQState_2_qubit(unittest.TestCase):
         expect = np.array([(0.5+0j), (0.5+0j), (0.5+0j),
                            (0.35355339059327373+0.35355339059327373j)])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_ct_dg(self):
@@ -590,7 +614,7 @@ class TestQState_2_qubit(unittest.TestCase):
         expect = np.array([(0.5+0j), (0.5+0j), (0.5+0j),
                            (0.35355339059327373-0.35355339059327373j)])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_sw(self):
@@ -600,7 +624,7 @@ class TestQState_2_qubit(unittest.TestCase):
         actual = qs.amp
         expect = np.array([(0.5+0j), (0.5+0j), (0.5+0j), (0.5+0j)])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_x_sw(self):
@@ -610,7 +634,7 @@ class TestQState_2_qubit(unittest.TestCase):
         actual = qs.amp
         expect = np.array([0j, (1+0j), 0j, 0j])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_cp(self):
@@ -621,7 +645,7 @@ class TestQState_2_qubit(unittest.TestCase):
         expect = np.array([(0.5+0j), (0.5+0j), (0.5+0j),
                            (0.3535533905932738+0.35355339059327373j)])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_crx(self):
@@ -632,7 +656,7 @@ class TestQState_2_qubit(unittest.TestCase):
         expect = np.array([(0.5+0j), (0.5+0j), (0.4619397662556434-0.1913417161825449j),
                            (0.4619397662556434-0.1913417161825449j)])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_cry(self):
@@ -643,7 +667,7 @@ class TestQState_2_qubit(unittest.TestCase):
         expect = np.array([(0.5+0j), (0.5+0j), (0.2705980500730985+0j),
                            (0.6532814824381882+0j)])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_crz(self):
@@ -654,7 +678,7 @@ class TestQState_2_qubit(unittest.TestCase):
         expect = np.array([(0.5+0j), (0.5+0j),(0.4619397662556434-0.1913417161825449j),
                            (0.4619397662556434+0.1913417161825449j)])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_cu1(self):
@@ -665,7 +689,7 @@ class TestQState_2_qubit(unittest.TestCase):
         expect = np.array([(0.5+0j), (0.5+0j), (0.5+0j),
                            (0.47552825814757677+0.1545084971874737j)])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_cu2(self):
@@ -676,7 +700,7 @@ class TestQState_2_qubit(unittest.TestCase):
         expect = np.array([(0.5+0j), (0.5+0j), (0.0173041346112951-0.10925400611220525j),
                            (0.49384417029756883+0.49384417029756883j)])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_cu3(self):
@@ -687,7 +711,7 @@ class TestQState_2_qubit(unittest.TestCase):
         expect = np.array([(0.5+0j), (0.5+0j), (0.22961795053748937-0.07014538985214754j),
                            (0.44550326209418395+0.4938441702975689j)])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
 class TestQState_2_qubit_in_3_reg(unittest.TestCase):
@@ -706,7 +730,7 @@ class TestQState_2_qubit_in_3_reg(unittest.TestCase):
                            (0.3266407412190941-0.13529902503654925j),
                            (0.3266407412190941-0.13529902503654925j)])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_crx_1_2(self):
@@ -721,7 +745,7 @@ class TestQState_2_qubit_in_3_reg(unittest.TestCase):
                            (0.3266407412190941-0.13529902503654925j),
                            (0.3266407412190941-0.13529902503654925j)])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_crx_2_0(self):
@@ -738,7 +762,7 @@ class TestQState_2_qubit_in_3_reg(unittest.TestCase):
                            (0.35355339059327373+0j),
                            (0.3266407412190941-0.13529902503654925j)])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
 class TestQState_3_qubit(unittest.TestCase):
@@ -752,7 +776,7 @@ class TestQState_3_qubit(unittest.TestCase):
         actual = qs.amp
         expect = np.array([0j, 0j, 0j, 0j, 0j, 0j, 0j, (1+0j)])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_x_x_csw(self):
@@ -762,7 +786,7 @@ class TestQState_3_qubit(unittest.TestCase):
         actual = qs.amp
         expect = np.array([0j, 0j, 0j, 0j, 0j, (1+0j), 0j, 0j])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
 class TestQState_n_qubit(unittest.TestCase):
@@ -776,7 +800,7 @@ class TestQState_n_qubit(unittest.TestCase):
         actual = qs.amp
         expect = np.array([0j, 0j, 0j, 0j, 0j, 0j, 0j, (1+0j)])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_mcx_4(self):
@@ -787,7 +811,7 @@ class TestQState_n_qubit(unittest.TestCase):
         expect = np.array([0j, 0j, 0j, 0j, 0j, 0j, 0j, 0j,
                            0j, 0j, 0j, 0j, 0j, 0j, 0j, (1+0j)])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_mcx_5(self):
@@ -800,7 +824,7 @@ class TestQState_n_qubit(unittest.TestCase):
                            0j, 0j, 0j, 0j, 0j, 0j, 0j, 0j,
                            0j, 0j, 0j, 0j, 0j, 0j, 0j, (1+0j)])
         ans = equal_vectors(actual, expect)
-        qs.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
 class TestQState_partial(unittest.TestCase):
@@ -815,8 +839,8 @@ class TestQState_partial(unittest.TestCase):
         actual = qs.amp
         expect = np.array([(0.7071067811865476+0j), 0j, 0j, (0.7071067811865476+0j)])
         ans = equal_vectors(actual, expect)
-        qs_ini.free()
-        qs.free()
+        # qs_ini.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_partial_3_permutation(self):
@@ -827,8 +851,8 @@ class TestQState_partial(unittest.TestCase):
         actual = qs.amp
         expect = np.array([(0.5+0j), 0j, (0.5+0j), 0j, 0j, (0.5+0j), 0j, (0.5+0j)])
         ans = equal_vectors(actual, expect)
-        qs_ini.free()
-        qs.free()
+        # qs_ini.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
 class TestQState_clone(unittest.TestCase):
@@ -843,8 +867,8 @@ class TestQState_clone(unittest.TestCase):
         actual_src = qs_src.amp
         actual_dst = qs_dst.amp
         ans = equal_vectors(actual_src, actual_dst)
-        qs_src.free()
-        qs_dst.free()
+        # qs_src.free()
+        # qs_dst.free()
         self.assertEqual(ans,True)
 
 class TestQState_bloch(unittest.TestCase):
@@ -856,7 +880,7 @@ class TestQState_bloch(unittest.TestCase):
         """
         qs = QState(qubit_num=3).ry(0, phase=0.25).rz(0, phase=0.25)
         theta, phi = qs.bloch()
-        qs.free()
+        # qs.free()
         ans = (round(theta,4) == 0.25 and round(phi,4) == 0.25)
         self.assertEqual(ans, True)
 
@@ -870,8 +894,8 @@ class TestQState_inpro(unittest.TestCase):
         qs_0 = QState(qubit_num=3).h(0).h(1).h(2)
         qs_1 = QState(qubit_num=3).h(0).h(1).h(2)
         inpro = qs_0.inpro(qs_1)
-        qs_0.free()
-        qs_1.free()
+        # qs_0.free()
+        # qs_1.free()
         ans = (round(inpro.real, 4) == 1.0 and inpro.imag == 0.0)
         self.assertEqual(ans, True)
 
@@ -881,8 +905,8 @@ class TestQState_inpro(unittest.TestCase):
         qs_0 = QState(qubit_num=3).h(0).h(1).h(2)
         qs_1 = QState(qubit_num=3).h(0).h(1).h(2)
         inpro = qs_0.inpro(qs_1, qid=[0,1])
-        qs_0.free()
-        qs_1.free()
+        # qs_0.free()
+        # qs_1.free()
         ans = (round(inpro.real, 4) == 1.0 and inpro.imag == 0.0)
         self.assertEqual(ans, True)
 
@@ -892,8 +916,8 @@ class TestQState_inpro(unittest.TestCase):
         qs_0 = QState(qubit_num=3).h(0).h(1).h(2)
         qs_1 = QState(qubit_num=3).h(0).h(1).h(2)
         fid = qs_0.fidelity(qs_1)
-        qs_0.free()
-        qs_1.free()
+        # qs_0.free()
+        # qs_1.free()
         ans = (round(fid, 4) == 1.0)
         self.assertEqual(ans, True)
 
@@ -903,8 +927,8 @@ class TestQState_inpro(unittest.TestCase):
         qs_0 = QState(qubit_num=3).h(0).h(1).h(2)
         qs_1 = QState(qubit_num=3).h(0).h(1).h(2)
         fid = qs_0.fidelity(qs_1, qid=[0,1])
-        qs_0.free()
-        qs_1.free()
+        # qs_0.free()
+        # qs_1.free()
         ans = (round(fid, 4) == 1.0)
         self.assertEqual(ans, True)
 
@@ -920,10 +944,10 @@ class TestQState_tenspro(unittest.TestCase):
         actual = qs_A.tenspro(qs_B)
         expect = QState(qubit_num=3).h(0).h(1).cx(1,2)
         ans = equal_qstates(actual, expect)
-        qs_A.free()
-        qs_B.free()
-        actual.free()
-        expect.free()
+        # qs_A.free()
+        # qs_B.free()
+        # actual.free()
+        # expect.free()
         self.assertEqual(ans,True)
 
 class TestQState_composite(unittest.TestCase):
@@ -937,9 +961,9 @@ class TestQState_composite(unittest.TestCase):
         actual = qs.composite(num=3)
         expect = QState(qubit_num=3).h(0).h(1).h(2)
         ans = equal_qstates(actual, expect)
-        qs.free()
-        actual.free()
-        expect.free()
+        # qs.free()
+        # actual.free()
+        # expect.free()
         self.assertEqual(ans,True)
 
 class TestQState_join(unittest.TestCase):
@@ -961,7 +985,7 @@ class TestQState_join(unittest.TestCase):
         actual = qs_tmp.join(qs_list)
         
         ans = equal_qstates(actual, expect)
-        QState.free_all(expect, qs_tmp, qs_list, actual)
+        # QState.free_all(expect, qs_tmp, qs_list, actual)
         self.assertEqual(ans,True)
         
 class TestQState_evolve(unittest.TestCase):
@@ -977,8 +1001,8 @@ class TestQState_evolve(unittest.TestCase):
         actual = qs.amp
         expect = np.array([(0.8090169943749473+0j), 0.5877852522924732j])
         ans = equal_vectors(actual, expect)
-        qs.free()
-        hm.free()
+        # qs.free()
+        # hm.free()
         self.assertEqual(ans,True)
 
 class TestQState_expect(unittest.TestCase):
@@ -995,9 +1019,9 @@ class TestQState_expect(unittest.TestCase):
         actual = qs.expect(observable=ob)
         expect = 0.9510565162951199
         ans = equal_values(actual, expect)
-        ob.free()
-        hm.free()
-        qs.free()
+        # ob.free()
+        # hm.free()
+        # qs.free()
         self.assertEqual(ans,True)
 
     def test_evolve_2_qubit(self):
@@ -1010,9 +1034,9 @@ class TestQState_expect(unittest.TestCase):
         actual = qs.expect(observable=ob)
         expect = 1.9999999999999898+0j
         ans = equal_values(actual, expect)
-        qs.free()
-        hm.free()
-        ob.free()
+        # qs.free()
+        # hm.free()
+        # ob.free()
         self.assertEqual(ans,True)
 
 class TestQState_apply(unittest.TestCase):
@@ -1026,8 +1050,8 @@ class TestQState_apply(unittest.TestCase):
         qs_0 = QState(qubit_num=2).h(0).apply(matrix=mat)
         qs_1 = QState(qubit_num=2).h(0).cx(0,1)
         ans = equal_qstates(qs_0, qs_1)
-        qs_0.free()
-        qs_1.free()
+        # qs_0.free()
+        # qs_1.free()
         self.assertEqual(ans,True)
 
 class TestQState_measure(unittest.TestCase):
@@ -1039,7 +1063,7 @@ class TestQState_measure(unittest.TestCase):
         """
         qs = QState(qubit_num=2).h(0).cx(0,1)
         md = qs.m(shots=10)
-        qs.free()
+        # qs.free()
         self.assertEqual(md.frq[0]+md.frq[3], 10)
         self.assertEqual(md.frq[1], 0)
         self.assertEqual(md.frq[2], 0)
@@ -1049,7 +1073,7 @@ class TestQState_measure(unittest.TestCase):
         """
         qs = QState(qubit_num=2).h(0).cx(0,1)
         md = qs.mx(shots=10)
-        qs.free()
+        # qs.free()
         self.assertEqual(md.frq[0]+md.frq[3], 10)
         self.assertEqual(md.frq[1], 0)
         self.assertEqual(md.frq[2], 0)
@@ -1059,7 +1083,7 @@ class TestQState_measure(unittest.TestCase):
         """
         qs = QState(qubit_num=2).h(0).cx(0,1)
         md = qs.my(shots=10)
-        qs.free()
+        # qs.free()
         self.assertEqual(md.frq[1]+md.frq[2], 10)
         self.assertEqual(md.frq[0], 0)
         self.assertEqual(md.frq[3], 0)
@@ -1069,7 +1093,7 @@ class TestQState_measure(unittest.TestCase):
         """
         qs = QState(qubit_num=2).h(0).cx(0,1)
         md = qs.mz(shots=10)
-        qs.free()
+        # qs.free()
         self.assertEqual(md.frq[0]+md.frq[3], 10)
         self.assertEqual(md.frq[1], 0)
         self.assertEqual(md.frq[2], 0)
@@ -1079,7 +1103,7 @@ class TestQState_measure(unittest.TestCase):
         """
         qs = QState(qubit_num=2).h(0).cx(0,1)
         md = qs.mb(shots=10)
-        qs.free()
+        # qs.free()
         self.assertEqual(md.frq[0], 10)
         self.assertEqual(md.frq[1], 0)
         self.assertEqual(md.frq[2], 0)
@@ -1090,7 +1114,7 @@ class TestQState_measure(unittest.TestCase):
         """
         qs = QState(qubit_num=2).ry(1, phase=0.2).rz(1, phase=0.2)
         md = qs.m([1], shots=10, angle=0.2, phase=0.2)
-        qs.free()
+        # qs.free()
         self.assertEqual(md.frq[0], 10)
         self.assertEqual(md.frq[1], 0)
 
@@ -1135,7 +1159,7 @@ class TestQState_measure(unittest.TestCase):
         freq = qs.m_freq()
         actual = sum(freq.values())
         self.assertEqual(actual, 100)
-        qs.free()
+        # qs.free()
 
 class TestQState_schmidt_decocmp(unittest.TestCase):
     """ test 'QState' : 'schmidt_decomp'
@@ -1153,8 +1177,8 @@ class TestQState_schmidt_decocmp(unittest.TestCase):
             vec_comp = vec_comp + coef[i] * qs_list[i].get_amp()
         qs_comp = QState(vector=vec_comp)
         ans = equal_qstates(qs_ori, qs_comp)
-        qs_ori.free()
-        qs_comp.free()
+        # qs_ori.free()
+        # qs_comp.free()
         self.assertEqual(ans,True)
 
     def test_schmidt_coef(self):
@@ -1182,7 +1206,7 @@ class TestQState_operate(unittest.TestCase):
         ans = equal_qstates(qs_expect, qs_actual)
         self.assertEqual(ans,True)
 
-        QState.free_all(qs_expect, qs_actual)
+        # QState.free_all(qs_expect, qs_actual)
         
     def test_operate_h_x(self):
         """test 'operate' (x followed by h)
@@ -1195,7 +1219,7 @@ class TestQState_operate(unittest.TestCase):
         ans = equal_qstates(qs_expect, qs_actual)
         self.assertEqual(ans,True)
 
-        QState.free_all(qs_expect, qs_actual)
+        # QState.free_all(qs_expect, qs_actual)
         
     def test_operate_h_y(self):
         """test 'operate' (y followed by h)
@@ -1208,7 +1232,7 @@ class TestQState_operate(unittest.TestCase):
         ans = equal_qstates(qs_expect, qs_actual)
         self.assertEqual(ans,True)
 
-        QState.free_all(qs_expect, qs_actual)
+        # QState.free_all(qs_expect, qs_actual)
         
     def test_operate_h_z(self):
         """test 'operate' (z followed by h)
@@ -1221,7 +1245,7 @@ class TestQState_operate(unittest.TestCase):
         ans = equal_qstates(qs_expect, qs_actual)
         self.assertEqual(ans,True)
 
-        QState.free_all(qs_expect, qs_actual)
+        # QState.free_all(qs_expect, qs_actual)
         
     def test_operate_xyz(self):
         """test 'operate' (xyz)
@@ -1234,7 +1258,7 @@ class TestQState_operate(unittest.TestCase):
         ans = equal_qstates(qs_expect, qs_actual)
         self.assertEqual(ans,True)
 
-        QState.free_all(qs_expect, qs_actual)
+        # QState.free_all(qs_expect, qs_actual)
         
     def test_operate_controlled_xyz(self):
         """test 'operate' (controlled_xyz)
@@ -1247,7 +1271,7 @@ class TestQState_operate(unittest.TestCase):
         ans = equal_qstates(qs_expect, qs_actual)
         self.assertEqual(ans,True)
 
-        QState.free_all(qs_expect, qs_actual)
+        # QState.free_all(qs_expect, qs_actual)
         
 if __name__ == '__main__':
     unittest.main()

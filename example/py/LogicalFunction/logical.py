@@ -140,4 +140,4 @@ if __name__ == '__main__':
     for i in range(len(in_list)):
         print("{0:03b} -> {1:d}".format(in_list[i],out_list[i]))
 
-    qs.free()
+    # qs.free()

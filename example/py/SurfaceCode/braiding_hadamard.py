@@ -359,7 +359,7 @@ def main():
     # result = qc.measure_Lx(shots=100)  # 論理パウリX演算子を測定
     print("frequency =", result['frequency'])
 
-    qc.free()
+    # qc.free()
 
 if __name__ == '__main__':
     main()

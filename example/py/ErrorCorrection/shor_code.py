@@ -66,4 +66,4 @@ if __name__ == '__main__':
     print("* fidelity = {:.6f}".format(fid))
 
     # free all densops
-    DensOp.free_all(de_ini, de_fin)
+    # DensOp.free_all(de_ini, de_fin)

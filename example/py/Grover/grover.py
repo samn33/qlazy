@@ -166,4 +166,4 @@ if __name__ == '__main__':
     print("== result==")
     print("x =", res)
 
-    qs.free()
+    # qs.free()

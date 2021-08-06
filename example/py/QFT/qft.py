@@ -100,7 +100,7 @@ def main():
     data_fft /= norm
     pprint(data_fft)
     
-    qs.free()
+    # qs.free()
 
 if __name__ == '__main__':
     main()

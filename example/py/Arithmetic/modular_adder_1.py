@@ -157,4 +157,4 @@ if __name__ == '__main__':
     for i in range(len(a_list)):
         print("{0:}+{1:} mod {2:} -> {3:}".format(a_list[i],b,N,r_list[i]))
 
-    qs.free()
+    # qs.free()

@@ -134,4 +134,4 @@ if __name__ == '__main__':
     error_correction(qs_fin, err_chain)
     print("* fidelity after error correction:", qs_fin.fidelity(qs_ini))
     
-    QState.free_all(qs_ini, qs_fin)
+    # QState.free_all(qs_ini, qs_fin)

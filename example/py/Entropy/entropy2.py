@@ -91,8 +91,8 @@ if __name__ == '__main__':
         de_B = de.partial(id_B)
         rel_ent = de_A.relative_entropy(de_B)
         print("- relative entropy:                    S(A||B) = {:.4f}".format(rel_ent))
-        de_A.free()
-        de_B.free()
+        # de_A.free()
+        # de_B.free()
     
-    qs.free()
-    de.free()
+    # qs.free()
+    # de.free()

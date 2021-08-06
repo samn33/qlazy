@@ -69,10 +69,10 @@ def hadamard_test_imag():
 
     # free memory
     
-    qs_0.free()
-    qs_psi.free()
-    qs_op.free()
-    qs.free()
+    # qs_0.free()
+    # qs_psi.free()
+    # qs_op.free()
+    # qs.free()
 
 if __name__ == '__main__':
     

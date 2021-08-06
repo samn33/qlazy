@@ -105,4 +105,4 @@ if __name__ == '__main__':
     for i in range(len(a_list)):
         print("{0:}+{1:} -> {2:}".format(a_list[i],b,r_list[i]))
 
-    qs.free()
+    # qs.free()

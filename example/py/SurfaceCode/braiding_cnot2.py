@@ -140,7 +140,7 @@ def measure_logical_X(sb, chain_A, chain_B, shots=1):
         mval_B_bin = str(sum([int(s) for s in list(mval_B)])%2)
         mval = (XBASE[mval_A_bin] + XBASE[mval_B_bin])
         mval_list.append(mval)
-        sb_tmp.free()
+        # sb_tmp.free()
         
     return Counter(mval_list)
 
@@ -223,7 +223,7 @@ def operate_logical_cnot(lq, shots=5):
     freq = measure_logical_X(sb, chain_0, chain_2, shots=shots)
     print("Input('{0:}') == [CNOT] ==> {1:}".format(lq, freq))
 
-    sb.free()
+    # sb.free()
 
 if __name__ == '__main__':
 

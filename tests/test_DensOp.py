@@ -462,8 +462,8 @@ class TestDensOp_init(unittest.TestCase):
         actual = de.element
         expect = make_densop_matrix(VECTORS_4, PROBS_4)
         ans = equal_matrices(actual, expect)
-        [qs[i].free() for i in range(dim)]
-        de.free()
+        # [qs[i].free() for i in range(dim)]
+        # de.free()
         self.assertEqual(ans,True)
 
     def test_init_with_matrix(self):
@@ -474,35 +474,62 @@ class TestDensOp_init(unittest.TestCase):
         actual = de.element
         expect = mat
         ans = equal_matrices(actual, expect)
-        de.free()
+        # de.free()
         self.assertEqual(ans,True)
 
-class TestDensOp_free_all(unittest.TestCase):
-    """ test 'DensOp' : free_all'
+# class TestDensOp_free_all(unittest.TestCase):
+#     """ test 'DensOp' : free_all'
+#     """
+# 
+#     def test_free_all(self):
+#         """test 'free_all'
+#         """
+#         mat = make_densop_matrix(VECTORS_4, PROBS_4)
+#         de_0 = DensOp(matrix=mat)
+#         de_1 = DensOp(matrix=mat).x(0)
+#         de_2 = DensOp(matrix=mat).h(0)
+#         DensOp.free_all(de_0,de_1,de_2)
+# 
+#         mat = make_densop_matrix(VECTORS_4, PROBS_4)
+#         de_0 = DensOp(matrix=mat)
+#         de_1 = DensOp(matrix=mat).x(0)
+#         de_2 = DensOp(matrix=mat).h(0)
+#         de_A = [de_1,de_2]
+#         DensOp.free_all(de_0,de_A)
+# 
+#         mat = make_densop_matrix(VECTORS_4, PROBS_4)
+#         de_0 = DensOp(matrix=mat)
+#         de_1 = DensOp(matrix=mat).x(0)
+#         de_2 = DensOp(matrix=mat).h(0)
+#         de_B = [de_0, [de_1,de_2]]
+#         DensOp.free_all(de_B)
+        
+class TestDensOp_del_all(unittest.TestCase):
+    """ test 'DensOp' : del_all'
     """
 
     def test_free_all(self):
-        """test 'free_all'
+        """test 'del_all'
         """
         mat = make_densop_matrix(VECTORS_4, PROBS_4)
         de_0 = DensOp(matrix=mat)
         de_1 = DensOp(matrix=mat).x(0)
         de_2 = DensOp(matrix=mat).h(0)
-        DensOp.free_all(de_0,de_1,de_2)
+        DensOp.del_all(de_0,de_1,de_2)
 
         mat = make_densop_matrix(VECTORS_4, PROBS_4)
         de_0 = DensOp(matrix=mat)
         de_1 = DensOp(matrix=mat).x(0)
         de_2 = DensOp(matrix=mat).h(0)
         de_A = [de_1,de_2]
-        DensOp.free_all(de_0,de_A)
+        DensOp.del_all(de_0,de_A)
 
         mat = make_densop_matrix(VECTORS_4, PROBS_4)
         de_0 = DensOp(matrix=mat)
         de_1 = DensOp(matrix=mat).x(0)
         de_2 = DensOp(matrix=mat).h(0)
         de_B = [de_0, [de_1,de_2]]
-        DensOp.free_all(de_B)
+        DensOp.del_all(de_B)
         
 class TestDensOp_reset(unittest.TestCase):
     """ test 'DensOp' : 'reset'
@@ -519,8 +546,8 @@ class TestDensOp_reset(unittest.TestCase):
         actual = de.element
         expect = np.array([[1, 0],[0, 0]])
         ans = equal_matrices(actual, expect)
-        [qs[i].free() for i in range(dim)]
-        de.free()
+        # [qs[i].free() for i in range(dim)]
+        # de.free()
         self.assertEqual(ans,True)
 
     def test_reset_partial(self):
@@ -545,15 +572,15 @@ class TestDensOp_reset(unittest.TestCase):
         expect = de_Y.element
         ans = equal_matrices(actual, expect)
 
-        [qs_A[i].free() for i in range(2)]
-        [qs_B[i].free() for i in range(4)]
-        qs_C.free()
+        # [qs_A[i].free() for i in range(2)]
+        # [qs_B[i].free() for i in range(4)]
+        # qs_C.free()
 
-        de_A.free()
-        de_B.free()
-        de_C.free()
-        de_X.free()
-        de_Y.free()
+        # de_A.free()
+        # de_B.free()
+        # de_C.free()
+        # de_X.free()
+        # de_Y.free()
         self.assertEqual(ans,True)
         
 class TestDensOp_clone(unittest.TestCase):
@@ -569,8 +596,8 @@ class TestDensOp_clone(unittest.TestCase):
         actual = de_clone.element
         expect = mat
         ans = equal_matrices(actual, expect)
-        de.free()
-        de_clone.free()
+        # de.free()
+        # de_clone.free()
         self.assertEqual(ans,True)
 
 class TestDensOp_add_mul(unittest.TestCase):
@@ -588,8 +615,8 @@ class TestDensOp_add_mul(unittest.TestCase):
         actual = de_0.element
         expect = add_matrices(mat_0, mat_1)
         ans = equal_matrices(actual, expect)
-        de_0.free()
-        de_1.free()
+        # de_0.free()
+        # de_1.free()
         self.assertEqual(ans,True)
 
     def test_mul(self):
@@ -602,7 +629,7 @@ class TestDensOp_add_mul(unittest.TestCase):
         actual = de.element
         expect = mul_matrix(fac, mat)
         ans = equal_matrices(actual, expect)
-        de.free()
+        # de.free()
         self.assertEqual(ans,True)
 
 class TestDensOp_trace(unittest.TestCase):
@@ -617,7 +644,7 @@ class TestDensOp_trace(unittest.TestCase):
         actual = de.trace()
         expect = 1.0
         ans = equal_values(actual, expect)
-        de.free()
+        # de.free()
         self.assertEqual(ans,True)
 
     def test_sqtrace(self):
@@ -628,7 +655,7 @@ class TestDensOp_trace(unittest.TestCase):
         actual = de.sqtrace()
         expect = 0.46978583
         ans = equal_values(actual, expect)
-        de.free()
+        # de.free()
         self.assertEqual(ans,True)
 
 class TestDensOp_composite(unittest.TestCase):
@@ -646,8 +673,8 @@ class TestDensOp_composite(unittest.TestCase):
         actual = de_pat.element
         expect = mat_2
         ans = equal_matrices(actual, expect)
-        de.free()
-        de_pat.free()
+        # de.free()
+        # de_pat.free()
         self.assertEqual(ans,True)
 
     def test_partial(self):
@@ -661,8 +688,8 @@ class TestDensOp_composite(unittest.TestCase):
         actual = de_pat.element
         expect = mat_2
         ans = equal_matrices(actual, expect)
-        de.free()
-        de_pat.free()
+        # de.free()
+        # de_pat.free()
         self.assertEqual(ans,True)
 
     def test_tensppro(self):
@@ -677,9 +704,9 @@ class TestDensOp_composite(unittest.TestCase):
         actual = de_8.element
         expect = mat_8
         ans = equal_matrices(actual, expect)
-        de_4.free()
-        de_2.free()
-        de_8.free()
+        # de_4.free()
+        # de_2.free()
+        # de_8.free()
         self.assertEqual(ans,True)
 
     def test_composite(self):
@@ -693,8 +720,8 @@ class TestDensOp_composite(unittest.TestCase):
         actual = de_8.element
         expect = mat_8
         ans = equal_matrices(actual, expect)
-        de_2.free()
-        de_8.free()
+        # de_2.free()
+        # de_8.free()
         self.assertEqual(ans,True)
 
 class TestDensOp_join(unittest.TestCase):
@@ -716,7 +743,7 @@ class TestDensOp_join(unittest.TestCase):
         actual = de_tmp.join(de_list)
         
         ans = equal_densops(actual, expect)
-        DensOp.free_all(expect, de_tmp, de_list, actual)
+        # DensOp.free_all(expect, de_tmp, de_list, actual)
         self.assertEqual(ans,True)
         
 class TestDensOp_expect(unittest.TestCase):
@@ -732,7 +759,7 @@ class TestDensOp_expect(unittest.TestCase):
         actual = de.expect(matrix=mat_1)
         expect = 0.20425749
         ans = equal_values(actual, expect)
-        de.free()
+        # de.free()
         self.assertEqual(ans,True)
 
 class TestDensOp_apply(unittest.TestCase):
@@ -749,7 +776,7 @@ class TestDensOp_apply(unittest.TestCase):
         actual = de.element
         expect = make_apply_matrix(mat_1, mat_0)
         ans = equal_matrices(actual, expect)
-        de.free()
+        # de.free()
         self.assertEqual(ans,True)
 
 class TestDensOp_measurement(unittest.TestCase):
@@ -789,8 +816,8 @@ class TestDensOp_measurement(unittest.TestCase):
         de = DensOp(qstate=[qs])
         povm = self.make_povm(theta)
         prob = de.probability(povm=povm)
-        qs.free()
-        de.free()
+        # qs.free()
+        # de.free()
         self.assertEqual(equal_values(prob[0], 0.69098301), True)
         self.assertEqual(equal_values(prob[1], 0.00000000), True)
         self.assertEqual(equal_values(prob[2], 0.30901699), True)
@@ -805,7 +832,7 @@ class TestDensOp_measurement(unittest.TestCase):
         actual = de.element
         expect = self.inst_res
         ans = equal_matrices(actual, expect)
-        de.free()
+        # de.free()
         self.assertEqual(ans,True)
 
     def test_instrument_0(self):
@@ -818,7 +845,7 @@ class TestDensOp_measurement(unittest.TestCase):
         actual = de.element
         expect = self.inst_res_0
         ans = equal_matrices(actual, expect)
-        de.free()
+        # de.free()
         self.assertEqual(ans,True)
 
     def test_instrument_1(self):
@@ -831,7 +858,7 @@ class TestDensOp_measurement(unittest.TestCase):
         actual = de.element
         expect = self.inst_res_1
         ans = equal_matrices(actual, expect)
-        de.free()
+        # de.free()
         self.assertEqual(ans,True)
 
 class TestDensOp_qchannel(unittest.TestCase):
@@ -863,7 +890,7 @@ class TestDensOp_qchannel(unittest.TestCase):
         de.bit_flip(0, prob=prob)
         actual = np.array(self.get_coordinate(densop=de))
         expect = np.array([0.57735027,0.46188022,0.46188022])
-        de.free()
+        # de.free()
         self.assertEqual((abs(np.linalg.norm(actual-expect)) < EPS), True)
  
     def test_phase_flip(self):
@@ -875,7 +902,7 @@ class TestDensOp_qchannel(unittest.TestCase):
         de.phase_flip(0, prob=prob)
         actual = np.array(self.get_coordinate(densop=de))
         expect = np.array([0.46188022,0.46188022,0.57735027])
-        de.free()
+        # de.free()
         self.assertEqual((abs(np.linalg.norm(actual-expect)) < EPS), True)
  
     def test_bit_phase_flip(self):
@@ -887,7 +914,7 @@ class TestDensOp_qchannel(unittest.TestCase):
         de.bit_phase_flip(0, prob=prob)
         actual = np.array(self.get_coordinate(densop=de))
         expect = np.array([0.46188022,0.57735027,0.46188022])
-        de.free()
+        # de.free()
         self.assertEqual((abs(np.linalg.norm(actual-expect)) < EPS), True)
  
     def test_depolarize(self):
@@ -899,7 +926,7 @@ class TestDensOp_qchannel(unittest.TestCase):
         de.depolarize(0, prob=prob)
         actual = np.array(self.get_coordinate(densop=de))
         expect = np.array([0.51961524,0.51961524,0.51961524])
-        de.free()
+        # de.free()
         self.assertEqual((abs(np.linalg.norm(actual-expect)) < EPS), True)
  
     def test_amp_dump(self):
@@ -911,7 +938,7 @@ class TestDensOp_qchannel(unittest.TestCase):
         de.amp_dump(0, prob=prob)
         actual = np.array(self.get_coordinate(densop=de))
         expect = np.array([0.54772256,0.54772256,0.61961524])
-        de.free()
+        # de.free()
         self.assertEqual((abs(np.linalg.norm(actual-expect)) < EPS), True)
  
     def test_phase_dump(self):
@@ -923,7 +950,7 @@ class TestDensOp_qchannel(unittest.TestCase):
         de.phase_dump(0, prob=prob)
         actual = np.array(self.get_coordinate(densop=de))
         expect = np.array([0.54772256,0.54772256,0.57735027])
-        de.free()
+        # de.free()
         self.assertEqual((abs(np.linalg.norm(actual-expect)) < EPS), True)
  
 class TestDensOp_similarity(unittest.TestCase):
@@ -940,8 +967,8 @@ class TestDensOp_similarity(unittest.TestCase):
         actual = de_0.fidelity(de_1)
         expect = 0.6973384790052483
         ans = equal_values(actual, expect)
-        de_0.free()
-        de_1.free()
+        # de_0.free()
+        # de_1.free()
         self.assertEqual(ans,True)
         
     def test_fidelity_partial(self):
@@ -954,8 +981,8 @@ class TestDensOp_similarity(unittest.TestCase):
         actual = de_0.fidelity(de_1, qid=[3,2,1,0])
         expect = 0.6973384790052483
         ans = equal_values(actual, expect)
-        de_0.free()
-        de_1.free()
+        # de_0.free()
+        # de_1.free()
         self.assertEqual(ans,True)
         
     def test_distance(self):
@@ -968,8 +995,8 @@ class TestDensOp_similarity(unittest.TestCase):
         actual = de_0.distance(de_1)
         expect = 0.6395360466162878
         ans = equal_values(actual, expect)
-        de_0.free()
-        de_1.free()
+        # de_0.free()
+        # de_1.free()
         self.assertEqual(ans,True)
 
     def test_distance_partial(self):
@@ -982,8 +1009,8 @@ class TestDensOp_similarity(unittest.TestCase):
         actual = de_0.distance(de_1, qid=[3,2,1,0])
         expect = 0.6395360466162878
         ans = equal_values(actual, expect)
-        de_0.free()
-        de_1.free()
+        # de_0.free()
+        # de_1.free()
         self.assertEqual(ans,True)
 
 class TestDensOp_spectrum(unittest.TestCase):
@@ -1000,9 +1027,9 @@ class TestDensOp_spectrum(unittest.TestCase):
         actual = de_0.fidelity(de_1)
         expect = 1.0
         ans = equal_values(actual, expect)
-        [q.free() for q in qstate]
-        de_0.free()
-        de_1.free()
+        # [q.free() for q in qstate]
+        # de_0.free()
+        # de_1.free()
         self.assertEqual(ans,True)
 
 class TestDensOp_entropy(unittest.TestCase):
@@ -1017,7 +1044,7 @@ class TestDensOp_entropy(unittest.TestCase):
         actual = de.entropy()
         expect = 1.3270775661797476
         ans = equal_values(actual, expect)
-        de.free()
+        # de.free()
         self.assertEqual(ans,True)
 
     def test_entropy_pure(self):
@@ -1028,8 +1055,8 @@ class TestDensOp_entropy(unittest.TestCase):
         ent_A = de.entropy([0])
         ent_B = de.entropy([1])
         ans = equal_values(ent_A, ent_B)
-        qs.free()
-        de.free()
+        # qs.free()
+        # de.free()
         self.assertEqual(ans,True)
 
     def test_cond_entropy(self):
@@ -1042,7 +1069,7 @@ class TestDensOp_entropy(unittest.TestCase):
         actual= de.cond_entropy([0,1],[2,3])
         expect = 1.3270774562533503
         ans = equal_values(actual, expect)
-        de.free()
+        # de.free()
         self.assertEqual(ans,True)
 
     def test_mutual_info(self):
@@ -1055,7 +1082,7 @@ class TestDensOp_entropy(unittest.TestCase):
         actual = de.mutual_info([0,1],[2,3])
         expect = 1.0992639731810527e-07
         ans = equal_values(actual, expect)
-        de.free()
+        # de.free()
         self.assertEqual(ans,True)
 
     def test_relative_entropy(self):
@@ -1068,8 +1095,8 @@ class TestDensOp_entropy(unittest.TestCase):
         actual = de_0.relative_entropy(de_1)
         expect = 2.789437620640274
         ans = equal_values(actual, expect)
-        de_0.free()
-        de_1.free()
+        # de_0.free()
+        # de_1.free()
         self.assertEqual(ans,True)
 
 class TestDensOp_1_qubit_gate(unittest.TestCase):
@@ -1085,9 +1112,9 @@ class TestDensOp_1_qubit_gate(unittest.TestCase):
         [qs.x(0) for qs in qstate]
         expect = DensOp(qstate=qstate, prob=PROBS_2)
         ans = equal_densops(actual, expect)
-        [qs.free() for qs in qstate]
-        actual.free()
-        expect.free()
+        # [qs.free() for qs in qstate]
+        # actual.free()
+        # expect.free()
         self.assertEqual(ans,True)
 
     def test_y(self):
@@ -1099,9 +1126,9 @@ class TestDensOp_1_qubit_gate(unittest.TestCase):
         [qs.y(0) for qs in qstate]
         expect = DensOp(qstate=qstate, prob=PROBS_2)
         ans = equal_densops(actual, expect)
-        [qs.free() for qs in qstate]
-        actual.free()
-        expect.free()
+        # [qs.free() for qs in qstate]
+        # actual.free()
+        # expect.free()
         self.assertEqual(ans,True)
 
     def test_z(self):
@@ -1113,9 +1140,9 @@ class TestDensOp_1_qubit_gate(unittest.TestCase):
         [qs.z(0) for qs in qstate]
         expect = DensOp(qstate=qstate, prob=PROBS_2)
         ans = equal_densops(actual, expect)
-        [qs.free() for qs in qstate]
-        actual.free()
-        expect.free()
+        # [qs.free() for qs in qstate]
+        # actual.free()
+        # expect.free()
         self.assertEqual(ans,True)
 
     def test_xr(self):
@@ -1127,9 +1154,9 @@ class TestDensOp_1_qubit_gate(unittest.TestCase):
         [qs.xr(0) for qs in qstate]
         expect = DensOp(qstate=qstate, prob=PROBS_2)
         ans = equal_densops(actual, expect)
-        [qs.free() for qs in qstate]
-        actual.free()
-        expect.free()
+        # [qs.free() for qs in qstate]
+        # actual.free()
+        # expect.free()
         self.assertEqual(ans,True)
 
     def test_xr_dg(self):
@@ -1141,9 +1168,9 @@ class TestDensOp_1_qubit_gate(unittest.TestCase):
         [qs.xr_dg(0) for qs in qstate]
         expect = DensOp(qstate=qstate, prob=PROBS_2)
         ans = equal_densops(actual, expect)
-        [qs.free() for qs in qstate]
-        actual.free()
-        expect.free()
+        # [qs.free() for qs in qstate]
+        # actual.free()
+        # expect.free()
         self.assertEqual(ans,True)
 
     def test_h(self):
@@ -1155,9 +1182,9 @@ class TestDensOp_1_qubit_gate(unittest.TestCase):
         [qs.h(0) for qs in qstate]
         expect = DensOp(qstate=qstate, prob=PROBS_2)
         ans = equal_densops(actual, expect)
-        [qs.free() for qs in qstate]
-        actual.free()
-        expect.free()
+        # [qs.free() for qs in qstate]
+        # actual.free()
+        # expect.free()
         self.assertEqual(ans,True)
 
     def test_s(self):
@@ -1169,9 +1196,9 @@ class TestDensOp_1_qubit_gate(unittest.TestCase):
         [qs.s(0) for qs in qstate]
         expect = DensOp(qstate=qstate, prob=PROBS_2)
         ans = equal_densops(actual, expect)
-        [qs.free() for qs in qstate]
-        actual.free()
-        expect.free()
+        # [qs.free() for qs in qstate]
+        # actual.free()
+        # expect.free()
         self.assertEqual(ans,True)
 
     def test_s_dg(self):
@@ -1183,9 +1210,9 @@ class TestDensOp_1_qubit_gate(unittest.TestCase):
         [qs.s_dg(0) for qs in qstate]
         expect = DensOp(qstate=qstate, prob=PROBS_2)
         ans = equal_densops(actual, expect)
-        [qs.free() for qs in qstate]
-        actual.free()
-        expect.free()
+        # [qs.free() for qs in qstate]
+        # actual.free()
+        # expect.free()
         self.assertEqual(ans,True)
 
     def test_t(self):
@@ -1197,9 +1224,9 @@ class TestDensOp_1_qubit_gate(unittest.TestCase):
         [qs.t(0) for qs in qstate]
         expect = DensOp(qstate=qstate, prob=PROBS_2)
         ans = equal_densops(actual, expect)
-        [qs.free() for qs in qstate]
-        actual.free()
-        expect.free()
+        # [qs.free() for qs in qstate]
+        # actual.free()
+        # expect.free()
         self.assertEqual(ans,True)
 
     def test_t_dg(self):
@@ -1211,9 +1238,9 @@ class TestDensOp_1_qubit_gate(unittest.TestCase):
         [qs.t_dg(0) for qs in qstate]
         expect = DensOp(qstate=qstate, prob=PROBS_2)
         ans = equal_densops(actual, expect)
-        [qs.free() for qs in qstate]
-        actual.free()
-        expect.free()
+        # [qs.free() for qs in qstate]
+        # actual.free()
+        # expect.free()
         self.assertEqual(ans,True)
 
     def test_rx(self):
@@ -1225,9 +1252,9 @@ class TestDensOp_1_qubit_gate(unittest.TestCase):
         [qs.rx(0, phase=0.25) for qs in qstate]
         expect = DensOp(qstate=qstate, prob=PROBS_2)
         ans = equal_densops(actual, expect)
-        [qs.free() for qs in qstate]
-        actual.free()
-        expect.free()
+        # [qs.free() for qs in qstate]
+        # actual.free()
+        # expect.free()
         self.assertEqual(ans,True)
 
     def test_ry(self):
@@ -1239,9 +1266,9 @@ class TestDensOp_1_qubit_gate(unittest.TestCase):
         [qs.ry(0, phase=0.25) for qs in qstate]
         expect = DensOp(qstate=qstate, prob=PROBS_2)
         ans = equal_densops(actual, expect)
-        [qs.free() for qs in qstate]
-        actual.free()
-        expect.free()
+        # [qs.free() for qs in qstate]
+        # actual.free()
+        # expect.free()
         self.assertEqual(ans,True)
 
     def test_rz(self):
@@ -1253,9 +1280,9 @@ class TestDensOp_1_qubit_gate(unittest.TestCase):
         [qs.rz(0, phase=0.25) for qs in qstate]
         expect = DensOp(qstate=qstate, prob=PROBS_2)
         ans = equal_densops(actual, expect)
-        [qs.free() for qs in qstate]
-        actual.free()
-        expect.free()
+        # [qs.free() for qs in qstate]
+        # actual.free()
+        # expect.free()
         self.assertEqual(ans,True)
 
     def test_p(self):
@@ -1267,9 +1294,9 @@ class TestDensOp_1_qubit_gate(unittest.TestCase):
         [qs.p(0, phase=0.25) for qs in qstate]
         expect = DensOp(qstate=qstate, prob=PROBS_2)
         ans = equal_densops(actual, expect)
-        [qs.free() for qs in qstate]
-        actual.free()
-        expect.free()
+        # [qs.free() for qs in qstate]
+        # actual.free()
+        # expect.free()
         self.assertEqual(ans,True)
 
     def test_u1(self):
@@ -1281,9 +1308,9 @@ class TestDensOp_1_qubit_gate(unittest.TestCase):
         [qs.u1(0, alpha=0.1) for qs in qstate]
         expect = DensOp(qstate=qstate, prob=PROBS_2)
         ans = equal_densops(actual, expect)
-        [qs.free() for qs in qstate]
-        actual.free()
-        expect.free()
+        # [qs.free() for qs in qstate]
+        # actual.free()
+        # expect.free()
         self.assertEqual(ans,True)
 
     def test_u2(self):
@@ -1295,9 +1322,9 @@ class TestDensOp_1_qubit_gate(unittest.TestCase):
         [qs.u2(0, alpha=0.1, beta=0.2) for qs in qstate]
         expect = DensOp(qstate=qstate, prob=PROBS_2)
         ans = equal_densops(actual, expect)
-        [qs.free() for qs in qstate]
-        actual.free()
-        expect.free()
+        # [qs.free() for qs in qstate]
+        # actual.free()
+        # expect.free()
         self.assertEqual(ans,True)
 
     def test_u3(self):
@@ -1309,9 +1336,9 @@ class TestDensOp_1_qubit_gate(unittest.TestCase):
         [qs.u3(0, alpha=0.1, beta=0.2, gamma=0.3) for qs in qstate]
         expect = DensOp(qstate=qstate, prob=PROBS_2)
         ans = equal_densops(actual, expect)
-        [qs.free() for qs in qstate]
-        actual.free()
-        expect.free()
+        # [qs.free() for qs in qstate]
+        # actual.free()
+        # expect.free()
         self.assertEqual(ans,True)
 
 class TestDensOp_1_qubit_gate_in_2_reg(unittest.TestCase):
@@ -1328,9 +1355,9 @@ class TestDensOp_1_qubit_gate_in_2_reg(unittest.TestCase):
         [qs.rx(qid, phase=0.25) for qs in qstate]
         expect = DensOp(qstate=qstate, prob=PROBS_4)
         ans = equal_densops(actual, expect)
-        [qs.free() for qs in qstate]
-        actual.free()
-        expect.free()
+        # [qs.free() for qs in qstate]
+        # actual.free()
+        # expect.free()
         self.assertEqual(ans,True)
 
     def test_rx_1(self):
@@ -1343,9 +1370,9 @@ class TestDensOp_1_qubit_gate_in_2_reg(unittest.TestCase):
         [qs.rx(qid, phase=0.25) for qs in qstate]
         expect = DensOp(qstate=qstate, prob=PROBS_4)
         ans = equal_densops(actual, expect)
-        [qs.free() for qs in qstate]
-        actual.free()
-        expect.free()
+        # [qs.free() for qs in qstate]
+        # actual.free()
+        # expect.free()
         self.assertEqual(ans,True)
 
 class TestQState_2_qubit(unittest.TestCase):
@@ -1361,9 +1388,9 @@ class TestQState_2_qubit(unittest.TestCase):
         [qs.cx(0,1) for qs in qstate]
         expect = DensOp(qstate=qstate, prob=PROBS_4)
         ans = equal_densops(actual, expect)
-        [qs.free() for qs in qstate]
-        actual.free()
-        expect.free()
+        # [qs.free() for qs in qstate]
+        # actual.free()
+        # expect.free()
         self.assertEqual(ans,True)
 
     def test_cy(self):
@@ -1375,9 +1402,9 @@ class TestQState_2_qubit(unittest.TestCase):
         [qs.cy(0,1) for qs in qstate]
         expect = DensOp(qstate=qstate, prob=PROBS_4)
         ans = equal_densops(actual, expect)
-        [qs.free() for qs in qstate]
-        actual.free()
-        expect.free()
+        # [qs.free() for qs in qstate]
+        # actual.free()
+        # expect.free()
         self.assertEqual(ans,True)
 
     def test_cz(self):
@@ -1389,9 +1416,9 @@ class TestQState_2_qubit(unittest.TestCase):
         [qs.cz(0,1) for qs in qstate]
         expect = DensOp(qstate=qstate, prob=PROBS_4)
         ans = equal_densops(actual, expect)
-        [qs.free() for qs in qstate]
-        actual.free()
-        expect.free()
+        # [qs.free() for qs in qstate]
+        # actual.free()
+        # expect.free()
         self.assertEqual(ans,True)
 
     def test_cxr(self):
@@ -1403,9 +1430,9 @@ class TestQState_2_qubit(unittest.TestCase):
         [qs.cxr(0,1) for qs in qstate]
         expect = DensOp(qstate=qstate, prob=PROBS_4)
         ans = equal_densops(actual, expect)
-        [qs.free() for qs in qstate]
-        actual.free()
-        expect.free()
+        # [qs.free() for qs in qstate]
+        # actual.free()
+        # expect.free()
         self.assertEqual(ans,True)
 
     def test_cxr_dg(self):
@@ -1417,9 +1444,9 @@ class TestQState_2_qubit(unittest.TestCase):
         [qs.cxr_dg(0,1) for qs in qstate]
         expect = DensOp(qstate=qstate, prob=PROBS_4)
         ans = equal_densops(actual, expect)
-        [qs.free() for qs in qstate]
-        actual.free()
-        expect.free()
+        # [qs.free() for qs in qstate]
+        # actual.free()
+        # expect.free()
         self.assertEqual(ans,True)
 
     def test_ch(self):
@@ -1431,9 +1458,9 @@ class TestQState_2_qubit(unittest.TestCase):
         [qs.ch(0,1) for qs in qstate]
         expect = DensOp(qstate=qstate, prob=PROBS_4)
         ans = equal_densops(actual, expect)
-        [qs.free() for qs in qstate]
-        actual.free()
-        expect.free()
+        # [qs.free() for qs in qstate]
+        # actual.free()
+        # expect.free()
         self.assertEqual(ans,True)
 
     def test_cs(self):
@@ -1445,9 +1472,9 @@ class TestQState_2_qubit(unittest.TestCase):
         [qs.cs(0,1) for qs in qstate]
         expect = DensOp(qstate=qstate, prob=PROBS_4)
         ans = equal_densops(actual, expect)
-        [qs.free() for qs in qstate]
-        actual.free()
-        expect.free()
+        # [qs.free() for qs in qstate]
+        # actual.free()
+        # expect.free()
         self.assertEqual(ans,True)
         
     def test_cs_dg(self):
@@ -1459,9 +1486,9 @@ class TestQState_2_qubit(unittest.TestCase):
         [qs.cs_dg(0,1) for qs in qstate]
         expect = DensOp(qstate=qstate, prob=PROBS_4)
         ans = equal_densops(actual, expect)
-        [qs.free() for qs in qstate]
-        actual.free()
-        expect.free()
+        # [qs.free() for qs in qstate]
+        # actual.free()
+        # expect.free()
         self.assertEqual(ans,True)
 
     def test_ct(self):
@@ -1473,9 +1500,9 @@ class TestQState_2_qubit(unittest.TestCase):
         [qs.ct(0,1) for qs in qstate]
         expect = DensOp(qstate=qstate, prob=PROBS_4)
         ans = equal_densops(actual, expect)
-        [qs.free() for qs in qstate]
-        actual.free()
-        expect.free()
+        # [qs.free() for qs in qstate]
+        # actual.free()
+        # expect.free()
         self.assertEqual(ans,True)
 
     def test_ct_dg(self):
@@ -1487,9 +1514,9 @@ class TestQState_2_qubit(unittest.TestCase):
         [qs.ct_dg(0,1) for qs in qstate]
         expect = DensOp(qstate=qstate, prob=PROBS_4)
         ans = equal_densops(actual, expect)
-        [qs.free() for qs in qstate]
-        actual.free()
-        expect.free()
+        # [qs.free() for qs in qstate]
+        # actual.free()
+        # expect.free()
         self.assertEqual(ans,True)
 
     def test_sw(self):
@@ -1501,9 +1528,9 @@ class TestQState_2_qubit(unittest.TestCase):
         [qs.sw(0,1) for qs in qstate]
         expect = DensOp(qstate=qstate, prob=PROBS_4)
         ans = equal_densops(actual, expect)
-        [qs.free() for qs in qstate]
-        actual.free()
-        expect.free()
+        # [qs.free() for qs in qstate]
+        # actual.free()
+        # expect.free()
         self.assertEqual(ans,True)
 
     def test_crx(self):
@@ -1515,9 +1542,9 @@ class TestQState_2_qubit(unittest.TestCase):
         [qs.crx(0,1, phase=0.25) for qs in qstate]
         expect = DensOp(qstate=qstate, prob=PROBS_4)
         ans = equal_densops(actual, expect)
-        [qs.free() for qs in qstate]
-        actual.free()
-        expect.free()
+        # [qs.free() for qs in qstate]
+        # actual.free()
+        # expect.free()
         self.assertEqual(ans,True)
 
     def test_cry(self):
@@ -1529,9 +1556,9 @@ class TestQState_2_qubit(unittest.TestCase):
         [qs.cry(0,1, phase=0.25) for qs in qstate]
         expect = DensOp(qstate=qstate, prob=PROBS_4)
         ans = equal_densops(actual, expect)
-        [qs.free() for qs in qstate]
-        actual.free()
-        expect.free()
+        # [qs.free() for qs in qstate]
+        # actual.free()
+        # expect.free()
         self.assertEqual(ans,True)
 
     def test_crz(self):
@@ -1543,9 +1570,9 @@ class TestQState_2_qubit(unittest.TestCase):
         [qs.crz(0,1, phase=0.25) for qs in qstate]
         expect = DensOp(qstate=qstate, prob=PROBS_4)
         ans = equal_densops(actual, expect)
-        [qs.free() for qs in qstate]
-        actual.free()
-        expect.free()
+        # [qs.free() for qs in qstate]
+        # actual.free()
+        # expect.free()
         self.assertEqual(ans,True)
 
     def test_cp(self):
@@ -1557,9 +1584,9 @@ class TestQState_2_qubit(unittest.TestCase):
         [qs.cp(0,1, phase=0.25) for qs in qstate]
         expect = DensOp(qstate=qstate, prob=PROBS_4)
         ans = equal_densops(actual, expect)
-        [qs.free() for qs in qstate]
-        actual.free()
-        expect.free()
+        # [qs.free() for qs in qstate]
+        # actual.free()
+        # expect.free()
         self.assertEqual(ans,True)
 
     def test_cu1(self):
@@ -1571,9 +1598,9 @@ class TestQState_2_qubit(unittest.TestCase):
         [qs.cu1(0,1, alpha=0.1) for qs in qstate]
         expect = DensOp(qstate=qstate, prob=PROBS_4)
         ans = equal_densops(actual, expect)
-        [qs.free() for qs in qstate]
-        actual.free()
-        expect.free()
+        # [qs.free() for qs in qstate]
+        # actual.free()
+        # expect.free()
         self.assertEqual(ans,True)
 
     def test_cu2(self):
@@ -1585,9 +1612,9 @@ class TestQState_2_qubit(unittest.TestCase):
         [qs.cu2(0,1, alpha=0.1, beta=0.2) for qs in qstate]
         expect = DensOp(qstate=qstate, prob=PROBS_4)
         ans = equal_densops(actual, expect)
-        [qs.free() for qs in qstate]
-        actual.free()
-        expect.free()
+        # [qs.free() for qs in qstate]
+        # actual.free()
+        # expect.free()
         self.assertEqual(ans,True)
 
     def test_cu3(self):
@@ -1599,9 +1626,9 @@ class TestQState_2_qubit(unittest.TestCase):
         [qs.cu3(0,1, alpha=0.1, beta=0.2, gamma=0.3) for qs in qstate]
         expect = DensOp(qstate=qstate, prob=PROBS_4)
         ans = equal_densops(actual, expect)
-        [qs.free() for qs in qstate]
-        actual.free()
-        expect.free()
+        # [qs.free() for qs in qstate]
+        # actual.free()
+        # expect.free()
         self.assertEqual(ans,True)
 
 class TestDensOp_2_qubit_in_3_reg(unittest.TestCase):
@@ -1617,9 +1644,9 @@ class TestDensOp_2_qubit_in_3_reg(unittest.TestCase):
         [qs.crx(0,1, phase=0.25) for qs in qstate]
         expect = DensOp(qstate=qstate, prob=PROBS_8)
         ans = equal_densops(actual, expect)
-        [qs.free() for qs in qstate]
-        actual.free()
-        expect.free()
+        # [qs.free() for qs in qstate]
+        # actual.free()
+        # expect.free()
         self.assertEqual(ans,True)
 
     def test_crx_1_2(self):
@@ -1631,9 +1658,9 @@ class TestDensOp_2_qubit_in_3_reg(unittest.TestCase):
         [qs.crx(1,2, phase=0.25) for qs in qstate]
         expect = DensOp(qstate=qstate, prob=PROBS_8)
         ans = equal_densops(actual, expect)
-        [qs.free() for qs in qstate]
-        actual.free()
-        expect.free()
+        # [qs.free() for qs in qstate]
+        # actual.free()
+        # expect.free()
         self.assertEqual(ans,True)
 
     def test_crx_2_0(self):
@@ -1645,9 +1672,9 @@ class TestDensOp_2_qubit_in_3_reg(unittest.TestCase):
         [qs.crx(2,0, phase=0.25) for qs in qstate]
         expect = DensOp(qstate=qstate, prob=PROBS_8)
         ans = equal_densops(actual, expect)
-        [qs.free() for qs in qstate]
-        actual.free()
-        expect.free()
+        # [qs.free() for qs in qstate]
+        # actual.free()
+        # expect.free()
         self.assertEqual(ans,True)
         
 class TestDensOp_3_qubit(unittest.TestCase):
@@ -1663,9 +1690,9 @@ class TestDensOp_3_qubit(unittest.TestCase):
         [qs.ccx(0,1,2) for qs in qstate]
         expect = DensOp(qstate=qstate, prob=PROBS_8)
         ans = equal_densops(actual, expect)
-        [qs.free() for qs in qstate]
-        actual.free()
-        expect.free()
+        # [qs.free() for qs in qstate]
+        # actual.free()
+        # expect.free()
         self.assertEqual(ans,True)
 
     def test_csw(self):
@@ -1677,9 +1704,9 @@ class TestDensOp_3_qubit(unittest.TestCase):
         [qs.csw(0,1,2) for qs in qstate]
         expect = DensOp(qstate=qstate, prob=PROBS_8)
         ans = equal_densops(actual, expect)
-        [qs.free() for qs in qstate]
-        actual.free()
-        expect.free()
+        # [qs.free() for qs in qstate]
+        # actual.free()
+        # expect.free()
         self.assertEqual(ans,True)
 
 class TestDensOp_n_qubit(unittest.TestCase):
@@ -1695,9 +1722,9 @@ class TestDensOp_n_qubit(unittest.TestCase):
         [qs.mcx([0,1,2]) for qs in qstate]
         expect = DensOp(qstate=qstate, prob=PROBS_8)
         ans = equal_densops(actual, expect)
-        [qs.free() for qs in qstate]
-        actual.free()
-        expect.free()
+        # [qs.free() for qs in qstate]
+        # actual.free()
+        # expect.free()
         self.assertEqual(ans,True)
 
     def test_mcx_4(self):
@@ -1709,9 +1736,9 @@ class TestDensOp_n_qubit(unittest.TestCase):
         [qs.mcx([0,1,2,3]) for qs in qstate]
         expect = DensOp(qstate=qstate, prob=PROBS_16)
         ans = equal_densops(actual, expect)
-        [qs.free() for qs in qstate]
-        actual.free()
-        expect.free()
+        # [qs.free() for qs in qstate]
+        # actual.free()
+        # expect.free()
         self.assertEqual(ans,True)
 
 class TestDensOp_operate(unittest.TestCase):
@@ -1726,7 +1753,7 @@ class TestDensOp_operate(unittest.TestCase):
         pp = PauliProduct(pauli_str="X")
         actual = DensOp(matrix=mat).operate(pauli_product=pp)
         ans = equal_densops(expect, actual)
-        DensOp.free_all(expect, actual)
+        # DensOp.free_all(expect, actual)
         self.assertEqual(ans,True)
         
     def test_operate_h_x(self):
@@ -1737,7 +1764,7 @@ class TestDensOp_operate(unittest.TestCase):
         pp = PauliProduct(pauli_str="X")
         actual = DensOp(matrix=mat).h(0).operate(pauli_product=pp)
         ans = equal_densops(expect, actual)
-        DensOp.free_all(expect, actual)
+        # DensOp.free_all(expect, actual)
         self.assertEqual(ans,True)
         
     def test_operate_h_y(self):
@@ -1748,7 +1775,7 @@ class TestDensOp_operate(unittest.TestCase):
         pp = PauliProduct(pauli_str="Y")
         actual = DensOp(matrix=mat).h(0).operate(pauli_product=pp)
         ans = equal_densops(expect, actual)
-        DensOp.free_all(expect, actual)
+        # DensOp.free_all(expect, actual)
         self.assertEqual(ans,True)
         
     def test_operate_h_z(self):
@@ -1759,7 +1786,7 @@ class TestDensOp_operate(unittest.TestCase):
         pp = PauliProduct(pauli_str="Z")
         actual = DensOp(matrix=mat).h(0).operate(pauli_product=pp)
         ans = equal_densops(expect, actual)
-        DensOp.free_all(expect, actual)
+        # DensOp.free_all(expect, actual)
         self.assertEqual(ans,True)
         
     def test_operate_xyz(self):
@@ -1770,7 +1797,7 @@ class TestDensOp_operate(unittest.TestCase):
         pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
         actual = DensOp(matrix=mat).operate(pauli_product=pp)
         ans = equal_densops(expect, actual)
-        DensOp.free_all(expect, actual)
+        # DensOp.free_all(expect, actual)
         self.assertEqual(ans,True)
         
     def test_operate_controlled_xz(self):
@@ -1781,7 +1808,7 @@ class TestDensOp_operate(unittest.TestCase):
         pp = PauliProduct(pauli_str="XZ", qid=[0,1])
         actual = DensOp(matrix=mat).operate(pauli_product=pp, ctrl=2)
         ans = equal_densops(expect, actual)
-        DensOp.free_all(expect, actual)
+        # DensOp.free_all(expect, actual)
         self.assertEqual(ans,True)
         
 if __name__ == '__main__':

@@ -55,7 +55,7 @@ class TestQComp_init(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([1j, 0j, 0j, 0j, 0j, 0j, 0j, 0j])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
 #
@@ -76,7 +76,7 @@ class TestQComp_reset(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([1j, 0j, 0j, 0j, 0j, 0j, 0j, 0j])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # # qc.free()
         self.assertEqual(ans,True)
 
 #
@@ -96,7 +96,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([0.0, 1.0])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # # qc.free()
         self.assertEqual(ans,True)
 
     def test_h_x(self):
@@ -108,7 +108,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([1.0/SQRT_2, 1.0/SQRT_2])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # # qc.free()
         self.assertEqual(ans,True)
 
     def test_y(self):
@@ -120,7 +120,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([0.0, 1.0j])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # # qc.free()
         self.assertEqual(ans,True)
 
     def test_h_y(self):
@@ -132,7 +132,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([-1.0j/SQRT_2, 1.0j/SQRT_2])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # # qc.free()
         self.assertEqual(ans,True)
 
     def test_z(self):
@@ -144,7 +144,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([1.0, 0.0])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # # qc.free()
         self.assertEqual(ans,True)
 
     def test_h_z(self):
@@ -156,7 +156,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([1.0/SQRT_2, -1.0/SQRT_2])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
     def test_xr(self):
@@ -168,7 +168,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([0.5+0.5j, 0.5-0.5j])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
     def test_h_xr(self):
@@ -180,7 +180,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([1.0/SQRT_2, 1.0/SQRT_2])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
     def test_xr_dg(self):
@@ -192,7 +192,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([0.5-0.5j, 0.5+0.5j])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
     def test_h_xr_dg(self):
@@ -204,7 +204,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([1.0/SQRT_2, 1.0/SQRT_2])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
     def test_h(self):
@@ -216,7 +216,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([1.0/SQRT_2, 1.0/SQRT_2])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
     def test_h_h(self):
@@ -228,7 +228,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([1.0, 0.0])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
     def test_s(self):
@@ -240,7 +240,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([1.0, 0.0])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
     def test_h_s(self):
@@ -252,7 +252,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([1.0/SQRT_2, 1.0j/SQRT_2])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
     def test_s_dg(self):
@@ -264,7 +264,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([1.0, 0.0])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
     def test_h_s_dg(self):
@@ -276,7 +276,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([1.0/SQRT_2, -1.0j/SQRT_2])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
     def test_t(self):
@@ -288,7 +288,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([1.0, 0.0])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
     def test_h_t(self):
@@ -300,7 +300,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([1.0/SQRT_2, 0.5+0.5j])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
     def test_t_dg(self):
@@ -312,7 +312,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([1.0, 0.0])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
     def test_h_t_dg(self):
@@ -324,7 +324,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([1.0/SQRT_2, 0.5-0.5j])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
     def test_rx(self):
@@ -336,7 +336,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([COS_PI_8, -SIN_PI_8*1.0j])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
     def test_h_rx(self):
@@ -348,7 +348,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([0.65328148-0.27059805j, 0.65328148-0.27059805j])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
     def test_ry(self):
@@ -360,7 +360,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([COS_PI_8, SIN_PI_8])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
     def test_h_ry(self):
@@ -372,7 +372,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([0.38268343+0.j, 0.92387953+0.j])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
     def test_rz(self):
@@ -384,7 +384,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([1.0, 0.0])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
     def test_h_rz(self):
@@ -396,7 +396,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([0.65328148-0.27059805j, 0.65328148+0.27059805j])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
     def test_p(self):
@@ -408,7 +408,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([1.0, 0.0])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
     def test_h_p(self):
@@ -420,7 +420,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([0.70710678, 0.5+0.5j])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
     def test_u1(self):
@@ -432,7 +432,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([1.0, 0.0])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
     def test_h_u1(self):
@@ -444,7 +444,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([0.70710678+0.j, 0.67249851+0.21850801j])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
     def test_u2(self):
@@ -456,7 +456,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([0.70710678+0.j, 0.5720614 +0.41562694j])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
     def test_h_u2(self):
@@ -468,7 +468,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([0.02447174-0.1545085j,0.69840112+0.69840112j])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
     def test_u3(self):
@@ -480,7 +480,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([0.89100652+0.j, 0.36728603+0.26684892j])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
     def test_h_u3(self):
@@ -492,7 +492,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([0.32472882-0.09920056j, 0.63003676+0.69840112j])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
 #
@@ -512,7 +512,7 @@ class TestQComp_2_qubit_qlazy_qstate_simulator(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([(0.5+0j), (0.5+0j), (0.5+0j), (0.5+0j)])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
     def test_cy(self):
@@ -524,7 +524,7 @@ class TestQComp_2_qubit_qlazy_qstate_simulator(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([(0.5+0j), (0.5+0j), -0.5j, 0.5j])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
     def test_cz(self):
@@ -536,7 +536,7 @@ class TestQComp_2_qubit_qlazy_qstate_simulator(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([(0.5+0j), (0.5+0j), (0.5+0j), (-0.5+0j)])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
     def test_cxr(self):
@@ -548,7 +548,7 @@ class TestQComp_2_qubit_qlazy_qstate_simulator(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([(0.5+0j), (0.5+0j), (0.5+0j), (0.5+0j)])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
     def test_cxr_dg(self):
@@ -560,7 +560,7 @@ class TestQComp_2_qubit_qlazy_qstate_simulator(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([(0.5+0j), (0.5+0j), (0.5+0j), (0.5+0j)])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
     def test_ch(self):
@@ -572,7 +572,7 @@ class TestQComp_2_qubit_qlazy_qstate_simulator(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([(0.5+0j), (0.5+0j), (0.7071067811865475+0j), 0j])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
     def test_cs(self):
@@ -584,7 +584,7 @@ class TestQComp_2_qubit_qlazy_qstate_simulator(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([(0.5+0j), (0.5+0j), (0.5+0j), 0.5j])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
     def test_cs_dg(self):
@@ -596,7 +596,7 @@ class TestQComp_2_qubit_qlazy_qstate_simulator(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([(0.5+0j), (0.5+0j), (0.5+0j), -0.5j])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
     def test_ct(self):
@@ -609,7 +609,7 @@ class TestQComp_2_qubit_qlazy_qstate_simulator(unittest.TestCase):
         expect = np.array([(0.5+0j), (0.5+0j), (0.5+0j),
                            (0.35355339059327373+0.35355339059327373j)])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
     def test_ct_dg(self):
@@ -622,7 +622,7 @@ class TestQComp_2_qubit_qlazy_qstate_simulator(unittest.TestCase):
         expect = np.array([(0.5+0j), (0.5+0j), (0.5+0j),
                            (0.35355339059327373-0.35355339059327373j)])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
     def test_sw(self):
@@ -634,7 +634,7 @@ class TestQComp_2_qubit_qlazy_qstate_simulator(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([(0.5+0j), (0.5+0j), (0.5+0j), (0.5+0j)])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
     def test_x_sw(self):
@@ -646,7 +646,7 @@ class TestQComp_2_qubit_qlazy_qstate_simulator(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([0j, (1+0j), 0j, 0j])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
     def test_cp(self):
@@ -659,7 +659,7 @@ class TestQComp_2_qubit_qlazy_qstate_simulator(unittest.TestCase):
         expect = np.array([(0.5+0j), (0.5+0j), (0.5+0j),
                            (0.3535533905932738+0.35355339059327373j)])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
     def test_crx(self):
@@ -672,7 +672,7 @@ class TestQComp_2_qubit_qlazy_qstate_simulator(unittest.TestCase):
         expect = np.array([(0.5+0j), (0.5+0j), (0.4619397662556434-0.1913417161825449j),
                            (0.4619397662556434-0.1913417161825449j)])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
     def test_cry(self):
@@ -685,7 +685,7 @@ class TestQComp_2_qubit_qlazy_qstate_simulator(unittest.TestCase):
         expect = np.array([(0.5+0j), (0.5+0j), (0.2705980500730985+0j),
                            (0.6532814824381882+0j)])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
     def test_crz(self):
@@ -698,7 +698,7 @@ class TestQComp_2_qubit_qlazy_qstate_simulator(unittest.TestCase):
         expect = np.array([(0.5+0j), (0.5+0j),(0.4619397662556434-0.1913417161825449j),
                            (0.4619397662556434+0.1913417161825449j)])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
     def test_cu1(self):
@@ -711,7 +711,7 @@ class TestQComp_2_qubit_qlazy_qstate_simulator(unittest.TestCase):
         expect = np.array([(0.5+0j), (0.5+0j), (0.5+0j),
                            (0.47552825814757677+0.1545084971874737j)])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
     def test_cu2(self):
@@ -724,7 +724,7 @@ class TestQComp_2_qubit_qlazy_qstate_simulator(unittest.TestCase):
         expect = np.array([(0.5+0j), (0.5+0j), (0.0173041346112951-0.10925400611220525j),
                            (0.49384417029756883+0.49384417029756883j)])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
     def test_cu3(self):
@@ -737,7 +737,7 @@ class TestQComp_2_qubit_qlazy_qstate_simulator(unittest.TestCase):
         expect = np.array([(0.5+0j), (0.5+0j), (0.22961795053748937-0.07014538985214754j),
                            (0.44550326209418395+0.4938441702975689j)])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
 #
@@ -757,7 +757,7 @@ class TestQComp_3_qubit_qlazy_qstate_simulator(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([0j, 0j, 0j, 0j, 0j, 0j, 0j, (1+0j)])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
     def test_x_x_csw(self):
@@ -769,7 +769,7 @@ class TestQComp_3_qubit_qlazy_qstate_simulator(unittest.TestCase):
         actual = qc.qstate
         expect = np.array([0j, 0j, 0j, 0j, 0j, (1+0j), 0j, 0j])
         ans = equal_vectors(actual, expect)
-        qc.free()
+        # qc.free()
         self.assertEqual(ans,True)
 
 #
@@ -793,7 +793,7 @@ class TestQComp_operate_ibmq_qasm_simulator(unittest.TestCase):
         actual = qc_actual.qstate
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
-        QComp.free_all(qc_expect, qc_actual)
+        # QComp.free_all(qc_expect, qc_actual)
 
     def test_operate_h_x(self):
         """test 'operate' (x followed by h)
@@ -808,7 +808,7 @@ class TestQComp_operate_ibmq_qasm_simulator(unittest.TestCase):
         actual = qc_actual.qstate
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
-        QComp.free_all(qc_expect, qc_actual)
+        # QComp.free_all(qc_expect, qc_actual)
 
     def test_operate_h_y(self):
         """test 'operate' (Y followed by h)
@@ -823,7 +823,7 @@ class TestQComp_operate_ibmq_qasm_simulator(unittest.TestCase):
         actual = qc_actual.qstate
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
-        QComp.free_all(qc_expect, qc_actual)
+        # QComp.free_all(qc_expect, qc_actual)
 
     def test_operate_h_z(self):
         """test 'operate' (Z followed by h)
@@ -838,7 +838,7 @@ class TestQComp_operate_ibmq_qasm_simulator(unittest.TestCase):
         actual = qc_actual.qstate
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
-        QComp.free_all(qc_expect, qc_actual)
+        # QComp.free_all(qc_expect, qc_actual)
 
     def test_operate_xyz(self):
         """test 'operate' (xyz)
@@ -853,7 +853,7 @@ class TestQComp_operate_ibmq_qasm_simulator(unittest.TestCase):
         actual = qc_actual.qstate
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
-        QComp.free_all(qc_expect, qc_actual)
+        # QComp.free_all(qc_expect, qc_actual)
 
     def test_operate_controlled_xyz(self):
         """test 'operate' (controlled_xyz)
@@ -868,7 +868,7 @@ class TestQComp_operate_ibmq_qasm_simulator(unittest.TestCase):
         actual = qc_actual.qstate
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
-        QComp.free_all(qc_expect, qc_actual)
+        # QComp.free_all(qc_expect, qc_actual)
         
 #
 # measurement
@@ -884,7 +884,7 @@ class TestQComp_measure_qstate_simulator(unittest.TestCase):
         bk = Backend(name='ibmq', device='qasm_simulator')
         qc = QComp(qubit_num=2, backend=bk)
         res = qc.measure([0,1]).run(shots=10)
-        qc.free()
+        # qc.free()
         self.assertEqual(res['measured_qid'], [0,1])
         self.assertEqual(res['frequency']['00'], 10)
 
@@ -894,7 +894,7 @@ class TestQComp_measure_qstate_simulator(unittest.TestCase):
         bk = Backend(name='ibmq', device='qasm_simulator')
         qc = QComp(qubit_num=2, backend=bk)
         res = qc.h(0).cx(0,1).measure([0,1]).run(shots=10)
-        qc.free()
+        # qc.free()
         self.assertEqual(res['measured_qid'], [0,1])
         self.assertEqual(res['frequency']['00']+res['frequency']['11'], 10)
 
@@ -907,7 +907,7 @@ class TestQComp_measure_qstate_simulator(unittest.TestCase):
         self.assertEqual(res['measured_qid'], [0,1])
         self.assertEqual(res['frequency']['00']+res['frequency']['11'], 10)
         self.assertEqual(qc.cmem==[0,0,0] or qc.cmem==[1,1,0], True)
-        qc.free()
+        # qc.free()
 
     def test_measure_control_qubit(self):
         """test 'm' (control qubit using classical memory)
@@ -915,7 +915,7 @@ class TestQComp_measure_qstate_simulator(unittest.TestCase):
         bk = Backend(name='ibmq', device='qasm_simulator')
         qc = QComp(qubit_num=2, cmem_num=3, backend=bk)
         res = qc.h(0).cx(0,1).measure([0],[0]).x(0, ctrl=0).x(1, ctrl=0).measure([0,1]).run(shots=10)
-        qc.free()
+        # qc.free()
         self.assertEqual(res['measured_qid'], [0,1])
         self.assertEqual(res['frequency']['00'], 10)
 
@@ -933,7 +933,7 @@ class TestQComp_inheritance_qstate_simulator(unittest.TestCase):
         bk = Backend(name='ibmq', device='qasm_simulator')
         qc = MyQComp(backend=bk, qubit_num=2, cmem_num=3)
         res = qc.bell(0,1).measure(qid=[0,1]).run(shots=10)
-        qc.free()
+        # qc.free()
         self.assertEqual(res['measured_qid'], [0,1])
         self.assertEqual(res['frequency']['00']+res['frequency']['11'], 10)
 

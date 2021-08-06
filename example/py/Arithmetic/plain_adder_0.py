@@ -81,4 +81,4 @@ if __name__ == '__main__':
         res = qs.decode(id_b)
         print("{0:}+{1:} -> {2:}".format(a,b,res))
 
-        qs.free()
+        # qs.free()

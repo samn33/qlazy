@@ -43,9 +43,9 @@ def main():
         print("time = {0:.2f}, theta = {1:.2f}*PI, phi = {2:.2f}*PI"
               .format(t,theta,phi))
 
-        qs.free()
+        # qs.free()
     
-    hm.free()
+    # hm.free()
     
 if __name__ == '__main__':
     main()

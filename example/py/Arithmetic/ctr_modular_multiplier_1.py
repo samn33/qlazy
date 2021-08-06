@@ -193,4 +193,4 @@ if __name__ == '__main__':
     for i in range(len(x_list)):
         print("(ctr={0:}) {1:}*{2:} mod {3:} -> {4:}".format(ctr,a,x_list[i],N,r_list[i]))
 
-    qs.free()
+    # qs.free()

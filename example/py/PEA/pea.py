@@ -85,9 +85,9 @@ def main():
     print(2*md.lst/md.state_num,"* PI")
 
     # free memory
-    qs_sub.free()
-    qs_psi_ctr.free()
-    qs_total.free()
+    # qs_sub.free()
+    # qs_psi_ctr.free()
+    # qs_total.free()
 
 if __name__ == '__main__':
     main()
