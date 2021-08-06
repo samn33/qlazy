@@ -50,10 +50,10 @@ class Backend:
                 else:
                     raise Backend_Error_DeviceNotSupported()
 
-        # not supported in the near future
-        elif name in ('qlazy_qstate_simulator', 'qlazy_stabilizer_simulator',
-                      'qulacs_simulator', 'qulacs_gpu_simulator', 'ibmq'):
-            self.name = name
+        # # not supported in the near future
+        # elif name in ('qlazy_qstate_simulator', 'qlazy_stabilizer_simulator',
+        #               'qulacs_simulator', 'qulacs_gpu_simulator', 'ibmq'):
+        #     self.name = name
             
         else:
             raise Backend_Error_NameNotSupported()
