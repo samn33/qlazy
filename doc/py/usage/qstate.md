@@ -50,15 +50,15 @@ qlazy/qlazy/lib/c/qlazy.hの以下の行の数字を変えて、
 
 ### リセット
 
-すでに生成済みの量子状態を破棄(free)することなく、再度初期化して使いた
-い場合は、reset()メソッドを使います。例えば、
+すでに生成済みの量子状態を破棄することなく、再度初期化して使いたい場合
+は、reset()メソッドを使います。例えば、
 
     qs = QState(2)
 	qs.x(0).h(1).cx(0,1)
     ...
 
-という一連の処理を行って結果を得た後、qs.free()して再度qs=QState(2)し
-ないで、qsを|00...0>の状態にして、再び一連の処理を実行する場合、
+という一連の処理を行って結果を得た後、qsを|00...0>の状態に戻して、
+再び一連の処理を実行する場合、
 
     qs.reset()
 
@@ -81,35 +81,32 @@ qlazy/qlazy/lib/c/qlazy.hの以下の行の数字を変えて、
 
 ### メモリ解放
 
-量子状態を使った作業がすべて終わったら、内部のメモリを解放する必要があ
-ります。
+量子状態インスタンスのメモリは使用されなくなったら自動的に解放されますが、
+明示的に解放したい場合、
 
-    qs.free()
+    del qs
+
+とすれば好きなタイミングで解放することができます。
 	
-複数の量子状態のインスタンスがある場合、クラス・メソッド'free_all'で一
-気に解放することができます。
+クラス・メソッド'del_all'を使えば複数の量子状態のインスタンスを一気に
+解放することができます。
 
     qs_0 = QState(1)
     qs_1 = QState(1)
     qs_2 = QState(1)
     ...
-    QState.free_all(qs_0, qs_1, qs_2)
+    QState.del_all(qs_0, qs_1, qs_2)
 
-また、引数に指定するのは量子状態のリストやタプルであっても良いですし、
+このとき、引数に指定するのは量子状態のリストやタプルであっても良いですし、
 それらの入れ子でもOKです。例えば、
 
     qs_A = [qs_1, qs_2]
-    QState.free_all(qs_0, qs_A)
+    QState.del_all(qs_0, qs_A)
 
     qs_B = [qs_3, [qs_4, qs_5]]
-    QState.free_all(qs_B)
+    QState.del_all(qs_B)
 
-という指定の仕方でも大丈夫です。ただし、同じ量子状態を２度以上解放する
-のはNGです。
-
-    QState.free_all(qs_0, [qs_0, qs_1])
-	
-こうしてしまわないようにご注意ください。
+という指定の仕方でも大丈夫です。
 
 ### ゲート演算
 
@@ -638,7 +635,6 @@ m_freqメソッドで参照する際にtagの指定を省略すると、'default
     print(qs.m_value(tag='foo', angle=0.5))
     print(qs.m_bit(0, tag='foo', angle=0.5))
     print(qs.m_freq(tag='foo', angle=0.5))
-    qs.free()
 
 あるいは、
 
@@ -647,7 +643,6 @@ m_freqメソッドで参照する際にtagの指定を省略すると、'default
     print(qs.m_value(tag='foo', angle=0.25, phase=0.25))
     print(qs.m_bit(0, tag='foo', angle=0.25, phase=0.25))
     print(qs.m_freq(tag='foo', angle=0.25, phase=0.25))
-    qs.free()
 
 です。
 
