@@ -2,6 +2,7 @@
 import ctypes
 from collections import Counter
 from ctypes.util import find_library
+import warnings
 
 from qlazy.config import *
 from qlazy.error import *
@@ -50,6 +51,11 @@ class CMem(ctypes.Structure):
         None
 
         """
+        # cmem_free(self)
+        warnings.warn("No need to call 'free' method because free automatically, or you can use 'del' to free memory explicitly.")
+        
+    def __del__(self):
+        
         cmem_free(self)
         
 # c-library for qstate

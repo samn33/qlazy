@@ -98,45 +98,45 @@ class QComp:
             self.__reset = reset
             self.__free = free
 
+        # # 
+        # # note: followings are not supported in the near future
+        # #
         # 
-        # note: followings are not supported in the near future
-        #
-        
-        # qlazy qstate simulator
-        elif self.backend.name == 'qlazy_qstate_simulator':
-            from qlazy.backend.qlazy_qstate_simulator import init, run, reset, free
-            self.__init = init
-            self.__run = run
-            self.__reset = reset
-            self.__free = free
-            warnings.warn("You should use name='qlazy',device='qstate_simulator', because name='qlazy_qstate_simulator' will be not supported in the near future")
-        
-        # qlazy stabilizer simulator
-        elif self.backend.name == 'qlazy_stabilizer_simulator':
-            from qlazy.backend.qlazy_stabilizer_simulator import init, run, reset, free
-            self.__init = init
-            self.__run = run
-            self.__reset = reset
-            self.__free = free
-            warnings.warn("You should use name='qlazy',device='stabilizer_simulator', because name='qlazy_stabilizer_simulator' will be not supported in the near future")
-        
-        # qulacs
-        elif self.backend.name == 'qulacs_simulator':
-            from qlazy.backend.qulacs_cpu_simulator import init, run, reset, free
-            self.__init = init
-            self.__run = run
-            self.__reset = reset
-            self.__free = free
-            warnings.warn("You should use name='qulacs',device='cpu_simulator', because name='qulacs_simulator' will be not supported in the near future")
-        
-        # qulacs-gpu
-        elif self.backend.name == 'qulacs_gpu_simulator':
-            from qlazy.backend.qulacs_gpu_simulator import init, run, reset, free
-            self.__init = init
-            self.__run = run
-            self.__reset = reset
-            self.__free = free
-            warnings.warn("You should use name='qulacs',device='gpu_simulator', because name='qulacs_gpu_simulator' will be not supported in the near future")
+        # # qlazy qstate simulator
+        # elif self.backend.name == 'qlazy_qstate_simulator':
+        #     from qlazy.backend.qlazy_qstate_simulator import init, run, reset, free
+        #     self.__init = init
+        #     self.__run = run
+        #     self.__reset = reset
+        #     self.__free = free
+        #     warnings.warn("You should use name='qlazy',device='qstate_simulator', because name='qlazy_qstate_simulator' will be not supported in the near future")
+        # 
+        # # qlazy stabilizer simulator
+        # elif self.backend.name == 'qlazy_stabilizer_simulator':
+        #     from qlazy.backend.qlazy_stabilizer_simulator import init, run, reset, free
+        #     self.__init = init
+        #     self.__run = run
+        #     self.__reset = reset
+        #     self.__free = free
+        #     warnings.warn("You should use name='qlazy',device='stabilizer_simulator', because name='qlazy_stabilizer_simulator' will be not supported in the near future")
+        # 
+        # # qulacs
+        # elif self.backend.name == 'qulacs_simulator':
+        #     from qlazy.backend.qulacs_cpu_simulator import init, run, reset, free
+        #     self.__init = init
+        #     self.__run = run
+        #     self.__reset = reset
+        #     self.__free = free
+        #     warnings.warn("You should use name='qulacs',device='cpu_simulator', because name='qulacs_simulator' will be not supported in the near future")
+        # 
+        # # qulacs-gpu
+        # elif self.backend.name == 'qulacs_gpu_simulator':
+        #     from qlazy.backend.qulacs_gpu_simulator import init, run, reset, free
+        #     self.__init = init
+        #     self.__run = run
+        #     self.__reset = reset
+        #     self.__free = free
+        #     warnings.warn("You should use name='qulacs',device='gpu_simulator', because name='qulacs_gpu_simulator' will be not supported in the near future")
         
         else:
             raise Backend_Error_NameNotSupported()
@@ -187,6 +187,16 @@ class QComp:
         None
 
         """
+        # if self.qstate != None:
+        #     self.__free(qstate=self.qstate, backend=self.backend)
+        # 
+        # del self.cmem
+        # del self.qcirc
+        
+        warnings.warn("No need to call 'free' method because free automatically, or you can use 'del' to free memory explicitly.")
+
+    def __del__(self):
+        
         if self.qstate != None:
             self.__free(qstate=self.qstate, backend=self.backend)
 
@@ -208,11 +218,36 @@ class QComp:
         None
 
         """
+        # for qc in qcomps:
+        #     if type(qc) is list or type(qc) is tuple:
+        #         cls.free_all(*qc)
+        #     elif type(qc) is QComp:
+        #         qc.free()
+        #     else:
+        #         raise QComp_Error_FreeAll()
+        
+        warnings.warn("No need to call 'free_all' method because free automatically, or you can use class method 'del_all' to free memory explicitly.")
+
+    @classmethod
+    def del_all(cls, *qcomps):
+        """
+        free memory of the all quantum computers.
+
+        Parameters
+        ----------
+        qcomps : instance of QComp,instance of QComp,...
+            set of QComp instances
+
+        Returns
+        -------
+        None
+
+        """
         for qc in qcomps:
             if type(qc) is list or type(qc) is tuple:
-                cls.free_all(*qc)
+                cls.del_all(*qc)
             elif type(qc) is QComp:
-                qc.free()
+                del qc
             else:
                 raise QComp_Error_FreeAll()
 

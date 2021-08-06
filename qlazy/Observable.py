@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import ctypes
+import warnings
 
 from qlazy.config import *
 from qlazy.error import *
@@ -38,9 +39,24 @@ class Observable(ctypes.Structure):
         return ob
 
     def free(ob):
+        """
+        free memory of observable.
 
-        observable_free(ob)
+        Parameters
+        ----------
+        None
 
+        Returns
+        -------
+        None
+
+        """
+        # observable_free(ob)
+        warnings.warn("No need to call 'free' method because free automatically, or you can use 'del' to free memory explicitly.")
+
+    def __del__(self):
+        
+        observable_free(self)
 
 # c-library for observable
 from qlazy.lib.observable_c import *

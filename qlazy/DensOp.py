@@ -2,6 +2,7 @@
 import random
 import math
 import numpy as np
+import warnings
 
 from qlazy.config import *
 from qlazy.error import *
@@ -66,7 +67,7 @@ class DensOp(ctypes.Structure):
             qstate = [QState(qubit_num=qubit_num)]
             prob = [1.0]
             de = densop_init(qstate, prob)
-            qstate[0].free()
+            # qstate[0].free()
             return de
         
         elif qstate != [] and prob != []:
@@ -120,7 +121,7 @@ class DensOp(ctypes.Structure):
             de_tmp = densop[i].clone()
             de_tmp.mul(factor=prob[i])
             de_out.add(densop=de_tmp)
-            de_tmp.free()
+            # de_tmp.free()
 
         return de_out
 
@@ -253,11 +254,36 @@ class DensOp(ctypes.Structure):
         None
 
         """
+        # for de in densops:
+        #     if type(de) is list or type(de) is tuple:
+        #         cls.free_all(*de)
+        #     elif type(de) is DensOp:
+        #         de.free()
+        #     else:
+        #         raise DensOp_Error_FreeAll()
+        
+        warnings.warn("No need to call 'free_all' method because free automatically, or you can use class method 'del_all' to free memory explicitly.")
+
+    @classmethod
+    def del_all(cls, *densops):
+        """
+        free memory of the all density operators.
+
+        Parameters
+        ----------
+        densops : instance of DensOp,instance of DensOp,...
+            set of DensOp instances
+
+        Returns
+        -------
+        None
+
+        """
         for de in densops:
             if type(de) is list or type(de) is tuple:
-                cls.free_all(*de)
+                cls.del_all(*de)
             elif type(de) is DensOp:
-                de.free()
+                del de
             else:
                 raise DensOp_Error_FreeAll()
 
@@ -290,7 +316,7 @@ class DensOp(ctypes.Structure):
         """
         de_part = self.partial(qid=qid)
         elm = densop_get_elm(de_part)
-        de_part.free()
+        # de_part.free()
         return elm
     
     def show(self, qid=[], nonzero=False):
@@ -332,7 +358,7 @@ class DensOp(ctypes.Structure):
         """
         de_part = self.partial(qid=qid)
         densop_print(de_part, nonzero)
-        de_part.free()
+        # de_part.free()
 
     def clone(self):
         """
@@ -511,9 +537,9 @@ class DensOp(ctypes.Structure):
             de = self.clone()
             for i in range(num-1):
                 de_tmp = de.tenspro(self)
-                de.free()
+                # de.free()
                 de = de_tmp.clone()
-                de_tmp.free()
+                # de_tmp.free()
             return de
         
     def join(self, de_list):
@@ -534,9 +560,9 @@ class DensOp(ctypes.Structure):
         de_out = self.clone()
         for de in de_list:
             de_tmp = de_out.clone()
-            de_out.free()
+            # de_out.free()
             de_out = de_tmp.tenspro(de)
-            de_tmp.free()
+            # de_tmp.free()
         return de_out
 
     def expect(self, matrix=None):
@@ -562,7 +588,7 @@ class DensOp(ctypes.Structure):
         densop = self.clone()
         densop_apply_matrix(densop, matrix=matrix, dire='left')
         value = densop.trace()
-        densop.free()
+        # densop.free()
         return value
         
     def apply(self, matrix=None, qid=[], dire='both'):
@@ -687,8 +713,8 @@ class DensOp(ctypes.Structure):
                     densop_tmp = densop_ori.clone()
                     densop_tmp.apply(matrix=kraus[i], qid=qid, dire='both')
                     self.add(densop=densop_tmp)
-                    densop_tmp.free()
-            densop_ori.free()
+                    # densop_tmp.free()
+            # densop_ori.free()
                 
         else:  # selective measurement
 
@@ -996,7 +1022,7 @@ class DensOp(ctypes.Structure):
             else:
                 de_part = self.partial(qid=qid)
                 ent = de_part.__von_neumann_entropy()
-                de_part.free()
+                # de_part.free()
                 
         return ent
 
@@ -1926,8 +1952,12 @@ class DensOp(ctypes.Structure):
         self : instance of DensOp
 
         """
-        return densop_free(self)
+        # densop_free(self)
+        warnings.warn("No need to call 'free' method because free automatically, or you can use 'del' to free memory explicitly.")
 
+    def __del__(self):
+
+        densop_free(self)
     
 # c-library for densop
 from qlazy.lib.densop_c import *

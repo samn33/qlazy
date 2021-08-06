@@ -2,6 +2,7 @@
 import ctypes
 from collections import Counter
 from ctypes.util import find_library
+import warnings
 
 from qlazy.config import *
 from qlazy.error import *
@@ -69,7 +70,7 @@ class QCirc(ctypes.Structure):
 
     def free(self):
         """
-        free memory of quantum state.
+        free memory of quantum circuit.
 
         Parameters
         ----------
@@ -80,6 +81,11 @@ class QCirc(ctypes.Structure):
         None
 
         """
+        # qcirc_free(self)
+        warnings.warn("No need to call 'free' method because free automatically, or you can use 'del' to free memory explicitly.")
+        
+    def __del__(self):
+        
         qcirc_free(self)
         
 # c-library for qstate

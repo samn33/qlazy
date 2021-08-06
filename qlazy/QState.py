@@ -2,6 +2,7 @@
 import random
 import numpy as np
 from collections import Counter
+import warnings
 
 from qlazy.config import *
 from qlazy.error import *
@@ -212,11 +213,36 @@ class QState(ctypes.Structure):
         None
 
         """
+        # for qs in qstates:
+        #     if type(qs) is list or type(qs) is tuple:
+        #         cls.free_all(*qs)
+        #     elif type(qs) is QState:
+        #         qs.free()
+        #     else:
+        #         raise QState_Error_FreeAll()
+
+        warnings.warn("No need to call 'free_all' method because free automatically, or you can use class method 'del_all' to free memory explicitly.")
+        
+    @classmethod
+    def del_all(cls, *qstates):
+        """
+        free memory of the all quantum states.
+
+        Parameters
+        ----------
+        qstates : instance of QState,instance of QState,...
+            set of QState instances
+
+        Returns
+        -------
+        None
+
+        """
         for qs in qstates:
             if type(qs) is list or type(qs) is tuple:
-                cls.free_all(*qs)
+                cls.del_all(*qs)
             elif type(qs) is QState:
-                qs.free()
+                del qs
             else:
                 raise QState_Error_FreeAll()
 
@@ -396,8 +422,8 @@ class QState(ctypes.Structure):
             qs_0 = self.partial(qid=qid)
             qs_1 = qstate.partial(qid=qid)
             inp = qstate_inner_product(qs_0, qs_1)
-            qs_0.free()
-            qs_1.free()
+            # qs_0.free()
+            # qs_1.free()
         return inp
         
     def tenspro(self, qstate):
@@ -466,9 +492,9 @@ class QState(ctypes.Structure):
             qs = self.clone()
             for i in range(num-1):
                 qs_tmp = qs.tenspro(self)
-                qs.free()
+                # qs.free()
                 qs = qs_tmp.clone()
-                qs_tmp.free()
+                # qs_tmp.free()
             return qs
         
     def join(self, qs_list):
@@ -489,9 +515,9 @@ class QState(ctypes.Structure):
         qs_out = self.clone()
         for qs in qs_list:
             qs_tmp = qs_out.clone()
-            qs_out.free()
+            # qs_out.free()
             qs_out = qs_tmp.tenspro(qs)
-            qs_tmp.free()
+            # qs_tmp.free()
         return qs_out
 
     def evolve(self, observable=None, time=0.0, iter=0):
@@ -1691,8 +1717,12 @@ class QState(ctypes.Structure):
         None
 
         """
+        # qstate_free(self)
+        warnings.warn("No need to call 'free' method because free automatically, or you can use 'del' to free memory explicitly.")
+
+    def __del__(self):
+
         qstate_free(self)
-        
 
 # c-library for qstate
 from qlazy.lib.qstate_c import *

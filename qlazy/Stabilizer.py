@@ -2,6 +2,7 @@
 import ctypes
 import random
 from collections import Counter
+import warnings
 
 from qlazy.config import *
 from qlazy.error import *
@@ -621,7 +622,7 @@ class Stabilizer(ctypes.Structure):
                 mval = stabilizer_measure(st, qid[i])
                 mval_str += str(mval)
             frequency += {mval_str:1}
-            st.free()
+            # st.free()
 
         # last measurement
         mval_str = ''
@@ -635,7 +636,6 @@ class Stabilizer(ctypes.Structure):
                              qubit_num=self.qubit_num)
 
         return md
-
 
     @classmethod
     def free_all(cls, *stabs):
@@ -652,11 +652,36 @@ class Stabilizer(ctypes.Structure):
         None
 
         """
+        # for sb in stabs:
+        #     if type(sb) is list or type(sb) is tuple:
+        #         cls.free_all(*sb)
+        #     elif type(sb) is Stabilizer:
+        #         sb.free()
+        #     else:
+        #         raise Stabilizer_Error_FreeAll()
+
+        warnings.warn("No need to call 'free_all' method because free automatically, or you can use class method 'del_all' to free memory explicitly.")
+
+    @classmethod
+    def del_all(cls, *stabs):
+        """
+        free memory of the all stabilizer.
+
+        Parameters
+        ----------
+        stabs : instance of Stabilizer,instance of Stabilizer,...
+            set of Stabilizer instances
+
+        Returns
+        -------
+        None
+
+        """
         for sb in stabs:
             if type(sb) is list or type(sb) is tuple:
-                cls.free_all(*sb)
+                cls.del_all(*sb)
             elif type(sb) is Stabilizer:
-                sb.free()
+                del sb
             else:
                 raise Stabilizer_Error_FreeAll()
 
@@ -719,7 +744,12 @@ class Stabilizer(ctypes.Structure):
         None
 
         """
-        stabilizer_free(self)
+        # stabilizer_free(self)
+        warnings.warn("No need to call 'free' method because free automatically, or you can use 'del' to free memory explicitly.")
 
+    def __del__(self):
+
+        stabilizer_free(self)
+        
 # c-library for stabilizer
 from qlazy.lib.stabilizer_c import *
