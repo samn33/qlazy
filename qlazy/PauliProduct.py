@@ -52,7 +52,7 @@ class PauliProduct(UnitaryOperator):
         qid_sorted = []
         pauli_list_sorted = []
 
-        if pauli_str == 'I':
+        if list(set(pauli_str)) == ['I']:
             qid_sorted = [0]
             pauli_list_sorted = ['I']
         else:
