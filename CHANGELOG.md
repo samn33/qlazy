@@ -7,6 +7,7 @@
 - elapsed time option (-etm) for command line tool ($ qlazy -qc foo.qc -etm)
 ### Changed
 - performance improvement (reduce 'memcpy' etc)
+- create 'Stabilizer' instance with list of pauli products
 - no need to call 'free' method (free automatically, you can use 'del' to free memory explicitly)
 
 ## [0.2.0] - 2021-05-25
