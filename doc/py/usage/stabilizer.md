@@ -85,6 +85,20 @@ set_pauli_facメソッドを使います。例えば、
 とします。set_pauli_facの第1引数は生成元の番具で、第2引数は指定したい
 符号(4つのうちのどれか)を文字列で指定します。
 
+パウリ積のリストをStabilizerの引数に与えてインスタンスを生成することも
+できます。
+
+    str_list = ["IIIXXXX", "IXXIIXX", "XIXIXIX", "IIIZZZZ", "IZZIIZZ", "ZIZIZIZ"]
+    pp_list = [PauliProduct(pauli_str=pp_str) for pp_str in str_list]
+    sb = Stabilizer(pp_list=gene_list)
+	sb.shoe()
+    >>> g[0]:  IIIXXXX
+    >>> g[1]:  IXXIIXX
+    >>> g[2]:  XIXIXIX
+    >>> g[3]:  IIIZZZZ
+    >>> g[4]:  IZZIIZZ
+    >>> g[5]:  ZIZIZIZ
+
 ### ゲート演算
 
 スタビライザーに対してゲート演算を実行することができます。ただし、クリ

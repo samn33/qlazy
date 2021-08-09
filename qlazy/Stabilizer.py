@@ -48,7 +48,7 @@ class Stabilizer(ctypes.Structure):
         ('check_matrix', ctypes.c_void_p),
     ]
 
-    def __new__(cls, qubit_num=None, gene_num=None, seed=None):
+    def __new__(cls, qubit_num=None, gene_num=None, pp_list=None, seed=None):
         """
         Parameters
         ----------
@@ -63,18 +63,41 @@ class Stabilizer(ctypes.Structure):
         'gene_num' is equal to 'qubit_num.'
 
         """
-        
-        if qubit_num is None:
-            raise Stabilizer_Error_Initialize()
-        if gene_num is None:
-            gene_num = qubit_num
-        if qubit_num < 1 or gene_num < 1:
-            raise Stabilizer_Error_Initialize()
-
+        # if qubit_num is None:
+        #     raise Stabilizer_Error_Initialize()
+        # if gene_num is None:
+        #     gene_num = qubit_num
+        # if qubit_num < 1 or gene_num < 1:
+        #     raise Stabilizer_Error_Initialize()
+        # 
+        # if seed is None:
+        #     seed = random.randint(0,1000000)
+        #     
+        # return stabilizer_init(gene_num, qubit_num, seed)
+            
         if seed is None:
             seed = random.randint(0,1000000)
-            
-        return stabilizer_init(gene_num, qubit_num, seed)
+
+        if pp_list is not None:
+            gene_num = len(pp_list)
+            qubit_num = 0
+            for pp in pp_list:
+                qubit_num = max([qubit_num] + pp.qid)
+            qubit_num += 1
+            sb = stabilizer_init(gene_num, qubit_num, seed)
+            for i, pp in enumerate(pp_list):
+                for j, q in enumerate(pp.qid):
+                    sb.set_pauli_op(i, q, pp.pauli_list[j])
+            return sb
+
+        else:
+            if qubit_num is None:
+                raise Stabilizer_Error_Initialize()
+            if gene_num is None:
+                gene_num = qubit_num
+            if qubit_num < 1 or gene_num < 1:
+                raise Stabilizer_Error_Initialize()
+            return stabilizer_init(gene_num, qubit_num, seed)
             
     def __str__(self):
 
@@ -685,13 +708,13 @@ class Stabilizer(ctypes.Structure):
             else:
                 raise Stabilizer_Error_FreeAll()
 
-    def operate(self, pauli_product=None, ctrl=None):
+    def operate(self, pp=None, ctrl=None):
         """
         operate unitary operator to stabilizer.
 
         Parameters
         ----------
-        pauli_product : instance of PauliProduct
+        pp : instance of PauliProduct
             pauli product to operate
         ctrl : int
             contoroll qubit id for controlled pauli product
@@ -702,8 +725,8 @@ class Stabilizer(ctypes.Structure):
             stabilizer after operation
 
         """
-        pauli_list = pauli_product.pauli_list
-        qid = pauli_product.qid
+        pauli_list = pp.pauli_list
+        qid = pp.qid
     
         if ctrl is None:
             for q, pauli in zip(qid, pauli_list):
