@@ -1202,7 +1202,7 @@ class TestQState_operate(unittest.TestCase):
         qs_actual = QState(qubit_num=1)
         pp = PauliProduct(pauli_str="X")
         qs_expect.x(0)
-        qs_actual.operate(pauli_product=pp)
+        qs_actual.operate(pp=pp)
         ans = equal_qstates(qs_expect, qs_actual)
         self.assertEqual(ans,True)
 
@@ -1215,7 +1215,7 @@ class TestQState_operate(unittest.TestCase):
         qs_actual = QState(qubit_num=1).h(0)
         pp = PauliProduct(pauli_str="X")
         qs_expect.x(0)
-        qs_actual.operate(pauli_product=pp)
+        qs_actual.operate(pp=pp)
         ans = equal_qstates(qs_expect, qs_actual)
         self.assertEqual(ans,True)
 
@@ -1228,7 +1228,7 @@ class TestQState_operate(unittest.TestCase):
         qs_actual = QState(qubit_num=1).h(0)
         pp = PauliProduct(pauli_str="Y")
         qs_expect.y(0)
-        qs_actual.operate(pauli_product=pp)
+        qs_actual.operate(pp=pp)
         ans = equal_qstates(qs_expect, qs_actual)
         self.assertEqual(ans,True)
 
@@ -1241,7 +1241,7 @@ class TestQState_operate(unittest.TestCase):
         qs_actual = QState(qubit_num=1).h(0)
         pp = PauliProduct(pauli_str="Z")
         qs_expect.z(0)
-        qs_actual.operate(pauli_product=pp)
+        qs_actual.operate(pp=pp)
         ans = equal_qstates(qs_expect, qs_actual)
         self.assertEqual(ans,True)
 
@@ -1254,7 +1254,7 @@ class TestQState_operate(unittest.TestCase):
         qs_actual = QState(qubit_num=3)
         pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
         qs_expect.x(2).y(0).z(1)
-        qs_actual.operate(pauli_product=pp)
+        qs_actual.operate(pp=pp)
         ans = equal_qstates(qs_expect, qs_actual)
         self.assertEqual(ans,True)
 
@@ -1267,7 +1267,7 @@ class TestQState_operate(unittest.TestCase):
         qs_actual = QState(qubit_num=4)
         pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
         qs_expect.cx(3,2).cy(3,0).cz(3,1)
-        qs_actual.operate(pauli_product=pp, ctrl=3)
+        qs_actual.operate(pp=pp, ctrl=3)
         ans = equal_qstates(qs_expect, qs_actual)
         self.assertEqual(ans,True)
 

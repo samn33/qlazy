@@ -788,7 +788,7 @@ class TestQComp_operate_ibmq_qasm_simulator(unittest.TestCase):
         res = qc_expect.run()
         expect = qc_expect.qstate
         pp = PauliProduct(pauli_str="X")
-        qc_actual = QComp(qubit_num=1, backend=bk).operate(pauli_product=pp)
+        qc_actual = QComp(qubit_num=1, backend=bk).operate(pp=pp)
         res = qc_actual.run()
         actual = qc_actual.qstate
         ans = equal_vectors(actual, expect)
@@ -803,7 +803,7 @@ class TestQComp_operate_ibmq_qasm_simulator(unittest.TestCase):
         res = qc_expect.run()
         expect = qc_expect.qstate
         pp = PauliProduct(pauli_str="X")
-        qc_actual = QComp(qubit_num=1, backend=bk).h(0).operate(pauli_product=pp)
+        qc_actual = QComp(qubit_num=1, backend=bk).h(0).operate(pp=pp)
         res = qc_actual.run()
         actual = qc_actual.qstate
         ans = equal_vectors(actual, expect)
@@ -818,7 +818,7 @@ class TestQComp_operate_ibmq_qasm_simulator(unittest.TestCase):
         res = qc_expect.run()
         expect = qc_expect.qstate
         pp = PauliProduct(pauli_str="Y")
-        qc_actual = QComp(qubit_num=1, backend=bk).h(0).operate(pauli_product=pp)
+        qc_actual = QComp(qubit_num=1, backend=bk).h(0).operate(pp=pp)
         res = qc_actual.run()
         actual = qc_actual.qstate
         ans = equal_vectors(actual, expect)
@@ -833,7 +833,7 @@ class TestQComp_operate_ibmq_qasm_simulator(unittest.TestCase):
         res = qc_expect.run()
         expect = qc_expect.qstate
         pp = PauliProduct(pauli_str="Z")
-        qc_actual = QComp(qubit_num=1, backend=bk).h(0).operate(pauli_product=pp)
+        qc_actual = QComp(qubit_num=1, backend=bk).h(0).operate(pp=pp)
         res = qc_actual.run()
         actual = qc_actual.qstate
         ans = equal_vectors(actual, expect)
@@ -848,7 +848,7 @@ class TestQComp_operate_ibmq_qasm_simulator(unittest.TestCase):
         res = qc_expect.run()
         expect = qc_expect.qstate
         pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
-        qc_actual = QComp(qubit_num=3, backend=bk).operate(pauli_product=pp)
+        qc_actual = QComp(qubit_num=3, backend=bk).operate(pp=pp)
         res = qc_actual.run()
         actual = qc_actual.qstate
         ans = equal_vectors(actual, expect)
@@ -863,7 +863,7 @@ class TestQComp_operate_ibmq_qasm_simulator(unittest.TestCase):
         res = qc_expect.run()
         expect = qc_expect.qstate
         pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
-        qc_actual = QComp(qubit_num=4, backend=bk).operate(pauli_product=pp, ctrl=3)
+        qc_actual = QComp(qubit_num=4, backend=bk).operate(pp=pp, ctrl=3)
         res = qc_actual.run()
         actual = qc_actual.qstate
         ans = equal_vectors(actual, expect)

@@ -1138,13 +1138,13 @@ class QComp:
         self.cx(q2,q1,ctrl=ctrl).ccx(q0,q1,q2,ctrl=ctrl).cx(q2,q1,ctrl=ctrl)
         return self
 
-    def operate(self, pauli_product=None, ctrl=None):
+    def operate(self, pp=None, ctrl=None):
         """
         add unitary operator.
 
         Parameters
         ----------
-        pauli_product : instance of PauliProduct
+        pp : instance of PauliProduct
             pauli product to operate
         ctrl : int
             contoroll qubit id for controlled pauli product
@@ -1155,8 +1155,8 @@ class QComp:
             quantum computer after adding
 
         """
-        pauli_list = pauli_product.pauli_list
-        qid = pauli_product.qid
+        pauli_list = pp.pauli_list
+        qid = pp.qid
     
         if ctrl is None:
             for q, pauli in zip(qid, pauli_list):

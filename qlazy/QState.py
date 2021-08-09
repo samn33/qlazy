@@ -1658,13 +1658,13 @@ class QState(ctypes.Structure):
         mfrq = MDATA_TABLE[tag_long].measured_freq(angle=angle, phase=phase)
         return mfrq
 
-    def operate(self, pauli_product=None, ctrl=None):
+    def operate(self, pp=None, ctrl=None):
         """
         operate unitary operator to quantum state.
 
         Parameters
         ----------
-        pauli_product : instance of PauliProduct
+        pp : instance of PauliProduct
             pauli product to operate
         ctrl : int
             contoroll qubit id for controlled pauli product
@@ -1675,8 +1675,8 @@ class QState(ctypes.Structure):
             quantum state after operation
 
         """
-        pauli_list = pauli_product.pauli_list
-        qid = pauli_product.qid
+        pauli_list = pp.pauli_list
+        qid = pp.qid
     
         if ctrl is None:
             for q, pauli in zip(qid, pauli_list):

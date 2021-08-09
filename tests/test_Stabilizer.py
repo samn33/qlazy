@@ -45,6 +45,16 @@ class TestStabilizer_init(unittest.TestCase):
         # sb.free()
         self.assertEqual(actual, expect)
 
+    def test_init_pp(self):
+        """test '__new__' (seed)
+        """
+        gene_str_list = ["IIIXXXX", "IXXIIXX", "XIXIXIX", "IIIZZZZ", "IZZIIZZ", "ZIZIZIZ"]
+        gene_list = [PauliProduct(pauli_str=gene_str, qid=[0,2,4,6,8,7,5]) for gene_str in gene_str_list]
+        sb = Stabilizer(pp_list=gene_list)
+        actual = sb.get_str()
+        expect = "  IIIIIXXXX\n  IIXIXXIXI\n  XIIIXXIIX\n  IIIIIZZZZ\n  IIZIZZIZI\n  ZIIIZZIIZ\n"
+        self.assertEqual(actual, expect)
+        
 class TestStabilizer_set_all(unittest.TestCase):
     """ test 'Stabilizer' : 'set_all'
     """
@@ -1215,7 +1225,7 @@ class TestStabilizer_operate(unittest.TestCase):
         sb_expect = Stabilizer(gene_num=1, qubit_num=1).set_pauli_op(0,0,'Z').x(0)
         expect = sb_expect.get_str()
         pp = PauliProduct(pauli_str="X")
-        sb_actual = Stabilizer(gene_num=1, qubit_num=1).set_pauli_op(0,0,'Z').operate(pauli_product=pp)
+        sb_actual = Stabilizer(gene_num=1, qubit_num=1).set_pauli_op(0,0,'Z').operate(pp=pp)
         actual = sb_actual.get_str()
         self.assertEqual(actual, expect)
         # Stabilizer.free_all(sb_expect, sb_actual)
@@ -1226,7 +1236,7 @@ class TestStabilizer_operate(unittest.TestCase):
         sb_expect = Stabilizer(gene_num=1, qubit_num=1).set_pauli_op(0,0,'Z').h(0).x(0)
         expect = sb_expect.get_str()
         pp = PauliProduct(pauli_str="X")
-        sb_actual = Stabilizer(gene_num=1, qubit_num=1).set_pauli_op(0,0,'Z').h(0).operate(pauli_product=pp)
+        sb_actual = Stabilizer(gene_num=1, qubit_num=1).set_pauli_op(0,0,'Z').h(0).operate(pp=pp)
         actual = sb_actual.get_str()
         self.assertEqual(actual, expect)
         # Stabilizer.free_all(sb_expect, sb_actual)
@@ -1237,7 +1247,7 @@ class TestStabilizer_operate(unittest.TestCase):
         sb_expect = Stabilizer(gene_num=1, qubit_num=1).set_pauli_op(0,0,'Z').h(0).y(0)
         expect = sb_expect.get_str()
         pp = PauliProduct(pauli_str="Y")
-        sb_actual = Stabilizer(gene_num=1, qubit_num=1).set_pauli_op(0,0,'Z').h(0).operate(pauli_product=pp)
+        sb_actual = Stabilizer(gene_num=1, qubit_num=1).set_pauli_op(0,0,'Z').h(0).operate(pp=pp)
         actual = sb_actual.get_str()
         self.assertEqual(actual, expect)
         # Stabilizer.free_all(sb_expect, sb_actual)
@@ -1248,7 +1258,7 @@ class TestStabilizer_operate(unittest.TestCase):
         sb_expect = Stabilizer(gene_num=1, qubit_num=1).set_pauli_op(0,0,'Z').h(0).z(0)
         expect = sb_expect.get_str()
         pp = PauliProduct(pauli_str="Z")
-        sb_actual = Stabilizer(gene_num=1, qubit_num=1).set_pauli_op(0,0,'Z').h(0).operate(pauli_product=pp)
+        sb_actual = Stabilizer(gene_num=1, qubit_num=1).set_pauli_op(0,0,'Z').h(0).operate(pp=pp)
         actual = sb_actual.get_str()
         self.assertEqual(actual, expect)
         # Stabilizer.free_all(sb_expect, sb_actual)
@@ -1259,7 +1269,7 @@ class TestStabilizer_operate(unittest.TestCase):
         sb_expect = Stabilizer(gene_num=3, qubit_num=3).set_all('Z').x(2).y(0).z(1)
         expect = sb_expect.get_str()
         pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
-        sb_actual = Stabilizer(gene_num=3, qubit_num=3).set_all('Z').operate(pauli_product=pp)
+        sb_actual = Stabilizer(gene_num=3, qubit_num=3).set_all('Z').operate(pp=pp)
         actual = sb_actual.get_str()
         self.assertEqual(actual, expect)
         # Stabilizer.free_all(sb_expect, sb_actual)
@@ -1270,7 +1280,7 @@ class TestStabilizer_operate(unittest.TestCase):
         sb_expect = Stabilizer(gene_num=4, qubit_num=4).set_all('Z').cx(3,2).cy(3,0).cz(3,1)
         expect = sb_expect.get_str()
         pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
-        sb_actual = Stabilizer(gene_num=4, qubit_num=4).set_all('Z').operate(pauli_product=pp, ctrl=3)
+        sb_actual = Stabilizer(gene_num=4, qubit_num=4).set_all('Z').operate(pp=pp, ctrl=3)
         actual = sb_actual.get_str()
         self.assertEqual(actual, expect)
         # Stabilizer.free_all(sb_expect, sb_actual)
