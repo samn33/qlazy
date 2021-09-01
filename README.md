@@ -108,6 +108,8 @@ execute the program
     c[11] = +0.7071+0.0000*i : 0.5000 |++++++
     Counter({{'00':53,'11':47})
 
+note: no need to call 'free' method (new version >= v0.2.1)
+
 #### Other classes
 
 - DensOp class: for operating density operators.

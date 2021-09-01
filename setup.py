@@ -4,7 +4,7 @@ import pathlib
 from setuptools import setup, find_packages, Extension
 from setuptools.command.build_ext import build_ext as build_ext_orig
 
-_VERSION = '0.2.1b'
+_VERSION = '0.2.1'
 
 class CMakeExtension(Extension):
 

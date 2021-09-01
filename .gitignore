@@ -6,5 +6,6 @@ __pycache__
 backup
 old
 tmp
+data
 dist
 build

@@ -1,14 +1,14 @@
 # Change Log
 
-## [0.2.1b] - 2021-08-xx
+## [0.2.1] - 2021-09-01
+### Changed
+- performance improvement (reduce 'memcpy' etc)
+- no need to call 'free' method (free automatically, use 'del' to free memory explicitly)
+- create 'Stabilizer' instance with list of pauli products
 ### Added
 - 'PauliProduct' class and 'operate' method (to operate pauli product to quantum state)
 - 'join' method (for making tensor product of many quantum states)
 - elapsed time option (-etm) for command line tool ($ qlazy -qc foo.qc -etm)
-### Changed
-- performance improvement (reduce 'memcpy' etc)
-- create 'Stabilizer' instance with list of pauli products
-- no need to call 'free' method (free automatically, you can use 'del' to free memory explicitly)
 
 ## [0.2.0] - 2021-05-25
 ### Changed
