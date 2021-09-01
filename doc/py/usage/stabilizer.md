@@ -169,13 +169,14 @@ Stabilizerクラスのメソッドとして登録したい場合は、Stabilizer
 トのスタビライザー状態sbに対して、X2 Y0 Z1というパウリ積を演算したい場合、
 
 	pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
-	sb.operate(pauli_product=pp)
+	sb.operate(pp=pp)
 	
-のようにします。制御化されたパウリ積はoperateメソッドにctrlオプション
-を与えることで実現できます。以下のようにします。
+のようにoperateメソッドのppオプションにPauliProductのインスタンスを指
+定します。制御化されたパウリ積はoperateメソッドのctrlオプションに制御
+量子ビット番号を指定することで実現できます。以下のようにします。
 
 	pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
-	sb.operate(pauli_product=pp, ctlr=3)
+	sb.operate(pp=pp, ctlr=3)
 
 ### 測定
 

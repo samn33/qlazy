@@ -92,13 +92,14 @@ numpyの行列（２次元配列）を指定して生成することもできま
 トの密度演算子deに対して、X2 Y0 Z1というパウリ積を演算したい場合、
 
 	pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
-	de.operate(pauli_product=pp)
+	de.operate(pp=pp)
 	
-のようにします。制御化されたパウリ積はoperateメソッドにctrlオプション
-を与えることで実現できます。以下のようにします。
+のようにoperateメソッドのppオプションにPauliProductのインスタンスを指
+定します。制御化されたパウリ積はoperateメソッドのctrlオプションに制御
+量子ビット番号を指定することで実現できます。以下のようにします。
 
 	pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
-	qs.operate(pauli_product=pp, ctlr=3)
+	qs.operate(pp=pp, ctlr=3)
 
 
 ### 量子チャネル

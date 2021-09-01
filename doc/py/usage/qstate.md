@@ -256,14 +256,15 @@ qlazyでは、数が不定の量子ビット番号を指定する必要がある
 
     qs = QState(qubit_num=3)
 	pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
-	qs.operate(pauli_product=pp)
+	qs.operate(pp=pp)
 	
-のようにします。制御化されたパウリ積はoperateメソッドにctrlオプション
-を与えることで実現できます。以下のようにします。
+のようにoperateメソッドのppオプションにPauliProductのインスタンスを指
+定します。制御化されたパウリ積はoperateメソッドのctrlオプションに制御
+量子ビット番号を指定することで実現できます。以下のようにします。
 
     qs = QState(qubit_num=4)
 	pp = PauliProduct(pauli_str="XYZ", qid=[0,1,2])
-	qs.operate(pauli_product=pp, ctlr=3)
+	qs.operate(pp=pp, ctlr=3)
 
 
 ## 量子状態の表示
