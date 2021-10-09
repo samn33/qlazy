@@ -364,17 +364,9 @@ bool densop_patrace(DensOp* densop_in, int qubit_num, int qubit_id[MAX_QUBIT_NUM
   dim_tr = 1<<qubit_num;
   dim = 1<<(total_qubit_num-qubit_num);
   
-  if (!(densop = (DensOp*)malloc(sizeof(DensOp))))
-    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
-  densop->row = densop->col = dim;
-  densop->buf_id = 0;
-  if (!(densop->buffer_0 = (COMPLEX*)malloc(sizeof(COMPLEX)*dim*dim)))
-    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
-  if (!(densop->buffer_1 = (COMPLEX*)malloc(sizeof(COMPLEX)*dim*dim)))
-    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
-  densop->elm = densop->buffer_0;
-  for (int n=0; n<dim*dim; n++) densop->elm[n] = 0.0+0.0i;
-
+  if(!(densop = _create_densop(dim, dim)))
+    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+  
   qsort(qubit_id, qubit_num, sizeof(int), _cmp_for_sort);
   
   int k,kk,l,ll;
