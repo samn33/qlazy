@@ -5,6 +5,12 @@ import math
 import numpy as np
 from qlazy import Stabilizer, PauliProduct
 
+class MyStabilizer(Stabilizer):
+
+    def bell(self, q0, q1):
+        self.h(q0).cx(q0,q1)
+        return self
+
 class TestStabilizer_init(unittest.TestCase):
     """ test 'Stabilizer' : '__new__'
     """
@@ -15,7 +21,6 @@ class TestStabilizer_init(unittest.TestCase):
         sb = Stabilizer(qubit_num=3)
         actual = sb.get_str()
         expect = "  III\n  III\n  III\n"
-        # sb.free()
         self.assertEqual(actual, expect)
 
     def test_init_2(self):
@@ -24,7 +29,6 @@ class TestStabilizer_init(unittest.TestCase):
         sb = Stabilizer(gene_num=2, qubit_num=3)
         actual = sb.get_str()
         expect = "  III\n  III\n"
-        # sb.free()
         self.assertEqual(actual, expect)
 
     def test_init_3(self):
@@ -33,7 +37,6 @@ class TestStabilizer_init(unittest.TestCase):
         sb = Stabilizer(gene_num=3, qubit_num=2)
         actual = sb.get_str()
         expect = "  II\n  II\n  II\n"
-        # sb.free()
         self.assertEqual(actual, expect)
 
     def test_init_4(self):
@@ -42,7 +45,6 @@ class TestStabilizer_init(unittest.TestCase):
         sb = Stabilizer(gene_num=3, qubit_num=3, seed=123)
         actual = sb.get_str()
         expect = "  III\n  III\n  III\n"
-        # sb.free()
         self.assertEqual(actual, expect)
 
     def test_init_pp(self):
@@ -66,7 +68,6 @@ class TestStabilizer_set_all(unittest.TestCase):
         sb.set_all('X')
         actual = sb.get_str()
         expect = "  XII\n  IXI\n  IIX\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_set_all_2(self):
@@ -76,7 +77,6 @@ class TestStabilizer_set_all(unittest.TestCase):
         sb.set_all('X')
         actual = sb.get_str()
         expect = "  XII\n  IXI\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_set_all_3(self):
@@ -86,7 +86,6 @@ class TestStabilizer_set_all(unittest.TestCase):
         sb.set_all('X')
         actual = sb.get_str()
         expect = "  XI\n  IX\n  II\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_set_all_4(self):
@@ -96,7 +95,6 @@ class TestStabilizer_set_all(unittest.TestCase):
         sb.set_all('Y')
         actual = sb.get_str()
         expect = "  YII\n  IYI\n  IIY\n"
-        # sb.free()
         self.assertEqual(actual, expect)
 
     def test_set_all_5(self):
@@ -106,7 +104,6 @@ class TestStabilizer_set_all(unittest.TestCase):
         sb.set_all('Z')
         actual = sb.get_str()
         expect = "  ZII\n  IZI\n  IIZ\n"
-        # sb.free()
         self.assertEqual(actual, expect)
 
     def test_set_all_6(self):
@@ -116,7 +113,6 @@ class TestStabilizer_set_all(unittest.TestCase):
         sb.set_all('I')
         actual = sb.get_str()
         expect = "  III\n  III\n  III\n"
-        # sb.free()
         self.assertEqual(actual, expect)
 
 class TestStabilizer_reset(unittest.TestCase):
@@ -130,7 +126,6 @@ class TestStabilizer_reset(unittest.TestCase):
         sb.set_all('Y').reset()
         actual = sb.get_str()
         expect = "  III\n  III\n  III\n  III\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
 class TestStabilizer_clone(unittest.TestCase):
@@ -145,7 +140,6 @@ class TestStabilizer_clone(unittest.TestCase):
         sb_clone = sb.clone()
         actual = sb_clone.get_str()
         expect = sb.get_str()
-        # sb.free()
         self.assertEqual(actual, expect)
         
 class TestStabilizer_set_pauli_fac(unittest.TestCase):
@@ -159,7 +153,6 @@ class TestStabilizer_set_pauli_fac(unittest.TestCase):
         sb.set_all('Z')
         actual = sb.set_pauli_fac(1,'-i').get_str()
         expect = "  ZIII\n-iIZII\n  IIZI\n"
-        # sb.free()
         self.assertEqual(actual, expect)
 
     def test_set_pauli_fac_2(self):
@@ -169,7 +162,6 @@ class TestStabilizer_set_pauli_fac(unittest.TestCase):
         sb.set_all('Z').set_pauli_op(1,0,'Y').set_pauli_op(1,2,'Y')
         actual = sb.set_pauli_fac(1,'-i').get_str()
         expect = "  ZIII\n-iYZYI\n  IIZI\n"
-        # sb.free()
         self.assertEqual(actual, expect)
 
 class TestStabilizer_get_pauli_fac(unittest.TestCase):
@@ -184,7 +176,6 @@ class TestStabilizer_get_pauli_fac(unittest.TestCase):
         sb.set_pauli_fac(1,'-i')
         actual = sb.get_pauli_fac(1)
         expect = -1j
-        # sb.free()
         self.assertEqual(actual, expect)
 
     def test_get_pauli_fac_2(self):
@@ -195,7 +186,6 @@ class TestStabilizer_get_pauli_fac(unittest.TestCase):
         sb.set_pauli_fac(1,'-i')
         actual = sb.get_pauli_fac(1)
         expect = -1j
-        # sb.free()
         self.assertEqual(actual, expect)
 
 class TestStabilizer_set_pauli_op(unittest.TestCase):
@@ -212,7 +202,6 @@ class TestStabilizer_set_pauli_op(unittest.TestCase):
         sb.set_pauli_op(3,0,'I').set_pauli_op(3,1,'I').set_pauli_op(3,2,'I')
         actual = sb.get_str()
         expect = "  XYZ\n  YZX\n  ZXY\n  III\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_set_pauli_op_2(self):
@@ -228,7 +217,6 @@ class TestStabilizer_set_pauli_op(unittest.TestCase):
         
         actual = sb.get_str()
         expect = "  XYZ\n -YZX\n iZXY\n-iIII\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
 class TestStabilizer_get_pauli_op(unittest.TestCase):
@@ -245,7 +233,6 @@ class TestStabilizer_get_pauli_op(unittest.TestCase):
         sb.set_pauli_op(3,0,'I').set_pauli_op(3,1,'I').set_pauli_op(3,2,'I')
         actual = sb.get_pauli_op(3,2)
         expect = "I"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_get_pauli_op_2(self):
@@ -260,7 +247,6 @@ class TestStabilizer_get_pauli_op(unittest.TestCase):
         sb.set_pauli_fac(2,'+i').set_pauli_fac(3,'-i')
         actual = sb.get_pauli_op(3,2)
         expect = "I"
-        # sb.free()
         self.assertEqual(actual, expect)
         
 class TestStabilizer_x(unittest.TestCase):
@@ -275,7 +261,6 @@ class TestStabilizer_x(unittest.TestCase):
         sb.x(0)
         actual = sb.get_str()
         expect = "  X\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_x_2(self):
@@ -286,7 +271,6 @@ class TestStabilizer_x(unittest.TestCase):
         sb.x(0)
         actual = sb.get_str()
         expect = " -Y\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_x_3(self):
@@ -297,7 +281,6 @@ class TestStabilizer_x(unittest.TestCase):
         sb.x(0)
         actual = sb.get_str()
         expect = " -Z\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_x_4(self):
@@ -308,7 +291,6 @@ class TestStabilizer_x(unittest.TestCase):
         sb.x(0)
         actual = sb.get_str()
         expect = "  I\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
 class TestStabilizer_y(unittest.TestCase):
@@ -323,7 +305,6 @@ class TestStabilizer_y(unittest.TestCase):
         sb.y(0)
         actual = sb.get_str()
         expect = " -X\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_y_2(self):
@@ -334,7 +315,6 @@ class TestStabilizer_y(unittest.TestCase):
         sb.y(0)
         actual = sb.get_str()
         expect = "  Y\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_y_3(self):
@@ -345,7 +325,6 @@ class TestStabilizer_y(unittest.TestCase):
         sb.y(0)
         actual = sb.get_str()
         expect = " -Z\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_y_4(self):
@@ -356,7 +335,6 @@ class TestStabilizer_y(unittest.TestCase):
         sb.y(0)
         actual = sb.get_str()
         expect = "  I\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
 class TestStabilizer_z(unittest.TestCase):
@@ -371,7 +349,6 @@ class TestStabilizer_z(unittest.TestCase):
         sb.z(0)
         actual = sb.get_str()
         expect = " -X\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_z_2(self):
@@ -382,7 +359,6 @@ class TestStabilizer_z(unittest.TestCase):
         sb.z(0)
         actual = sb.get_str()
         expect = " -Y\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_z_3(self):
@@ -393,7 +369,6 @@ class TestStabilizer_z(unittest.TestCase):
         sb.z(0)
         actual = sb.get_str()
         expect = "  Z\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_z_4(self):
@@ -404,7 +379,6 @@ class TestStabilizer_z(unittest.TestCase):
         sb.z(0)
         actual = sb.get_str()
         expect = "  I\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
 class TestStabilizer_h(unittest.TestCase):
@@ -419,7 +393,6 @@ class TestStabilizer_h(unittest.TestCase):
         sb.h(0)
         actual = sb.get_str()
         expect = "  Z\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_h_2(self):
@@ -430,7 +403,6 @@ class TestStabilizer_h(unittest.TestCase):
         sb.h(0)
         actual = sb.get_str()
         expect = " -Y\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_h_3(self):
@@ -441,7 +413,6 @@ class TestStabilizer_h(unittest.TestCase):
         sb.h(0)
         actual = sb.get_str()
         expect = "  X\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_h_4(self):
@@ -452,7 +423,6 @@ class TestStabilizer_h(unittest.TestCase):
         sb.h(0)
         actual = sb.get_str()
         expect = "  I\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
 class TestStabilizer_s(unittest.TestCase):
@@ -467,7 +437,6 @@ class TestStabilizer_s(unittest.TestCase):
         sb.s(0)
         actual = sb.get_str()
         expect = "  Y\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_s_2(self):
@@ -478,7 +447,6 @@ class TestStabilizer_s(unittest.TestCase):
         sb.s(0)
         actual = sb.get_str()
         expect = " iX\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_s_3(self):
@@ -489,7 +457,6 @@ class TestStabilizer_s(unittest.TestCase):
         sb.s(0)
         actual = sb.get_str()
         expect = "  Z\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_s_4(self):
@@ -500,7 +467,6 @@ class TestStabilizer_s(unittest.TestCase):
         sb.s(0)
         actual = sb.get_str()
         expect = "  I\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
 class TestStabilizer_s_dg(unittest.TestCase):
@@ -515,7 +481,6 @@ class TestStabilizer_s_dg(unittest.TestCase):
         sb.s_dg(0)
         actual = sb.get_str()
         expect = " -Y\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_s_dg_2(self):
@@ -526,7 +491,6 @@ class TestStabilizer_s_dg(unittest.TestCase):
         sb.s_dg(0)
         actual = sb.get_str()
         expect = "-iX\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_s_dg_3(self):
@@ -537,7 +501,6 @@ class TestStabilizer_s_dg(unittest.TestCase):
         sb.s_dg(0)
         actual = sb.get_str()
         expect = "  Z\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_s_dg_4(self):
@@ -548,7 +511,6 @@ class TestStabilizer_s_dg(unittest.TestCase):
         sb.s_dg(0)
         actual = sb.get_str()
         expect = "  I\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
 class TestStabilizer_cx(unittest.TestCase):
@@ -563,7 +525,6 @@ class TestStabilizer_cx(unittest.TestCase):
         sb.cx(0,1)
         actual = sb.get_str()
         expect = "  II\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_cx_2(self):
@@ -574,7 +535,6 @@ class TestStabilizer_cx(unittest.TestCase):
         sb.cx(0,1)
         actual = sb.get_str()
         expect = "  XX\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_cx_3(self):
@@ -585,7 +545,6 @@ class TestStabilizer_cx(unittest.TestCase):
         sb.cx(0,1)
         actual = sb.get_str()
         expect = "  IX\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_cx_4(self):
@@ -596,7 +555,6 @@ class TestStabilizer_cx(unittest.TestCase):
         sb.cx(0,1)
         actual = sb.get_str()
         expect = "  YX\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_cx_5(self):
@@ -607,7 +565,6 @@ class TestStabilizer_cx(unittest.TestCase):
         sb.cx(0,1)
         actual = sb.get_str()
         expect = "  ZY\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_cx_6(self):
@@ -618,7 +575,6 @@ class TestStabilizer_cx(unittest.TestCase):
         sb.cx(0,1)
         actual = sb.get_str()
         expect = "  ZI\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_cx_7(self):
@@ -629,7 +585,6 @@ class TestStabilizer_cx(unittest.TestCase):
         sb.cx(0,1)
         actual = sb.get_str()
         expect = "  ZZ\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_cx_8(self):
@@ -640,7 +595,6 @@ class TestStabilizer_cx(unittest.TestCase):
         sb.cx(0,1)
         actual = sb.get_str()
         expect = "  XI\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_cx_9(self):
@@ -651,7 +605,6 @@ class TestStabilizer_cx(unittest.TestCase):
         sb.cx(0,1)
         actual = sb.get_str()
         expect = "  YZ\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_cx_10(self):
@@ -662,7 +615,6 @@ class TestStabilizer_cx(unittest.TestCase):
         sb.cx(0,1)
         actual = sb.get_str()
         expect = " -YY\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_cx_11(self):
@@ -673,7 +625,6 @@ class TestStabilizer_cx(unittest.TestCase):
         sb.cx(0,1)
         actual = sb.get_str()
         expect = "  YI\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_cx_12(self):
@@ -684,7 +635,6 @@ class TestStabilizer_cx(unittest.TestCase):
         sb.cx(0,1)
         actual = sb.get_str()
         expect = " -XZ\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_cx_13(self):
@@ -695,7 +645,6 @@ class TestStabilizer_cx(unittest.TestCase):
         sb.cx(0,1)
         actual = sb.get_str()
         expect = "  XY\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_cx_14(self):
@@ -706,7 +655,6 @@ class TestStabilizer_cx(unittest.TestCase):
         sb.cx(0,1)
         actual = sb.get_str()
         expect = "  ZX\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_cx_15(self):
@@ -717,7 +665,6 @@ class TestStabilizer_cx(unittest.TestCase):
         sb.cx(0,1)
         actual = sb.get_str()
         expect = "  IY\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_cx_16(self):
@@ -728,7 +675,6 @@ class TestStabilizer_cx(unittest.TestCase):
         sb.cx(0,1)
         actual = sb.get_str()
         expect = "  IZ\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
 class TestStabilizer_cy(unittest.TestCase):
@@ -743,7 +689,6 @@ class TestStabilizer_cy(unittest.TestCase):
         sb.cy(0,1)
         actual = sb.get_str()
         expect = "  II\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_cy_2(self):
@@ -754,7 +699,6 @@ class TestStabilizer_cy(unittest.TestCase):
         sb.cy(0,1)
         actual = sb.get_str()
         expect = "-iXY\n"
-        # sb.free()
         self.assertEqual(actual, expect)
 
     def test_cy_3(self):
@@ -765,7 +709,6 @@ class TestStabilizer_cy(unittest.TestCase):
         sb.cy(0,1)
         actual = sb.get_str()
         expect = "  ZX\n"
-        # sb.free()
         self.assertEqual(actual, expect)
 
     def test_cy_4(self):
@@ -776,7 +719,6 @@ class TestStabilizer_cy(unittest.TestCase):
         sb.cy(0,1)
         actual = sb.get_str()
         expect = "  YY\n"
-        # sb.free()
         self.assertEqual(actual, expect)
 
     def test_cy_5(self):
@@ -787,7 +729,6 @@ class TestStabilizer_cy(unittest.TestCase):
         sb.cy(0,1)
         actual = sb.get_str()
         expect = "  IY\n"
-        # sb.free()
         self.assertEqual(actual, expect)
 
     def test_cy_6(self):
@@ -798,7 +739,6 @@ class TestStabilizer_cy(unittest.TestCase):
         sb.cy(0,1)
         actual = sb.get_str()
         expect = "  ZI\n"
-        # sb.free()
         self.assertEqual(actual, expect)
 
     def test_cy_7(self):
@@ -809,7 +749,6 @@ class TestStabilizer_cy(unittest.TestCase):
         sb.cy(0,1)
         actual = sb.get_str()
         expect = "  ZZ\n"
-        # sb.free()
         self.assertEqual(actual, expect)
 
     def test_cy_8(self):
@@ -820,7 +759,6 @@ class TestStabilizer_cy(unittest.TestCase):
         sb.cy(0,1)
         actual = sb.get_str()
         expect = " -YZ\n"
-        # sb.free()
         self.assertEqual(actual, expect)
 
     def test_cy_9(self):
@@ -831,7 +769,6 @@ class TestStabilizer_cy(unittest.TestCase):
         sb.cy(0,1)
         actual = sb.get_str()
         expect = "-iXI\n"
-        # sb.free()
         self.assertEqual(actual, expect)
 
     def test_cy_10(self):
@@ -842,7 +779,6 @@ class TestStabilizer_cy(unittest.TestCase):
         sb.cy(0,1)
         actual = sb.get_str()
         expect = "  YX\n"
-        # sb.free()
         self.assertEqual(actual, expect)
 
     def test_cy_11(self):
@@ -853,7 +789,6 @@ class TestStabilizer_cy(unittest.TestCase):
         sb.cy(0,1)
         actual = sb.get_str()
         expect = "-iXZ\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_cy_12(self):
@@ -864,7 +799,6 @@ class TestStabilizer_cy(unittest.TestCase):
         sb.cy(0,1)
         actual = sb.get_str()
         expect = "  YI\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_cy_13(self):
@@ -875,7 +809,6 @@ class TestStabilizer_cy(unittest.TestCase):
         sb.cy(0,1)
         actual = sb.get_str()
         expect = " iXX\n"
-        # sb.free()
         self.assertEqual(actual, expect)
 
     def test_cy_14(self):
@@ -886,7 +819,6 @@ class TestStabilizer_cy(unittest.TestCase):
         sb.cy(0,1)
         actual = sb.get_str()
         expect = "  IX\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_cy_15(self):
@@ -897,7 +829,6 @@ class TestStabilizer_cy(unittest.TestCase):
         sb.cy(0,1)
         actual = sb.get_str()
         expect = "  ZY\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_cy_16(self):
@@ -908,7 +839,6 @@ class TestStabilizer_cy(unittest.TestCase):
         sb.cy(0,1)
         actual = sb.get_str()
         expect = "  IZ\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
 class TestStabilizer_cz(unittest.TestCase):
@@ -923,7 +853,6 @@ class TestStabilizer_cz(unittest.TestCase):
         sb.cz(0,1)
         actual = sb.get_str()
         expect = "  II\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_cz_2(self):
@@ -934,7 +863,6 @@ class TestStabilizer_cz(unittest.TestCase):
         sb.cz(0,1)
         actual = sb.get_str()
         expect = "  XZ\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_cz_3(self):
@@ -945,7 +873,6 @@ class TestStabilizer_cz(unittest.TestCase):
         sb.cz(0,1)
         actual = sb.get_str()
         expect = "  ZX\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_cz_4(self):
@@ -956,7 +883,6 @@ class TestStabilizer_cz(unittest.TestCase):
         sb.cz(0,1)
         actual = sb.get_str()
         expect = "  YZ\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_cz_5(self):
@@ -967,7 +893,6 @@ class TestStabilizer_cz(unittest.TestCase):
         sb.cz(0,1)
         actual = sb.get_str()
         expect = "  ZY\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_cz_6(self):
@@ -978,7 +903,6 @@ class TestStabilizer_cz(unittest.TestCase):
         sb.cz(0,1)
         actual = sb.get_str()
         expect = "  ZI\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_cz_7(self):
@@ -989,7 +913,6 @@ class TestStabilizer_cz(unittest.TestCase):
         sb.cz(0,1)
         actual = sb.get_str()
         expect = "  IZ\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_cz_8(self):
@@ -1000,7 +923,6 @@ class TestStabilizer_cz(unittest.TestCase):
         sb.cz(0,1)
         actual = sb.get_str()
         expect = "  YY\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_cz_9(self):
@@ -1011,7 +933,6 @@ class TestStabilizer_cz(unittest.TestCase):
         sb.cz(0,1)
         actual = sb.get_str()
         expect = " -YX\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_cz_10(self):
@@ -1022,7 +943,6 @@ class TestStabilizer_cz(unittest.TestCase):
         sb.cz(0,1)
         actual = sb.get_str()
         expect = "  XI\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_cz_11(self):
@@ -1033,7 +953,6 @@ class TestStabilizer_cz(unittest.TestCase):
         sb.cz(0,1)
         actual = sb.get_str()
         expect = " -XY\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_cz_12(self):
@@ -1044,7 +963,6 @@ class TestStabilizer_cz(unittest.TestCase):
         sb.cz(0,1)
         actual = sb.get_str()
         expect = "  XX\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_cz_13(self):
@@ -1055,7 +973,6 @@ class TestStabilizer_cz(unittest.TestCase):
         sb.cz(0,1)
         actual = sb.get_str()
         expect = "  YI\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_cz_14(self):
@@ -1066,7 +983,6 @@ class TestStabilizer_cz(unittest.TestCase):
         sb.cz(0,1)
         actual = sb.get_str()
         expect = "  IX\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_cz_15(self):
@@ -1077,7 +993,6 @@ class TestStabilizer_cz(unittest.TestCase):
         sb.cz(0,1)
         actual = sb.get_str()
         expect = "  IY\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
     def test_cz_16(self):
@@ -1088,7 +1003,6 @@ class TestStabilizer_cz(unittest.TestCase):
         sb.cz(0,1)
         actual = sb.get_str()
         expect = "  ZZ\n"
-        # sb.free()
         self.assertEqual(actual, expect)
         
 class TestStabilizer_m(unittest.TestCase):
@@ -1105,7 +1019,6 @@ class TestStabilizer_m(unittest.TestCase):
         frq = md.frequency
         lst = md.last
         ans = ((lst == '00' or lst == '11') and (frq['00'] + frq['11'] == 10))
-        # sb.free()
         self.assertEqual(ans, True)
 
     def test_m_2(self):
@@ -1118,7 +1031,6 @@ class TestStabilizer_m(unittest.TestCase):
         frq = md.frequency
         lst = md.last
         ans = ((lst == '000' or lst == '111') and (frq['000'] + frq['111'] == 10))
-        # sb.free()
         self.assertEqual(ans, True)
 
 class TestStabilizer_mz(unittest.TestCase):
@@ -1135,7 +1047,6 @@ class TestStabilizer_mz(unittest.TestCase):
         frq = md.frequency
         lst = md.last
         ans = ((lst == '00' or lst == '11') and (frq['00'] + frq['11'] == 10))
-        # sb.free()
         self.assertEqual(ans, True)
 
     def test_mz_2(self):
@@ -1148,7 +1059,6 @@ class TestStabilizer_mz(unittest.TestCase):
         frq = md.frequency
         lst = md.last
         ans = ((lst == '000' or lst == '111') and (frq['000'] + frq['111'] == 10))
-        # sb.free()
         self.assertEqual(ans, True)
 
 class TestStabilizer_mx(unittest.TestCase):
@@ -1165,7 +1075,6 @@ class TestStabilizer_mx(unittest.TestCase):
         frq = md.frequency
         lst = md.last
         ans = ((lst == '00' or lst == '11') and (frq['00'] + frq['11'] == 10))
-        # sb.free()
         self.assertEqual(ans, True)
 
     def test_mx_2(self):
@@ -1180,7 +1089,6 @@ class TestStabilizer_mx(unittest.TestCase):
         ans = ((lst == '000' or lst == '011' or lst == '101' or lst == '110') and
                (frq['000'] + frq['011'] + frq['101'] + frq['110'] == 10))
         self.assertEqual(ans, True)
-        # sb.free()
 
 class TestStabilizer_my(unittest.TestCase):
     """ test 'Stabilizer' : 'my'
@@ -1196,7 +1104,6 @@ class TestStabilizer_my(unittest.TestCase):
         frq = md.frequency
         lst = md.last
         ans = ((lst == '01' or lst == '10') and (frq['01'] + frq['10'] == 10))
-        # sb.free()
         self.assertEqual(ans, True)
 
     def test_my_2(self):
@@ -1213,7 +1120,6 @@ class TestStabilizer_my(unittest.TestCase):
                (frq['000'] + frq['001'] + frq['010'] + frq['011'] +
                 frq['100'] + frq['101'] + frq['110'] + frq['111'] == 10))
         self.assertEqual(ans, True)
-        # sb.free()
 
 class TestStabilizer_operate(unittest.TestCase):
     """ test 'Stabilizer' : 'operate'
@@ -1228,7 +1134,6 @@ class TestStabilizer_operate(unittest.TestCase):
         sb_actual = Stabilizer(gene_num=1, qubit_num=1).set_pauli_op(0,0,'Z').operate(pp=pp)
         actual = sb_actual.get_str()
         self.assertEqual(actual, expect)
-        # Stabilizer.free_all(sb_expect, sb_actual)
         
     def test_operate_h_x(self):
         """test 'operate' (x followed by h)
@@ -1239,7 +1144,6 @@ class TestStabilizer_operate(unittest.TestCase):
         sb_actual = Stabilizer(gene_num=1, qubit_num=1).set_pauli_op(0,0,'Z').h(0).operate(pp=pp)
         actual = sb_actual.get_str()
         self.assertEqual(actual, expect)
-        # Stabilizer.free_all(sb_expect, sb_actual)
         
     def test_operate_h_y(self):
         """test 'operate' (Y followed by h)
@@ -1250,7 +1154,6 @@ class TestStabilizer_operate(unittest.TestCase):
         sb_actual = Stabilizer(gene_num=1, qubit_num=1).set_pauli_op(0,0,'Z').h(0).operate(pp=pp)
         actual = sb_actual.get_str()
         self.assertEqual(actual, expect)
-        # Stabilizer.free_all(sb_expect, sb_actual)
         
     def test_operate_h_z(self):
         """test 'operate' (Z followed by h)
@@ -1261,7 +1164,6 @@ class TestStabilizer_operate(unittest.TestCase):
         sb_actual = Stabilizer(gene_num=1, qubit_num=1).set_pauli_op(0,0,'Z').h(0).operate(pp=pp)
         actual = sb_actual.get_str()
         self.assertEqual(actual, expect)
-        # Stabilizer.free_all(sb_expect, sb_actual)
         
     def test_operate_xyz(self):
         """test 'operate' (xyz)
@@ -1272,7 +1174,6 @@ class TestStabilizer_operate(unittest.TestCase):
         sb_actual = Stabilizer(gene_num=3, qubit_num=3).set_all('Z').operate(pp=pp)
         actual = sb_actual.get_str()
         self.assertEqual(actual, expect)
-        # Stabilizer.free_all(sb_expect, sb_actual)
         
     def test_operate_controlled_xyz(self):
         """test 'operate' (controlled_xyz)
@@ -1283,7 +1184,32 @@ class TestStabilizer_operate(unittest.TestCase):
         sb_actual = Stabilizer(gene_num=4, qubit_num=4).set_all('Z').operate(pp=pp, ctrl=3)
         actual = sb_actual.get_str()
         self.assertEqual(actual, expect)
-        # Stabilizer.free_all(sb_expect, sb_actual)
         
+class TestStabilizer_inheritance(unittest.TestCase):
+    """ test 'Stabilizer' : inheritance
+    """
+
+    def test_inheritance_1(self):
+        """test 'inheritance_1'
+        """
+        sb_expect = Stabilizer(qubit_num=2).set_all('Z')
+        sb_expect.h(0).cx(0,1).x(0)
+        sb_actual = MyStabilizer(qubit_num=2).set_all('Z')
+        sb_actual.bell(0,1).x(0)
+        str_expect = sb_expect.get_str()
+        str_actual = sb_actual.get_str()
+        self.assertEqual(str_expect, str_actual)
+
+    def test_inheritance_2(self):
+        """test 'inheritance_2'
+        """
+        sb_expect = Stabilizer(qubit_num=2).set_all('Z')
+        sb_expect.h(0).cx(0,1).x(0)
+        sb_actual = MyStabilizer(qubit_num=2).set_all('Z').clone()
+        sb_actual.bell(0,1).x(0)
+        str_expect = sb_expect.get_str()
+        str_actual = sb_actual.get_str()
+        self.assertEqual(str_expect, str_actual)
+
 if __name__ == '__main__':
     unittest.main()
