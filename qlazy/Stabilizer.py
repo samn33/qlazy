@@ -3,6 +3,7 @@ import ctypes
 import random
 from collections import Counter
 import warnings
+import ctypes
 
 from qlazy.config import *
 from qlazy.error import *
@@ -84,7 +85,9 @@ class Stabilizer(ctypes.Structure):
             for pp in pp_list:
                 qubit_num = max([qubit_num] + pp.qid)
             qubit_num += 1
-            sb = stabilizer_init(gene_num, qubit_num, seed)
+            # sb = stabilizer_init(gene_num, qubit_num, seed)
+            obj = stabilizer_init(gene_num, qubit_num, seed)
+            sb = ctypes.cast(obj.value, ctypes.POINTER(cls)).contents
             for i, pp in enumerate(pp_list):
                 for j, q in enumerate(pp.qid):
                     sb.set_pauli_op(i, q, pp.pauli_list[j])
@@ -97,7 +100,10 @@ class Stabilizer(ctypes.Structure):
                 gene_num = qubit_num
             if qubit_num < 1 or gene_num < 1:
                 raise Stabilizer_Error_Initialize()
-            return stabilizer_init(gene_num, qubit_num, seed)
+            # return stabilizer_init(gene_num, qubit_num, seed)
+            obj = stabilizer_init(gene_num, qubit_num, seed)
+            sb = ctypes.cast(obj.value, ctypes.POINTER(cls)).contents
+            return sb
             
     def __str__(self):
 
@@ -210,8 +216,11 @@ class Stabilizer(ctypes.Structure):
             copy of the original stabilizer.
 
         """
-        stab = stabilizer_copy(self)
-        return stab
+        # stab = stabilizer_copy(self)
+        # return stab
+        obj = stabilizer_copy(self)
+        sb = ctypes.cast(obj.value, ctypes.POINTER(self.__class__)).contents
+        return sb
 
     def get_rank(self):
 
@@ -645,7 +654,6 @@ class Stabilizer(ctypes.Structure):
                 mval = stabilizer_measure(st, qid[i])
                 mval_str += str(mval)
             frequency += {mval_str:1}
-            # st.free()
 
         # last measurement
         mval_str = ''
@@ -675,14 +683,6 @@ class Stabilizer(ctypes.Structure):
         None
 
         """
-        # for sb in stabs:
-        #     if type(sb) is list or type(sb) is tuple:
-        #         cls.free_all(*sb)
-        #     elif type(sb) is Stabilizer:
-        #         sb.free()
-        #     else:
-        #         raise Stabilizer_Error_FreeAll()
-
         warnings.warn("No need to call 'free_all' method because free automatically, or you can use class method 'del_all' to free memory explicitly.")
 
     @classmethod

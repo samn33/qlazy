@@ -24,9 +24,9 @@ def cmem_init(cmem_num):
     if ret == FALSE:
         raise CMem_Error_Initialize()
 
-    out = ctypes.cast(c_cmem.value, ctypes.POINTER(CMem))
-        
-    return out.contents
+    # out = ctypes.cast(c_cmem.value, ctypes.POINTER(CMem))
+    # return out.contents
+    return c_cmem
     
 def cmem_free(cmem):
 

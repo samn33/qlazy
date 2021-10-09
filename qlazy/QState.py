@@ -3,6 +3,7 @@ import random
 import numpy as np
 from collections import Counter
 import warnings
+import ctypes
 
 from qlazy.config import *
 from qlazy.error import *
@@ -61,10 +62,17 @@ class QState(ctypes.Structure):
                 print("qubit number must be {0:d} or less.".format(MAX_QUBIT_NUM))
                 raise QState_Error_Initialize()
 
-            return qstate_init(qubit_num, seed)
+            obj = qstate_init(qubit_num, seed)
+            # return qstate_init(qubit_num, seed)
 
         else:
-            return qstate_init_with_vector(vector, seed)
+            obj = qstate_init_with_vector(vector, seed)
+            # return qstate_init_with_vector(vector, seed)
+            
+        # self = ctypes.cast(obj.value, ctypes.POINTER(QState)).contents
+        self = ctypes.cast(obj.value, ctypes.POINTER(cls)).contents
+        return self
+
 
     def __str__(self):
 
@@ -213,14 +221,6 @@ class QState(ctypes.Structure):
         None
 
         """
-        # for qs in qstates:
-        #     if type(qs) is list or type(qs) is tuple:
-        #         cls.free_all(*qs)
-        #     elif type(qs) is QState:
-        #         qs.free()
-        #     else:
-        #         raise QState_Error_FreeAll()
-
         warnings.warn("No need to call 'free_all' method because free automatically, or you can use class method 'del_all' to free memory explicitly.")
         
     @classmethod
@@ -364,8 +364,11 @@ class QState(ctypes.Structure):
             copy of the original quantum state.
 
         """
-        qstate = qstate_copy(self)
-        return qstate
+        # qstate = qstate_copy(self)
+        # return qstate
+        obj = qstate_copy(self)
+        qs = ctypes.cast(obj.value, ctypes.POINTER(self.__class__)).contents
+        return qs
 
     def bloch(self, q=0):
         """
@@ -422,8 +425,6 @@ class QState(ctypes.Structure):
             qs_0 = self.partial(qid=qid)
             qs_1 = qstate.partial(qid=qid)
             inp = qstate_inner_product(qs_0, qs_1)
-            # qs_0.free()
-            # qs_1.free()
         return inp
         
     def tenspro(self, qstate):
@@ -441,8 +442,11 @@ class QState(ctypes.Structure):
             tensor produt of 'self' and 'qstate'.
 
         """
-        qstate_out = qstate_tensor_product(self, qstate)
-        return qstate_out
+        # qstate_out = qstate_tensor_product(self, qstate)
+        # return qstate_out
+        obj = qstate_tensor_product(self, qstate)
+        qs = ctypes.cast(obj.value, ctypes.POINTER(self.__class__)).contents
+        return qs
 
     def fidelity(self, qstate, qid=[]):
         """
@@ -492,9 +496,7 @@ class QState(ctypes.Structure):
             qs = self.clone()
             for i in range(num-1):
                 qs_tmp = qs.tenspro(self)
-                # qs.free()
                 qs = qs_tmp.clone()
-                # qs_tmp.free()
             return qs
         
     def join(self, qs_list):
@@ -515,9 +517,7 @@ class QState(ctypes.Structure):
         qs_out = self.clone()
         for qs in qs_list:
             qs_tmp = qs_out.clone()
-            # qs_out.free()
             qs_out = qs_tmp.tenspro(qs)
-            # qs_tmp.free()
         return qs_out
 
     def evolve(self, observable=None, time=0.0, iter=0):

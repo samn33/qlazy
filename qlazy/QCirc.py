@@ -3,6 +3,7 @@ import ctypes
 from collections import Counter
 from ctypes.util import find_library
 import warnings
+import ctypes
 
 from qlazy.config import *
 from qlazy.error import *
@@ -43,7 +44,9 @@ class QCirc(ctypes.Structure):
         qcirc : instance (QCirc)
 
         """
-        qcirc = qcirc_init()
+        # qcirc = qcirc_init()
+        obj = qcirc_init()
+        qcirc = ctypes.cast(obj.value, ctypes.POINTER(cls)).contents
         return qcirc
             
     def append_gate(self, kind, qid, para=None, c=None, ctrl=None):

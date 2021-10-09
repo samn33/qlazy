@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import ctypes
 import warnings
+import ctypes
 
 from qlazy.config import *
 from qlazy.error import *
@@ -35,7 +36,9 @@ class Observable(ctypes.Structure):
         cls.spin_num = 0
         cls.array_num = 0
         cls.spro_array = None
-        ob = observable_init(string)
+        obj = observable_init(string)
+        ob = ctypes.cast(obj.value, ctypes.POINTER(cls)).contents
+        # ob = observable_init(string)
         return ob
 
     def free(ob):

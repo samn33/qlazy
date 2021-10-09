@@ -3,6 +3,7 @@ import random
 import math
 import numpy as np
 import warnings
+import ctypes
 
 from qlazy.config import *
 from qlazy.error import *
@@ -26,8 +27,11 @@ class DensOp(ctypes.Structure):
     _fields_ = [
         ('row', ctypes.c_int),
         ('col', ctypes.c_int),
+        ('buf_id', ctypes.c_int),
         ('elm', ctypes.c_void_p),
-        ('elm_tmp', ctypes.c_void_p),
+        ('buffer_0', ctypes.c_void_p),
+        ('buffer_1', ctypes.c_void_p),
+        ('gbank', ctypes.c_void_p),
     ]
     
     def __new__(cls, qubit_num=0, qstate=[], prob=[], matrix=None):
@@ -66,15 +70,20 @@ class DensOp(ctypes.Structure):
         if qubit_num != 0:
             qstate = [QState(qubit_num=qubit_num)]
             prob = [1.0]
-            de = densop_init(qstate, prob)
-            # qstate[0].free()
-            return de
+            # de = densop_init(qstate, prob)
+            # return de
+            obj = densop_init(qstate, prob)
         
         elif qstate != [] and prob != []:
-            return densop_init(qstate, prob)
+            # return densop_init(qstate, prob)
+            obj = densop_init(qstate, prob)
 
         else:
-            return densop_init_with_matrix(matrix)
+            # return densop_init_with_matrix(matrix)
+            obj = densop_init_with_matrix(matrix)
+
+        self = ctypes.cast(obj.value, ctypes.POINTER(cls)).contents
+        return self
     
     def __str__(self):
 
@@ -121,7 +130,6 @@ class DensOp(ctypes.Structure):
             de_tmp = densop[i].clone()
             de_tmp.mul(factor=prob[i])
             de_out.add(densop=de_tmp)
-            # de_tmp.free()
 
         return de_out
 
@@ -254,14 +262,6 @@ class DensOp(ctypes.Structure):
         None
 
         """
-        # for de in densops:
-        #     if type(de) is list or type(de) is tuple:
-        #         cls.free_all(*de)
-        #     elif type(de) is DensOp:
-        #         de.free()
-        #     else:
-        #         raise DensOp_Error_FreeAll()
-        
         warnings.warn("No need to call 'free_all' method because free automatically, or you can use class method 'del_all' to free memory explicitly.")
 
     @classmethod
@@ -316,7 +316,6 @@ class DensOp(ctypes.Structure):
         """
         de_part = self.partial(qid=qid)
         elm = densop_get_elm(de_part)
-        # de_part.free()
         return elm
     
     def show(self, qid=[], nonzero=False):
@@ -358,7 +357,6 @@ class DensOp(ctypes.Structure):
         """
         de_part = self.partial(qid=qid)
         densop_print(de_part, nonzero)
-        # de_part.free()
 
     def clone(self):
         """
@@ -374,8 +372,11 @@ class DensOp(ctypes.Structure):
             copy of the original density operator.
 
         """
-        densop = densop_copy(self)
-        return densop
+        # densop = densop_copy(self)
+        # return densop
+        obj = densop_copy(self)
+        de = ctypes.cast(obj.value, ctypes.POINTER(self.__class__)).contents
+        return de
     
     def add(self, densop=None):
         """
@@ -468,8 +469,11 @@ class DensOp(ctypes.Structure):
             density operator after partial trace.
 
         """
-        densop = densop_patrace(self, qid=qid)
-        return densop
+        # densop = densop_patrace(self, qid=qid)
+        # return densop
+        obj = densop_patrace(self, qid=qid)
+        de = ctypes.cast(obj.value, ctypes.POINTER(self.__class__)).contents
+        return de
 
     def partial(self, qid=[]):
         """
@@ -513,8 +517,11 @@ class DensOp(ctypes.Structure):
             tensor produt of 'self' and 'densop'.
 
         """
-        densop_out = densop_tensor_product(self, densop)
-        return densop_out
+        # densop_out = densop_tensor_product(self, densop)
+        # return densop_out
+        obj = densop_tensor_product(self, densop)
+        de = ctypes.cast(obj.value, ctypes.POINTER(self.__class__)).contents
+        return de
 
     def composite(self, num=0):
         """
@@ -537,9 +544,7 @@ class DensOp(ctypes.Structure):
             de = self.clone()
             for i in range(num-1):
                 de_tmp = de.tenspro(self)
-                # de.free()
                 de = de_tmp.clone()
-                # de_tmp.free()
             return de
         
     def join(self, de_list):
@@ -560,9 +565,7 @@ class DensOp(ctypes.Structure):
         de_out = self.clone()
         for de in de_list:
             de_tmp = de_out.clone()
-            # de_out.free()
             de_out = de_tmp.tenspro(de)
-            # de_tmp.free()
         return de_out
 
     def expect(self, matrix=None):
@@ -588,7 +591,6 @@ class DensOp(ctypes.Structure):
         densop = self.clone()
         densop_apply_matrix(densop, matrix=matrix, dire='left')
         value = densop.trace()
-        # densop.free()
         return value
         
     def apply(self, matrix=None, qid=[], dire='both'):
@@ -713,8 +715,6 @@ class DensOp(ctypes.Structure):
                     densop_tmp = densop_ori.clone()
                     densop_tmp.apply(matrix=kraus[i], qid=qid, dire='both')
                     self.add(densop=densop_tmp)
-                    # densop_tmp.free()
-            # densop_ori.free()
                 
         else:  # selective measurement
 
@@ -1022,7 +1022,6 @@ class DensOp(ctypes.Structure):
             else:
                 de_part = self.partial(qid=qid)
                 ent = de_part.__von_neumann_entropy()
-                # de_part.free()
                 
         return ent
 

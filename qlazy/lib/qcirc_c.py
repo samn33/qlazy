@@ -26,9 +26,9 @@ def qcirc_init():
     if ret == FALSE:
         raise QCirc_Error_Initialize()
 
-    out = ctypes.cast(c_qcirc.value, ctypes.POINTER(QCirc))
-        
-    return out.contents
+    # out = ctypes.cast(c_qcirc.value, ctypes.POINTER(QCirc))
+    # return out.contents
+    return c_qcirc
 
 def qcirc_append_gate(qcirc, kind, qid, para, c, ctrl):
 

@@ -3,6 +3,7 @@ import ctypes
 from collections import Counter
 from ctypes.util import find_library
 import warnings
+import ctypes
 
 from qlazy.config import *
 from qlazy.error import *
@@ -35,7 +36,9 @@ class CMem(ctypes.Structure):
         cmem : instance (CMem)
 
         """
-        cmem = cmem_init(cmem_num)
+        # cmem = cmem_init(cmem_num)
+        obj = cmem_init(cmem_num)
+        cmem = ctypes.cast(obj.value, ctypes.POINTER(cls)).contents
         return cmem
             
     def free(self):

@@ -31,9 +31,9 @@ def qstate_init(qubit_num=None, seed=None):
     if ret == FALSE:
         raise QState_Error_Initialize()
 
-    out = ctypes.cast(c_qstate.value, ctypes.POINTER(QState))
-        
-    return out.contents
+    # out = ctypes.cast(c_qstate.value, ctypes.POINTER(QState))
+    # return out.contents
+    return c_qstate
 
 def qstate_init_with_vector(vector=None, seed=None):
         
@@ -62,9 +62,9 @@ def qstate_init_with_vector(vector=None, seed=None):
     if ret == FALSE:
         raise QState_Error_Initialize()
     
-    out = ctypes.cast(c_qstate.value, ctypes.POINTER(QState))
-        
-    return out.contents
+    # out = ctypes.cast(c_qstate.value, ctypes.POINTER(QState))
+    # return out.contents
+    return c_qstate
 
 
 def qstate_reset(qs, qid=None):
@@ -137,9 +137,9 @@ def qstate_copy(qs):
         if ret == FALSE:
             raise QState_Error_Clone()
 
-        out = ctypes.cast(c_qstate.value, ctypes.POINTER(QState))
-
-        return out.contents
+        # out = ctypes.cast(c_qstate.value, ctypes.POINTER(QState))
+        # return out.contents
+        return c_qstate
         
     except Exception:
         raise QState_Error_Clone()
@@ -269,9 +269,9 @@ def qstate_tensor_product(qs, qstate):
         if ret == FALSE:
             raise QState_Error_TensorProduct()
 
-        out = ctypes.cast(c_qstate_out.value, ctypes.POINTER(QState))
-
-        return out.contents
+        # out = ctypes.cast(c_qstate_out.value, ctypes.POINTER(QState))
+        # return out.contents
+        return c_qstate_out
 
     except Exception:
         raise QState_Error_TensorProduct()
@@ -332,8 +332,8 @@ def qstate_apply_matrix(qs, matrix=None, qid=None):
 
     if matrix is None:
         raise QState_Error_Apply()
-    if (matrix.shape[0] > qs.state_num or matrix.shape[0] > qs.state_num):
-        raise QState_Error_Apply()
+    # if (matrix.shape[0] > qs.state_num or matrix.shape[0] > qs.state_num):
+    #     raise QState_Error_Apply()
         
     if qid is None or qid == []:
         qid = [i for i in range(qs.qubit_num)]
@@ -351,7 +351,12 @@ def qstate_apply_matrix(qs, matrix=None, qid=None):
         size = row * col
 
         # set array of matrix
-        mat_complex = list(matrix.flatten())
+        # mat_complex = list(matrix.flatten())
+        mat_complex = []
+        for mat_row in matrix:
+            for mat_elm in mat_row:
+                mat_complex.append(mat_elm)
+        
         mat_real = [0.0 for _ in range(size)]
         mat_imag = [0.0 for _ in range(size)]
         for i in range(size):

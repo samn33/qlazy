@@ -38,9 +38,9 @@ def densop_init(qstate=[], prob=[]):
     if ret == FALSE:
         raise DensOp_Error_Initialize()
             
-    out = ctypes.cast(c_densop.value, ctypes.POINTER(DensOp))
-        
-    return out.contents
+    # out = ctypes.cast(c_densop.value, ctypes.POINTER(DensOp))
+    # return out.contents
+    return c_densop
 
 def densop_init_with_matrix(matrix=None):
 
@@ -73,9 +73,9 @@ def densop_init_with_matrix(matrix=None):
     if ret == FALSE:
         raise DensOp_Error_Initialize()
             
-    out = ctypes.cast(c_densop.value, ctypes.POINTER(DensOp))
-        
-    return out.contents
+    # out = ctypes.cast(c_densop.value, ctypes.POINTER(DensOp))
+    # return out.contents
+    return c_densop
 
 
 def densop_get_elm(de):
@@ -159,9 +159,9 @@ def densop_copy(de):
         if ret == FALSE:
             raise DensOp_Error_Clone()
 
-        out = ctypes.cast(c_densop.value, ctypes.POINTER(DensOp))
-
-        return out.contents
+        # out = ctypes.cast(c_densop.value, ctypes.POINTER(DensOp))
+        # return out.contents
+        return c_densop
         
     except Exception:
         raise DensOp_Error_Clone()
@@ -277,9 +277,9 @@ def densop_patrace(de, qid=None):
         if ret == FALSE:
             raise DensOp_Error_PaTrace()
             
-        out = ctypes.cast(c_densop.value, ctypes.POINTER(DensOp))
-        
-        return out.contents
+        # out = ctypes.cast(c_densop.value, ctypes.POINTER(DensOp))
+        # return out.contents
+        return c_densop
 
     except Exception:
         raise DensOp_Error_PaTrace()
@@ -300,9 +300,9 @@ def densop_tensor_product(de_0, de_1):
         if ret == FALSE:
             raise DensOp_Error_TensorProduct()
 
-        out = ctypes.cast(c_densop_out.value, ctypes.POINTER(DensOp))
-
-        return out.contents
+        # out = ctypes.cast(c_densop_out.value, ctypes.POINTER(DensOp))
+        # return out.contents
+        return c_densop_out
 
     except Exception:
         raise DensOp_Error_TensorProduct()
@@ -311,8 +311,8 @@ def densop_apply_matrix(de, matrix=None, qid=[], dire='both'):
 
     if matrix is None:
         raise DensOp_Error_Apply()
-    if (matrix.shape[0] > de.row or matrix.shape[1] > de.col):
-        raise DensOp_Error_Apply()
+    # if (matrix.shape[0] > de.row or matrix.shape[1] > de.col):
+    #     raise DensOp_Error_Apply()
         
     if qid is None or qid == []:
         qnum = int(math.log2(de.row))
@@ -340,7 +340,12 @@ def densop_apply_matrix(de, matrix=None, qid=[], dire='both'):
         size = row * col
 
         # set array of matrix
-        mat_complex = list(matrix.flatten())
+        # mat_complex = list(matrix.flatten())
+        mat_complex = []
+        for mat_row in matrix:
+            for mat_elm in mat_row:
+                mat_complex.append(mat_elm)
+        
         mat_real = [0.0 for _ in range(size)]
         mat_imag = [0.0 for _ in range(size)]
         for i in range(size):

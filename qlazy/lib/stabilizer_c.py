@@ -27,9 +27,9 @@ def stabilizer_init(gene_num=None, qubit_num=None, seed=None):
     if ret == FALSE:
         raise Stabilizer_Error_Initialize()
         
-    out = ctypes.cast(c_stab.value, ctypes.POINTER(Stabilizer))
-
-    return out.contents
+    # out = ctypes.cast(c_stab.value, ctypes.POINTER(Stabilizer))
+    # return out.contents
+    return c_stab
 
 def stabilizer_copy(sb):
 
@@ -45,9 +45,9 @@ def stabilizer_copy(sb):
         if ret == FALSE:
             raise Stabilizer_Error_Clone()
 
-        out = ctypes.cast(c_stab.value, ctypes.POINTER(Stabilizer))
-
-        return out.contents
+        # out = ctypes.cast(c_stab.value, ctypes.POINTER(Stabilizer))
+        # return out.contents
+        return c_stab
         
     except Exception:
         raise Stabilizer_Error_Clone()
