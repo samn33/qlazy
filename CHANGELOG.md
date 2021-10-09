@@ -1,5 +1,12 @@
 # Change Log
 
+## [0.2.2] - 2021-10-09
+### Changed
+- possible to create subclass of QState, DensOp, Stabilizer etc
+### Fixed
+- 'apply' method of QState, DensOp
+- 'patrace','partial','reset' method of DensOp
+
 ## [0.2.1] - 2021-09-01
 ### Changed
 - performance improvement (reduce 'memcpy' etc)
