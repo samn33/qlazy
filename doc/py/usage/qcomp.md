@@ -196,22 +196,22 @@ DensOpクラスのものと同様で、さらに上で説明したctrlという�
 パウリ演算子X,Y,Zのテンソル積を定義して量子コンピュータに設定すること
 ができます。パウリ積を扱うために、まず、
 
-    from qlazy import QState, PauliProduct
+    from qlazy import QComp, PauliProduct
 	
 のようにPauliProductクラスをimportする必要があります。例えば、3量子ビッ
 トの状態に対して、X2 Y0 Z1というパウリ積を演算したい場合、
 
-    qs = QState(qubit_num=3)
+    qs = QComp(qubit_num=3)
 	pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
-	qs.operate(pp=pp)
+	qc.operate(pp=pp)
 	
 のようにoperateメソッドのppオプションにPauliProductのインスタンスを指
 定します。制御化されたパウリ積はoperateメソッドのctrlオプションに制御
 量子ビット番号を指定することで実現できます。以下のようにします。
 
-    qs = QState(qubit_num=4)
+    qc = QComp(qubit_num=4)
 	pp = PauliProduct(pauli_str="XYZ", qid=[0,1,2])
-	qs.operate(pp=pp, ctlr=3)
+	qc.operate(pp=pp, ctlr=3)
 	
 量子ゲートの設定の場合と同様、operateメソッドを実行しただけでは実際の
 演算は実行されていません。runメソッド（およびその前にmeasurementメソッ
@@ -373,7 +373,7 @@ QCompクラスを継承することで、自分専用の量子ゲートを簡単
             self.h(q0).cx(q0,q1)
             return self
 
-    bk = Backend('qlazy_qstate_simulator')
+    bk = Backend(name='qlazy', device='qstate_simulator')
     qc = MyQComp(backend=bk, qubit_num=2, cmem_num=3)
     result = qc.bell(0,1).measure(qid=[0,1]).run(shots=10)
     ...
