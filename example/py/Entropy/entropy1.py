@@ -31,6 +31,3 @@ if __name__ == '__main__':
     print("** S(A,B)  = {:.4f}".format(ent))
     print("** S(A)    = {:.4f}".format(ent_A))
     print("** S(B)    = {:.4f}".format(ent_B))
-
-    # qs.free()
-    # de.free()

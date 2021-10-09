@@ -46,5 +46,3 @@ if __name__ == '__main__':
 
     (u_1,u_2,u_3) = get_coordinate(densop=de)
     print("(u_1,u_2,u_3) = ({0:},{1:},{2:})".format(u_1,u_2,u_3))
-
-    # de.free()

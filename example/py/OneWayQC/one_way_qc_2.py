@@ -41,9 +41,6 @@ def main():
     qs_gate = QState(1)
     qs_gate.rx(0, phase=alpha).rz(0, phase=beta).rx(0, phase=gamma)
     qs_gate.show()
-
-    # qs_oneway.free()
-    # qs_gate.free()
     
 if __name__ == '__main__':
     main()

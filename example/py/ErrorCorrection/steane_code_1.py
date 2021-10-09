@@ -9,6 +9,41 @@ Steane_0 = ['0000000', '1101001', '1011010', '0110011',
 Steane_1 = ['1111111', '0010110', '0100101', '1001100',
             '1000011', '0101010', '0011001', '1110000']
 
+class MyDensOp(DensOp):
+    
+    def noise(self, kind='', prob=0.0, qid=[]):
+
+        print("== noise ({:}) ==".format(kind))
+        print("- qubit = {:}".format(qid))
+        print("- prob  = {:}".format(prob))
+    
+        qchannel = {'bit_flip':self.bit_flip, 'phase_flip':self.phase_flip,
+                    'bit_phase_flip':self.bit_phase_flip,
+                    'depolarize':self.depolarize, 'amp_dump':self.amp_dump,
+                    'phase_dump':self.phase_dump}
+        [qchannel[kind](i, prob=prob) for i in qid]
+        return self
+
+    def correct(self, kind, qid_C, qid_S):
+
+        self.reset(qid=qid_S)
+
+        if kind == 'phase_flip': [self.h(q) for q in qid_C]
+
+        # syndrome
+        for i, row in enumerate(Hamming):
+            [self.cx(qid_C[j], qid_S[i]) if row[j] == 1 else False for j in range(len(row))]
+
+        # correction
+        for i, row in enumerate(Hamming_T):
+            [self.x(qid_S[j]) if row[j] == 0 else False for j in range(len(row))]
+            self.mcx(qid=qid_S+[qid_C[i]])
+            [self.x(qid_S[j]) if row[j] == 0 else False for j in range(len(row))]
+    
+        if kind == 'phase_flip': [self.h(q) for q in qid_C]
+        
+        return self
+
 def generate_qstate(qid_C, qid_S):
 
     a = np.random.rand() + np.random.rand() * 1.j
@@ -28,55 +63,18 @@ def generate_qstate(qid_C, qid_S):
     qs_C = QState(vector=qvec)
     qs_S = QState(len(qid_S))
     qs = qs_C.tenspro(qs_S)
-    de_ini = DensOp(qstate=[qs])
+    de_ini = MyDensOp(qstate=[qs])
     de_fin = de_ini.clone()
 
     # QState.free_all(qs_C, qs_S, qs)
     return de_ini, de_fin
 
-def noise(self, kind='', prob=0.0, qid=[]):
-
-    print("== noise ({:}) ==".format(kind))
-    print("- qubit = {:}".format(qid))
-    print("- prob  = {:}".format(prob))
-    
-    qchannel = {'bit_flip':self.bit_flip, 'phase_flip':self.phase_flip,
-                'bit_phase_flip':self.bit_phase_flip,
-                'depolarize':self.depolarize, 'amp_dump':self.amp_dump,
-                'phase_dump':self.phase_dump}
-    [qchannel[kind](i, prob=prob) for i in qid]
-    return self
-
-def correct(self, kind, qid_C, qid_S):
-
-    self.reset(qid=qid_S)
-
-    if kind == 'phase_flip': [self.h(q) for q in qid_C]
-
-    # syndrome
-    for i, row in enumerate(Hamming):
-        [self.cx(qid_C[j], qid_S[i]) if row[j] == 1 else False for j in range(len(row))]
-
-    # correction
-    for i, row in enumerate(Hamming_T):
-        [self.x(qid_S[j]) if row[j] == 0 else False for j in range(len(row))]
-        self.mcx(qid=qid_S+[qid_C[i]])
-        [self.x(qid_S[j]) if row[j] == 0 else False for j in range(len(row))]
-    
-    if kind == 'phase_flip': [self.h(q) for q in qid_C]
-        
-    return self
-    
 if __name__ == '__main__':
 
-    # add custom gates
-    DensOp.add_method(noise)
-    DensOp.add_method(correct)
-
     # set registers
-    qid_C = DensOp.create_register(7) # registers for code space
-    qid_S = DensOp.create_register(3) # registers for error syndrome
-    DensOp.init_register(qid_C, qid_S)
+    qid_C = MyDensOp.create_register(7) # registers for code space
+    qid_S = MyDensOp.create_register(3) # registers for error syndrome
+    MyDensOp.init_register(qid_C, qid_S)
 
     # generate initial quantum state (density operator)
     de_ini, de_fin = generate_qstate(qid_C, qid_S)
@@ -91,5 +89,3 @@ if __name__ == '__main__':
     # print result
     print("== result ==")
     print("- fidelity = {:.6f}".format(de_fin.fidelity(de_ini, qid=qid_C)))
-
-    # DensOp.free_all(de_ini, de_fin)

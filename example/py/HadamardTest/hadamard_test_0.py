@@ -30,13 +30,6 @@ def hadamard_test_real():
     exp_theo = qs_psi.inpro(qs_op).real
     print("expectation value (theoretical) = {0:.3f}".format(exp_theo))
 
-    # free memory
-    
-    #qs_0.free()
-    #qs_psi.free()
-    #qs_op.free()
-    #qs.free()
-    
 def hadamard_test_imag():
     
     print("== expectaion value prediction (imaginary part) == ")
@@ -66,13 +59,6 @@ def hadamard_test_imag():
     qs_op.h(0).rx(1,phase=0.25)
     exp_theo = qs_psi.inpro(qs_op).imag
     print("expectation value (theoretical) = {0:.3f}".format(exp_theo))
-
-    # free memory
-    
-    # qs_0.free()
-    # qs_psi.free()
-    # qs_op.free()
-    # qs.free()
 
 if __name__ == '__main__':
     

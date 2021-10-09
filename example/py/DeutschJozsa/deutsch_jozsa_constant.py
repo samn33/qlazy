@@ -4,72 +4,91 @@ from qlazy import QState
 
 # custom gates
 
-def hadamard(self,id):
-
-    for i in range(len(id)):
-        self.h(id[i])
-    return self
-
-def multi_cx(self,id_in,id_out):
-
-    #
-    # hadamard
-    #
-    self.h(id_out[0])
-
-    #
-    # controlled-RZ(psi), psi=pi/(2**(bitnum-1))
-    #
-    bitnum = len(id_in)
-    psi = 1.0/(2**(bitnum-1)) # unit=pi(radian)
-    gray_pre = 0
-    for gray in gray_code(bitnum):
-        if gray == 0:
-            continue
-        msb = len(str(bin(gray)))-3
-        chb = len(str(bin(gray^gray_pre)))-3
-        if gray != 1:
-            if chb == msb:
-                chb -= 1
-            self.cx(id_in[chb],id_in[msb])
-        self.cp(id_in[msb],id_out[0],phase=psi)
-        psi = -psi
-        gray_pre = gray
+class MyQState(QState):
     
-    #
-    # hadamard
-    #
-    self.h(id_out[0])
+    def hadamard(self,id):
 
-    return self
-    
-def mpmct(self,id_in,id_out,x):
+        for i in range(len(id)):
+            self.h(id[i])
+        return self
 
-    bitnum = len(id_in)
+    def multi_cx(self,id_in,id_out):
+
+        #
+        # hadamard
+        #
+        self.h(id_out[0])
+
+        #
+        # controlled-RZ(psi), psi=pi/(2**(bitnum-1))
+        #
+        bitnum = len(id_in)
+        psi = 1.0/(2**(bitnum-1)) # unit=pi(radian)
+        gray_pre = 0
+        for gray in gray_code(bitnum):
+            if gray == 0:
+                continue
+            msb = len(str(bin(gray)))-3
+            chb = len(str(bin(gray^gray_pre)))-3
+            if gray != 1:
+                if chb == msb:
+                    chb -= 1
+                self.cx(id_in[chb],id_in[msb])
+            self.cp(id_in[msb],id_out[0],phase=psi)
+            psi = -psi
+            gray_pre = gray
     
-    for i in range(bitnum):
-        bit = (x>>i)%2
-        if bit == 0:
-            self.x(id_in[i])
+        #
+        # hadamard
+        #
+        self.h(id_out[0])
+
+        return self
+    
+    def mpmct(self,id_in,id_out,x):
+
+        bitnum = len(id_in)
+    
+        for i in range(bitnum):
+            bit = (x>>i)%2
+            if bit == 0:
+                self.x(id_in[i])
             
-    self.multi_cx(id_in,id_out)
+        self.multi_cx(id_in,id_out)
 
-    for i in range(bitnum):
-        bit = (x>>i)%2
-        if bit == 0:
-            self.x(id_in[i])
+        for i in range(bitnum):
+            bit = (x>>i)%2
+            if bit == 0:
+                self.x(id_in[i])
 
-    return self
+        return self
 
-def q_oracle(self,id_in,id_out,table):
+    def q_oracle(self,id_in,id_out,table):
 
-    num = 2**len(id_in)
-    for x in range(num):
-        y = table[x]
-        if y == 1:
-            self.mpmct(id_in,id_out,x)
+        num = 2**len(id_in)
+        for x in range(num):
+            y = table[x]
+            if y == 1:
+                self.mpmct(id_in,id_out,x)
 
-    return self
+        return self
+
+    def result(self,id_a,id_b):
+
+        # measurement
+        id_ab = id_a + id_b
+        iid_ab = id_ab[::-1]
+        shots = (2**len(id_a))*5
+        freq = self.m(iid_ab,shots=shots).frq
+    
+        # set results
+        a_list = []
+        r_list = []
+        for i in range(len(freq)):
+            if freq[i] > 0:
+                a_list.append(i%(2**len(id_a)))
+                r_list.append(i>>len(id_a))
+        return (a_list,r_list)
 
 # functions
 
@@ -91,31 +110,7 @@ def init_register(*args):
             idx += 1
     return idx
 
-def result(self,id_a,id_b):
-
-    # measurement
-    id_ab = id_a + id_b
-    iid_ab = id_ab[::-1]
-    shots = (2**len(id_a))*5
-    freq = self.m(iid_ab,shots=shots).frq
-    
-    # set results
-    a_list = []
-    r_list = []
-    for i in range(len(freq)):
-        if freq[i] > 0:
-            a_list.append(i%(2**len(id_a)))
-            r_list.append(i>>len(id_a))
-    return (a_list,r_list)
-
 if __name__ == '__main__':
-
-    # add custom gates
-    QState.hadamard = hadamard
-    QState.multi_cx = multi_cx
-    QState.mpmct = mpmct
-    QState.q_oracle = q_oracle
-    QState.result = result
 
     # input qubit number
     qnum_in = 4
@@ -140,7 +135,7 @@ if __name__ == '__main__':
     id = id_in + id_out
 
     # initial state
-    qs = QState(qnum)
+    qs = MyQState(qnum)
     qs.hadamard(id_in)
     qs.x(id_out[0])
 
@@ -157,5 +152,3 @@ if __name__ == '__main__':
         print("constant")
     else:
         print("balanced")
-        
-    # qs.free()

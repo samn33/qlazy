@@ -29,6 +29,3 @@ if __name__ == '__main__':
     for i in range(2):
         prob = de[i].probability(povm=povm)
         print("[{0:}] {1:.3f} {2:.3f} {3:.3f}".format(i, prob[0],prob[1],prob[2]))
-            
-        # de[i].free()
-        # qs[i].free()

@@ -3,74 +3,90 @@ from qlazy import QState
 
 # custom gates
 
-def hadamard(self,id):
-
-    for i in range(len(id)):
-        self.h(id[i])
-    return self
-
-def flip(self,id):
-
-    for i in range(len(id)):
-        self.x(id[i])
-    return self
-
-def multi_cz(self,id_in,id_out):
-
-    bitnum = len(id_in)
-    psi = 1.0/(2**(bitnum-1)) # unit=pi(radian)
-    gray_pre = 0
-    for gray in gray_code(bitnum):
-        if gray == 0:
-            continue
-        msb = len(str(bin(gray)))-3
-        chb = len(str(bin(gray^gray_pre)))-3
-        if gray != 1:
-            if chb == msb:
-                chb -= 1
-            self.cx(id_in[chb],id_in[msb])
-        self.cp(id_in[msb],id_out[0],phase=psi)
-        psi = -psi
-        gray_pre = gray
+class MyQState(QState):
     
-    return self
+    def hadamard(self,id):
 
-def multi_cx(self,id_in,id_out):
+        for i in range(len(id)):
+            self.h(id[i])
+        return self
 
-    self.h(id_out[0])
-    self.multi_cz(id_in,id_out)
-    self.h(id_out[0])
+    def flip(self,id):
 
-    return self
+        for i in range(len(id)):
+            self.x(id[i])
+        return self
 
-def mpmct(self,id_in,id_out,x):
+    def multi_cz(self,id_in,id_out):
 
-    bitnum = len(id_in)
+        bitnum = len(id_in)
+        psi = 1.0/(2**(bitnum-1)) # unit=pi(radian)
+        gray_pre = 0
+        for gray in gray_code(bitnum):
+            if gray == 0:
+                continue
+            msb = len(str(bin(gray)))-3
+            chb = len(str(bin(gray^gray_pre)))-3
+            if gray != 1:
+                if chb == msb:
+                    chb -= 1
+                self.cx(id_in[chb],id_in[msb])
+            self.cp(id_in[msb],id_out[0],phase=psi)
+            psi = -psi
+            gray_pre = gray
     
-    for i in range(bitnum):
-        bit = (x>>i)%2
-        if bit == 0:
-            self.x(id_in[i])
+        return self
+
+    def multi_cx(self,id_in,id_out):
+
+        self.h(id_out[0])
+        self.multi_cz(id_in,id_out)
+        self.h(id_out[0])
+
+        return self
+
+    def mpmct(self,id_in,id_out,x):
+
+        bitnum = len(id_in)
+    
+        for i in range(bitnum):
+            bit = (x>>i)%2
+            if bit == 0:
+                self.x(id_in[i])
             
-    self.multi_cx(id_in,id_out)
+        self.multi_cx(id_in,id_out)
 
-    for i in range(bitnum):
-        bit = (x>>i)%2
-        if bit == 0:
-            self.x(id_in[i])
+        for i in range(bitnum):
+            bit = (x>>i)%2
+            if bit == 0:
+                self.x(id_in[i])
 
-    return self
+        return self
 
-def q_oracle(self,id_in,id_out,func):
+    def q_oracle(self,id_in,id_out,func):
 
-    num = 2**len(id_in)
-    for x in range(num):
-        y = func(x)
-        if y == 1:
-            self.mpmct(id_in,id_out,x)
+        num = 2**len(id_in)
+        for x in range(num):
+            y = func(x)
+            if y == 1:
+                self.mpmct(id_in,id_out,x)
 
-    return self
+        return self
 
+    def result(self,id,solnum):
+
+        # measurement
+        iid = id[::-1]
+        freq = self.m(iid, shots=100).frq
+
+        res = []
+        for _ in range(solnum):
+            idx = freq.index(max(freq))
+            res.append(idx)
+            freq[idx] = 0
+
+        return res
+    
 # functions
 
 def gray_code(n):
@@ -99,34 +115,11 @@ def init_register(*args):
             idx += 1
     return idx
 
-def result(self,id,solnum):
-
-    # measurement
-    iid = id[::-1]
-    freq = self.m(iid, shots=100).frq
-
-    res = []
-    for _ in range(solnum):
-        idx = freq.index(max(freq))
-        res.append(idx)
-        freq[idx] = 0
-
-    return res
-    
 def opt_iter(N,solnum):
 
     return int(0.25*math.pi/math.asin(math.sqrt(solnum/N)))
 
 if __name__ == '__main__':
-
-    # add custom gates
-    QState.hadamard = hadamard
-    QState.flip = flip
-    QState.multi_cz = multi_cz
-    QState.multi_cx = multi_cx
-    QState.mpmct = mpmct
-    QState.q_oracle = q_oracle
-    QState.result = result
 
     # set parameters
     bits = 10
@@ -142,7 +135,7 @@ if __name__ == '__main__':
     id_in_t = [id_in[-1]]
 
     # initial state
-    qs = QState(qnum)
+    qs = MyQState(qnum)
     qs.hadamard(id_in)
     qs.x(id_out[0]).h(id_out[0])
     
@@ -165,5 +158,3 @@ if __name__ == '__main__':
     res = qs.result(id_in,solnum)
     print("== result==")
     print("x =", res)
-
-    # qs.free()

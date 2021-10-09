@@ -61,4 +61,3 @@ init = np.random.rand(6)
 callback(init)
 res = scipy.optimize.minimize(cost, init,
                               method='Powell', callback=callback)
-# M.free()

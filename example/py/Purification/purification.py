@@ -31,10 +31,6 @@ def random_mixed_state(qubit_num, mixed_num):
     # random density operator
     de_A = DensOp(qstate=qs_A, prob=prob_mixed)
 
-    # free memory
-    # for i in range(mixed_num):
-    #     qs_A[i].free()
-    
     return de_A
     
 def computational_basis(qubit_num):
@@ -48,7 +44,6 @@ def eigen_values_vectors(densop):
 
     matrix = densop.get_elm()
     eigvals, eigvecs = eigh(matrix, eigvals_only=False)
-    #eigvecs = np.conjugate(eigvecs.T)
     eigvecs = eigvecs.T
 
     eigvals_list = [eigvals[i] for i in range(len(eigvals)) if abs(eigvals[i]) > MIN_DOUBLE]
@@ -81,9 +76,6 @@ def purification(de_A):
 
     qs_AR = QState(vector=vec_AR)
     de_AR = DensOp(qstate=[qs_AR], prob=[1.0])
-
-    # free memory
-    # qs_AR.free()
 
     return de_AR
 
@@ -123,7 +115,3 @@ if __name__ == '__main__':
         print("* OK!")
     else:
         print("* NG!")
-
-    # de_A.free()
-    # de_AR.free()
-    # de_AR_pat.free()

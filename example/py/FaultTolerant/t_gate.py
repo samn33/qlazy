@@ -77,7 +77,6 @@ def logical_zero():
     qs_total.reset(qid=anc)
 
     qs = qs_total.partial(qid=cod)
-    # qs_total.free()
 
     return qs
 
@@ -114,7 +113,6 @@ def faulttolerant_t(qs_in):
     if mval == '1': [qs_ABC.x(q).s(q).z(q) for q in B]
 
     qs_out = qs_ABC.partial(qid=B)
-    # QState.free_all(qs_A, qs_B, qs_AB, qs_ABC)
 
     return qs_out
 
@@ -131,7 +129,6 @@ def faulttolerant_m(qs_in):
     [qs_total.cx(anc[0], anc[i]) for i in range(1,7)]
     qs_total.h(anc[0])
     md = qs_total.m(qid=[0], shots=10000)
-    # QState.free_all(qs_anc, qs_total)
 
     return md
 
@@ -146,5 +143,3 @@ if __name__ == '__main__':
     [qs_fin.h(i) for i in range(7)]  # operate fault-tolerant H
     md = faulttolerant_m(qs_fin)     # execute fault-tolerant measurement
     print(md.frequency)
-
-    # QState.free_all(qs, qs_ini, qs_fin)

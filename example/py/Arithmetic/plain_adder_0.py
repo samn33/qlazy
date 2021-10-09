@@ -1,43 +1,45 @@
 from qlazy import QState
 
-def sum(self,q0,q1,q2):
+class MyQState(QState):
 
-    self.cx(q1,q2).cx(q0,q2)
-    return self
+    def sum(self,q0,q1,q2):
+
+        self.cx(q1,q2).cx(q0,q2)
+        return self
     
-def carry(self,q0,q1,q2,q3):
+    def carry(self,q0,q1,q2,q3):
 
-    self.ccx(q1,q2,q3).cx(q1,q2).ccx(q0,q2,q3)
-    return self
+        self.ccx(q1,q2,q3).cx(q1,q2).ccx(q0,q2,q3)
+        return self
 
-def i_carry(self,q0,q1,q2,q3):
+    def i_carry(self,q0,q1,q2,q3):
 
-    self.ccx(q0,q2,q3).cx(q1,q2).ccx(q1,q2,q3)
-    return self
+        self.ccx(q0,q2,q3).cx(q1,q2).ccx(q1,q2,q3)
+        return self
 
-def plain_adder(self,id_a,id_b,id_c):
+    def plain_adder(self,id_a,id_b,id_c):
 
-    depth = len(id_a)
-    for i in range(depth):
-        self.carry(id_c[i],id_a[i],id_b[i],id_c[i+1])
-    self.cx(id_a[depth-1],id_b[depth-1])
-    self.sum(id_c[depth-1],id_a[depth-1],id_b[depth-1])
-    for i in reversed(range(depth-1)):
-        self.i_carry(id_c[i],id_a[i],id_b[i],id_c[i+1])
-        self.sum(id_c[i],id_a[i],id_b[i])
-    return self
+        depth = len(id_a)
+        for i in range(depth):
+            self.carry(id_c[i],id_a[i],id_b[i],id_c[i+1])
+        self.cx(id_a[depth-1],id_b[depth-1])
+        self.sum(id_c[depth-1],id_a[depth-1],id_b[depth-1])
+        for i in reversed(range(depth-1)):
+            self.i_carry(id_c[i],id_a[i],id_b[i],id_c[i+1])
+            self.sum(id_c[i],id_a[i],id_b[i])
+        return self
 
-def encode(self,decimal,id):
+    def encode(self,decimal,id):
 
-    for i in range(len(id)):
-        if (decimal>>i)%2 == 1:
-            self.x(id[i])
-    return self
+        for i in range(len(id)):
+            if (decimal>>i)%2 == 1:
+                self.x(id[i])
+        return self
 
-def decode(self,id):
+    def decode(self,id):
 
-    iid = id[::-1]
-    return self.m(iid,shots=1).lst
+        iid = id[::-1]
+        return self.m(iid,shots=1).lst
     
 def create_register(digits):
 
@@ -53,14 +55,6 @@ def create_register(digits):
 
 if __name__ == '__main__':
 
-    # add metthods
-    QState.encode = encode
-    QState.decode = decode
-    QState.sum = sum
-    QState.carry = carry
-    QState.i_carry = i_carry
-    QState.plain_adder = plain_adder
-
     # create registers
     digits = 4
     num,id_a,id_b,id_c = create_register(digits)
@@ -72,7 +66,7 @@ if __name__ == '__main__':
     for a in a_list:
 
         # initialize quantum state
-        qs = QState(num)
+        qs = MyQState(num)
         qs.encode(a,id_a)
         qs.encode(b,id_b)
 
@@ -80,5 +74,3 @@ if __name__ == '__main__':
         qs.plain_adder(id_a,id_b,id_c)
         res = qs.decode(id_b)
         print("{0:}+{1:} -> {2:}".format(a,b,res))
-
-        # qs.free()

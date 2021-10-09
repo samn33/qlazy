@@ -68,8 +68,6 @@ def holevo_quantity(X,de):
     for i in range(code_num):
         holevo -= prob[i]*de[i].entropy()
 
-    # de_total.free()
-    
     return holevo
 
 def transmit(X,de,povm):
@@ -99,9 +97,6 @@ def make_densop(basis):
 
     qs = [QState(vector=b) for b in basis]
     de = [DensOp(qstate=[q], prob=[1.0]) for q in qs]
-
-    # for n in range(len(qs)):
-    #     qs[n].free()
     
     return de
     
@@ -165,6 +160,3 @@ if __name__ == '__main__':
         print("[mutual information]")
         print("- mean = {0:.4f} (std = {1:.4f})".format(mutual_mean, mutual_std))
         print()
-        
-    # for n in range(len(de)):
-    #     de[n].free()

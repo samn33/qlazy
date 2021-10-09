@@ -106,8 +106,6 @@ def estimate_densop(prob,qstate,shots):
             prb = np.array([f/shots for f in frq])
             expect[index] = calc_expect(prb)
 
-            # qs.free()
-
         de_tmp = make_densop(expect, qubit_num, pauli_mat)
         
         if i == 0:
@@ -116,8 +114,6 @@ def estimate_densop(prob,qstate,shots):
         else:
             de_tmp.mul(prob[i])
             densop_est.add(de_tmp)
-
-    # de_tmp.free()
 
     return densop_est
     
@@ -143,8 +139,3 @@ if __name__ == '__main__':
     print("** density operator (estimated)")
     densop_est.show()
     print("** fidelity =",densop_ori.fidelity(densop_est))
-
-    # for q in qstate:
-    #     q.free()
-    # densop_ori.free()
-    # densop_est.free()

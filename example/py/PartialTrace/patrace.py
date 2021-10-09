@@ -23,9 +23,3 @@ print(" * square trace = ", de2_reduced.sqtrace())
 
 print("== partial state of entangled state ==")
 qs.show([2,3])
-
-# qs.free()
-# de1.free()
-# de2.free()
-# de1_reduced.free()
-# de2_reduced.free()

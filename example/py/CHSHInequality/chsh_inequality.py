@@ -71,8 +71,6 @@ def quantum_strategy(trials=1000):
         # count up if win
         if (x and y) == (a+b)%2:
             win_cnt += 1
-
-        # qs.free()
             
     print("== result of quantum strategy (trials:{0:d}) ==".format(trials))
     print("* win prob. = ", win_cnt/trials)

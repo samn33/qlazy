@@ -63,8 +63,3 @@ if __name__ == '__main__':
     print("- square trace = ", de_B.sqtrace())
     print("- eigen values =", eval_B)
     print("- rank =", len(eval_B))
-
-    # qs.free()
-    # de.free()
-    # de_A.free()
-    # de_B.free()

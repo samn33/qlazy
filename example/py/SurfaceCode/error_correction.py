@@ -45,9 +45,21 @@ LZ_OPERATORS = [{'logical_qid':0, 'edges':[0, 1,  2]},
 LX_OPERATORS = [{'logical_qid':0, 'edges':[0, 6, 12]},
                 {'logical_qid':1, 'edges':[3, 4,  5]}]
 
+class MyQState(QState):
+    
+    def Lz(self, q):
+
+        [self.z(i) for i in LZ_OPERATORS[q]['edges']]
+        return self
+        
+    def Lx(self, q):
+
+        [self.x(i) for i in LX_OPERATORS[q]['edges']]
+        return self
+
 def make_logical_zero():
 
-    qs = QState(19)  # data:18 + ancilla:1
+    qs = MyQState(19)  # data:18 + ancilla:1
 
     mvals = [0, 0, 0, 0, 0, 0, 0, 0, 0] # measured values of 9 plaquette operators
     for vop in V_OPERATORS: # measure and get measured values of 9 star operators
@@ -103,20 +115,8 @@ def error_correction(qs, e_chn):
         if c['type'] == 'X': [qs.x(i) for i in c['qid']]
         if c['type'] == 'Z': [qs.z(i) for i in c['qid']]
 
-def Lz(self, q):
-
-    [self.z(i) for i in LZ_OPERATORS[q]['edges']]
-    return self
-        
-def Lx(self, q):
-
-    [self.x(i) for i in LX_OPERATORS[q]['edges']]
-    return self
-    
 if __name__ == '__main__':
 
-    QState.add_methods(Lz, Lx)
-    
     print("* initial state: logical |11>")
     qs_ini, mval_list = make_logical_zero()  # logical |00>
     qs_ini.Lx(0).Lx(1)  # logical |00> -> |11>
@@ -133,5 +133,3 @@ if __name__ == '__main__':
 
     error_correction(qs_fin, err_chain)
     print("* fidelity after error correction:", qs_fin.fidelity(qs_ini))
-    
-    # QState.free_all(qs_ini, qs_fin)

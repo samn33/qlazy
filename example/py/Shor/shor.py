@@ -8,61 +8,63 @@ from qlazy import QState
 # custom gates
 #
 
-def swap(self,q0,q1):
+class MyQState(QState):
+    
+    def swap(self,q0,q1):
 
-    self.cx(q0,q1).cx(q1,q0).cx(q0,q1)
-    return self
+        self.cx(q0,q1).cx(q1,q0).cx(q0,q1)
+        return self
 
-def hadamard(self,id=None):
+    def hadamard(self,id=None):
 
-    for i in range(len(id)):
-        self.h(id[i])
-    return self
+        for i in range(len(id)):
+            self.h(id[i])
+        return self
 
-def iqft(self,id=None):
+    def iqft(self,id=None):
 
-    dim = len(id)
+        dim = len(id)
 
-    for i in range(dim):
-        phase = -1.0/2**i
-        for j in range(i):
-            self.cp(id[j],id[i],phase=phase)
-            phase *= 2.0
-        self.h(id[i])
+        for i in range(dim):
+            phase = -1.0/2**i
+            for j in range(i):
+                self.cp(id[j],id[i],phase=phase)
+                phase *= 2.0
+            self.h(id[i])
             
-    i = 0
-    while i < dim-1-i:
-        self.swap(id[i], id[dim-1-i])
-        i += 1
+        i = 0
+        while i < dim-1-i:
+            self.swap(id[i], id[dim-1-i])
+            i += 1
         
-    return self
+        return self
 
-def mod_exp(self,a,N,id_up,id_dn):
+    def mod_exp(self,a,N,id_up,id_dn):
 
-    # make unitary matrix: |k>|t>->|k>|a^k t mod N>
+        # make unitary matrix: |k>|t>->|k>|a^k t mod N>
     
-    bitnum_up = len(id_up)
-    bitnum_dn = len(id_dn)
+        bitnum_up = len(id_up)
+        bitnum_dn = len(id_dn)
     
-    matdim_up = 2**bitnum_up
-    matdim_dn = 2**bitnum_dn
-    matdim = matdim_up * matdim_dn
+        matdim_up = 2**bitnum_up
+        matdim_dn = 2**bitnum_dn
+        matdim = matdim_up * matdim_dn
 
-    mat = np.array([[0]*matdim]*matdim)
-    for j in range(matdim_up):
-        for k in range(matdim_dn):
-            col = matdim_dn*j + k
-            if k < N:
-                row = matdim_dn*j + ((a**j)*k)%N
-            else:
-                row = col
-            mat[row][col] = 1.0
+        mat = np.array([[0]*matdim]*matdim)
+        for j in range(matdim_up):
+            for k in range(matdim_dn):
+                col = matdim_dn*j + k
+                if k < N:
+                    row = matdim_dn*j + ((a**j)*k)%N
+                else:
+                    row = col
+                mat[row][col] = 1.0
 
-    # apply unitary matrix(mat) to the quantum state
+            # apply unitary matrix(mat) to the quantum state
 
-    self.apply(mat)
+        self.apply(mat)
     
-    return self
+        return self
 
 #
 # functions
@@ -121,7 +123,7 @@ def discover_order(a,N):
     id_dn = create_register(bitnum_dn)
     qubit_num = init_register(id_up,id_dn)
     
-    qs = QState(qubit_num)
+    qs = MyQState(qubit_num)
     qs.hadamard(id_up)
     qs.x(id_dn[0])
     qs.mod_exp(a,N,id_up,id_dn)
@@ -137,7 +139,6 @@ def discover_order(a,N):
             if r != 0 and r < N and (a**r)%N == 1 and r%2 == 0:
                 order = r
                 break
-    # qs.free()
     
     return r  # return 1 if order discovery failure
 
@@ -222,11 +223,6 @@ def shor(N):
     return fac
 
 if __name__ == '__main__':
-
-    QState.swap = swap
-    QState.hadamard = hadamard
-    QState.iqft = iqft
-    QState.mod_exp = mod_exp
 
     print("== input number ==")
     # args = sys.argv

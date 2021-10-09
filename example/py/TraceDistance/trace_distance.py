@@ -21,7 +21,6 @@ def random_densop(qnum_tar,qnum_ref,qnum_env):
     qs = QState(vector=vec_whole)
     de = DensOp(qstate=[qs],prob=[1.0])
 
-    # qs.free()
     return de
 
 def random_unitary(qnum):
@@ -70,11 +69,3 @@ if __name__ == '__main__':
         print("OK!")
     else:
         print("NG!")
-
-    # free memory
-    # de1_whole.free()
-    # de2_whole.free()
-    # de1_ini.free()
-    # de2_ini.free()
-    # de1_fin.free()
-    # de2_fin.free()

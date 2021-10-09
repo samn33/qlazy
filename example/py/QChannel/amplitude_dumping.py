@@ -70,5 +70,3 @@ if __name__ == '__main__':
     (u_1,u_2,u_3) = get_coordinate(densop=de)
     print("(u_1,u_2,u_3) = ({0:.3f},{1:.3f},{2:.3f})".format(u_1,u_2,u_3))
     print("expect value of energy =", de.expect(matrix=H))
-
-    # de.free()

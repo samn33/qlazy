@@ -25,9 +25,5 @@ def main():
     print("- unitary operated |psi>")
     qs.h(1).rx(2,phase=0.25).show([1,2])
 
-    # qs_0.free()
-    # qs_psi.free()
-    # qs.free()
-
 if __name__ == '__main__':
     main()

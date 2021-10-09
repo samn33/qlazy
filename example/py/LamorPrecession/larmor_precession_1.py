@@ -26,10 +26,6 @@ def main():
 
         print("time = {0:.2f}, <y> = {1:.2f}, <z> = {2:.2f}, <theta> = {3:.2f}*PI"
               .format(t, exp_y, exp_z, exp_theta))
-
-        # qs.free()
-    
-    # hm.free()
     
 if __name__ == '__main__':
     main()

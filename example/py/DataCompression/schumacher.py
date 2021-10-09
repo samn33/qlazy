@@ -71,7 +71,3 @@ if __name__ == '__main__':
 
     # fidelity
     print("fidelity = {:.6f}".format(de_fin.fidelity(de_ini)))
-
-    # de_ini.free()
-    # de_comp.free()
-    # de_fin.free()

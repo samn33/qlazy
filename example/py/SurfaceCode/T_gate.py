@@ -32,8 +32,6 @@ def main():
     print("== fidelity ==")
     print("{:.6f}".format(qs_actual.fidelity(qs_expect)))
 
-    # QState.free_all(qs, qs_expect, qs_actual)
-
 if __name__ == '__main__':
 
     main()

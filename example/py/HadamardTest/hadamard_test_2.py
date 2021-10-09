@@ -25,9 +25,5 @@ def main():
 
     print("[theoretical] cos(gamma) = {0:.3f}".format(math.cos(-0.25*math.pi)))
 
-    # qs_0.free()
-    # qs_psi.free()
-    # qs.free()
-
 if __name__ == '__main__':
     main()

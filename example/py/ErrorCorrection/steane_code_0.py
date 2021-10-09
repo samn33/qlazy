@@ -9,6 +9,41 @@ Steane_0 = ['0000000', '1101001', '1011010', '0110011',
 Steane_1 = ['1111111', '0010110', '0100101', '1001100',
             '1000011', '0101010', '0011001', '1110000']
 
+class MyQState(QState):
+    
+    def noise(self, qid):
+
+        i = np.random.randint(len(qid))
+        alpha, beta, gamma = np.random.rand(3)
+        self.u3(qid[i], alpha=alpha, beta=beta, gamma=gamma)
+    
+        print("== random noise (random U3 operation)==")
+        print("- qubit id = #{0:}".format(i, alpha, beta, gamma))
+        print("- parameter of U3 = {0:.4f},{1:.4f},{2:.4f}".format(alpha, beta, gamma))
+
+        return self
+
+    def correct(self, kind, qid_C, qid_S):
+
+        self.reset(qid=qid_S)
+
+        if kind == 'phase_flip': [self.h(q) for q in qid_C]
+
+        # syndrome
+        for i, row in enumerate(Hamming):
+            [self.cx(qid_C[j], qid_S[i]) if row[j] == 1 else False for j in range(len(row))]
+            #[self.cx(qid_C[j], qid_S[i], cond=(row[j] == 1)) for j in range(len(row))]
+
+        # correction
+        for i, row in enumerate(Hamming_T):
+            [self.x(qid_S[j]) if row[j] == 0 else False for j in range(len(row))]
+            self.mcx(qid=qid_S+[qid_C[i]])
+            [self.x(qid_S[j]) if row[j] == 0 else False for j in range(len(row))]
+    
+        if kind == 'phase_flip': [self.h(q) for q in qid_C]
+        
+        return self
+    
 def generate_qstate(qid_C, qid_S):
 
     a = np.random.rand() + np.random.rand() * 1.j
@@ -21,8 +56,8 @@ def generate_qstate(qid_C, qid_S):
     norm = np.linalg.norm(qvec)
     qvec = qvec / norm
 
-    qs_C = QState(vector=qvec)
-    qs_S = QState(len(qid_S))
+    qs_C = MyQState(vector=qvec)
+    qs_S = MyQState(len(qid_S))
     qs_ini = qs_C.tenspro(qs_S)
     qs_fin = qs_ini.clone()
 
@@ -33,44 +68,7 @@ def generate_qstate(qid_C, qid_S):
     # QState.free_all(qs_C, qs_S)
     return qs_ini, qs_fin
 
-def noise(self, qid):
-
-    i = np.random.randint(len(qid))
-    alpha, beta, gamma = np.random.rand(3)
-    self.u3(qid[i], alpha=alpha, beta=beta, gamma=gamma)
-    
-    print("== random noise (random U3 operation)==")
-    print("- qubit id = #{0:}".format(i, alpha, beta, gamma))
-    print("- parameter of U3 = {0:.4f},{1:.4f},{2:.4f}".format(alpha, beta, gamma))
-
-    return self
-
-def correct(self, kind, qid_C, qid_S):
-
-    self.reset(qid=qid_S)
-
-    if kind == 'phase_flip': [self.h(q) for q in qid_C]
-
-    # syndrome
-    for i, row in enumerate(Hamming):
-        [self.cx(qid_C[j], qid_S[i]) if row[j] == 1 else False for j in range(len(row))]
-        #[self.cx(qid_C[j], qid_S[i], cond=(row[j] == 1)) for j in range(len(row))]
-
-    # correction
-    for i, row in enumerate(Hamming_T):
-        [self.x(qid_S[j]) if row[j] == 0 else False for j in range(len(row))]
-        self.mcx(qid=qid_S+[qid_C[i]])
-        [self.x(qid_S[j]) if row[j] == 0 else False for j in range(len(row))]
-    
-    if kind == 'phase_flip': [self.h(q) for q in qid_C]
-        
-    return self
-    
 if __name__ == '__main__':
-
-    # add custom gates
-    QState.add_method(noise)
-    QState.add_method(correct)
 
     # set registers
     qid_C = QState.create_register(7) # registers for code space
@@ -90,5 +88,3 @@ if __name__ == '__main__':
     # print result
     print("== result ==")
     print("- fidelity = {:.6f}".format(qs_fin.fidelity(qs_ini, qid=qid_C)))
-
-    # QState.free_all(qs_ini, qs_fin)

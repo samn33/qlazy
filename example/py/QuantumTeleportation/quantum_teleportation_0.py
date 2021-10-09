@@ -36,5 +36,3 @@ print("== Alice (final) ==")
 qs.show([0])
 print("== Bob (final) ==")
 qs.show([2])
-
-# qs.free()
