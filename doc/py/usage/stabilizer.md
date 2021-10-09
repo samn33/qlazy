@@ -129,34 +129,23 @@ X,Y,Z,H,S,S+,CX,CY,CZのみです。Tゲートや回転ゲートは非クリフ�
 
 #### カスタム・ゲートの追加
 
-基本的なゲートを組み合わせてユーザーが独自に作成したカスタム・ゲートを、
-Stabilizerクラスのメソッドとして登録したい場合は、Stabilizerクラスのク
-ラス・メソッド'add_method'を使います。
+Stabilizerクラスを継承することで、自分専用の量子ゲートを簡単に作成・追
+加することができます。ベル状態を作成する回路をbellメソッドとして、
+Stabilizerを継承したMyStabilizerクラスに追加する例を示します。
 
-例えば、指定した３つの量子ビット番号に各々X,Y,Zゲートを演算する'foo'ゲー
-トを登録したいとします。まず、その演算を以下のように関数定義します。引
-数'self'は、DensOpのインスタンスで、このselfに対してゲート演算を適用し
-て、関数の最後でselfをリターンするようにします。
+    class MyStabilizer(Stabilizer):
 
-    def foo(self,q0,q1,q2):
-        self.x(q0).y(q1).z(q2)
-        return self
+        def bell(self, q0, q1):
+            self.h(q0).cx(q0,q1)
+            return self
 
-これをメソッドとして登録するには、以下のようにします。
+    sb = MyStabilizer(qubit_num=2).set_all('Z')
+	sb.bell(0,1)
+    ...
 
-    Stabilizer.add_method(foo)
+これは非常に簡単な例なのであまりご利益を感じないかもしれませんが、大規
+模な量子回路を作成したい場合など、便利に使える場面は多いと思います。
 
-'foo'を使用する場合は、
-
-    sb.foo(0,1,2)
-
-という具合に、通常のゲート演算と同様の書き方で実行できます。
-
-また、複数のメソッドを同時に登録したい場合は、クラス・メソッ
-ド'add_methods'を使って、以下のようにします。引数として設定できる関数
-の数には特に制限はありません。
-
-    Stabilizer.add_methods(foo, bar, hoge)
 
 ### パウリ積の演算
 
