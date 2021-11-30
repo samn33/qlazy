@@ -63,13 +63,10 @@ class QState(ctypes.Structure):
                 raise QState_Error_Initialize()
 
             obj = qstate_init(qubit_num, seed)
-            # return qstate_init(qubit_num, seed)
 
         else:
             obj = qstate_init_with_vector(vector, seed)
-            # return qstate_init_with_vector(vector, seed)
             
-        # self = ctypes.cast(obj.value, ctypes.POINTER(QState)).contents
         self = ctypes.cast(obj.value, ctypes.POINTER(cls)).contents
         return self
 
@@ -364,8 +361,6 @@ class QState(ctypes.Structure):
             copy of the original quantum state.
 
         """
-        # qstate = qstate_copy(self)
-        # return qstate
         obj = qstate_copy(self)
         qs = ctypes.cast(obj.value, ctypes.POINTER(self.__class__)).contents
         return qs
@@ -442,8 +437,6 @@ class QState(ctypes.Structure):
             tensor produt of 'self' and 'qstate'.
 
         """
-        # qstate_out = qstate_tensor_product(self, qstate)
-        # return qstate_out
         obj = qstate_tensor_product(self, qstate)
         qs = ctypes.cast(obj.value, ctypes.POINTER(self.__class__)).contents
         return qs
@@ -1425,6 +1418,40 @@ class QState(ctypes.Structure):
         return self
     
     # measurement
+
+    def measure(self, qid=None):
+        """
+        one shot measurement in Z-direction.
+
+        Parameters
+        ----------
+        qid : list of int
+            qubit id list to measure.
+
+        Returns
+        -------
+        mval : str
+            measurement value.
+
+        Examples
+        --------
+        >>> qs = QState(qubit_num=2).h(0).cx(0,1)
+        >>> qs.show()
+        >>> print(qs.measure(qid=[0,1]))
+        >>> qs.show()
+        c[00] = +0.7071+0.0000*i : 0.5000 |++++++
+        c[01] = +0.0000+0.0000*i : 0.0000 |
+        c[10] = +0.0000+0.0000*i : 0.0000 |
+        c[11] = +0.7071+0.0000*i : 0.5000 |++++++
+        00
+        c[00] = +1.0000+0.0000*i : 1.0000 |+++++++++++
+        c[01] = +0.0000+0.0000*i : 0.0000 |
+        c[10] = +0.0000+0.0000*i : 0.0000 |
+        c[11] = +0.0000+0.0000*i : 0.0000 |
+
+        """
+        mval = self.m(qid=qid, shots=1).last
+        return mval
     
     def m(self, qid=None, shots=DEF_SHOTS, angle=0.0, phase=0.0, tag=None):
         """
@@ -1717,7 +1744,6 @@ class QState(ctypes.Structure):
         None
 
         """
-        # qstate_free(self)
         warnings.warn("No need to call 'free' method because free automatically, or you can use 'del' to free memory explicitly.")
 
     def __del__(self):

@@ -941,6 +941,13 @@ class TestQState_measure(unittest.TestCase):
     """ test 'QState' : various kind of measurements
     """
 
+    def test_measure(self):
+        """test 'measure'
+        """
+        qs = QState(qubit_num=4).x(1).x(2)
+        mval = qs.measure(qid=[0,1,2,3])
+        self.assertEqual(mval, '0110')
+
     def test_m(self):
         """test 'm' (for bell state)
         """

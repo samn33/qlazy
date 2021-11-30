@@ -1005,6 +1005,17 @@ class TestStabilizer_cz(unittest.TestCase):
         expect = "  ZZ\n"
         self.assertEqual(actual, expect)
         
+class TestStabilizer_measure(unittest.TestCase):
+    """ test 'Stabilizer' : 'measure'
+    """
+
+    def test_measure(self):
+        """test 'measure'
+        """
+        sb = Stabilizer(qubit_num=4).set_all('Z').x(1).x(2)
+        mval = sb.measure(qid=[0,1,2,3])
+        self.assertEqual(mval, '0110')
+
 class TestStabilizer_m(unittest.TestCase):
     """ test 'Stabilizer' : 'm'
     """

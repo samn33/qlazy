@@ -64,18 +64,6 @@ class Stabilizer(ctypes.Structure):
         'gene_num' is equal to 'qubit_num.'
 
         """
-        # if qubit_num is None:
-        #     raise Stabilizer_Error_Initialize()
-        # if gene_num is None:
-        #     gene_num = qubit_num
-        # if qubit_num < 1 or gene_num < 1:
-        #     raise Stabilizer_Error_Initialize()
-        # 
-        # if seed is None:
-        #     seed = random.randint(0,1000000)
-        #     
-        # return stabilizer_init(gene_num, qubit_num, seed)
-            
         if seed is None:
             seed = random.randint(0,1000000)
 
@@ -85,7 +73,6 @@ class Stabilizer(ctypes.Structure):
             for pp in pp_list:
                 qubit_num = max([qubit_num] + pp.qid)
             qubit_num += 1
-            # sb = stabilizer_init(gene_num, qubit_num, seed)
             obj = stabilizer_init(gene_num, qubit_num, seed)
             sb = ctypes.cast(obj.value, ctypes.POINTER(cls)).contents
             for i, pp in enumerate(pp_list):
@@ -100,7 +87,6 @@ class Stabilizer(ctypes.Structure):
                 gene_num = qubit_num
             if qubit_num < 1 or gene_num < 1:
                 raise Stabilizer_Error_Initialize()
-            # return stabilizer_init(gene_num, qubit_num, seed)
             obj = stabilizer_init(gene_num, qubit_num, seed)
             sb = ctypes.cast(obj.value, ctypes.POINTER(cls)).contents
             return sb
@@ -216,8 +202,6 @@ class Stabilizer(ctypes.Structure):
             copy of the original stabilizer.
 
         """
-        # stab = stabilizer_copy(self)
-        # return stab
         obj = stabilizer_copy(self)
         sb = ctypes.cast(obj.value, ctypes.POINTER(self.__class__)).contents
         return sb
@@ -536,6 +520,36 @@ class Stabilizer(ctypes.Structure):
 
     # measurement
 
+    def measure(self, qid=None):
+        """
+        one shot measurement in Z-direction.
+
+        Parameters
+        ----------
+        qid : list of int
+            qubit id list to measure.
+
+        Returns
+        -------
+        mval : str
+            measurement value.
+
+        Examples
+        --------
+        >>> sb = Stabilizer(qubit_num=2).set_all('Z').h(0).cx(0,1)
+        >>> sb.show()
+        >>> print(sb.measure(qid=[0,1]))
+        >>> sb.show()
+        g[0]:  XX
+        g[1]:  ZZ
+        00
+        g[0]:  ZI
+        g[1]:  ZZ
+
+        """
+        mval = self.m(qid=qid, shots=1).last
+        return mval
+    
     def m(self, qid=None, shots=DEF_SHOTS):
         """
         measurement in Z-direction.
@@ -554,7 +568,7 @@ class Stabilizer(ctypes.Structure):
 
         Examples
         --------
-        >>> sb = Stabilizer(2).h(0).cx(0,1)
+        >>> sb = Stabilizer(qubit_num=2).set_all('Z').h(0).cx(0,1)
         >>> md = qs.m(qid=[0,1], shots=100)
         >>> print(md.freauency)
         >>> print(md.last)
@@ -632,7 +646,7 @@ class Stabilizer(ctypes.Structure):
 
         Examples
         --------
-        >>> sb = Stabilizer(2).h(0).cx(0,1)
+        >>> sb = Stabilizer(2).set_all('Z').h(0).cx(0,1)
         >>> md = qs.mz(qid=[0,1], shots=100)
         >>> print(md.freauency)
         >>> print(md.last)
@@ -767,7 +781,6 @@ class Stabilizer(ctypes.Structure):
         None
 
         """
-        # stabilizer_free(self)
         warnings.warn("No need to call 'free' method because free automatically, or you can use 'del' to free memory explicitly.")
 
     def __del__(self):

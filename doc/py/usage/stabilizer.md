@@ -91,7 +91,7 @@ set_pauli_facメソッドを使います。例えば、
     str_list = ["IIIXXXX", "IXXIIXX", "XIXIXIX", "IIIZZZZ", "IZZIIZZ", "ZIZIZIZ"]
     pp_list = [PauliProduct(pauli_str=pp_str) for pp_str in str_list]
     sb = Stabilizer(pp_list=gene_list)
-	sb.shoe()
+	sb.show()
     >>> g[0]:  IIIXXXX
     >>> g[1]:  IXXIIXX
     >>> g[2]:  XIXIXIX
@@ -178,6 +178,24 @@ QStateクラスと同様にmメソッドで測定データ(MDataStabilizerクラ
     print(md.last)
     >>> Counter({'000':58,'111':42})
     >>> 111
+
+### 一回限りの測定（もう一つの方法）
+
+計算基底で単純に１回だけ測定してその測定値を得たい場合、measureメソッ
+ドを使うこともできます。
+
+	sb = Stabilizer(qubit=2).set_all('Z').h(0).cx(0,1)
+	mval = sb.measure(qid=[0,1])
+	print(mval)
+	sb.show()
+
+とやればmvalに文字列'00'または'11'が格納されます。スタビライザー状態は測定後の状
+態になります（例えば以下のように）。
+
+	>> 11
+	>> g[0]: -ZI
+	>> g[1]:  ZZ
+
 
 ### メモリ解放
 
