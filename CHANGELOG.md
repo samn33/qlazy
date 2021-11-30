@@ -1,5 +1,10 @@
 # Change Log
 
+## [0.2.3] - 2021-xx-xx
+### Added
+- examples of "Lattice Surgery"
+- 'measure' method of QState, Stabilizer (one shot measuremant in computational basis)
+
 ## [0.2.2] - 2021-10-09
 ### Changed
 - possible to create subclass of QState, DensOp, Stabilizer etc
