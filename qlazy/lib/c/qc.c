@@ -175,6 +175,7 @@ bool qc_set_cimage(QC* qc)
     case MEASURE_Y:
     case MEASURE_Z:
     case MEASURE_BELL:
+    case RESET:
       for (int j=0; j<qc->qgate[i].terminal_num; j++) {
 	p = 0;
 	while (symbol[p] != '\0') {
