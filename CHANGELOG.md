@@ -4,6 +4,10 @@
 ### Added
 - examples of "Lattice Surgery"
 - 'measure' method of QState, Stabilizer (one shot measuremant in computational basis)
+### Changed
+- QComp ('reset' method -> 'clear' method, redefine 'reset' method as adding non-unitary reset gate, return value of 'run' method)
+### Fixed
+- 'measure' method of QComp for qlazy's qstate_simulator
 
 ## [0.2.2] - 2021-10-09
 ### Changed
