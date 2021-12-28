@@ -62,7 +62,6 @@ class TestQState_init(unittest.TestCase):
         actual = qs.amp
         expect = np.array([1j, 0j, 0j, 0j, 0j, 0j, 0j, 0j])
         ans = equal_vectors(actual, expect)
-        # qs.free()
         self.assertEqual(ans,True)
 
     def test_init_with_vector(self):

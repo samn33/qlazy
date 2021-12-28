@@ -8,6 +8,7 @@ import cmath
 from qlazy.error import *
 from qlazy.config import *
 from qlazy.util import *
+from qlazy.Result import *
 
 from qiskit import IBMQ, QuantumCircuit, ClassicalRegister, QuantumRegister
 from qiskit import execute, Aer
@@ -21,25 +22,22 @@ def init(qubit_num=0, backend=None):
     qstate[0] = 1.+0.j
     return qstate
 
-def run(qubit_num=0, cmem_num=0, qstate=None, qcirc=[], cmem=[], shots=1, backend=None):
+def run(qubit_num=0, cmem_num=0, qstate=None, qcirc=[], cmem=[], shots=1, cid=[], backend=None):
 
     if cmem == []:
         cmem_num = qubit_num
         cmem = [0] * cmem_num
         
     qubit_reg = QuantumRegister(qubit_num)
-    cmem_reg = [ClassicalRegister(1, name="cmem_reg_{}".format(i)) for i in range(cmem_num)]
+    cmem_reg = [ClassicalRegister(1, name="cmem_reg_{}".format(i)) for i in range(cmem_num+1)]
 
     args = [qubit_reg] + cmem_reg
     qc = QuantumCircuit(*args)
 
-    measured_qid = []
-    measured_cid = []
-
     for crc in qcirc:
         kind = crc['kind']
-        qid = crc['qid']
-        cid = crc['cid']
+        qids = crc['qid']
+        cids = crc['cid']
         phase = crc['phase'] * np.pi
         phase1 = crc['phase1'] * np.pi
         phase2 = crc['phase2'] * np.pi
@@ -49,16 +47,24 @@ def run(qubit_num=0, cmem_num=0, qstate=None, qcirc=[], cmem=[], shots=1, backen
         para_num = get_qgate_param_num(kind)
 
         if kind == MEASURE:
-            if cid == None:
-                cid = qid[:]
-            if len(qid) != len(cid):
-                raise ValueError("cid length is not equal to qid's ")
-            qc.measure(qid, cid)
-            measured_qid[:] = qid[:]
-            measured_cid[:] = cid[:]
+
+            if cids == None:
+                for q in qids:
+                    qc.measure(qubit_reg[q], cmem_reg[-1])
+            else:
+                for q,c in zip(qids, cids):
+                    qc.measure(qubit_reg[q], cmem_reg[c])
+
+        elif kind == RESET:
+            if ctrl == None:
+                for q in qids:
+                    qc.reset(qubit_reg[q])
+            else:
+                for q in qids:
+                    qc.reset(qubit_reg[q]).c_if(cmem_reg[ctrl], 1)
 
         else:
-            __ibmq_add_qgate(qc, kind, qid, phase, phase1, phase2, ctrl, cmem_reg)
+            __ibmq_add_qgate(qc, kind, qids, phase, phase1, phase2, ctrl, cmem_reg)
 
     # set backend
     if backend.device == 'qasm_simulator':
@@ -83,29 +89,113 @@ def run(qubit_num=0, cmem_num=0, qstate=None, qcirc=[], cmem=[], shots=1, backen
     res_sv = execute(qc, ibmq_sv_backend).result()
     qstate[:] = reverse_bit_order(res_sv.get_statevector(qc))
     
-    # if nothing are measured
-    if measured_qid == None:
-        return None
-
-    # else if something are measured
-    lut = {}
-    for q,c in zip(measured_qid, measured_cid):
-        lut[q] = c
-
     frequency = Counter()
     for k,v in frq.items():
         bits_list = list(k.replace(' ', ''))
         bits_list.reverse()
-        measured_bits_list = []
-        for q in measured_qid:
-            measured_bits_list.append(bits_list[lut[q]])
+        measured_bits_list = [bits_list[c] for c in cid]
         measured_bits = ''.join(measured_bits_list)
-        frequency[measured_bits] += v
+        if measured_bits != '':
+            frequency[measured_bits] += v
+        else:
+            frequency = None
+            break
 
-    result = {'measured_qid': measured_qid, 'frequency': frequency}
+    if frequency is not None:
+        result = Result(cid=cid, frequency=frequency)
+    else:
+        result = None
+    
     return result
         
-def reset(qstate=None, backend=None):
+# def run(qubit_num=0, cmem_num=0, qstate=None, qcirc=[], cmem=[], shots=1, backend=None):
+# 
+#     if cmem == []:
+#         cmem_num = qubit_num
+#         cmem = [0] * cmem_num
+#         
+#     qubit_reg = QuantumRegister(qubit_num)
+#     cmem_reg = [ClassicalRegister(1, name="cmem_reg_{}".format(i)) for i in range(cmem_num)]
+# 
+#     args = [qubit_reg] + cmem_reg
+#     qc = QuantumCircuit(*args)
+# 
+#     measured_qid = []
+#     measured_cid = []
+# 
+#     for crc in qcirc:
+#         kind = crc['kind']
+#         qid = crc['qid']
+#         cid = crc['cid']
+#         phase = crc['phase'] * np.pi
+#         phase1 = crc['phase1'] * np.pi
+#         phase2 = crc['phase2'] * np.pi
+#         ctrl = crc['ctrl']
+# 
+#         term_num = get_qgate_qubit_num(kind)
+#         para_num = get_qgate_param_num(kind)
+# 
+#         if kind == MEASURE:
+#             if cid == None:
+#                 cid = qid[:]
+#             if len(qid) != len(cid):
+#                 raise ValueError("cid length is not equal to qid's ")
+#             qc.measure(qid, cid)
+#             measured_qid[:] = qid[:]
+#             measured_cid[:] = cid[:]
+# 
+#         elif kind == RESET:
+#             qc.reset(qid)
+# 
+#         else:
+#             __ibmq_add_qgate(qc, kind, qid, phase, phase1, phase2, ctrl, cmem_reg)
+# 
+#     # set backend
+#     if backend.device == 'qasm_simulator':
+#         ibmq_backend = Aer.get_backend("qasm_simulator")
+#     else:
+#         provider = IBMQ.load_account()
+#         if backend.device == 'least_busy':
+#             ibmq_backend = least_busy(provider.backends(simulator=False, operational=True))
+#         else:
+#             ibmq_backend_system_names = [b.name() for b in provider.backends(simulator=False, operational=True)]
+#             if backend.device in ibmq_backend_system_names:
+#                 ibmq_backend = provider.get_backend(backend.device)
+#             else:
+#                 raise ValueError("unknown device")
+# 
+#     # execute the circuit
+#     res = execute(qc, ibmq_backend, shots=shots).result()
+#     frq = res.get_counts(qc)
+# 
+#     # execute the circuit (for state vector)
+#     ibmq_sv_backend = Aer.get_backend("statevector_simulator")
+#     res_sv = execute(qc, ibmq_sv_backend).result()
+#     qstate[:] = reverse_bit_order(res_sv.get_statevector(qc))
+#     
+#     # if nothing are measured
+#     if measured_qid == None:
+#         return None
+# 
+#     # else if something are measured
+#     lut = {}
+#     for q,c in zip(measured_qid, measured_cid):
+#         lut[q] = c
+# 
+#     frequency = Counter()
+#     for k,v in frq.items():
+#         bits_list = list(k.replace(' ', ''))
+#         bits_list.reverse()
+#         measured_bits_list = []
+#         for q in measured_qid:
+#             measured_bits_list.append(bits_list[lut[q]])
+#         measured_bits = ''.join(measured_bits_list)
+#         frequency[measured_bits] += v
+# 
+#     result = {'measured_qid': measured_qid, 'frequency': frequency}
+#     return result
+        
+def clear(qstate=None, backend=None):
 
     pass
 

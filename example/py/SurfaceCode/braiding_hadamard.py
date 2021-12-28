@@ -21,12 +21,12 @@ class QComp_SurfaceCode(QComp):
         self.Lx_ancilla = 0
         self.Lz_ancilla = 0
 
-    def run(self, reset_qubits=False, reset_cmem=False, reset_qcirc=True, shots=1):
+    def run(self, clear_qubits=False, clear_cmem=False, clear_qcirc=True, shots=1, cid=[]):
         """ 量子回路を実行
-            (default: 実行後、量子回路はリセットするが、量子状態と古典メモリはリセットしない) 
+            (default: 実行後、量子回路はクリアするが、量子状態と古典メモリはクリアしない) 
         """
-        return super().run(reset_qubits=reset_qubits, reset_cmem=reset_cmem,
-                           reset_qcirc=reset_qcirc, shots=shots)
+        return super().run(clear_qubits=clear_qubits, clear_cmem=clear_cmem,
+                           clear_qcirc=clear_qcirc, shots=shots, cid=cid)
 
     def initialize(self):
         """ 符号空間を初期化(真空状態を作成) """
@@ -64,9 +64,8 @@ class QComp_SurfaceCode(QComp):
         self.h(ancilla)
         [self.cx(ancilla, n) for n in self.Lx_chain]
         self.h(ancilla).measure(qid=[ancilla], cid=[ancilla])
-        result = self.run(shots=shots)
-        if self.cmem[ancilla] == 1: self.x(ancilla).run()
-        return result
+        result = self.run(shots=shots, cid=[ancilla])
+        return result.frequency
 
     def measure_Lz(self, shots=1):
         """ 論理パウリZ演算子の測定 """
@@ -74,9 +73,8 @@ class QComp_SurfaceCode(QComp):
         ancilla = self.Lz_ancilla
         [self.cx(n, ancilla) for n in self.Lz_chain]
         self.measure(qid=[ancilla], cid=[ancilla])
-        result = self.run(shots=shots)
-        if self.cmem[ancilla] == 1: self.x(ancilla).run()
-        return result
+        result = self.run(shots=shots, cid=[ancilla])
+        return result.frequency
 
     def operate_Lh(self):
         """ 論理アダマール演算 """
@@ -288,9 +286,9 @@ class QComp_SurfaceCode(QComp):
         [self.cx(ancilla, n) for n in neighbors]
         self.h(ancilla)
         self.measure(qid=[ancilla], cid=[ancilla])
-        result = self.run()
-        if self.cmem[ancilla] == 1: self.x(ancilla).run()
-        return result
+        result = self.run(cid=[ancilla])
+        if self.cmem[ancilla] == 1: self.x(ancilla).run(cid=[ancilla])
+        return result.frequency
 
     def __zstab_meas(self, i, j, shots=1):
         """ 面(i,j)に対応したZスタビライザを測定 """
@@ -299,24 +297,24 @@ class QComp_SurfaceCode(QComp):
         neighbors = list(nx.neighbors(self.lattice, ancilla))
         [self.cx(n, ancilla) for n in neighbors]
         self.measure(qid=[ancilla], cid=[ancilla])
-        result = self.run(shots=shots)
-        if self.cmem[ancilla] == 1: self.x(ancilla).run()
-        return result
+        result = self.run(shots=shots, cid=[ancilla])
+        if self.cmem[ancilla] == 1: self.x(ancilla).run(cid=[ancilla])
+        return result.frequency
 
     def __x_meas(self, q):
         """ q番目の量子ビットをX基底で測定 """
 
         self.h(q).measure(qid=[q], cid=[q])
         result = self.run()
-        self.h(q).run()
-        return result
+        self.h(q).run(cid=[q])
+        return result.frequency
 
     def __z_meas(self, q):
         """ q番目の量子ビットをZ基底で測定 """
 
         self.measure(qid=[q], cid=[q])
-        result = self.run()
-        return result
+        result = self.run(cid=[q])
+        return result.frequency
 
     def __move_defect_p(self, rows, cols):
         """ p型欠陥を移動
@@ -355,9 +353,9 @@ def main():
     qc.operate_Lh()        # 論理アダマール演算
     # qc.operate_Lx()        # 論理パウリX演算
 
-    result = qc.measure_Lz(shots=100)  # 論理パウリZ演算子を測定
-    # result = qc.measure_Lx(shots=100)  # 論理パウリX演算子を測定
-    print("frequency =", result['frequency'])
+    frequency = qc.measure_Lz(shots=100)  # 論理パウリZ演算子を測定
+    # frequency = qc.measure_Lx(shots=100)  # 論理パウリX演算子を測定
+    print("frequency =", frequency)
 
 if __name__ == '__main__':
     main()

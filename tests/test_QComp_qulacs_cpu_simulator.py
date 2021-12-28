@@ -65,24 +65,23 @@ class TestQComp_init(unittest.TestCase):
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([1j, 0j, 0j, 0j, 0j, 0j, 0j, 0j]))
         ans = equal_vectors(actual, expect)
-        # # qc.free()
         self.assertEqual(ans,True)
 
 #
-# reset
+# clear
 #
 
-class TestQComp_reset(unittest.TestCase):
-    """ test 'QState' : 'reset'
+class TestQComp_clear(unittest.TestCase):
+    """ test 'QComp' : 'clear'
     """
 
-    def test_reset_qulacs_simulator(self):
-        """test 'reset' (qulacs_simulator)
+    def test_clear_qulacs_simulator(self):
+        """test 'clear' (qulacs_simulator)
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=3, cmem_num=2, backend=bk)
         qc.h(0).h(1).h(2).run()
-        qc.reset()
+        qc.clear()
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([1j, 0j, 0j, 0j, 0j, 0j, 0j, 0j]))
         ans = equal_vectors(actual, expect)
@@ -92,7 +91,7 @@ class TestQComp_reset(unittest.TestCase):
 # 1-qubit gate
 #
 
-class TestQComp_1_qubit_qulacs_simulator(unittest.TestCase):
+class TestQComp_1_qubit_qulacs_cpu_simulator(unittest.TestCase):
     """ test 'QComp' : 1-qubit gate (qulacs_simulator)
     """
 
@@ -101,7 +100,7 @@ class TestQComp_1_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=1, backend=bk)
-        res = qc.x(0).run(reset_qubits=False)
+        res = qc.x(0).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([0.0, 1.0]))
         ans = equal_vectors(actual, expect)
@@ -112,7 +111,7 @@ class TestQComp_1_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=1, backend=bk)
-        res = qc.h(0).x(0).run(reset_qubits=False)
+        res = qc.h(0).x(0).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([1.0/SQRT_2, 1.0/SQRT_2]))
         ans = equal_vectors(actual, expect)
@@ -123,7 +122,7 @@ class TestQComp_1_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=1, backend=bk)
-        res = qc.y(0).run(reset_qubits=False)
+        res = qc.y(0).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([0.0, 1.0j]))
         ans = equal_vectors(actual, expect)
@@ -134,7 +133,7 @@ class TestQComp_1_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=1, backend=bk)
-        res = qc.h(0).y(0).run(reset_qubits=False)
+        res = qc.h(0).y(0).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([-1.0j/SQRT_2, 1.0j/SQRT_2]))
         ans = equal_vectors(actual, expect)
@@ -145,7 +144,7 @@ class TestQComp_1_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=1, backend=bk)
-        res = qc.z(0).run(reset_qubits=False)
+        res = qc.z(0).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([1.0, 0.0]))
         ans = equal_vectors(actual, expect)
@@ -156,7 +155,7 @@ class TestQComp_1_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=1, backend=bk)
-        res = qc.h(0).z(0).run(reset_qubits=False)
+        res = qc.h(0).z(0).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([1.0/SQRT_2, -1.0/SQRT_2]))
         ans = equal_vectors(actual, expect)
@@ -167,7 +166,7 @@ class TestQComp_1_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=1, backend=bk)
-        res = qc.xr(0).run(reset_qubits=False)
+        res = qc.xr(0).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([0.5+0.5j, 0.5-0.5j]))
         ans = equal_vectors(actual, expect)
@@ -178,7 +177,7 @@ class TestQComp_1_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=1, backend=bk)
-        res = qc.h(0).xr(0).run(reset_qubits=False)
+        res = qc.h(0).xr(0).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([1.0/SQRT_2, 1.0/SQRT_2]))
         ans = equal_vectors(actual, expect)
@@ -189,7 +188,7 @@ class TestQComp_1_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=1, backend=bk)
-        res = qc.xr_dg(0).run(reset_qubits=False)
+        res = qc.xr_dg(0).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([0.5-0.5j, 0.5+0.5j]))
         ans = equal_vectors(actual, expect)
@@ -200,7 +199,7 @@ class TestQComp_1_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=1, backend=bk)
-        res = qc.h(0).xr_dg(0).run(reset_qubits=False)
+        res = qc.h(0).xr_dg(0).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([1.0/SQRT_2, 1.0/SQRT_2]))
         ans = equal_vectors(actual, expect)
@@ -211,7 +210,7 @@ class TestQComp_1_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=1, backend=bk)
-        res = qc.h(0).run(reset_qubits=False)
+        res = qc.h(0).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([1.0/SQRT_2, 1.0/SQRT_2]))
         ans = equal_vectors(actual, expect)
@@ -222,7 +221,7 @@ class TestQComp_1_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=1, backend=bk)
-        res = qc.h(0).h(0).run(reset_qubits=False)
+        res = qc.h(0).h(0).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([1.0, 0.0]))
         ans = equal_vectors(actual, expect)
@@ -233,7 +232,7 @@ class TestQComp_1_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=1, backend=bk)
-        res = qc.s(0).run(reset_qubits=False)
+        res = qc.s(0).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([1.0, 0.0]))
         ans = equal_vectors(actual, expect)
@@ -244,7 +243,7 @@ class TestQComp_1_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=1, backend=bk)
-        res = qc.h(0).s(0).run(reset_qubits=False)
+        res = qc.h(0).s(0).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([1.0/SQRT_2, 1.0j/SQRT_2]))
         ans = equal_vectors(actual, expect)
@@ -255,7 +254,7 @@ class TestQComp_1_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=1, backend=bk)
-        res = qc.s_dg(0).run(reset_qubits=False)
+        res = qc.s_dg(0).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([1.0, 0.0]))
         ans = equal_vectors(actual, expect)
@@ -266,7 +265,7 @@ class TestQComp_1_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=1, backend=bk)
-        res = qc.h(0).s_dg(0).run(reset_qubits=False)
+        res = qc.h(0).s_dg(0).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([1.0/SQRT_2, -1.0j/SQRT_2]))
         ans = equal_vectors(actual, expect)
@@ -277,7 +276,7 @@ class TestQComp_1_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=1, backend=bk)
-        res = qc.t(0).run(reset_qubits=False)
+        res = qc.t(0).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([1.0, 0.0]))
         ans = equal_vectors(actual, expect)
@@ -288,7 +287,7 @@ class TestQComp_1_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=1, backend=bk)
-        res = qc.h(0).t(0).run(reset_qubits=False)
+        res = qc.h(0).t(0).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([1.0/SQRT_2, 0.5+0.5j]))
         ans = equal_vectors(actual, expect)
@@ -299,7 +298,7 @@ class TestQComp_1_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=1, backend=bk)
-        res = qc.t_dg(0).run(reset_qubits=False)
+        res = qc.t_dg(0).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([1.0, 0.0]))
         ans = equal_vectors(actual, expect)
@@ -310,7 +309,7 @@ class TestQComp_1_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=1, backend=bk)
-        res = qc.h(0).t_dg(0).run(reset_qubits=False)
+        res = qc.h(0).t_dg(0).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([1.0/SQRT_2, 0.5-0.5j]))
         ans = equal_vectors(actual, expect)
@@ -321,7 +320,7 @@ class TestQComp_1_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=1, backend=bk)
-        res = qc.rx(0, phase=0.25).run(reset_qubits=False)
+        res = qc.rx(0, phase=0.25).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([COS_PI_8, -SIN_PI_8*1.0j]))
         ans = equal_vectors(actual, expect)
@@ -332,7 +331,7 @@ class TestQComp_1_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=1, backend=bk)
-        res = qc.h(0).rx(0, phase=0.25).run(reset_qubits=False)
+        res = qc.h(0).rx(0, phase=0.25).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([0.65328148-0.27059805j, 0.65328148-0.27059805j]))
         ans = equal_vectors(actual, expect)
@@ -343,7 +342,7 @@ class TestQComp_1_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=1, backend=bk)
-        res = qc.ry(0, phase=0.25).run(reset_qubits=False)
+        res = qc.ry(0, phase=0.25).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([COS_PI_8, SIN_PI_8]))
         ans = equal_vectors(actual, expect)
@@ -354,7 +353,7 @@ class TestQComp_1_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=1, backend=bk)
-        res = qc.h(0).ry(0, phase=0.25).run(reset_qubits=False)
+        res = qc.h(0).ry(0, phase=0.25).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([0.38268343+0.j, 0.92387953+0.j]))
         ans = equal_vectors(actual, expect)
@@ -365,7 +364,7 @@ class TestQComp_1_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=1, backend=bk)
-        res = qc.rz(0, phase=0.25).run(reset_qubits=False)
+        res = qc.rz(0, phase=0.25).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([1.0, 0.0]))
         ans = equal_vectors(actual, expect)
@@ -376,7 +375,7 @@ class TestQComp_1_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=1, backend=bk)
-        res = qc.h(0).rz(0, phase=0.25).run(reset_qubits=False)
+        res = qc.h(0).rz(0, phase=0.25).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([0.65328148-0.27059805j, 0.65328148+0.27059805j]))
         ans = equal_vectors(actual, expect)
@@ -387,7 +386,7 @@ class TestQComp_1_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=1, backend=bk)
-        res = qc.p(0, phase=0.25).run(reset_qubits=False)
+        res = qc.p(0, phase=0.25).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([1.0, 0.0]))
         ans = equal_vectors(actual, expect)
@@ -398,7 +397,7 @@ class TestQComp_1_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=1, backend=bk)
-        res = qc.h(0).p(0, phase=0.25).run(reset_qubits=False)
+        res = qc.h(0).p(0, phase=0.25).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([0.70710678, 0.5+0.5j]))
         ans = equal_vectors(actual, expect)
@@ -409,7 +408,7 @@ class TestQComp_1_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=1, backend=bk)
-        res = qc.u1(0, alpha=0.1).run(reset_qubits=False)
+        res = qc.u1(0, alpha=0.1).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([1.0, 0.0]))
         ans = equal_vectors(actual, expect)
@@ -420,7 +419,7 @@ class TestQComp_1_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=1, backend=bk)
-        res = qc.h(0).u1(0, alpha=0.1).run(reset_qubits=False)
+        res = qc.h(0).u1(0, alpha=0.1).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([0.70710678+0.j, 0.67249851+0.21850801j]))
         ans = equal_vectors(actual, expect)
@@ -431,7 +430,7 @@ class TestQComp_1_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=1, backend=bk)
-        res = qc.u2(0, alpha=0.1, beta=0.2).run(reset_qubits=False)
+        res = qc.u2(0, alpha=0.1, beta=0.2).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([0.70710678+0.j, 0.5720614 +0.41562694j]))
         ans = equal_vectors(actual, expect)
@@ -442,7 +441,7 @@ class TestQComp_1_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=1, backend=bk)
-        res = qc.h(0).u2(0, alpha=0.1, beta=0.2).run(reset_qubits=False)
+        res = qc.h(0).u2(0, alpha=0.1, beta=0.2).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([0.02447174-0.1545085j,0.69840112+0.69840112j]))
         ans = equal_vectors(actual, expect)
@@ -453,7 +452,7 @@ class TestQComp_1_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=1, backend=bk)
-        res = qc.u3(0, alpha=0.1, beta=0.2, gamma=0.3).run(reset_qubits=False)
+        res = qc.u3(0, alpha=0.1, beta=0.2, gamma=0.3).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([0.89100652+0.j, 0.36728603+0.26684892j]))
         ans = equal_vectors(actual, expect)
@@ -464,7 +463,7 @@ class TestQComp_1_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=1, backend=bk)
-        res = qc.h(0).u3(0, alpha=0.1, beta=0.2, gamma=0.3).run(reset_qubits=False)
+        res = qc.h(0).u3(0, alpha=0.1, beta=0.2, gamma=0.3).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([0.32472882-0.09920056j, 0.63003676+0.69840112j]))
         ans = equal_vectors(actual, expect)
@@ -474,7 +473,7 @@ class TestQComp_1_qubit_qulacs_simulator(unittest.TestCase):
 # 2-qubit gate
 #
 
-class TestQComp_2_qubit_qulacs_simulator(unittest.TestCase):
+class TestQComp_2_qubit_qulacs_cpu_simulator(unittest.TestCase):
     """ test 'QComp' : 2-qubit gate
     """
 
@@ -483,7 +482,7 @@ class TestQComp_2_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=2, backend=bk)
-        res = qc.h(0).h(1).cx(0,1).run(reset_qubits=False)
+        res = qc.h(0).h(1).cx(0,1).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([(0.5+0j), (0.5+0j), (0.5+0j), (0.5+0j)]))
         ans = equal_vectors(actual, expect)
@@ -494,7 +493,7 @@ class TestQComp_2_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=2, backend=bk)
-        res = qc.h(0).h(1).cy(0,1).run(reset_qubits=False)
+        res = qc.h(0).h(1).cy(0,1).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([(0.5+0j), (0.5+0j), -0.5j, 0.5j]))
         ans = equal_vectors(actual, expect)
@@ -505,7 +504,7 @@ class TestQComp_2_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=2, backend=bk)
-        res = qc.h(0).h(1).cz(0,1).run(reset_qubits=False)
+        res = qc.h(0).h(1).cz(0,1).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([(0.5+0j), (0.5+0j), (0.5+0j), (-0.5+0j)]))
         ans = equal_vectors(actual, expect)
@@ -516,7 +515,7 @@ class TestQComp_2_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=2, backend=bk)
-        res = qc.h(0).h(1).cxr(0,1).run(reset_qubits=False)
+        res = qc.h(0).h(1).cxr(0,1).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([(0.5+0j), (0.5+0j), (0.5+0j), (0.5+0j)]))
         ans = equal_vectors(actual, expect)
@@ -527,7 +526,7 @@ class TestQComp_2_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=2, backend=bk)
-        res = qc.h(0).h(1).cxr_dg(0,1).run(reset_qubits=False)
+        res = qc.h(0).h(1).cxr_dg(0,1).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([(0.5+0j), (0.5+0j), (0.5+0j), (0.5+0j)]))
         ans = equal_vectors(actual, expect)
@@ -538,7 +537,7 @@ class TestQComp_2_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=2, backend=bk)
-        res = qc.h(0).h(1).ch(0,1).run(reset_qubits=False)
+        res = qc.h(0).h(1).ch(0,1).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([(0.5+0j), (0.5+0j), (0.7071067811865475+0j), 0j]))
         ans = equal_vectors(actual, expect)
@@ -549,7 +548,7 @@ class TestQComp_2_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=2, backend=bk)
-        res = qc.h(0).h(1).cs(0,1).run(reset_qubits=False)
+        res = qc.h(0).h(1).cs(0,1).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([(0.5+0j), (0.5+0j), (0.5+0j), 0.5j]))
         ans = equal_vectors(actual, expect)
@@ -560,7 +559,7 @@ class TestQComp_2_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=2, backend=bk)
-        res = qc.h(0).h(1).cs_dg(0,1).run(reset_qubits=False)
+        res = qc.h(0).h(1).cs_dg(0,1).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([(0.5+0j), (0.5+0j), (0.5+0j), -0.5j]))
         ans = equal_vectors(actual, expect)
@@ -571,7 +570,7 @@ class TestQComp_2_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=2, backend=bk)
-        res = qc.h(0).h(1).ct(0,1).run(reset_qubits=False)
+        res = qc.h(0).h(1).ct(0,1).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([(0.5+0j), (0.5+0j), (0.5+0j),
                            (0.35355339059327373+0.35355339059327373j)]))
@@ -583,7 +582,7 @@ class TestQComp_2_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=2, backend=bk)
-        res = qc.h(0).h(1).ct_dg(0,1).run(reset_qubits=False)
+        res = qc.h(0).h(1).ct_dg(0,1).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([(0.5+0j), (0.5+0j), (0.5+0j),
                            (0.35355339059327373-0.35355339059327373j)]))
@@ -595,7 +594,7 @@ class TestQComp_2_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=2, backend=bk)
-        res = qc.h(0).h(1).sw(0,1).run(reset_qubits=False)
+        res = qc.h(0).h(1).sw(0,1).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([(0.5+0j), (0.5+0j), (0.5+0j), (0.5+0j)]))
         ans = equal_vectors(actual, expect)
@@ -606,7 +605,7 @@ class TestQComp_2_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=2, backend=bk)
-        res = qc.x(0).sw(0,1).run(reset_qubits=False)
+        res = qc.x(0).sw(0,1).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([0j, (1+0j), 0j, 0j]))
         ans = equal_vectors(actual, expect)
@@ -617,7 +616,7 @@ class TestQComp_2_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=2, backend=bk)
-        res = qc.h(0).h(1).cp(0,1, phase=0.25).run(reset_qubits=False)
+        res = qc.h(0).h(1).cp(0,1, phase=0.25).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([(0.5+0j), (0.5+0j), (0.5+0j),
                                              (0.3535533905932738+0.35355339059327373j)]))
@@ -629,7 +628,7 @@ class TestQComp_2_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=2, backend=bk)
-        res = qc.h(0).h(1).crx(0,1, phase=0.25).run(reset_qubits=False)
+        res = qc.h(0).h(1).crx(0,1, phase=0.25).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([(0.5+0j), (0.5+0j), (0.4619397662556434-0.1913417161825449j),
                                              (0.4619397662556434-0.1913417161825449j)]))
@@ -641,7 +640,7 @@ class TestQComp_2_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=2, backend=bk)
-        res = qc.h(0).h(1).cry(0,1, phase=0.25).run(reset_qubits=False)
+        res = qc.h(0).h(1).cry(0,1, phase=0.25).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([(0.5+0j), (0.5+0j), (0.2705980500730985+0j),
                                              (0.6532814824381882+0j)]))
@@ -653,7 +652,7 @@ class TestQComp_2_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=2, backend=bk)
-        res = qc.h(0).h(1).crz(0,1, phase=0.25).run(reset_qubits=False)
+        res = qc.h(0).h(1).crz(0,1, phase=0.25).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([(0.5+0j), (0.5+0j),(0.4619397662556434-0.1913417161825449j),
                            (0.4619397662556434+0.1913417161825449j)]))
@@ -665,7 +664,7 @@ class TestQComp_2_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=2, backend=bk)
-        res = qc.h(0).h(1).cu1(0,1, alpha=0.1).run(reset_qubits=False)
+        res = qc.h(0).h(1).cu1(0,1, alpha=0.1).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([(0.5+0j), (0.5+0j), (0.5+0j),
                            (0.47552825814757677+0.1545084971874737j)]))
@@ -677,7 +676,7 @@ class TestQComp_2_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=2, backend=bk)
-        res = qc.h(0).h(1).cu2(0,1, alpha=0.1, beta=0.2).run(reset_qubits=False)
+        res = qc.h(0).h(1).cu2(0,1, alpha=0.1, beta=0.2).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([(0.5+0j), (0.5+0j), (0.0173041346112951-0.10925400611220525j),
                                              (0.49384417029756883+0.49384417029756883j)]))
@@ -689,7 +688,7 @@ class TestQComp_2_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=2, backend=bk)
-        res = qc.h(0).h(1).cu3(0,1, alpha=0.1, beta=0.2, gamma=0.3).run(reset_qubits=False)
+        res = qc.h(0).h(1).cu3(0,1, alpha=0.1, beta=0.2, gamma=0.3).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([(0.5+0j), (0.5+0j), (0.22961795053748937-0.07014538985214754j),
                                              (0.44550326209418395+0.4938441702975689j)]))
@@ -709,7 +708,7 @@ class TestQComp_3_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=3, backend=bk)
-        res = qc.x(0).x(1).ccx(0,1,2).run(reset_qubits=False)
+        res = qc.x(0).x(1).ccx(0,1,2).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([0j, 0j, 0j, 0j, 0j, 0j, 0j, (1+0j)]))
         ans = equal_vectors(actual, expect)
@@ -720,7 +719,7 @@ class TestQComp_3_qubit_qulacs_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=3, backend=bk)
-        res = qc.x(0).x(1).csw(0,1,2).run(reset_qubits=False)
+        res = qc.x(0).x(1).csw(0,1,2).run(clear_qubits=False)
         actual = qc.qstate.get_vector()
         expect = reverse_bit_order(np.array([0j, 0j, 0j, 0j, 0j, (1+0j), 0j, 0j]))
         ans = equal_vectors(actual, expect)
@@ -739,11 +738,11 @@ class TestQComp_operate_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc_expect = QComp(qubit_num=1, backend=bk).x(0)
-        res = qc_expect.run(reset_qubits=False)
+        res = qc_expect.run(clear_qubits=False)
         expect = qc_expect.qstate.get_vector()
         pp = PauliProduct(pauli_str="X")
         qc_actual = QComp(qubit_num=1, backend=bk).operate(pp=pp)
-        res = qc_actual.run(reset_qubits=False)
+        res = qc_actual.run(clear_qubits=False)
         actual = qc_actual.qstate.get_vector()
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
@@ -753,11 +752,11 @@ class TestQComp_operate_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc_expect = QComp(qubit_num=1, backend=bk).h(0).x(0)
-        res = qc_expect.run(reset_qubits=False)
+        res = qc_expect.run(clear_qubits=False)
         expect = qc_expect.qstate.get_vector()
         pp = PauliProduct(pauli_str="X")
         qc_actual = QComp(qubit_num=1, backend=bk).h(0).operate(pp=pp)
-        res = qc_actual.run(reset_qubits=False)
+        res = qc_actual.run(clear_qubits=False)
         actual = qc_actual.qstate.get_vector()
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
@@ -767,11 +766,11 @@ class TestQComp_operate_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc_expect = QComp(qubit_num=1, backend=bk).h(0).y(0)
-        res = qc_expect.run(reset_qubits=False)
+        res = qc_expect.run(clear_qubits=False)
         expect = qc_expect.qstate.get_vector()
         pp = PauliProduct(pauli_str="Y")
         qc_actual = QComp(qubit_num=1, backend=bk).h(0).operate(pp=pp)
-        res = qc_actual.run(reset_qubits=False)
+        res = qc_actual.run(clear_qubits=False)
         actual = qc_actual.qstate.get_vector()
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
@@ -781,11 +780,11 @@ class TestQComp_operate_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc_expect = QComp(qubit_num=1, backend=bk).h(0).z(0)
-        res = qc_expect.run(reset_qubits=False)
+        res = qc_expect.run(clear_qubits=False)
         expect = qc_expect.qstate.get_vector()
         pp = PauliProduct(pauli_str="Z")
         qc_actual = QComp(qubit_num=1, backend=bk).h(0).operate(pp=pp)
-        res = qc_actual.run(reset_qubits=False)
+        res = qc_actual.run(clear_qubits=False)
         actual = qc_actual.qstate.get_vector()
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
@@ -795,11 +794,11 @@ class TestQComp_operate_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc_expect = QComp(qubit_num=3, backend=bk).x(2).y(0).z(1)
-        res = qc_expect.run(reset_qubits=False)
+        res = qc_expect.run(clear_qubits=False)
         expect = qc_expect.qstate.get_vector()
         pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
         qc_actual = QComp(qubit_num=3, backend=bk).operate(pp=pp)
-        res = qc_actual.run(reset_qubits=False)
+        res = qc_actual.run(clear_qubits=False)
         actual = qc_actual.qstate.get_vector()
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
@@ -809,11 +808,11 @@ class TestQComp_operate_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc_expect = QComp(qubit_num=4, backend=bk).cx(3,2).cy(3,0).cz(3,1)
-        res = qc_expect.run(reset_qubits=False)
+        res = qc_expect.run(clear_qubits=False)
         expect = qc_expect.qstate.get_vector()
         pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
         qc_actual = QComp(qubit_num=4, backend=bk).operate(pp=pp, ctrl=3)
-        res = qc_actual.run(reset_qubits=False)
+        res = qc_actual.run(clear_qubits=False)
         actual = qc_actual.qstate.get_vector()
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
@@ -822,46 +821,154 @@ class TestQComp_operate_qulacs_cpu_simulator(unittest.TestCase):
 # measurement
 #
 
-class TestQComp_measure_qulacs_simulator(unittest.TestCase):
+class TestQComp_measure_qulacs_cpu_simulator(unittest.TestCase):
     """ test 'QComp' : various kind of measurements
     """
 
-    def test_measure_mesurement_only(self):
-        """test 'm' (measurement only)
+    def test_measure_mesurement_only_1(self):
+        """test 'measure' (measurement only (1))
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
-        qc = QComp(qubit_num=2, backend=bk)
-        res = qc.measure([0,1]).run(shots=10)
-        self.assertEqual(res['measured_qid'], [0,1])
-        self.assertEqual(res['frequency']['00'], 10)
-
-    def test_measure_simple(self):
-        """test 'm' (simple case)
-        """
-        bk = Backend(name='qulacs', device='cpu_simulator')
-        qc = QComp(qubit_num=2, backend=bk)
-        res = qc.h(0).cx(0,1).measure([0,1]).run(shots=10)
-        self.assertEqual(res['measured_qid'], [0,1])
-        self.assertEqual(res['frequency']['00']+res['frequency']['11'], 10)
-
-    def test_measure_use_cmem(self):
-        """test 'm' (use classical memory)
+        qc = QComp(qubit_num=2, cmem_num=2, backend=bk)
+        res = qc.measure(qid=[0,1], cid=[0,1]).run(shots=10)
+        freq = res.frequency
+        cid = res.cid
+        self.assertEqual(freq['00'], 10)
+        self.assertEqual(cid, [0,1])
+    
+    def test_measure_mesurement_only_2(self):
+        """test 'measure' (measurement only (2))
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=2, cmem_num=3, backend=bk)
-        res = qc.h(0).cx(0,1).measure([0,1],[0,1]).run(shots=10, reset_cmem=False)
-        self.assertEqual(res['measured_qid'], [0,1])
-        self.assertEqual(res['frequency']['00']+res['frequency']['11'], 10)
-        self.assertEqual(qc.cmem==[0,0,0] or qc.cmem==[1,1,0], True)
-
-    def test_measure_control_qubit(self):
-        """test 'm' (control qubit using classical memory)
+        res = qc.measure(qid=[0,1], cid=[1,2]).run(shots=10, cid=[1,2])
+        freq = res.frequency
+        cid = res.cid
+        self.assertEqual(freq['00'], 10)
+        self.assertEqual(cid, [1,2])
+    
+    def test_measure_mesurement_only_3(self):
+        """test 'measure' (measurement only (3))
+        """
+        bk = Backend(name='qulacs', device='cpu_simulator')
+        qc = QComp(qubit_num=3, cmem_num=2, backend=bk)
+        res = qc.measure(qid=[0,1], cid=[0,1]).run(shots=10)
+        freq = res.frequency
+        cid = res.cid
+        self.assertEqual(freq['00'], 10)
+        self.assertEqual(cid, [0,1])
+    
+    def test_measure_mesurement_only_4(self):
+        """test 'measure' (measurement only (4))
+        """
+        bk = Backend(name='qulacs', device='cpu_simulator')
+        qc = QComp(qubit_num=3, backend=bk)
+        res = qc.measure(qid=[0,1]).run(shots=10)
+        self.assertEqual(res, None)
+    
+    def test_measure_mesurement_unitary(self):
+        """test 'measure' (measurement-unitary)
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
         qc = QComp(qubit_num=2, cmem_num=3, backend=bk)
-        res = qc.h(0).cx(0,1).measure([0],[0]).x(0, ctrl=0).x(1, ctrl=0).measure([0,1]).run(shots=10)
-        self.assertEqual(res['measured_qid'], [0,1])
-        self.assertEqual(res['frequency']['00'], 10)
+        res = qc.measure(qid=[0,1], cid=[1,2]).h(0).cx(0,1).run(shots=10, cid=[1,2], clear_qubits=False)
+        freq = res.frequency
+        cid = res.cid
+        expect = reverse_bit_order(np.array([(0.7071067811865476+0j), 0j, 0j, (0.7071067811865476+0j)]))
+        actual = qc.qstate.get_vector()
+        ans = equal_vectors(actual, expect)
+        self.assertEqual(freq['00'], 10)
+        self.assertEqual(ans, True)
+        self.assertEqual(cid, [1,2])
+    
+    def test_measure_unitary_measurement_with_no_cmem(self):
+        """test 'measure' (unitary-meausrement with no cmem)
+        """
+        bk = Backend(name='qulacs', device='cpu_simulator')
+        qc = QComp(qubit_num=2, backend=bk)
+        res = qc.h(0).cx(0,1).measure(qid=[0,1]).run(shots=10, clear_qubits=False)
+        expect_1 = reverse_bit_order(np.array([1+0j, 0j, 0j, 0j]))
+        expect_2 = reverse_bit_order(np.array([0j, 0j, 0j, 1+0j]))
+        actual = qc.qstate.get_vector()
+        ans_1 = equal_vectors(actual, expect_1)
+        ans_2 = equal_vectors(actual, expect_2)
+        self.assertEqual(ans_1 or ans_2, True)
+    
+    def test_measure_unitary_measurement_with_cmem(self):
+        """test 'measure' (unitary-measurement with cmem)
+        """
+        bk = Backend(name='qulacs', device='cpu_simulator')
+        qc = QComp(qubit_num=2, cmem_num=3, backend=bk)
+        res = qc.h(0).cx(0,1).measure(qid=[0,1], cid=[0,1]).run(shots=10, cid=[0,1], clear_cmem=False)
+        freq = res.frequency
+        cid = res.cid
+        ans = (freq['00']+freq['11'] == 10) and (freq['00'] != 0) and (freq['11'] != 0)
+        self.assertEqual(ans, True)
+        self.assertEqual(cid, [0,1])
+    
+    def test_measure_unitary_measurement_with_cmem_norecord(self):
+        """test 'measure' (unitary-measurement with cmem norecord)
+        """
+        bk = Backend(name='qulacs', device='cpu_simulator')
+        qc = QComp(qubit_num=2, cmem_num=3, backend=bk)
+        res = qc.h(0).cx(0,1).measure(qid=[0,1]).run(shots=10, cid=[0,1], clear_cmem=False)
+        freq = res.frequency
+        cid = res.cid
+        self.assertEqual(freq['00'], 10)
+        self.assertEqual(cid, [0,1])
+    
+    def test_measure_mesurement_unitary_measurement(self):
+        """test 'measure' (meaurement-unitary-measrement)
+        """
+        bk = Backend(name='qulacs', device='cpu_simulator')
+        qc = QComp(qubit_num=2, cmem_num=3, backend=bk)
+        res = qc.measure(qid=[0,1], cid=[1,2]).x(0).measure(qid=[0,1], cid=[2,0]).run(shots=10, cid=[0,1,2], clear_qubits=False)
+        freq = res.frequency
+        cid = res.cid
+        self.assertEqual(freq['001'], 10)
+        self.assertEqual(cid, [0,1,2])
+    
+    def test_measure_unitary_measuremen_cunitary_measurement(self):
+        """test 'measure' (unitary-measurement-cunitary-measurement)
+        """
+        bk = Backend(name='qulacs', device='cpu_simulator')
+        qc = QComp(qubit_num=2, cmem_num=3, backend=bk)
+        res = qc.h(0).cx(0,1).measure(qid=[0], cid=[0]).x(0, ctrl=0).x(1, ctrl=0).measure(qid=[0,1], cid=[0,1]).run(shots=10)
+        freq = res.frequency
+        cid = res.cid
+        self.assertEqual(freq['000'], 10)
+        self.assertEqual(cid, [0,1,2])
+
+class TestQComp_reset_qulacs_cpu_simulator(unittest.TestCase):
+    """ test 'QComp' : various kind of resets
+    """
+
+    def test_reset_simple_all(self):
+        """test 'reset' (simple_all)
+        """
+        bk = Backend(name='qulacs', device='cpu_simulator')
+        qc = QComp(qubit_num=3, cmem_num=3, backend=bk)
+        res = qc.x(0).x(1).reset(qid=[0,1,2]).measure(qid=[0,1,2], cid=[0,1,2]).run(shots=10)
+        freq = res.frequency
+        self.assertEqual(freq['000'], 10)
+
+    def test_reset_simple_partial(self):
+        """test 'reset' (simple_partial)
+        """
+        bk = Backend(name='qulacs', device='cpu_simulator')
+        qc = QComp(qubit_num=3, cmem_num=2, backend=bk)
+        res = qc.x(0).x(1).reset(qid=[1]).measure(qid=[0,1], cid=[0,1]).run(shots=10)
+        freq = res.frequency
+        self.assertEqual(freq['10'], 10)
+
+    def test_reset_unitary_measure_reset(self):
+        """test 'reset' (unitary-measure-reset)
+        """
+        bk = Backend(name='qulacs', device='cpu_simulator')
+        qc = QComp(qubit_num=3, cmem_num=3, backend=bk)
+        res = qc.x(0).x(1).measure(qid=[0,1,2]).reset(qid=[1]).measure(qid=[0,1], cid=[0,1]).run(shots=10, cid=[0,1])
+        freq = res.frequency
+        self.assertEqual(freq['10'], 10)
 
 #
 # inheritance
@@ -875,10 +982,11 @@ class TestQComp_inheritance_qstate_simulator(unittest.TestCase):
         """test 'inheritance'
         """
         bk = Backend(name='qulacs', device='cpu_simulator')
-        qc = MyQComp(backend=bk, qubit_num=2, cmem_num=3)
-        res = qc.bell(0,1).measure(qid=[0,1]).run(shots=10)
-        self.assertEqual(res['measured_qid'], [0,1])
-        self.assertEqual(res['frequency']['00']+res['frequency']['11'], 10)
-
+        qc = MyQComp(backend=bk, qubit_num=2, cmem_num=2)
+        res = qc.bell(0,1).measure(qid=[0,1], cid=[0,1]).run(shots=10)
+        freq = res.frequency
+        ans = (freq['00']+freq['11'] == 10) and (freq['00'] != 0) and (freq['11'] != 0)
+        self.assertEqual(ans, True)
+        
 if __name__ == '__main__':
     unittest.main()

@@ -57,32 +57,12 @@ class TestQComp_init(unittest.TestCase):
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
-# #
-# # reset
-# #
-# 
-# class TestQComp_reset(unittest.TestCase):
-#     """ test 'QState' : 'reset'
-#     """
-# 
-#     def test_reset_ibmq_qasm_simulator(self):
-#         """test 'reset' (ibmq_qasm_simulator)
-#         """
-#         bk = Backend(name='ibmq', device='qasm_simulator')
-#         qc = QComp(qubit_num=3, cmem_num=2, backend=bk)
-#         qc.run()
-#         qc.reset()
-#         actual = qc.qstate
-#         expect = np.array([1j, 0j, 0j, 0j, 0j, 0j, 0j, 0j])
-#         ans = equal_vectors(actual, expect)
-#         self.assertEqual(ans,True)
-
 #
 # 1-qubit gate
 #
 
-class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
-    """ test 'QComp' : 1-qubit gate (qlazy_qstate_simulator)
+class TestQComp_1_qubit_ibmq_qasm_simulator(unittest.TestCase):
+    """ test 'QComp' : 1-qubit gate (ibmq_qasm_simulator)
     """
 
     def test_x(self):
@@ -205,17 +185,6 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
         expect = np.array([1.0/SQRT_2, 1.0/SQRT_2])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
-
-    # def test_h_h(self):
-    #     """test 'h' gate (following 'h')
-    #     """
-    #     bk = Backend(name='ibmq', device='qasm_simulator')
-    #     qc = QComp(qubit_num=1, backend=bk)
-    #     res = qc.h(0).h(0).run()
-    #     actual = qc.qstate
-    #     expect = np.array([1.0, 0.0])
-    #     ans = equal_vectors(actual, expect)
-    #     self.assertEqual(ans,True)
 
     def test_s(self):
         """test 's' gate
@@ -464,7 +433,7 @@ class TestQComp_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
 # 2-qubit gate
 #
 
-class TestQComp_2_qubit_qlazy_qstate_simulator(unittest.TestCase):
+class TestQComp_2_qubit_ibmq_qasm_simulator(unittest.TestCase):
     """ test 'QComp' : 2-qubit gate
     """
 
@@ -690,7 +659,7 @@ class TestQComp_2_qubit_qlazy_qstate_simulator(unittest.TestCase):
 # 3-qubit gate
 #
 
-class TestQComp_3_qubit_qlazy_qstate_simulator(unittest.TestCase):
+class TestQComp_3_qubit_ibmq_qasm_simulator(unittest.TestCase):
     """ test 'QComp' : 3-qubit gate
     """
 
@@ -812,63 +781,172 @@ class TestQComp_operate_ibmq_qasm_simulator(unittest.TestCase):
 # measurement
 #
 
-class TestQComp_measure_qstate_simulator(unittest.TestCase):
+class TestQComp_measure_qasm_simulator(unittest.TestCase):
     """ test 'QComp' : various kind of measurements
     """
 
-    def test_measure_mesurement_only(self):
-        """test 'm' (measurement only)
+    def test_measure_mesurement_only_1(self):
+        """test 'measure' (measurement only (1))
         """
         bk = Backend(name='ibmq', device='qasm_simulator')
-        qc = QComp(qubit_num=2, backend=bk)
-        res = qc.measure([0,1]).run(shots=10)
-        self.assertEqual(res['measured_qid'], [0,1])
-        self.assertEqual(res['frequency']['00'], 10)
-
-    def test_measure_simple(self):
-        """test 'm' (simple case)
-        """
-        bk = Backend(name='ibmq', device='qasm_simulator')
-        qc = QComp(qubit_num=2, backend=bk)
-        res = qc.h(0).cx(0,1).measure([0,1]).run(shots=10)
-        self.assertEqual(res['measured_qid'], [0,1])
-        self.assertEqual(res['frequency']['00']+res['frequency']['11'], 10)
-
-    def test_measure_use_cmem(self):
-        """test 'm' (use classical memory)
+        qc = QComp(qubit_num=2, cmem_num=2, backend=bk)
+        res = qc.measure(qid=[0,1], cid=[0,1]).run(shots=10)
+        freq = res.frequency
+        cid = res.cid
+        self.assertEqual(freq['00'], 10)
+        self.assertEqual(cid, [0,1])
+    
+    def test_measure_mesurement_only_2(self):
+        """test 'measure' (measurement only (2))
         """
         bk = Backend(name='ibmq', device='qasm_simulator')
         qc = QComp(qubit_num=2, cmem_num=3, backend=bk)
-        res = qc.h(0).cx(0,1).measure([0,1],[0,1]).run(shots=10, reset_cmem=False)
-        self.assertEqual(res['measured_qid'], [0,1])
-        self.assertEqual(res['frequency']['00']+res['frequency']['11'], 10)
-        self.assertEqual(qc.cmem==[0,0,0] or qc.cmem==[1,1,0], True)
+        res = qc.measure(qid=[0,1], cid=[1,2]).run(shots=10, cid=[1,2])
+        freq = res.frequency
+        cid = res.cid
+        self.assertEqual(freq['00'], 10)
+        self.assertEqual(cid, [1,2])
+    
+    def test_measure_mesurement_only_3(self):
+        """test 'measure' (measurement only (3))
+        """
+        bk = Backend(name='ibmq', device='qasm_simulator')
+        qc = QComp(qubit_num=3, cmem_num=2, backend=bk)
+        res = qc.measure(qid=[0,1], cid=[0,1]).run(shots=10)
+        freq = res.frequency
+        cid = res.cid
+        self.assertEqual(freq['00'], 10)
+        self.assertEqual(cid, [0,1])
+    
+    def test_measure_mesurement_only_4(self):
+        """test 'measure' (measurement only (4))
+        """
+        bk = Backend(name='ibmq', device='qasm_simulator')
+        qc = QComp(qubit_num=3, backend=bk)
+        res = qc.measure(qid=[0,1]).run(shots=10)
+        self.assertEqual(res, None)
 
-    def test_measure_control_qubit(self):
-        """test 'm' (control qubit using classical memory)
+    def test_measure_mesurement_unitary(self):
+        """test 'measure' (measurement-unitary)
         """
         bk = Backend(name='ibmq', device='qasm_simulator')
         qc = QComp(qubit_num=2, cmem_num=3, backend=bk)
-        res = qc.h(0).cx(0,1).measure([0],[0]).x(0, ctrl=0).x(1, ctrl=0).measure([0,1]).run(shots=10)
-        self.assertEqual(res['measured_qid'], [0,1])
-        self.assertEqual(res['frequency']['00'], 10)
+        res = qc.measure(qid=[0,1], cid=[1,2]).h(0).cx(0,1).run(shots=10, cid=[1,2])
+        freq = res.frequency
+        cid = res.cid
+        expect = np.array([(0.7071067811865476+0j), 0j, 0j, (0.7071067811865476+0j)])
+        actual = qc.qstate
+        ans = equal_vectors(actual, expect)
+        self.assertEqual(freq['00'], 10)
+        self.assertEqual(ans, True)
+        self.assertEqual(cid, [1,2])
+    
+    def test_measure_unitary_measurement_with_no_cmem(self):
+        """test 'measure' (unitary-meausrement with no cmem)
+        """
+        bk = Backend(name='ibmq', device='qasm_simulator')
+        qc = QComp(qubit_num=2, backend=bk)
+        res = qc.h(0).cx(0,1).measure(qid=[0,1]).run(shots=10)
+        expect_1 = np.array([1+0j, 0j, 0j, 0j])
+        expect_2 = np.array([0j, 0j, 0j, 1+0j])
+        actual = qc.qstate
+        ans_1 = equal_vectors(actual, expect_1)
+        ans_2 = equal_vectors(actual, expect_2)
+        self.assertEqual(ans_1 or ans_2, True)
+    
+    def test_measure_unitary_measurement_with_cmem(self):
+        """test 'measure' (unitary-measurement with cmem)
+        """
+        bk = Backend(name='ibmq', device='qasm_simulator')
+        qc = QComp(qubit_num=2, cmem_num=3, backend=bk)
+        res = qc.h(0).cx(0,1).measure(qid=[0,1], cid=[0,1]).run(shots=10, cid=[0,1], clear_cmem=False)
+        freq = res.frequency
+        cid = res.cid
+        ans = (freq['00']+freq['11'] == 10) and (freq['00'] != 0) and (freq['11'] != 0)
+        self.assertEqual(ans, True)
+        self.assertEqual(cid, [0,1])
+    
+    def test_measure_unitary_measurement_with_cmem_norecord(self):
+        """test 'measure' (unitary-measurement with cmem norecord)
+        """
+        bk = Backend(name='ibmq', device='qasm_simulator')
+        qc = QComp(qubit_num=2, cmem_num=3, backend=bk)
+        res = qc.h(0).cx(0,1).measure(qid=[0,1]).run(shots=10, cid=[0,1], clear_cmem=False)
+        freq = res.frequency
+        cid = res.cid
+        self.assertEqual(freq['00'], 10)
+        self.assertEqual(cid, [0,1])
+
+    def test_measure_mesurement_unitary_measurement(self):
+        """test 'measure' (meaurement-unitary-measrement)
+        """
+        bk = Backend(name='ibmq', device='qasm_simulator')
+        qc = QComp(qubit_num=2, cmem_num=3, backend=bk)
+        res = qc.measure(qid=[0,1], cid=[1,2]).x(0).measure(qid=[0,1], cid=[2,0]).run(shots=10, cid=[0,1,2])
+        freq = res.frequency
+        cid = res.cid
+        self.assertEqual(freq['001'], 10)
+        self.assertEqual(cid, [0,1,2])
+    
+    def test_measure_unitary_measuremen_cunitary_measurement(self):
+        """test 'measure' (unitary-measurement-cunitary-measurement)
+        """
+        bk = Backend(name='ibmq', device='qasm_simulator')
+        qc = QComp(qubit_num=2, cmem_num=3, backend=bk)
+        res = qc.h(0).cx(0,1).measure(qid=[0], cid=[0]).x(0, ctrl=0).x(1, ctrl=0).measure(qid=[0,1], cid=[0,1]).run(shots=10)
+        freq = res.frequency
+        cid = res.cid
+        self.assertEqual(freq['000'], 10)
+        self.assertEqual(cid, [0,1,2])
+
+class TestQComp_reset_ibmq_qasm_simulator(unittest.TestCase):
+    """ test 'QComp' : various kind of resets
+    """
+
+    def test_reset_simple_all(self):
+        """test 'reset' (simple_all)
+        """
+        bk = Backend(name='ibmq', device='qasm_simulator')
+        qc = QComp(qubit_num=3, cmem_num=3, backend=bk)
+        res = qc.x(0).x(1).reset(qid=[0,1,2]).measure(qid=[0,1,2], cid=[0,1,2]).run(shots=10)
+        freq = res.frequency
+        self.assertEqual(freq['000'], 10)
+
+    def test_reset_simple_partial(self):
+        """test 'reset' (simple_partial)
+        """
+        bk = Backend(name='ibmq', device='qasm_simulator')
+        qc = QComp(qubit_num=3, cmem_num=2, backend=bk)
+        res = qc.x(0).x(1).reset(qid=[1]).measure(qid=[0,1], cid=[0,1]).run(shots=10)
+        freq = res.frequency
+        self.assertEqual(freq['10'], 10)
+
+    def test_reset_unitary_measure_reset(self):
+        """test 'reset' (unitary-measure-reset)
+        """
+        bk = Backend(name='ibmq', device='qasm_simulator')
+        qc = QComp(qubit_num=3, cmem_num=3, backend=bk)
+        res = qc.x(0).x(1).measure(qid=[0,1,2]).reset(qid=[1]).measure(qid=[0,1], cid=[0,1]).run(shots=10, cid=[0,1])
+        freq = res.frequency
+        self.assertEqual(freq['10'], 10)
 
 #
 # inheritance
 #
 
-class TestQComp_inheritance_qstate_simulator(unittest.TestCase):
-    """ test 'QComp' : inheritance (qlazy_qstate_simulator)
+class TestQComp_inheritance_ibmq_qasm_simulator(unittest.TestCase):
+    """ test 'QComp' : inheritance (ibmq_qasm_simulator)
     """
 
     def test_inheritance(self):
         """test 'inheritance'
         """
         bk = Backend(name='ibmq', device='qasm_simulator')
-        qc = MyQComp(backend=bk, qubit_num=2, cmem_num=3)
-        res = qc.bell(0,1).measure(qid=[0,1]).run(shots=10)
-        self.assertEqual(res['measured_qid'], [0,1])
-        self.assertEqual(res['frequency']['00']+res['frequency']['11'], 10)
-
+        qc = MyQComp(backend=bk, qubit_num=2, cmem_num=2)
+        res = qc.bell(0,1).measure(qid=[0,1], cid=[0,1]).run(shots=10)
+        freq = res.frequency
+        ans = (freq['00']+freq['11'] == 10) and (freq['00'] != 0) and (freq['11'] != 0)
+        self.assertEqual(ans, True)
+    
 if __name__ == '__main__':
     unittest.main()

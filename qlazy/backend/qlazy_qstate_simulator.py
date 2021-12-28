@@ -5,121 +5,60 @@ from qlazy.error import *
 from qlazy.config import *
 from qlazy.util import *
 from qlazy.QState import *
+from qlazy.Result import *
 from qlazy.lib.qstate_c import *
+
+import sys
 
 def init(qubit_num=0, backend=None):
 
     qstate = QState(qubit_num)
     return qstate
 
-def run(qubit_num=0, cmem_num=0, qstate=None, qcirc=[], cmem=[], shots=1, backend=None):
+def run(qubit_num=0, cmem_num=0, qstate=None, qcirc=[], cmem=[], shots=1, cid=[], backend=None):
 
     qcc = QCirc()
     for i, gate in enumerate(qcirc):
         kind = gate['kind']
-        qid = gate['qid']
-        cid = gate['cid']
+        qids = gate['qid']
+        cids = gate['cid']
         phase = gate['phase']
         phase1 = gate['phase1']
         phase2 = gate['phase2']
         ctrl = gate['ctrl']
         para = [phase, phase1, phase2]
         if is_measurement_gate(kind) == True:
-            for i, q in enumerate(qid):
-                qid = [q]
-                if cid is not None:
-                    c = cid[i]
+            for i, q in enumerate(qids):
+                qids = [q]
+                if cids is not None:
+                    c = cids[i]
                 else:
                     c = None
-                qcc.append_gate(kind, qid, para, c, ctrl)
+                qcc.append_gate(kind, qids, para, c, ctrl)
+        elif is_reset_gate(kind) == True:
+            for q in qids:
+                qids = [q]
+                c = None
+                qcc.append_gate(kind, qids, para, c, ctrl)
         else:
             c = None
-            qcc.append_gate(kind, qid, para, c, ctrl)
+            qcc.append_gate(kind, qids, para, c, ctrl)
 
-    mdata = qstate_operate_qcirc(qstate, cmem, qcc, shots)
+    frequency = qstate_operate_qcirc(qstate, cmem, qcc, shots, cid)
 
-    if mdata is not None:
-        result = {'measured_qid': mdata.qid, 'frequency': mdata.frequency}
+    if frequency is not None:
+        result = Result(cid=cid, frequency=frequency)
     else:
         result = None
         
     return result
     
-
-def run_old(qubit_num=0, cmem_num=0, qstate=None, qcirc=[], cmem=[], shots=1, backend=None):
-
-    # number of measurement (measurement_cnt)
-    # and its position of last measurement (end_of_measurements)
-    measurement_cnt = 0
-    end_of_measurements = -1
-    for j, c in enumerate(qcirc):
-        if c['kind'] == MEASURE:
-            measurement_cnt += 1
-            end_of_measurements = j
-
-    # qcirc have only one measurement at the end, or not
-    if measurement_cnt == 1 and end_of_measurements == len(qcirc) - 1:
-        only_one_measurement_end = True
-    else:
-        only_one_measurement_end = False
-
-    # run the quantum circuit
-    freq = Counter()
-    for cnt in range(shots):
-        for i, c in enumerate(qcirc):
-            
-            if c['kind'] == MEASURE:
-                md = qstate_measure(qstate, {}, qid=c['qid'], shots=1, angle=0.0, phase=0.0, tag=None)
-
-                if c['cid'] != None:
-                    for k,mval in enumerate(list(md.last)):
-                        cmem[c['cid'][k]] = int(mval)
-                        
-                if end_of_measurements == i:
-                    freq += md.frequency
-
-            else:
-                if c['ctrl'] == None or cmem[c['ctrl']] == 1:
-                    qstate_operate_qgate(qstate, kind=c['kind'], qid=c['qid'],
-                                         phase=c['phase'], phase1=c['phase1'], phase2=c['phase2'])
-
-            # qcirc have only one measurement
-            if only_one_measurement_end == True and i == len(qcirc) - 2:
-                md = qstate_measure(qstate, {}, qid=qcirc[-1]['qid'], shots=shots, angle=0.0, phase=0.0, tag=None)
-                freq = md.frequency
-                
-                if qcirc[-1]['cid'] != None:
-                    for k,mval in enumerate(list(md.last)):
-                        cmem[qcirc[-1]['cid'][k]] = int(mval)
-                break
-
-        if only_one_measurement_end == True and i == len(qcirc) - 2:
-            break
-            
-        # reset classical memory and qubits, if not end of the shots
-        if cnt < shots-1:
-            cmem = [0] * len(cmem)
-            qstate.reset()
-
-    # if end_of_measurements > 0:
-    if measurement_cnt > 0:
-        measured_qid = qcirc[end_of_measurements]['qid']
-        result = {'measured_qid': measured_qid, 'frequency': freq}
-    else:
-        result = None
-        
-    return result
-
-def reset(qstate=None, backend=None):
+def clear(qstate=None, backend=None):
 
     if qstate != None:
         qstate.reset()
 
-    # return True
-
 def free(qstate=None, backend=None):
 
     if qstate != None:
-        # qstate.free()
         del qstate
-

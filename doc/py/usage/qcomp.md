@@ -52,17 +52,19 @@ deviceにはそのバックエンドでサポートされているデバイス�
 
 ### 量子回路の設定と実行
 
+#### 測定
+
 量子コンピュータが用意できたら、次に量子回路を設定します。QStateクラス
 やDensopクラスと同じ記法でゲートを追加していきます。例えば、Bell状態を
 作成する回路を設定したい場合は、
 
-    qc = QComp(qubit_num=2, cmem_num=1)
+    qc = QComp(qubit_num=2, cmem_num=2)
     qc.h(0)
     qc.cx(0,1)
 
 のようにします。hはアダマールゲート、cxはCNOTゲートを表します。または、
 
-    qc = QComp(qubit_num=2, cmem_num=1)
+    qc = QComp(qubit_num=2, cmem_num=2)
     qc.h(0).cx(0,1)
 
 のようにゲートをつなげて書いてもOKです。これで量子コンピュータ内部に、
@@ -70,11 +72,17 @@ deviceにはそのバックエンドでサポートされているデバイス�
     q0 --H--*---
             |
     q1 -----X---
+    
+    c0 ---------	
+    c1 ---------	
 	
-という回路が設定されたことになります。QStateクラスやDensOpクラスや
-Stabilizerクラスと違い、この段階ではまだゲート演算は実行されていません。
-以下のようにrunメソッドを適用することではじめて実行されます(初期状態は
-常に|00...0>です。いまの例は2量子ビットなので|00>です)。
+という回路が設定されたことになります。ここで、q0,q1は量子レジスタ、
+c0,c1は古典レジスタを表しています。
+
+QStateクラスやDensOpクラスやStabilizerクラスと違い、この段階ではまだゲー
+ト演算は実行されていません。以下のようにrunメソッドを適用することでは
+じめて実行されます(初期状態は常に|00...0>です。いまの例は2量子ビットな
+ので|00>です)。
 
     qc.h(0).cx(0,1).run()
 
@@ -82,44 +90,79 @@ Stabilizerクラスと違い、この段階ではまだゲート演算は実行�
 ん。測定を表すゲートmeasureを付加して、以下のようにすれば、測定結果を
 取得することができます。
 
-    qc.h(0).cx(0,1).measure(qid=[0,1])
+    qc.h(0).cx(0,1).measure(qid=[0,1], cid=[0,1])
 	result = qc.run(shots=10)
+	
+回路図で書くと、以下のような操作に相当します。
 
-1行目のmeasureメソッドは計算基底で測定するためのゲートで、qidに測定す
-る量子ビット番号(量子レジスタ番号)を指定します。2行目のrunメソッドに指
-定されているshotsは実行回数(=測定回数)を表しています。これで測定結果が
-result変数に格納されることになります。resultをprintすると、
+    q0 --H--*---M
+            |   |
+    q1 -----X---|--M
+                |  |
+    c0 ---------*--|--	
+    c1 ------------*--
 
-    print(result)
-    >>> {'measured_qid': [0, 1], 'frequency': Counter({'00': 6, '11': 4})}
+ここで、1行目のmeasureメソッドは計算基底で測定するためのゲートで、qid
+に測定する量子ビット番号(量子レジスタ番号)を指定し、cidにその結果を格
+納する古典レジスタ番号を指定します。ここでqidの長さとcidの長さは一致し
+ている必要があります。cidをまったく指定しないということも許されますが、
+その場合測定して状態は変化しますが測定値をどこにも格納しないという操作
+を意味します。
 
-という具合に表示されます。runの返却値は、measured_qidとfrequencyという
-2つのキーからなる辞書データになっていることがわかります。一番最後に測定が
-ない回路をrunした場合、resultはNoneになります。
+測定を含んだ量子回路が設定できたらば、2行目に示すようにrunメソッドを呼
+び出して実行します。runのオプションとして指定されているshotsは実行回数
+(=測定回数)を表しています。これで測定結果がresult変数に格納されること
+になります。resultにはcidとfrequencyという２つのプロパティが定義されて
+いて、各々、
 
-古典レジスタに途中の測定結果を格納して、それで以降のゲート制御をしたい
-場合の例を以下に示します。
+    print(result.cid)
+	>>> [0,1]
+	print(result.frequency)
+	>>> Counter({'00': 6, '11': 4})
+	
+のように値を取り出すことができます。測定がない回路、あるいは測定しても
+古典レジスタに測定値を格納しない（measureでcidを指定しない）回路の場合、
+resultにはNoneが入ります。
 
-    qc = QComp(qubit_num=2, cmem_num=3)
-    qc.h(0).cx(0,1).measure(qid=[0],cid=[0]).x(0, ctrl=0).x(1, ctrl=0).measure(qid=[0,1])
+runのオプションとして頻度を取得したい古典レジスタ番号cidを指定すること
+もできます。例えば、上の回路で、
+
+	result = qc.run(shots=10, cid=[1])
+
+とすると、1番目の古典レジスタに入る値の頻度だけ取り出すことができて、
+
+    print(result.cid)
+	>>> [1]
+    print(result.frequency)
+    >>> Counter({'0': 6, '1': 4})
+
+という結果を得ることができます（いわゆる周辺化ですね）。cidを省略した
+場合、全古典レジスタにわたり頻度が計算されます。
+
+#### 測定結果に応じたゲート演算制御
+
+古典レジスタに格納されている測定結果に応じて、以降のゲート制御をしたい
+ことがあります。そのような一例を以下に示します。
+
+    qc = QComp(qubit_num=2, cmem_num=2)
+    qc.h(0).cx(0,1).measure(qid=[0],cid=[0]).x(0, ctrl=0).x(1, ctrl=0).measure(qid=[0,1], cid=[0,1])
 	result = qc.run(shots=10)
-	print(result)
+	print(result.frequency)
 
 2行目の量子回路を設定する部分で、まずh(0).cx(0,1)を追加した後に
-measure(qid=[0],cid=[0])を追加しています。measureメソッドのcidには測定
-値を格納する古典レジスタ番号リストを指定します。この例では、0番目の量
-子ビットの測定結果を0番目の古典レジスタに格納するということを表してい
-ます。次にx(0, ctrl=0)と続きます。xはQStateクラスやDensOpクラスと同様
-パウリXゲートを表しており、最初の引数は適用する量子ビット番号です。
-QCompクラスでは、ctrlという引数も指定することができます。これはこのゲー
-トを適用するか否かをctrlで指定した古典レジスタ番号に格納されている測定
-値によって決めるということを表すためのものです。つまり、いまの例の場合、
-前段のmeasureで0番目の量子ビットの測定結果を0番目の古典レジスタに格納
-していたので、その値が0であったか1であったかによってパウリXゲートが実
-行されるかどうかが決まります。次のx(1, ctrl=0)も同様の考え方で実行が制
-御されるパウリXゲートです。最後に再びmeasureです。今度は0番目と1番目の
-量子ビットが測定されます(cidが指定されていないので、古典レジスタに結果
-は格納されません)。
+measure(qid=[0],cid=[0])を追加しています。つまり、0番目の量子ビットの
+測定結果を0番目の古典レジスタに格納します。次にx(0, ctrl=0)と続きます。
+xはQStateクラスやDensOpクラスと同様パウリXゲートを表しており、最初の引
+数は適用する量子ビット番号です。QCompクラスでは、ctrlという引数も指定
+することができます。これはこのゲートを適用するか否かをctrlで指定した古
+典レジスタ番号に格納されている測定値によって決めるということを表すため
+のものです。いまの例の場合、前段のmeasureで0番目の量子ビットの測定結果
+を0番目の古典レジスタに格納していたので、その値が0であったか1であった
+かによってパウリXゲートが実行されるかどうかが決まります。1だった場合パ
+ウリXゲートが実行されます。次のx(1, ctrl=0)も同様の考え方で実行が制御
+されるパウリXゲートです。最後に再びmeasureです。今度は0番目と1番目の量
+子ビットが測定されます(cidが指定されていないので、古典レジスタに結果は
+格納されません)。
 
 3行目でrunによって、この回路が実行されます。shots=10と指定したので実行
 回数は10回です。そして、その測定値の頻度がカウントされて、測定量子ビッ
@@ -129,13 +172,31 @@ QCompクラスでは、ctrlという引数も指定することができます�
 
 というわけで、この例の結果はどうなるかわかりますでしょうか？答えは、
 
-    {'measured_qid': [0, 1], 'frequency': Counter({'00': 10})}
+    Counter({'00': 10})
 
 です。最初のh(0).cx(0,1)で|00>+|11>というBell状態になり(規格化定数は省
 略)、0番目の量子ビットを測定して結果が0だった場合は、以降何もしないの
 で最終状態は|00>となり、1だった場合は全ビットをビット反転するので最終
 状態は|11>のビット反転で|00>になります。これを最後に測定するので、100%
 の確率で|00>になります。
+
+#### リセット
+
+特定の量子ビットを強制的に|0>にすることができます。例えば、以下のよう
+にresetメソッドを使います。qidオプションには|0>にしたい量子ビット番号
+を指定します。何も指定しなかった場合、すべての量子ビットが|0>にリセッ
+トされます。
+
+    qc = QComp(qubit_num=2, cmem_num=2)
+    qc.h(0).cx(0,1).reset(qid=[0]).measure(qid=[0,1], cid=[0,1])
+	result = qc.run(shots=10)
+	print(result.frequency)
+
+この実行結果は、
+
+    Counter({'00': 6, '01': 4})
+
+のようになります。
 
 ### 量子コンピュータの解放
 
@@ -150,10 +211,10 @@ QCompクラスでは、ctrlという引数も指定することができます�
 ### 対応している量子ゲート
 
 以下に利用可能な量子ゲートを示します。指定できる引数はQStateクラスや
-DensOpクラスのものと同様で、さらに上で説明したctrlという引数がすべての
-ゲートで指定できます。
+DensOpクラスのものと同様で、さらに上で説明したctrlという引数がすべてユ
+ニタリゲートで指定できます。
 
-#### 1量子ビットゲート
+#### 1量子ビットゲート（ユニタリゲート）
 
 - x,y,z: Pauli X/Y/Z gate
 - h: Hadamard gate
@@ -164,7 +225,7 @@ DensOpクラスのものと同様で、さらに上で説明したctrlという�
 - rx,ry,rz: RX/RY/RZ (rotation around X/Y/Z-axis) gate
 - u1,u2,u3: U1/U2/U3 gate (by IBM)
 
-#### 2量子ビットゲート
+#### 2量子ビットゲート（ユニタリゲート）
 
 - cx,cy,cz: controlled X/Y/Z gate
 - cxr,cxr_dg: controlled XR and XR dagger gate
@@ -176,14 +237,18 @@ DensOpクラスのものと同様で、さらに上で説明したctrlという�
 - crx,cry,crz: controlled RX/RY/RZ gate
 - cu1,cu2,cu3: controlled U1/U2/U3 gate
 
-#### 3量子ビットゲート
+#### 3量子ビットゲート（ユニタリゲート）
 
 - ccx: toffoli gate (or CCX gate, controlled controlled X gate)
 - csw: fredkin gate (or controlled swap gate)
 
-#### 測定ゲート
+#### 測定ゲート（非ユニタリゲート）
 
 - measure: measurement gate (computational basis)
+
+#### リセットゲート（非ユニタリゲート）
+
+- reset: reset gate (computational basis)
 
 #### 注意：スタビライザーシミュレータの場合
 
@@ -221,12 +286,12 @@ DensOpクラスのものと同様で、さらに上で説明したctrlという�
 
 ## 少し高度な技
 
-### リセットしない実行
+### 量子回路をクリアしない実行
 
 上で説明した基本パターンを改めてまとめると、
 - (1) バックエンドの定義
 - (2) 量子コンピュータの初期化(量子レジスタ数、古典レジスタ数、バックエンドを設定)
-- (3) 量子回路の設定(ユニタリゲートと測定ゲートを次々に追加)
+- (3) 量子回路の設定(ユニタリゲートと非ユニタリゲートを次々に追加)
 - (4) 量子回路の実行と結果取得
 ということになります。
 
@@ -234,46 +299,45 @@ DensOpクラスのものと同様で、さらに上で説明したctrlという�
 
     from qlazy import QComp, Backend
 	bk = Backend(name='qlazy_qstate_simulator')
-	qc = QComp(qubit_num=2, backend=bk)
-    qc.h(0).cx(0,1).measure(qid=[0,1])
-	result = qc.run(shots=10)
-    print(result)
+	qc = QComp(qubit_num=1, cmem_num=1, backend=bk)
+    result = qc.x(0).measure(qid=[0], cid=[0]).run(shots=10)
+    print(result.frequency)
 
 という具合です。ここで、5行目のrunを実行したら、量子コンピュータ内部の
 「量子回路」と「量子状態」と「古典メモリ」はすべてリセットされる仕様に
 なっています。なので、再びrunしても何も起きません。しかし、同じ量子回
-路を保持したまま繰り返し何度も計算実行したい場合や、量子状態をリセット
-しないで別の量子回路を設定して実行したい場合や、古典メモリをそのままに
-して繰り返したい場合があると思います。runメソッドのreset_qcirc,
-reset_qubits, reset_cmemというオプションを使えば各々をリセットしない形
-の継続実行が実現できます。
+路を保持したまま繰り返し何度も計算実行したい場合やすでに設定済の量子回
+路にさらにゲートを追加して計算実行したい場合があるかもしれません。そう
+いった場合、runのオプションclear_qcircにFalseを指定することで量子回路
+をクリアしないようにできます。
 
-runした後に、量子回路をリセットしたくない場合、
+上の例で、
 
-    result = qc.run(shots=10, reset_qcirc=False)
+    result = qc.x(0).measure(qid=[0], cid=[0]).run(shots=10)
+    print(result.frequency)
+    result = qc.x(0).measure(qid=[0], cid=[0]).run(shots=10)
+    print(result.frequency)
 
-runした後に、量子状態をリセットしたくない場合、
+を繰り返しても、結果は、
 
-    result = qc.run(shots=10, reset_qubits=False)
+    Counter({'1': 10})
+    Counter({'1': 10})
 
-runした後に、古典レジスタをリセットしたくない場合、
+となり同じですが、以下のようにclear_qcircをFalseにすると、
 
-    result = qc.run(shots=10, reset_cmem=False)
+    result = qc.x(0).measure(qid=[0], cid=[0]).run(shots=10, clear_qcirc=False)
+    print(result.frequency)
+    result = qc.x(0).measure(qid=[0], cid=[0]).run(shots=10)
+    print(result.frequency)
 
-runした後に、すべてをリセットしたくない場合、
 
-    result = qc.run(shots=10, reset_qcirc=False, reset_qubits=False, reset_cmem=False)
+結果は、
 
-と指定します。言わずもがなですが、reset_qcirc, reset_qubits,
-reset_cmemのデフォルト値はTrueです。なので、
+    Counter({'1': 10})
+    Counter({'0': 10})
 
-    result = qc.run(shots=10)
-
-は、
-
-    result = qc.run(shots=10, reset_qcirc=True, reset_qubits=True, reset_cmem=True)
-	
-と同じことを意味しています。
+となります。2番めのrunではビット反転を2回やった結果に対して測定するの
+で元の初期状態に戻るというわけです。
 
 
 ### レジスタの設定
@@ -374,8 +438,8 @@ QCompクラスを継承することで、自分専用の量子ゲートを簡単
             return self
 
     bk = Backend(name='qlazy', device='qstate_simulator')
-    qc = MyQComp(backend=bk, qubit_num=2, cmem_num=3)
-    result = qc.bell(0,1).measure(qid=[0,1]).run(shots=10)
+    qc = MyQComp(backend=bk, qubit_num=2, cmem_num=2)
+    result = qc.bell(0,1).measure(qid=[0,1], cid=[0,1]).run(shots=10)
     ...
 
 これは非常に簡単な例なのであまりご利益を感じないかもしれませんが、大き
@@ -416,8 +480,8 @@ GPUを利用したシミュレータで計算させたい場合、
 
 あとは上述したように、
 
-	qc = QComp(qubit_num=2, backend=bk)
-    qc.h(0).cx(0,1).measure(qid=[0,1])
+	qc = QComp(qubit_num=2, cmem_num=2, backend=bk)
+    qc.h(0).cx(0,1).measure(qid=[0,1], cid=[0,1])
 	result = qc.run(shots=100)
 
 のようにすれば、qulacsを使った計算ができます。
@@ -467,14 +531,14 @@ Experienceの使い
 
 あとは上述したように、
 
-	qc = QComp(qubit_num=2, backend=bk)
-    qc.h(0).cx(0,1).measure(qid=[0,1])
+	qc = QComp(qubit_num=2, cmem_num=2, backend=bk)
+    qc.h(0).cx(0,1).measure(qid=[0,1], cid=[0,1])
 	result = qc.run(shots=100)
 
 のようにすれば、IBMQを使った計算ができます。
 
 本物の量子コンピュータを使った計算に関して一点注意事項があります。量子
-回路を設定してrunする際に、reset_qubits=Falseは指定できません。一度run
+回路を設定してrunする際に、clear_qubits=Falseは指定できません。一度run
 して結果が返ってきたら、IBMQ側の量子状態は有無を言わさず解放されるので
 (少なくとも現在のIBMQでは...)、qlazy側でそれを保持しておく手段がないからです。
 

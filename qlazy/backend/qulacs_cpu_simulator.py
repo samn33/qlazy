@@ -8,6 +8,7 @@ import cmath
 from qlazy.error import *
 from qlazy.config import *
 from qlazy.util import *
+from qlazy.Result import *
 
 from qulacs import QuantumState
 from qulacs import QuantumCircuit
@@ -72,76 +73,75 @@ def init(qubit_num=0, backend=None):
     qstate = QuantumState(qubit_num)
     return qstate
 
-def run(qubit_num=0, cmem_num=0, qstate=None, qcirc=[], cmem=[], shots=1, backend=None):
+def run(qubit_num=0, cmem_num=0, qstate=None, qcirc=[], cmem=[], shots=1, cid=[], backend=None):
 
-    # number of measurement (measurement_cnt)
-    # and its position of last measurement (end_of_measurements)
-    measurement_cnt = 0
-    end_of_measurements = -1
-    for j, c in enumerate(qcirc):
-        if c['kind'] == MEASURE:
-            measurement_cnt += 1
-            end_of_measurements = j
-    
-    # qcirc have only one measurement at the end, or not
-    if measurement_cnt == 1 and end_of_measurements == len(qcirc) - 1:
-        only_one_measurement_end = True
-    else:
-        only_one_measurement_end = False
-    
-    # run the quantum circuit
-    freq = Counter()
-    for cnt in range(shots):
-        for i, c in enumerate(qcirc):
-            
+    #
+    # before measurement gate
+    #
+
+    exist_measurement = False
+    for pos, c in enumerate(qcirc):
+
+        if (c['ctrl'] == None or (c['ctrl'] != None and cmem[c['ctrl']] == 1)):
+
             if c['kind'] == MEASURE:
-                md = __qulacs_measure(qstate, qubit_num, qid=c['qid'], shots=1)
-    
-                if c['cid'] != None:
-                    for k,mval in enumerate(list(md['last'])):
-                        cmem[c['cid'][k]] = int(mval)
-                        
-                if end_of_measurements == i:
-                    freq += md['frequency']
-    
-            else:
-                if c['ctrl'] == None or cmem[c['ctrl']] == 1:
-                    __qulacs_operate_qgate(qstate, qubit_num, kind=c['kind'], qid=c['qid'],
-                                           phase=c['phase'], phase1=c['phase1'], phase2=c['phase2'])
-    
-            # qcirc have only one measurement
-            if only_one_measurement_end == True and i == len(qcirc) - 2:
-                md = __qulacs_measure(qstate, qubit_num, qid=qcirc[-1]['qid'], shots=shots)
-                freq = md['frequency']
-                
-                if qcirc[-1]['cid'] != None:
-                    for k,mval in enumerate(list(md['last'])):
-                        cmem[qcirc[-1]['cid'][k]] = int(mval)
+                exist_measurement = True
                 break
-            
-        if only_one_measurement_end == True and i == len(qcirc) - 2:
-            break
-        
-        # reset classical memory and qubits, if not end of the shots
-        if cnt < shots-1:
-            cmem = [0] * len(cmem)
-            qstate.set_zero_state()
+            elif c['kind'] == RESET:
+                __qulacs_reset(qstate, qubit_num, qid=c['qid'])
+            else:
+                __qulacs_operate_qgate(qstate, qubit_num, kind=c['kind'], qid=c['qid'],
+                                       phase=c['phase'], phase1=c['phase1'], phase2=c['phase2'])
+
+    if exist_measurement == False:
+        return None
     
-    # if end_of_measurements > 0:
-    if measurement_cnt > 0:
-        measured_qid = qcirc[end_of_measurements]['qid']
-        result = {'measured_qid': measured_qid, 'frequency': freq}
+    #
+    # after measurement gate
+    #
+
+    frequency = Counter()
+    qstate_tmp = None
+    for cnt in range(shots):
+
+        qstate_tmp = qstate.copy()
+
+        for c in qcirc[pos:]:
+
+            if (c['ctrl'] == None or (c['ctrl'] != None and cmem[c['ctrl']] == 1)):
+
+                if c['kind'] == MEASURE:
+                    m_list = __qulacs_measure(qstate_tmp, qubit_num, qid=c['qid'])
+
+                    if len(cmem) > 0 and c['cid'] != None:
+                        for k, m in enumerate(m_list):
+                            cmem[c['cid'][k]] = m
+                        
+                elif c['kind'] == RESET:
+                    __qulacs_reset(qstate_tmp, qubit_num, qid=c['qid'])
+                
+                else:
+                    __qulacs_operate_qgate(qstate_tmp, qubit_num, kind=c['kind'], qid=c['qid'],
+                                           phase=c['phase'], phase1=c['phase1'], phase2=c['phase2'])
+
+        if len(cmem) > 0:
+            mval = ''.join(map(str, [cmem[i] for i in cid]))
+            frequency[mval] += 1
+    
+    if qstate_tmp is not None:
+        qstate.load(qstate_tmp.get_vector())
+        
+    if len(frequency) > 0:
+        result = Result(cid=cid, frequency=frequency)
     else:
         result = None
 
     return result
         
-def reset(qstate=None, backend=None):
+def clear(qstate=None, backend=None):
 
     if qstate != None:
         qstate.set_zero_state()
-
-    # return True
 
 def free(qstate=None, backend=None):
 
@@ -301,50 +301,12 @@ def __qulacs_operate_qgate(qstate, qubit_num, kind, qid, phase, phase1, phase2):
     
     circ.update_quantum_state(qstate)
 
-def __qulacs_measure(qstate, qubit_num, qid, shots=1):
+def __qulacs_reset(qstate, qubit_num, qid):
 
     # error check
     # qubit_num = qstate.get_qubit_count()
     if max(qid) >= qubit_num:
         raise ValueError
-
-    # list of binary vectors for len(qid) bit integers
-    qid_sorted = sorted(qid)
-    mbits_list = []
-    for i in range(2**len(qid)):
-        # ex)
-        # qid = [5,0,2] -> qid_sorted = [0,2,5]
-        # i = (0,1,2), idx = (2,0,1)
-        # bits = [q0,q1,q2] -> mbits = [q1,q2,q0]
-        bits = list(map(int, list(format(i, '0{}b'.format(len(qid))))))
-        mbits = [0] * len(qid)
-        for i, q in enumerate(qid):
-            idx = qid_sorted.index(q)
-            mbits[idx] = bits[i]
-        mbits_list.append(mbits)
-
-    # list of probabilities
-    prob_list = []
-    prob = 0.0
-    for mbits in mbits_list:
-        args = [2] * qubit_num
-        for j, q in enumerate(qid):
-            args[q] = mbits[j]
-        prob += qstate.get_marginal_probability(args)
-        prob_list.append(prob)
-    if prob_list[-1] != 1.0:
-        prob_list[-1] = 1.0
-
-    # frequency
-    mval_data = []
-    if shots > 1:
-        for i in range(shots - 1):
-            rand = random.random()
-            for mbits, prob in zip(mbits_list, prob_list):
-                mval = ''.join(map(str, mbits))
-                if rand <= prob:
-                    mval_data.append(mval)
-                    break
 
     # last quantum state
     circ = QuantumCircuit(qubit_num)
@@ -352,10 +314,82 @@ def __qulacs_measure(qstate, qubit_num, qid, shots=1):
         circ.add_gate(Measurement(q, i))
     circ.update_quantum_state(qstate)
 
-    last = ''.join(map(str, [qstate.get_classical_value(i) for i in range(len(qid))]))
-    mval_data.append(last)
-    frequency = Counter(mval_data)
+    circ_flip = QuantumCircuit(qubit_num)
+    for i, q in enumerate(qid):
+        if qstate.get_classical_value(i) == 1:
+            circ_flip.add_gate(X(q))
+    circ_flip.update_quantum_state(qstate)
 
-    measured_data = {'measured_qid': qid, 'frequency': frequency, 'last': last}
-    
-    return measured_data
+def __qulacs_measure(qstate, qubit_num, qid):
+
+    # error check
+    if max(qid) >= qubit_num:
+        raise ValueError
+
+    # measurement
+    circ = QuantumCircuit(qubit_num)
+    for i, q in enumerate(qid):
+        circ.add_gate(Measurement(q, i))
+    circ.update_quantum_state(qstate)
+    mval_list = [qstate.get_classical_value(i) for i in range(len(qid))]
+
+    return mval_list
+
+# def __qulacs_measure_old(qstate, qubit_num, qid, shots=1):
+# 
+#     # error check
+#     # qubit_num = qstate.get_qubit_count()
+#     if max(qid) >= qubit_num:
+#         raise ValueError
+# 
+#     # list of binary vectors for len(qid) bit integers
+#     qid_sorted = sorted(qid)
+#     mbits_list = []
+#     for i in range(2**len(qid)):
+#         # ex)
+#         # qid = [5,0,2] -> qid_sorted = [0,2,5]
+#         # i = (0,1,2), idx = (2,0,1)
+#         # bits = [q0,q1,q2] -> mbits = [q1,q2,q0]
+#         bits = list(map(int, list(format(i, '0{}b'.format(len(qid))))))
+#         mbits = [0] * len(qid)
+#         for i, q in enumerate(qid):
+#             idx = qid_sorted.index(q)
+#             mbits[idx] = bits[i]
+#         mbits_list.append(mbits)
+# 
+#     # list of probabilities
+#     prob_list = []
+#     prob = 0.0
+#     for mbits in mbits_list:
+#         args = [2] * qubit_num
+#         for j, q in enumerate(qid):
+#             args[q] = mbits[j]
+#         prob += qstate.get_marginal_probability(args)
+#         prob_list.append(prob)
+#     if prob_list[-1] != 1.0:
+#         prob_list[-1] = 1.0
+# 
+#     # frequency
+#     mval_data = []
+#     if shots > 1:
+#         for i in range(shots - 1):
+#             rand = random.random()
+#             for mbits, prob in zip(mbits_list, prob_list):
+#                 mval = ''.join(map(str, mbits))
+#                 if rand <= prob:
+#                     mval_data.append(mval)
+#                     break
+# 
+#     # last quantum state
+#     circ = QuantumCircuit(qubit_num)
+#     for i, q in enumerate(qid):
+#         circ.add_gate(Measurement(q, i))
+#     circ.update_quantum_state(qstate)
+# 
+#     last = ''.join(map(str, [qstate.get_classical_value(i) for i in range(len(qid))]))
+#     mval_data.append(last)
+#     frequency = Counter(mval_data)
+# 
+#     measured_data = {'measured_qid': qid, 'frequency': frequency, 'last': last}
+#     
+#     return measured_data

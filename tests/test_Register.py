@@ -64,8 +64,8 @@ class TestRegisterQComp(unittest.TestCase):
         qc.h(qid_0[0])
         qc.measure(qid=[qid_0[0]], cid=[cid_0[0]])
         res = qc.run(shots=10)
-        self.assertEqual(res['measured_qid'], [0])
-        self.assertEqual(res['frequency']['0']+res['frequency']['1'], 10)
+        freq = res.frequency
+        self.assertEqual(freq['0']+freq['1'], 10)
         
     def test_1(self):
 
@@ -80,10 +80,9 @@ class TestRegisterQComp(unittest.TestCase):
         bk = Backend(name='qlazy', device='qstate_simulator')
         qc = QComp(qubit_num=qubit_num, cmem_num=cmem_num, backend=bk)
         qc.h(qid_0[1]).cx(qid_0[1], qid_1[0][2]).measure(qid=[qid_0[1], qid_1[0][2]], cid=[cid_1[0][0],cid_1[1][1]])
-        res = qc.run(shots=10)
-        self.assertEqual(res['measured_qid'], [1,4])
-        self.assertEqual(res['frequency']['00']+res['frequency']['11'], 10)
-        # qc.free()
+        res = qc.run(shots=10, cid=[cid_1[0][0],cid_1[1][1]])
+        freq = res.frequency
+        self.assertEqual(freq['00']+freq['11'], 10)
 
 if __name__ == '__main__':
     unittest.main()
