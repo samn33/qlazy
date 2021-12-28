@@ -29,7 +29,8 @@ bool qcirc_append_gate(QCirc* qcirc, Kind kind, int* qid, double* para, int c, i
   int para_size = 0;
   
   if (qcirc == NULL ||
-      (kind_is_measurement(kind) == false && kind_is_unitary(kind) == false)) {
+      (kind_is_measurement(kind) == false &&
+       kind_is_reset(kind) == false && kind_is_unitary(kind) == false)) {
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
   }
   /* bell measurement is not supported */

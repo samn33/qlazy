@@ -7,14 +7,12 @@
 bool cmem_init(int cmem_num, void** cmem_out)
 {
   CMem* cmem = NULL;
-  
-  if (cmem_num < 0) {
-    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
-  }
+
+  if (cmem_num < 1) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
   if (!(cmem = (CMem*)malloc(sizeof(CMem))))
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,NULL);
-
+    
   cmem->cmem_num = cmem_num;
   if (!(cmem->bit_array = (int*)malloc(sizeof(int) * cmem_num)))
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,NULL);

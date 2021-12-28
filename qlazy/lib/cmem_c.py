@@ -14,6 +14,9 @@ libc = ctypes.CDLL(find_library("c"),mode=ctypes.RTLD_GLOBAL)
 
 def cmem_init(cmem_num):
 
+    if cmem_num < 1:
+        raise CMem_Error_Initialize()
+    
     cmem = None
     c_cmem = ctypes.c_void_p(cmem)
 
@@ -24,8 +27,6 @@ def cmem_init(cmem_num):
     if ret == FALSE:
         raise CMem_Error_Initialize()
 
-    # out = ctypes.cast(c_cmem.value, ctypes.POINTER(CMem))
-    # return out.contents
     return c_cmem
     
 def cmem_free(cmem):
