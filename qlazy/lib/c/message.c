@@ -106,6 +106,9 @@ void error_msg(ErrCode err)
   case ERROR_QSTATE_APPLY_MATRIX:
     fprintf(stderr, "ERROR: apply matrix failure !\n");
     break;
+  case ERROR_QSTATE_OPERATE_QCIRC:
+    fprintf(stderr, "ERROR: qstate operate qcirc failure !\n");
+    break;
 
   case ERROR_MDATA_INIT:
     fprintf(stderr, "ERROR: mdata init failure !\n");
@@ -198,6 +201,9 @@ void error_msg(ErrCode err)
   case ERROR_STABILIZER_MEASURE:
     fprintf(stderr, "ERROR: stabilizer measure failure !\n");
     break;
+  case ERROR_STABILIZER_OPERATE_QCIRC:
+    fprintf(stderr, "ERROR: stabilizer operate qcirc failure !\n");
+    break;
 
   case ERROR_NEED_TO_INITIALIZE:
     fprintf(stderr, "ERROR: need to initialize !\n");
@@ -237,6 +243,9 @@ void error_msg(ErrCode err)
     break;
   case ERROR_CANT_PRINT_HELP:
     fprintf(stderr, "ERROR: can't print help (item is not exist) !\n");
+    break;
+  case ERROR_CANT_RESET:
+    fprintf(stderr, "ERROR: can't reset qubits !\n");
     break;
     
   default:

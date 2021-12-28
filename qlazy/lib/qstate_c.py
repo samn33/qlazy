@@ -3,6 +3,7 @@ import ctypes
 from ctypes.util import find_library
 import numpy as np
 import pathlib
+from collections import Counter 
 
 from qlazy.config import *
 from qlazy.error import *
@@ -31,8 +32,6 @@ def qstate_init(qubit_num=None, seed=None):
     if ret == FALSE:
         raise QState_Error_Initialize()
 
-    # out = ctypes.cast(c_qstate.value, ctypes.POINTER(QState))
-    # return out.contents
     return c_qstate
 
 def qstate_init_with_vector(vector=None, seed=None):
@@ -62,8 +61,6 @@ def qstate_init_with_vector(vector=None, seed=None):
     if ret == FALSE:
         raise QState_Error_Initialize()
     
-    # out = ctypes.cast(c_qstate.value, ctypes.POINTER(QState))
-    # return out.contents
     return c_qstate
 
 
@@ -137,8 +134,6 @@ def qstate_copy(qs):
         if ret == FALSE:
             raise QState_Error_Clone()
 
-        # out = ctypes.cast(c_qstate.value, ctypes.POINTER(QState))
-        # return out.contents
         return c_qstate
         
     except Exception:
@@ -269,8 +264,6 @@ def qstate_tensor_product(qs, qstate):
         if ret == FALSE:
             raise QState_Error_TensorProduct()
 
-        # out = ctypes.cast(c_qstate_out.value, ctypes.POINTER(QState))
-        # return out.contents
         return c_qstate_out
 
     except Exception:
@@ -332,8 +325,6 @@ def qstate_apply_matrix(qs, matrix=None, qid=None):
 
     if matrix is None:
         raise QState_Error_Apply()
-    # if (matrix.shape[0] > qs.state_num or matrix.shape[0] > qs.state_num):
-    #     raise QState_Error_Apply()
         
     if qid is None or qid == []:
         qid = [i for i in range(qs.qubit_num)]
@@ -350,8 +341,6 @@ def qstate_apply_matrix(qs, matrix=None, qid=None):
         col = row
         size = row * col
 
-        # set array of matrix
-        # mat_complex = list(matrix.flatten())
         mat_complex = []
         for mat_row in matrix:
             for mat_elm in mat_row:
@@ -511,41 +500,48 @@ def qstate_measure_bell(qs, MDATA_TABLE, qid=None, shots=DEF_SHOTS, tag=None):
     
     return md
 
-def qstate_operate_qcirc(qstate, cmem_list, qcirc, shots):
-
-    cmem_num = len(cmem_list)
-    cmem = CMem(cmem_num)
-    
-    mdata = None
-    c_mdata = ctypes.c_void_p(mdata)
+def qstate_operate_qcirc(qstate, cmem_list, qcirc, shots, cid):
 
     lib.qstate_operate_qcirc.restype = ctypes.c_int
-    lib.qstate_operate_qcirc.argtypes = [ctypes.POINTER(QState), ctypes.POINTER(CMem), ctypes.POINTER(QCirc),
-                                         ctypes.c_int, ctypes.POINTER(ctypes.c_void_p)]
-    ret = lib.qstate_operate_qcirc(ctypes.byref(qstate), ctypes.byref(cmem), ctypes.byref(qcirc),
-                                   ctypes.c_int(shots), c_mdata)
-    
-    if ret == FALSE:
-        raise QState_Error_OperateQcirc()
+    lib.qstate_operate_qcirc.argtypes = [ctypes.POINTER(QState), ctypes.POINTER(CMem), ctypes.POINTER(QCirc)]
 
-    if c_mdata.value == None:
+    if len(cmem_list) != 0:
+
+        frequency = Counter()
+        for n in range(shots):
+            
+            cmem = CMem(len(cmem_list))
+            if n < shots - 1:
+                qstate_tmp = qstate.clone()
+                ret = lib.qstate_operate_qcirc(ctypes.byref(qstate_tmp), ctypes.byref(cmem), ctypes.byref(qcirc))
+            else:
+                ret = lib.qstate_operate_qcirc(ctypes.byref(qstate), ctypes.byref(cmem), ctypes.byref(qcirc))
+
+            if ret == FALSE:
+                raise QState_Error_OperateQcirc()
+        
+            cmem_num = cmem.cmem_num
+            bit_array = ctypes.cast(cmem.bit_array, ctypes.POINTER(ctypes.c_int*cmem_num))
+            for i in range(len(cmem_list)):
+                cmem_list[i] = bit_array.contents[i]
+
+            cmem_list_part = [cmem_list[c] for c in cid]
+            mval = "".join(map(str, cmem_list_part))
+
+            frequency[mval] += 1
+
+        return frequency
+
+    else:
+
+        c_cmem = ctypes.POINTER(CMem)()
+        ret = lib.qstate_operate_qcirc(ctypes.byref(qstate), c_cmem, ctypes.byref(qcirc))
+
+        if ret == FALSE:
+            raise QState_Error_OperateQcirc()
+
         return None
-        
-    out = ctypes.cast(c_mdata.value, ctypes.POINTER(MDataC))
-        
-    qubit_num = out.contents.qubit_num
-    state_num = out.contents.state_num
-    last_state = out.contents.last
-    qid = [out.contents.qubit_id[i] for i in range(qubit_num)]
-    freq = ctypes.cast(out.contents.freq, ctypes.POINTER(ctypes.c_int*state_num))
-    freq_list = [freq.contents[i] for i in range(state_num)]
-    md = MData(freq_list=freq_list, last_state=last_state, qid=qid,
-               qubit_num=qubit_num, state_num=state_num, angle=0.0, phase=0.0,
-               is_bell=False)
-    out.contents.free()
 
-    return md
-    
 def qstate_free(qs):
 
     lib.qstate_free.argtypes = [ctypes.POINTER(QState)]

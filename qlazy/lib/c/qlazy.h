@@ -120,6 +120,7 @@ typedef enum _ErrCode {
   ERROR_QSTATE_INNER_PRODUCT,
   ERROR_QSTATE_EXPECT_VALUE,
   ERROR_QSTATE_APPLY_MATRIX,
+  ERROR_QSTATE_OPERATE_QCIRC,
   ERROR_MDATA_INIT,
   ERROR_MDATA_PRINT,
   ERROR_MDATA_PRINT_BELL,
@@ -149,6 +150,7 @@ typedef enum _ErrCode {
   ERROR_STABILIZER_GET_PAULI_FAC,
   ERROR_STABILIZER_OPERATE_QGATE,
   ERROR_STABILIZER_MEASURE,
+  ERROR_STABILIZER_OPERATE_QCIRC,
   ERROR_CMEM_INIT,
   ERROR_CMEM_COPY,
 
@@ -166,58 +168,60 @@ typedef enum _ErrCode {
   ERROR_CANT_PRINT_CIRC,
   ERROR_CANT_PRINT_GATES,
   ERROR_CANT_PRINT_HELP,
+  ERROR_CANT_RESET,
 } ErrCode;
 
 typedef enum _Kind {
-  CIRC  	 = 1,	 	/* symbol: '&','circ'    */
-  GATES  	 = 2,	 	/* symbol: '!','gates'   */
-  SHOW   	 = 3,	 	/* symbol: '-','show'    */
-  BLOCH   	 = 4,	 	/* symbol: '|','bloch'   */
-  ECHO   	 = 5,	 	/* symbol: '@','echo'    */
-  OUTPUT	 = 6,	 	/* symbol: '>','output'  */
-  HELP    	 = 7,	 	/* symbol: '?','help'    */
-  QUIT	         = 8,	 	/* symbol: '.','quit'    */
-  INIT  	 = 9,	 	/* symbol: '%','init'    */
-  PAULI_X	 = 120,		/* symbol: 'X','x'       */
-  PAULI_Y	 = 121,		/* symbol: 'Y','y'       */
-  PAULI_Z	 = 122,		/* symbol: 'Z','z'       */
-  ROOT_PAULI_X	 = 123,		/* symbol: 'XR','xr'     */
-  ROOT_PAULI_X_	 = 124,		/* symbol: 'XR+','xr'    */
-  HADAMARD	 = 130,		/* symbol: 'H','h'       */
-  PHASE_SHIFT_S	 = 140,		/* symbol: 'S','s'       */
-  PHASE_SHIFT_S_ = 141,		/* symbol: 'S+','s+'     */
-  PHASE_SHIFT_T	 = 142,		/* symbol: 'T','t'       */
-  PHASE_SHIFT_T_ = 143,		/* symbol: 'T+','t+'     */
-  PHASE_SHIFT    = 144,		/* symbol: 'P','p'       */
-  ROTATION_X	 = 150,		/* symbol: 'RX','rx'     */
-  ROTATION_Y	 = 151,		/* symbol: 'RY','ry'     */
-  ROTATION_Z	 = 152,		/* symbol: 'RZ','rz'     */
-  ROTATION_U1	 = 153,		/* symbol: 'U1','u1'     */
-  ROTATION_U2	 = 154,		/* symbol: 'U2','u2'     */
-  ROTATION_U3	 = 155,		/* symbol: 'U3','u3'     */
-  CONTROLLED_X	 = 160,		/* symbol: 'CX','cx'     */
-  CONTROLLED_Y	 = 161,		/* symbol: 'CX','cx'     */
-  CONTROLLED_Z	 = 162,		/* symbol: 'CZ','cz'     */
-  CONTROLLED_XR	 = 163,		/* symbol: 'CXR','cxr'   */
-  CONTROLLED_XR_ = 164,		/* symbol: 'CXR+','cxr+' */
-  CONTROLLED_H	 = 165,		/* symbol: 'CH','ch'     */
-  CONTROLLED_S	 = 166,		/* symbol: 'CS','cs'     */
-  CONTROLLED_S_	 = 167,		/* symbol: 'CS_','cs_'   */
-  CONTROLLED_T	 = 168,		/* symbol: 'CT','ct'     */
-  CONTROLLED_T_	 = 169,		/* symbol: 'CT_','ct_'   */
-  CONTROLLED_P	 = 170,		/* symbol: 'CP','cp'     */
-  CONTROLLED_RX	 = 171,		/* symbol: 'CRX','crx'   */
-  CONTROLLED_RY	 = 172,		/* symbol: 'CRY','cry'   */
-  CONTROLLED_RZ	 = 173,		/* symbol: 'CRZ','crz'   */
-  CONTROLLED_U1  = 174,		/* symbol: 'CU1','cu1'   */
-  CONTROLLED_U2  = 175,		/* symbol: 'CU1','cu1'   */
-  CONTROLLED_U3  = 176,		/* symbol: 'CU1','cu1'   */
-  SWAP_QUBITS	 = 180,		/* symbol: 'SW','sw'     */
-  MEASURE	 = 200,	 	/* symbol: 'M','m'       */
-  MEASURE_X	 = 201,	 	/* symbol: 'MX','mx'     */
-  MEASURE_Y	 = 202,	 	/* symbol: 'MY','my'     */
-  MEASURE_Z	 = 203,	 	/* symbol: 'MZ','mz'     */
-  MEASURE_BELL	 = 204,	 	/* symbol: 'MB','mb'     */
+  CIRC  	 = 1,	 	/* symbol: '&','circ'      */
+  GATES  	 = 2,	 	/* symbol: '!','gates'     */
+  SHOW   	 = 3,	 	/* symbol: '-','show'      */
+  BLOCH   	 = 4,	 	/* symbol: '|','bloch'     */
+  ECHO   	 = 5,	 	/* symbol: '@','echo'      */
+  OUTPUT	 = 6,	 	/* symbol: '>','output'    */
+  HELP    	 = 7,	 	/* symbol: '?','help'      */
+  QUIT	         = 8,	 	/* symbol: '.','quit'      */
+  INIT  	 = 9,	 	/* symbol: '%','init'      */
+  PAULI_X	 = 120,		/* symbol: 'X','x'         */
+  PAULI_Y	 = 121,		/* symbol: 'Y','y'         */
+  PAULI_Z	 = 122,		/* symbol: 'Z','z'         */
+  ROOT_PAULI_X	 = 123,		/* symbol: 'XR','xr'       */
+  ROOT_PAULI_X_	 = 124,		/* symbol: 'XR+','xr'      */
+  HADAMARD	 = 130,		/* symbol: 'H','h'         */
+  PHASE_SHIFT_S	 = 140,		/* symbol: 'S','s'         */
+  PHASE_SHIFT_S_ = 141,		/* symbol: 'S+','s+'       */
+  PHASE_SHIFT_T	 = 142,		/* symbol: 'T','t'         */
+  PHASE_SHIFT_T_ = 143,		/* symbol: 'T+','t+'       */
+  PHASE_SHIFT    = 144,		/* symbol: 'P','p'         */
+  ROTATION_X	 = 150,		/* symbol: 'RX','rx'       */
+  ROTATION_Y	 = 151,		/* symbol: 'RY','ry'       */
+  ROTATION_Z	 = 152,		/* symbol: 'RZ','rz'       */
+  ROTATION_U1	 = 153,		/* symbol: 'U1','u1'       */
+  ROTATION_U2	 = 154,		/* symbol: 'U2','u2'       */
+  ROTATION_U3	 = 155,		/* symbol: 'U3','u3'       */
+  CONTROLLED_X	 = 160,		/* symbol: 'CX','cx'       */
+  CONTROLLED_Y	 = 161,		/* symbol: 'CX','cx'       */
+  CONTROLLED_Z	 = 162,		/* symbol: 'CZ','cz'       */
+  CONTROLLED_XR	 = 163,		/* symbol: 'CXR','cxr'     */
+  CONTROLLED_XR_ = 164,		/* symbol: 'CXR+','cxr+'   */
+  CONTROLLED_H	 = 165,		/* symbol: 'CH','ch'       */
+  CONTROLLED_S	 = 166,		/* symbol: 'CS','cs'       */
+  CONTROLLED_S_	 = 167,		/* symbol: 'CS_','cs_'     */
+  CONTROLLED_T	 = 168,		/* symbol: 'CT','ct'       */
+  CONTROLLED_T_	 = 169,		/* symbol: 'CT_','ct_'     */
+  CONTROLLED_P	 = 170,		/* symbol: 'CP','cp'       */
+  CONTROLLED_RX	 = 171,		/* symbol: 'CRX','crx'     */
+  CONTROLLED_RY	 = 172,		/* symbol: 'CRY','cry'     */
+  CONTROLLED_RZ	 = 173,		/* symbol: 'CRZ','crz'     */
+  CONTROLLED_U1  = 174,		/* symbol: 'CU1','cu1'     */
+  CONTROLLED_U2  = 175,		/* symbol: 'CU1','cu1'     */
+  CONTROLLED_U3  = 176,		/* symbol: 'CU1','cu1'     */
+  SWAP_QUBITS	 = 180,		/* symbol: 'SW','sw'       */
+  MEASURE	 = 200,	 	/* symbol: 'M','m'         */
+  MEASURE_X	 = 201,	 	/* symbol: 'MX','mx'       */
+  MEASURE_Y	 = 202,	 	/* symbol: 'MY','my'       */
+  MEASURE_Z	 = 203,	 	/* symbol: 'MZ','mz'       */
+  MEASURE_BELL	 = 204,	 	/* symbol: 'MB','mb'       */
+  RESET	         = 205,	 	/* symbol: '>','reset'     */
   NOT_A_GATE	 = 1000,
   IDENTITY       = 2000,
 } Kind;
@@ -440,6 +444,7 @@ bool     is_power_of_2(int n);
 int      kind_get_qid_size(Kind kind);
 int      kind_get_para_size(Kind kind);
 bool     kind_is_measurement(Kind kind);
+bool     kind_is_reset(Kind kind);
 bool     kind_is_unitary(Kind kind);
 
 /* init.c */
@@ -494,7 +499,7 @@ bool     qstate_tensor_product(QState* qstate_0, QState* qstate_1, void** qstate
 bool     qstate_expect_value(QState* qstate, Observable* observ, double* value);
 bool     qstate_apply_matrix(QState* qstate, int qnum, int qid[MAX_QUBIT_NUM],
 			     double* real, double *imag, int row, int col);
-bool     qstate_operate_qcirc(QState* qstate, CMem* cmem, QCirc* qcirc, int shots, void** mdata);
+bool     qstate_operate_qcirc(QState* qstate, CMem* cmem, QCirc* qcirc);
 void	 qstate_free(QState* qstate);
 
 /* mdata.c */
@@ -553,6 +558,7 @@ bool	stabilizer_get_pauli_fac(Stabilizer* stab, int gene_id, ComplexAxis* pauli_
 bool	stabilizer_operate_qgate(Stabilizer* stab, Kind kind, int q0, int q1);
 bool    stabilizer_get_rank(Stabilizer* stab, int* rank_out);
 bool	stabilizer_measure(Stabilizer* stab, int q, double prob_out[2], int* mval_out);
+bool    stabilizer_operate_qcirc(Stabilizer* stab, CMem* cmem, QCirc* qcirc);
 void	stabilizer_free(Stabilizer* stab);
 
 /* qcirc.c */

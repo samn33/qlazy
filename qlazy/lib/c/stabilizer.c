@@ -541,8 +541,7 @@ bool stabilizer_operate_qgate(Stabilizer* stab, Kind kind, int q0, int q1)
 {
   /* error check */
   if (stab == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
-  if ((q0 < 0) || (q0 >= stab->qubit_num) ||
-      (q1 < 0) || (q1 >= stab->qubit_num))
+  if ((q0 < 0) || (q0 >= stab->qubit_num))
     ERR_RETURN(ERROR_OUT_OF_BOUND,false);
 
   switch (kind) {
@@ -565,9 +564,11 @@ bool stabilizer_operate_qgate(Stabilizer* stab, Kind kind, int q0, int q1)
     _stabilizer_operate_s_dg(stab, q0);
     break;
   case CONTROLLED_X:
+    if ((q1 < 0) || (q1 >= stab->qubit_num)) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
     _stabilizer_operate_cx(stab, q0, q1);
     break;
   case CONTROLLED_Z:
+    if ((q1 < 0) || (q1 >= stab->qubit_num)) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
     _stabilizer_operate_cz(stab, q0, q1);
     break;
   default:
@@ -738,6 +739,209 @@ bool stabilizer_measure(Stabilizer* stab, int q, double prob_out[2], int* mval_o
 
   SUC_RETURN(true);
 }
+
+bool stabilizer_operate_qcirc(Stabilizer* stab, CMem* cmem, QCirc* qcirc)
+{
+  QGate*        qgate                   = NULL;   /* quantum gate in quantum circuit */
+  MData*	mdata			= NULL;   /* output measurement data */
+
+  /* error check */
+  if ((stab == NULL || qcirc == NULL) ||
+      (stab->qubit_num != stab->gene_num) ||
+      (stab->qubit_num < qcirc->qubit_num) ||
+      (cmem != NULL && cmem->cmem_num < qcirc->cmem_num))
+    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+
+  qgate = qcirc->first;
+  while (qgate != NULL) {
+
+    if ((qgate->ctrl == -1) ||
+	((qgate->ctrl != -1) && (cmem->bit_array[qgate->ctrl] == 1))) {
+    
+      int m;
+      double prob_out[2];
+      if (kind_is_unitary(qgate->kind) == true) {
+	if (!(stabilizer_operate_qgate(stab, qgate->kind, qgate->qid[0], qgate->qid[1])))
+	  ERR_RETURN(ERROR_STABILIZER_OPERATE_QGATE, false);
+      }
+      else if (kind_is_reset(qgate->kind) == true) {
+	if (!(stabilizer_measure(stab, qgate->qid[0], prob_out, &m)))
+	  ERR_RETURN(ERROR_STABILIZER_MEASURE, false);
+	if (m == 1) {
+	  if (!(stabilizer_operate_qgate(stab, PAULI_X, qgate->qid[0], qgate->qid[1])))
+	    ERR_RETURN(ERROR_STABILIZER_OPERATE_QGATE, false);
+	}
+      }
+      else if (kind_is_measurement(qgate->kind) == true) {
+	if (!(stabilizer_measure(stab, qgate->qid[0], prob_out, &m)))
+	  ERR_RETURN(ERROR_STABILIZER_MEASURE, false);
+	if (qgate->c != -1) cmem->bit_array[qgate->c] = m;  /* measured value is stored to classical register */
+	mdata_free(mdata); mdata = NULL;
+      }
+      else {
+	ERR_RETURN(ERROR_QSTATE_OPERATE_QCIRC, false);
+      }
+    }
+    
+    qgate = qgate->next;
+  }
+
+  SUC_RETURN(true);
+}
+
+// bool stabilizer_operate_qcirc_old(Stabilizer* stab, CMem* cmem, QCirc* qcirc, int shots, void** mdata_out)
+// {
+//   QGate*        qgate                   = NULL;   /* quantum gate in quantum circuit */
+//   Stabilizer*   stab_tmp                = NULL;   /* stabilizer state (temporary) */
+//   CMem*         cmem_tmp                = NULL;   /* classical register (temporary) */
+//   QGate*        qgate_nuni_start        = NULL;   /* quantum gate in quantum circuit (start of non-unitary) */
+//   int           state_num               = 0;      /* number of measured state */
+//   int*          freq                    = NULL;   /* array for storing measurement frequency */
+//   int           mval                    = 0;      /* measured value */
+//   MData*	mdata			= NULL;   /* output measurement data */
+// 
+//   /* error check */
+//   if ((stab == NULL || qcirc == NULL) ||
+//       (stab->qubit_num != stab->gene_num) ||
+//       (stab->qubit_num < qcirc->qubit_num) ||
+//       (cmem != NULL && cmem->cmem_num < qcirc->cmem_num))
+//     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+// 
+//   /* 
+//      before measurement gate 
+//   */
+// 
+//   qgate = qcirc->first;
+//   while (qgate != NULL) {
+// 
+//     if ((qgate->ctrl == -1) ||
+// 	((qgate->ctrl != -1) && (cmem->bit_array[qgate->ctrl] == 1))) {
+//     
+//       if (kind_is_unitary(qgate->kind) == true) {
+// 	if (!(stabilizer_operate_qgate(stab, qgate->kind, qgate->qid[0], qgate->qid[1])))
+// 	  ERR_RETURN(ERROR_STABILIZER_OPERATE_QGATE, false);
+//       }
+//       else if (kind_is_reset(qgate->kind) == true) {
+// 	int m;
+// 	double prob_out[2];
+// 	if (!(stabilizer_measure(stab, qgate->qid[0], prob_out, &m)))
+// 	  ERR_RETURN(ERROR_STABILIZER_MEASURE, false);
+// 	if (m == 1) {
+// 	  if (!(stabilizer_operate_qgate(stab, PAULI_X, qgate->qid[0], qgate->qid[1])))
+// 	    ERR_RETURN(ERROR_STABILIZER_OPERATE_QGATE, false);
+// 	}
+//       }
+//       else if (kind_is_measurement(qgate->kind) == true) {
+// 	qgate_nuni_start = qgate;
+// 	break;
+//       }
+//       else {
+// 	ERR_RETURN(ERROR_QSTATE_OPERATE_QCIRC, false);
+//       }
+//     }
+//     
+//     qgate = qgate->next;
+//   }
+// 
+//   /* 
+//      after measurement gate 
+//   */
+// 
+//   /* initialize freq */
+//   if (cmem != NULL) {
+//     state_num = (int)pow(2.0, cmem->cmem_num);
+//     if (!(freq = (int*)malloc(sizeof(int) * state_num)))
+//       ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
+//     for (int i=0; i<state_num; i++) freq[i] = 0;
+//   }
+//   else {
+//     freq = NULL;
+//   }
+//       
+//   /* loop and count measured value */
+//   for (int n=0; n<shots; n++) {
+// 
+//     /* copy temporary */
+//     if (!(stabilizer_copy(stab, (void**)&stab_tmp)))
+//       ERR_RETURN(ERROR_STABILIZER_COPY,NULL);
+//     if (cmem != NULL) {
+//       if (!(cmem_copy(cmem, (void**)&cmem_tmp)))
+// 	ERR_RETURN(ERROR_CMEM_COPY,NULL);
+//     }
+//     
+//     qgate = qgate_nuni_start;
+//     while (qgate != NULL) {
+// 
+//       if ((qgate->ctrl == -1) ||
+// 	  ((qgate->ctrl != -1) && (cmem_tmp->bit_array[qgate->ctrl] == 1))) {
+// 
+// 	int m;
+// 	double prob_out[2];
+// 	if (kind_is_measurement(qgate->kind) == true) {  /* mesurement */
+// 	  if (!(stabilizer_measure(stab_tmp, qgate->qid[0], prob_out, &m)))
+// 	    ERR_RETURN(ERROR_STABILIZER_MEASURE, false);
+// 	  if (qgate->c != -1) cmem_tmp->bit_array[qgate->c] = m;  /* measured value is stored to classical register */
+// 	  mdata_free(mdata); mdata = NULL;
+// 	}
+// 	else if (qgate->kind == RESET) {  /* reset */
+// 	  if (!(stabilizer_measure(stab_tmp, qgate->qid[0], prob_out, &m)))
+// 	    ERR_RETURN(ERROR_STABILIZER_MEASURE, false);
+// 	  if (m == 1) {
+// 	    if (!(stabilizer_operate_qgate(stab_tmp, PAULI_X, qgate->qid[0], qgate->qid[1])))
+// 	      ERR_RETURN(ERROR_STABILIZER_OPERATE_QGATE, false);
+// 	  }
+// 	}
+// 	else {  /* unitary gate */
+// 	  if (!(stabilizer_operate_qgate(stab_tmp, qgate->kind, qgate->qid[0], qgate->qid[1])))
+// 	    ERR_RETURN(ERROR_STABILIZER_OPERATE_QGATE, false);
+// 	}
+// 	
+//       }
+//       qgate = qgate->next;
+//     }
+// 
+//     /* count up frequency */
+//     if (cmem_tmp != NULL) {
+//       mval = 0;
+//       for (int i=0; i<cmem_tmp->cmem_num; i++) {
+// 	mval += (cmem_tmp->bit_array[i] << (cmem_tmp->cmem_num - 1 - i));
+//       }
+//       freq[mval] += 1;
+//       cmem_free(cmem_tmp); cmem_tmp = NULL;
+//     }
+// 
+//   }
+// 
+//   /* copy back to original qstate from temporary */
+//   if (stab_tmp != NULL) {
+//     stab->qubit_num = stab_tmp->qubit_num;
+//     stab->gene_num = stab_tmp->gene_num;
+//     memcpy(stab->pauli_factor, stab_tmp->pauli_factor, sizeof(ComplexAxis) * stab_tmp->gene_num);
+//     memcpy(stab->check_matrix, stab_tmp->check_matrix, sizeof(int) * 2 * stab_tmp->qubit_num * stab_tmp->gene_num);
+//     stabilizer_free(stab_tmp); stab_tmp = NULL;
+//   }
+// 
+//   /* set frequency data to mdata object */
+//   if (cmem != NULL) {
+//     int* cid;
+//     double angle = 0.0;
+//     double phase = 0.0;
+//     if (!(cid = (int*)malloc(sizeof(int) * cmem->cmem_num)))
+//       ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
+//     for (int i=0; i<cmem->cmem_num; i++) cid[i] = i;
+//     if (!(mdata_init(cmem->cmem_num, state_num, shots, angle, phase, cid, (void**)&mdata)))
+//       ERR_RETURN(ERROR_MDATA_INIT, false);
+//     memcpy(mdata->freq, freq, sizeof(int) * state_num);
+//     free(freq); freq = NULL;
+//     free(cid); cid = NULL;
+//     *mdata_out = mdata;
+//   }
+//   else {
+//     *mdata_out = NULL;
+//   }
+// 
+//   SUC_RETURN(true);
+// }
 
 void stabilizer_free(Stabilizer* stab)
 {

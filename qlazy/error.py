@@ -238,6 +238,10 @@ class Stabilizer_Error_FreeAll(Exception):
     def __str__(self):
         return "Stabilizer: fail to free all"
 
+class Stabilizer_Error_OperateQcirc(Exception):
+    def __str__(self):
+        return "Stabilizer: fail to operate qcirc"
+
 # QComp
 
 class QComp_Error_QgateNotSupported(Exception):

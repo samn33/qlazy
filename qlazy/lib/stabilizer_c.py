@@ -3,10 +3,14 @@ import ctypes
 from ctypes.util import find_library
 import pathlib
 
-from qlazy.Stabilizer import Stabilizer
-from qlazy.error import *
 from qlazy.config import *
+from qlazy.error import *
 from qlazy.util import *
+from qlazy.Stabilizer import Stabilizer
+from qlazy.MData import *
+from qlazy.QCirc import QCirc
+from qlazy.CMem import CMem
+from qlazy.lib.mdata_c import *
 
 lib= ctypes.CDLL(str(pathlib.Path(__file__).with_name('libqlz.'+get_lib_ext())))
 libc = ctypes.CDLL(find_library("c"),mode=ctypes.RTLD_GLOBAL)
@@ -27,8 +31,6 @@ def stabilizer_init(gene_num=None, qubit_num=None, seed=None):
     if ret == FALSE:
         raise Stabilizer_Error_Initialize()
         
-    # out = ctypes.cast(c_stab.value, ctypes.POINTER(Stabilizer))
-    # return out.contents
     return c_stab
 
 def stabilizer_copy(sb):
@@ -45,8 +47,6 @@ def stabilizer_copy(sb):
         if ret == FALSE:
             raise Stabilizer_Error_Clone()
 
-        # out = ctypes.cast(c_stab.value, ctypes.POINTER(Stabilizer))
-        # return out.contents
         return c_stab
         
     except Exception:
@@ -163,6 +163,48 @@ def stabilizer_measure(sb, q=None):
     mval = c_mval.value
 
     return mval
+    
+def stabilizer_operate_qcirc(sb, cmem_list, qcirc, shots, cid):
+
+    lib.stabilizer_operate_qcirc.restype = ctypes.c_int
+    lib.stabilizer_operate_qcirc.argtypes = [ctypes.POINTER(Stabilizer), ctypes.POINTER(CMem), ctypes.POINTER(QCirc)]
+
+    if len(cmem_list) != 0:
+
+        frequency = Counter()
+        for n in range(shots):
+            
+            cmem = CMem(len(cmem_list))
+            if n < shots - 1:
+                sb_tmp = sb.clone()
+                ret = lib.stabilizer_operate_qcirc(ctypes.byref(sb_tmp), ctypes.byref(cmem), ctypes.byref(qcirc))
+            else:
+                ret = lib.stabilizer_operate_qcirc(ctypes.byref(sb), ctypes.byref(cmem), ctypes.byref(qcirc))
+
+            if ret == FALSE:
+                raise Stabilizer_Error_OperateQcirc()
+        
+            cmem_num = cmem.cmem_num
+            bit_array = ctypes.cast(cmem.bit_array, ctypes.POINTER(ctypes.c_int*cmem_num))
+            for i in range(len(cmem_list)):
+                cmem_list[i] = bit_array.contents[i]
+
+            cmem_list_part = [cmem_list[c] for c in cid]
+            mval = "".join(map(str, cmem_list_part))
+
+            frequency[mval] += 1
+
+        return frequency
+    
+    else:
+
+        c_cmem = ctypes.POINTER(CMem)()
+        ret = lib.stabilizer_operate_qcirc(ctypes.byref(sb), c_cmem, ctypes.byref(qcirc))
+        
+        if ret == FALSE:
+            raise Stabilizer_Error_OperateQcirc()
+
+        return None
     
 def stabilizer_free(stab):
 

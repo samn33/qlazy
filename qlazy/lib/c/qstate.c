@@ -1007,8 +1007,10 @@ bool qstate_operate_qgate(QState* qstate, Kind kind, double alpha, double beta,
   if (qstate == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
   if ((kind == INIT) || (kind ==MEASURE) || (kind ==MEASURE_X) ||
-      (kind == MEASURE_Y) || (kind == MEASURE_Z) || (kind == MEASURE_BELL))
+      (kind == MEASURE_Y) || (kind == MEASURE_Z) || (kind == MEASURE_BELL) ||
+      (kind == RESET)) {
     SUC_RETURN(true);
+  }
   else {
     if (!(gbank_get_unitary(qstate->gbank, kind, alpha, beta, gamma, &dim, (void**)&U)))
       ERR_RETURN(ERROR_GBANK_GET_UNITARY,false);
@@ -1348,168 +1350,197 @@ bool qstate_apply_matrix(QState* qstate, int qnum_part, int qid[MAX_QUBIT_NUM],
   SUC_RETURN(true);
 }
 
-bool qstate_operate_qcirc(QState* qstate, CMem* cmem, QCirc* qcirc, int shots, void** mdata_out)
+bool qstate_operate_qcirc(QState* qstate, CMem* cmem, QCirc* qcirc)
 {
   QGate*        qgate                   = NULL;   /* quantum gate in quantum circuit */
-  QState*       qstate_tmp              = NULL;   /* quantum state (temporary) */
-  CMem*         cmem_tmp                = NULL;   /* classical register (temporary) */
-  int*          freq                    = NULL;   /* array for storing measurement frequency */
-  bool		ugate_after_measurement = false;  /* exist unitary gate after measurement */
-  bool		last_measurements	= false;  /* exist last measurements */
   double        angle                   = 0.0;    /* measurement angle */
   double        phase                   = 0.0;    /* measurement phase */
-  int		meas_num                = 0;      /* measurement qubit number */
-  int*		meas_qid		= NULL;   /* measurement qubit id */
-  int           operation_gate_num      = 0;      /* number of gates without last measurements */
   MData*	mdata			= NULL;   /* output measurement data */
 
   /* error check */
   if ((qstate == NULL || qcirc == NULL) ||
       (qstate->qubit_num < qcirc->qubit_num) ||
-      (cmem->cmem_num < qcirc->cmem_num))
+      (cmem != NULL && cmem->cmem_num < qcirc->cmem_num))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
-  
-  /* exist some mesurements before last measurements or not */
-  /* (set 'ugate_after_measurement' true or false)        */
+
   qgate = qcirc->first;
-  Kind kind_pre = NOT_A_GATE;
-  ugate_after_measurement = false;
   while (qgate != NULL) {
-    Kind kind_now = qgate->kind;
-    if ((kind_is_measurement(kind_pre) == true) && (kind_is_unitary(kind_now) == true)) {
-      ugate_after_measurement = true;
-      break;
-    }
-    qgate = qgate->next;
-    kind_pre = kind_now;
-  }
 
-  /* number of last measurements */
-  meas_num = 0;
-  qgate = qcirc->last;
-  while (qgate != NULL && kind_is_measurement(qgate->kind) == true) {
-    meas_num++;
-    last_measurements = true;
-    qgate = qgate->prev;
-  }
-  operation_gate_num = qcirc->gate_num - meas_num;
-
-  /* set measurement qubit id */
-  if (!(meas_qid = (int*)malloc(sizeof(int) * meas_num)))
-    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
-  qgate = qcirc->last;
-  int cnt = meas_num;
-  while (qgate != NULL && kind_is_measurement(qgate->kind) == true) {
-    meas_qid[--cnt] = qgate->qid[0];
-    qgate = qgate->prev;
-  }
-  
-  /* 
-     operate quantum gates 
-  */
-  if (ugate_after_measurement == true) {  /* exist some mesurements before last measurements */
-
-    /* allocate memory for storing measurement frequency */
-    int state_num = (int)pow(2.0, meas_num);
-    if (!(freq = (int*)malloc(sizeof(int) * state_num)))
-      ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
-    for (int i=0; i<state_num; i++) freq[i] = 0;
-
-    /* execute the quantum circuit iteratively */
-    for (int n=0; n<shots; n++) {
-
-      /* initial quantum state */
-      if (!(qstate_copy(qstate, (void**)&qstate_tmp)))
-	ERR_RETURN(ERROR_QSTATE_COPY,NULL);
-
-      /* initial classical register */
-      if (!(cmem_copy(cmem, (void**)&cmem_tmp)))
-	ERR_RETURN(ERROR_CMEM_COPY,NULL);
-
-      /* operations before last measurements */
-      qgate = qcirc->first;
-      for (int i=0; i<operation_gate_num; i++) {
-
-	if ((qgate->ctrl == -1) ||
-	    ((qgate->ctrl != -1) && (cmem_tmp->bit_array[qgate->ctrl] == 1))) {
-
-	  if (kind_is_measurement(qgate->kind) == true) {  /* mesurement */
-	    if (qgate->kind == MEASURE_X) { angle = 0.5; phase = 0.0; }
-	    else if (qgate->kind == MEASURE_Y) { angle = 0.5; phase = 0.5; }
-	    else { angle = phase = 0.0; }
-	    if (!(qstate_measure(qstate_tmp, 1, angle, phase, 1, qgate->qid, (void**)&mdata)))
-	      ERR_RETURN(ERROR_QSTATE_MEASURE, false);
-	    if (qgate->c != -1) cmem_tmp->bit_array[qgate->c] = mdata->last;  /* measured value is stored to classical register */
-	    mdata_free(mdata); mdata = NULL;
-	  }
-	  else {  /* unitary gate */
-	    if (!(qstate_operate_qgate(qstate_tmp, qgate->kind, qgate->para[0], qgate->para[1], qgate->para[2], qgate->qid)))
-	      ERR_RETURN(ERROR_QSTATE_OPERATE_QGATE, false);
-	  }
-	}
-	qgate = qgate->next;
+    if ((qgate->ctrl == -1) ||
+	((qgate->ctrl != -1) && (cmem->bit_array[qgate->ctrl] == 1))) {
+    
+      if (kind_is_unitary(qgate->kind) == true) {
+	if (!(qstate_operate_qgate(qstate, qgate->kind, qgate->para[0], qgate->para[1], qgate->para[2], qgate->qid)))
+	  ERR_RETURN(ERROR_QSTATE_OPERATE_QGATE, false);
       }
-
-      /* last measurements */
-      if (operation_gate_num != qcirc->gate_num) {
+      else if (kind_is_reset(qgate->kind) == true) {
+	if (!(qstate_reset(qstate, 1, qgate->qid)))
+	  ERR_RETURN(ERROR_CANT_RESET, false);
+      }
+      else if ((kind_is_measurement(qgate->kind) == true) || (kind_is_reset(qgate->kind) == true)) {
 	if (qgate->kind == MEASURE_X) { angle = 0.5; phase = 0.0; }
 	else if (qgate->kind == MEASURE_Y) { angle = 0.5; phase = 0.5; }
 	else { angle = phase = 0.0; }
-	if (!(qstate_measure(qstate, 1, angle, phase, meas_num, meas_qid, (void**)&mdata)))
+	if (!(qstate_measure(qstate, 1, angle, phase, 1, qgate->qid, (void**)&mdata)))
 	  ERR_RETURN(ERROR_QSTATE_MEASURE, false);
-	freq[mdata->last] += 1;
+	if (qgate->c != -1) cmem->bit_array[qgate->c] = mdata->last;  /* measured value is stored to classical register */
+	mdata_free(mdata); mdata = NULL;
       }
-
-      /* this time is last or not */
-      if (n < shots - 1) {  /* not last */
-	qstate_free(qstate_tmp); qstate_tmp = NULL;
-	cmem_free(cmem_tmp); cmem_tmp = NULL;
-      }
-      else {  /* last */
-	memcpy(qstate->buffer_0, qstate_tmp->buffer_0, sizeof(COMPLEX) * qstate->state_num);
-	memcpy(qstate->buffer_1, qstate_tmp->buffer_1, sizeof(COMPLEX) * qstate->state_num);
-	qstate_free(qstate_tmp); qstate_tmp = NULL;
+      else {
+	ERR_RETURN(ERROR_QSTATE_OPERATE_QCIRC, false);
       }
     }
-
-    if (operation_gate_num != qcirc->gate_num) {
-      free(mdata->freq);
-      mdata->freq = freq;
-    }
-    else {
-      free(freq);
-      mdata_free(mdata); mdata = NULL;
-    }
-  }
-  
-  else {  /* exist some mesurements before last measurements */
-
-    /* operations before last measurements */
-    qgate = qcirc->first;
-    for (int i=0; i<operation_gate_num; i++) {
-      if ((qgate->ctrl == -1) || ((qgate->ctrl != -1) && (cmem->bit_array[qgate->ctrl] == 1))) {
-	if (!(qstate_operate_qgate(qstate, qgate->kind, qgate->para[0], qgate->para[1], qgate->para[2], qgate->qid)))
-	  ERR_RETURN(ERROR_QSTATE_OPERATE_QGATE, false);
-	qgate = qgate->next;
-      }
-    }
-
-    /* last measurements */
-    if (operation_gate_num != qcirc->gate_num) {
-      if (qgate->kind == MEASURE_X) { angle = 0.5; phase = 0.0; }
-      else if (qgate->kind == MEASURE_Y) { angle = 0.5; phase = 0.5; }
-      else { angle = phase = 0.0; }
-      if (!(qstate_measure(qstate, shots, angle, phase, meas_num, meas_qid, (void**)&mdata)))
-	ERR_RETURN(ERROR_QSTATE_MEASURE, false);
-    }
+    
+    qgate = qgate->next;
   }
 
-  free(meas_qid); meas_qid = NULL;
-
-  *mdata_out = mdata;
-  
   SUC_RETURN(true);
 }
+
+// bool qstate_operate_qcirc_old(QState* qstate, CMem* cmem, QCirc* qcirc, int shots, void** mdata_out)
+// {
+//   QGate*        qgate                   = NULL;   /* quantum gate in quantum circuit */
+//   QState*       qstate_tmp              = NULL;   /* quantum state (temporary) */
+//   CMem*         cmem_tmp                = NULL;   /* classical register (temporary) */
+//   QGate*        qgate_nuni_start        = NULL;   /* quantum gate in quantum circuit (start of non-unitary) */
+//   int           state_num               = 0;      /* number of measured state */
+//   int*          freq                    = NULL;   /* array for storing measurement frequency */
+//   int           mval                    = 0;      /* measured value */
+//   double        angle                   = 0.0;    /* measurement angle */
+//   double        phase                   = 0.0;    /* measurement phase */
+//   MData*	mdata			= NULL;   /* output measurement data */
+// 
+//   /* error check */
+//   if ((qstate == NULL || qcirc == NULL) ||
+//       (qstate->qubit_num < qcirc->qubit_num) ||
+//       (cmem != NULL && cmem->cmem_num < qcirc->cmem_num))
+//     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+// 
+//   /* 
+//      before measurement gate
+//   */
+// 
+//   qgate = qcirc->first;
+//   while (qgate != NULL) {
+// 
+//     if ((qgate->ctrl == -1) ||
+// 	((qgate->ctrl != -1) && (cmem->bit_array[qgate->ctrl] == 1))) {
+//     
+//       if (kind_is_unitary(qgate->kind) == true) {
+// 	if (!(qstate_operate_qgate(qstate, qgate->kind, qgate->para[0], qgate->para[1], qgate->para[2], qgate->qid)))
+// 	  ERR_RETURN(ERROR_QSTATE_OPERATE_QGATE, false);
+//       }
+//       else if (kind_is_reset(qgate->kind) == true) {
+// 	if (!(qstate_reset(qstate, 1, qgate->qid)))
+// 	  ERR_RETURN(ERROR_CANT_RESET, false);
+//       }
+//       else if ((kind_is_measurement(qgate->kind) == true) || (kind_is_reset(qgate->kind) == true)) {
+// 	qgate_nuni_start = qgate;
+// 	break;
+//       }
+//       else {
+// 	ERR_RETURN(ERROR_QSTATE_OPERATE_QCIRC, false);
+//       }
+//     }
+//     
+//     qgate = qgate->next;
+//   }
+// 
+//   /* 
+//      after measurement gate
+//   */
+// 
+//   /* initialize freq */
+//   if (cmem != NULL) {
+//     state_num = (int)pow(2.0, cmem->cmem_num);
+//     if (!(freq = (int*)malloc(sizeof(int) * state_num)))
+//       ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
+//     for (int i=0; i<state_num; i++) freq[i] = 0;
+//   }
+//   else {
+//     freq = NULL;
+//   }
+//       
+//   /* loop and count measured value */
+//   for (int n=0; n<shots; n++) {
+// 
+//     /* copy temporary */
+//     if (!(qstate_copy(qstate, (void**)&qstate_tmp)))
+//       ERR_RETURN(ERROR_QSTATE_COPY,NULL);
+//     if (cmem != NULL) {
+//       if (!(cmem_copy(cmem, (void**)&cmem_tmp)))
+// 	ERR_RETURN(ERROR_CMEM_COPY,NULL);
+//     }
+//     
+//     qgate = qgate_nuni_start;
+//     while (qgate != NULL) {
+// 
+//       if ((qgate->ctrl == -1) ||
+// 	  ((qgate->ctrl != -1) && (cmem_tmp->bit_array[qgate->ctrl] == 1))) {
+// 
+// 	if (kind_is_measurement(qgate->kind) == true) {  /* mesurement */
+// 	  if (qgate->kind == MEASURE_X) { angle = 0.5; phase = 0.0; }
+// 	  else if (qgate->kind == MEASURE_Y) { angle = 0.5; phase = 0.5; }
+// 	  else { angle = phase = 0.0; }
+// 	  if (!(qstate_measure(qstate_tmp, 1, angle, phase, 1, qgate->qid, (void**)&mdata)))
+// 	    ERR_RETURN(ERROR_QSTATE_MEASURE, false);
+// 	  if (qgate->c != -1) cmem_tmp->bit_array[qgate->c] = mdata->last;  /* measured value is stored to classical register */
+// 	  mdata_free(mdata); mdata = NULL;
+// 	}
+// 	else if (qgate->kind == RESET) {  /* reset */
+// 	  if (!(qstate_reset(qstate_tmp, 1, qgate->qid)))
+// 	    ERR_RETURN(ERROR_CANT_RESET, false);
+// 	}
+// 	else {  /* unitary gate */
+// 	  if (!(qstate_operate_qgate(qstate_tmp, qgate->kind, qgate->para[0], qgate->para[1], qgate->para[2], qgate->qid)))
+// 	    ERR_RETURN(ERROR_QSTATE_OPERATE_QGATE, false);
+// 	}
+// 	
+//       }
+//       qgate = qgate->next;
+//     }
+// 
+//     /* count up frequency */
+//     if (cmem_tmp != NULL) {
+//       mval = 0;
+//       for (int i=0; i<cmem_tmp->cmem_num; i++) {
+// 	mval += (cmem_tmp->bit_array[i] << (cmem_tmp->cmem_num - 1 - i));
+//       }
+//       freq[mval] += 1;
+//       cmem_free(cmem_tmp); cmem_tmp = NULL;
+//     }
+// 
+//   }
+// 
+//   /* copy back to original qstate from temporary */
+//   if (qstate_tmp != NULL) {
+//     qstate->buf_id = qstate_tmp->buf_id;
+//     if (qstate->buf_id == 0) qstate->camp = qstate->buffer_0;
+//     else qstate->camp = qstate->buffer_1;
+//     memcpy(qstate->buffer_0, qstate_tmp->buffer_0, sizeof(COMPLEX) * qstate->state_num);
+//     memcpy(qstate->buffer_1, qstate_tmp->buffer_1, sizeof(COMPLEX) * qstate->state_num);
+//     qstate_free(qstate_tmp); qstate_tmp = NULL;
+//   }
+// 
+//   /* set frequency data to mdata object */
+//   if (cmem != NULL) {
+//     int* cid;
+//     if (!(cid = (int*)malloc(sizeof(int) * cmem->cmem_num)))
+//       ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
+//     for (int i=0; i<cmem->cmem_num; i++) cid[i] = i;
+//     if (!(mdata_init(cmem->cmem_num, state_num, shots, angle, phase, cid, (void**)&mdata)))
+//       ERR_RETURN(ERROR_MDATA_INIT, false);
+//     memcpy(mdata->freq, freq, sizeof(int) * state_num);
+//     free(freq); freq = NULL;
+//     free(cid); cid = NULL;
+//     *mdata_out = mdata;
+//   }
+//   else {
+//     *mdata_out = NULL;
+//   }
+// 
+//   SUC_RETURN(true);
+// }
 
 void qstate_free(QState* qstate)
 {
