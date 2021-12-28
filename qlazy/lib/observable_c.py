@@ -26,8 +26,6 @@ def observable_init(str=None):
     if ret == FALSE:
         raise Observable_Error_Initialize()
         
-    # out = octypes.cast(c_observ.value, ctypes.POINTER(Observable))
-    # return out.contents
     return c_observ
 
 def observable_free(ob):

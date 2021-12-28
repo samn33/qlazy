@@ -62,7 +62,6 @@ class DensOp(ctypes.Structure):
         If 'prob' isn't set, equal probabilities are set.
 
         """
-        # if prob is not specified, set equal probability
         if qstate != [] and prob == []:
             mixed_num = len(qstate)
             prob = [1.0/mixed_num for _ in range(mixed_num)]
@@ -70,16 +69,12 @@ class DensOp(ctypes.Structure):
         if qubit_num != 0:
             qstate = [QState(qubit_num=qubit_num)]
             prob = [1.0]
-            # de = densop_init(qstate, prob)
-            # return de
             obj = densop_init(qstate, prob)
         
         elif qstate != [] and prob != []:
-            # return densop_init(qstate, prob)
             obj = densop_init(qstate, prob)
 
         else:
-            # return densop_init_with_matrix(matrix)
             obj = densop_init_with_matrix(matrix)
 
         self = ctypes.cast(obj.value, ctypes.POINTER(cls)).contents
@@ -98,12 +93,18 @@ class DensOp(ctypes.Structure):
         qid : list
             qubit id's list to reset.
 
+        Returns
+        -------
+        densop : instance of DensOp
+            reset density operator.
+
         Notes
         -----
         If 'qid' is not set, whole system is reset.
 
         """
         densop_reset(self, qid=qid)
+        return self
         
     @classmethod
     def mix(cls, densop=[], prob=[]):
@@ -372,8 +373,6 @@ class DensOp(ctypes.Structure):
             copy of the original density operator.
 
         """
-        # densop = densop_copy(self)
-        # return densop
         obj = densop_copy(self)
         de = ctypes.cast(obj.value, ctypes.POINTER(self.__class__)).contents
         return de
@@ -469,8 +468,6 @@ class DensOp(ctypes.Structure):
             density operator after partial trace.
 
         """
-        # densop = densop_patrace(self, qid=qid)
-        # return densop
         obj = densop_patrace(self, qid=qid)
         de = ctypes.cast(obj.value, ctypes.POINTER(self.__class__)).contents
         return de
@@ -517,8 +514,6 @@ class DensOp(ctypes.Structure):
             tensor produt of 'self' and 'densop'.
 
         """
-        # densop_out = densop_tensor_product(self, densop)
-        # return densop_out
         obj = densop_tensor_product(self, densop)
         de = ctypes.cast(obj.value, ctypes.POINTER(self.__class__)).contents
         return de

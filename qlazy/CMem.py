@@ -36,7 +36,6 @@ class CMem(ctypes.Structure):
         cmem : instance (CMem)
 
         """
-        # cmem = cmem_init(cmem_num)
         obj = cmem_init(cmem_num)
         cmem = ctypes.cast(obj.value, ctypes.POINTER(cls)).contents
         return cmem

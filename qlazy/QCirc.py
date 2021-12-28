@@ -44,7 +44,6 @@ class QCirc(ctypes.Structure):
         qcirc : instance (QCirc)
 
         """
-        # qcirc = qcirc_init()
         obj = qcirc_init()
         qcirc = ctypes.cast(obj.value, ctypes.POINTER(cls)).contents
         return qcirc
@@ -84,7 +83,6 @@ class QCirc(ctypes.Structure):
         None
 
         """
-        # qcirc_free(self)
         warnings.warn("No need to call 'free' method because free automatically, or you can use 'del' to free memory explicitly.")
         
     def __del__(self):

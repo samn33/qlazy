@@ -26,8 +26,6 @@ def qcirc_init():
     if ret == FALSE:
         raise QCirc_Error_Initialize()
 
-    # out = ctypes.cast(c_qcirc.value, ctypes.POINTER(QCirc))
-    # return out.contents
     return c_qcirc
 
 def qcirc_append_gate(qcirc, kind, qid, para, c, ctrl):
@@ -42,7 +40,7 @@ def qcirc_append_gate(qcirc, kind, qid, para, c, ctrl):
     DoubleArray = ctypes.c_double * para_num
     c_qid = IntArray(*qid)
     c_para = DoubleArray(*para)
-    
+
     lib.qcirc_append_gate.restype = ctypes.c_int
     lib.qcirc_append_gate.argtypes = [ctypes.POINTER(QCirc), ctypes.c_int, IntArray, DoubleArray,
                                       ctypes.c_int, ctypes.c_int]
