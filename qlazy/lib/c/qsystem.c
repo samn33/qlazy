@@ -55,6 +55,10 @@ static bool _operate_qgate(QState* qstate, QG* qgate)
     mdata_print_bell(mdata);
     mdata_free(mdata); mdata = NULL;
     break;
+  case RESET:
+    if (!(qstate_reset(qstate, terminal_num, qubit_id)))
+      ERR_RETURN(ERROR_CANT_RESET, false);
+    break;
   default:
     ;
   }
@@ -94,7 +98,7 @@ static bool _qsystem_execute_one_line(QSystem* qsystem, char* line)
   case SHOW:
     /* print quantum state */
     if (tnum > qubit_num + 1) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
-    terminal_num = tnum - 1;  /* number of qubits to measure */
+    terminal_num = tnum - 1;  /* number of qubits to show */
     if (anum > 1) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
     if ((qc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
     for (int i=0; i<terminal_num; i++) {
@@ -127,6 +131,7 @@ static bool _qsystem_execute_one_line(QSystem* qsystem, char* line)
     SUC_RETURN(true);
   case CIRC:
     /* print quantum circuit */
+    fprintf(stderr, "Warn: circ(&) command will be not supported in the near future.\n");
     if (tnum > 1) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
     if (anum > 1) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
     if ((qc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
@@ -135,6 +140,7 @@ static bool _qsystem_execute_one_line(QSystem* qsystem, char* line)
     SUC_RETURN(true);
   case GATES:
     /* print quantum gates */
+    fprintf(stderr, "Warn: gates(!) command will be not supported in the near future.\n");
     if (tnum > 1) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
     if (anum > 1) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
     if ((qc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
@@ -147,6 +153,7 @@ static bool _qsystem_execute_one_line(QSystem* qsystem, char* line)
     SUC_RETURN(true);
   case OUTPUT:
     /* output file */
+    fprintf(stderr, "Warn: output(>) command will be not supported in the near future.\n");
     if (tnum > 2) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
     if (tnum < 2) ERR_RETURN(ERROR_NEED_MORE_ARGUMENTS,false);
     if (anum > 1) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
@@ -289,6 +296,24 @@ static bool _qsystem_execute_one_line(QSystem* qsystem, char* line)
       qubit_id[i] = strtol(token[1+i], NULL, 10);
       if (qubit_num < qubit_id[i] + 1) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
       if (qubit_id[i] < 0) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
+    }
+    break;
+  case RESET:
+    /* reset qubit */
+    if (tnum > qubit_num + 1) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
+    terminal_num = tnum - 1;  /* number of qubits to reset */
+    if (anum > 1) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
+    if ((qc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
+    for (int i=0; i<terminal_num; i++) {
+      qubit_id[i] = strtol(token[1+i], NULL, 10);
+      if (qubit_num < qubit_id[i] + 1) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
+      if (qubit_id[i] < 0) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
+    }
+    if (terminal_num == 0) {  /* reset all qubit */
+      terminal_num = qubit_num;
+      for (int i=0; i<terminal_num; i++) {
+	qubit_id[i] = i;
+      }
     }
     break;
   case PAULI_X:
