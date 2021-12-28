@@ -20,6 +20,7 @@ static void _help_print_outline() {
 * 1-qubit gates:            X,Y,Z,XR,XR+,H,S,S+,T,T+,P,RX,RY,RZ,U1,U2,U3\n\
 * 2-qubit gates:            CX,CY,CZ,CXR,CXR+,CH,CS,CS+,CT,CT+,CP,CRX,CRY,CRZ,CU1,CU2,CU3,SW\n\
 * measurement:              M,MX,MY,MZ,MB\n\
+* reset:                    reset\n\
 [notes] \n\
 * see \'help <item>\', for more information\n\
 ");
@@ -760,6 +761,20 @@ static void _help_print_sw() {
 ");
 }
 
+static void _help_print_reset() {
+  printf("\
+== reset qubits ==\n\
+[description] \n\
+   Reset qubits.\n\
+[note] \n\
+   - If 'reset' the qubits that entangled to other qubits,\n\
+     then quantum state changes probabilistic.\n\
+[usage] \n\
+  >> reset \n\
+  >> reset <qubit_id>...\n\
+");
+}
+
 bool help_print(char* item)
 {
   Kind kind;
@@ -918,6 +933,9 @@ bool help_print(char* item)
     break;
   case SWAP_QUBITS:
     _help_print_sw();
+    break;
+  case RESET:
+    _help_print_reset();
     break;
   default:
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);

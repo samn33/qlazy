@@ -180,13 +180,15 @@ class Stabilizer(ctypes.Structure):
 
         Returns
         -------
-        None
+        self : instance of Stabilizer
+            stabilizer state.
  
         """
         for i in range(self.gene_num):
             for j in range(self.qubit_num):
                 self.set_pauli_op(i,j,'I')
             self.set_pauli_fac(i,'+1')
+        return self
         
     def clone(self):
         """

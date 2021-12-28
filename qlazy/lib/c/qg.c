@@ -154,6 +154,9 @@ bool qg_get_symbol(Kind kind, char* symbol)
   case MEASURE_BELL:
     strcpy(symbol,"MB");
     break;
+  case RESET:
+    strcpy(symbol,">");
+    break;
   default:
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
   }
@@ -263,6 +266,7 @@ bool qg_get_kind(char* symbol, Kind* kind_out)
   else if (strcmp(symbol,"mz")    == 0) kind = MEASURE_Z;
   else if (strcmp(symbol,"MB")    == 0) kind = MEASURE_BELL;
   else if (strcmp(symbol,"mb")    == 0) kind = MEASURE_BELL;
+  else if (strcmp(symbol,"reset") == 0) kind = RESET;
   else kind = NOT_A_GATE;
 
   *kind_out = kind;

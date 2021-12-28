@@ -289,6 +289,7 @@ int kind_get_qid_size(Kind kind)
   case MEASURE_X:
   case MEASURE_Y:
   case MEASURE_Z:
+  case RESET:
     qid_size = 1;
     break;
   case CONTROLLED_X:
@@ -340,6 +341,7 @@ int kind_get_para_size(Kind kind)
   case MEASURE_X:
   case MEASURE_Y:
   case MEASURE_Z:
+  case RESET:
   case CONTROLLED_X:
   case CONTROLLED_Y:
   case CONTROLLED_Z:
@@ -401,6 +403,22 @@ bool kind_is_measurement(Kind kind)
   }
 
   return is_measurement;
+}
+
+bool kind_is_reset(Kind kind)
+{
+  bool is_reset;
+  
+  switch (kind) {
+  case RESET:
+    is_reset = true;
+    break;
+  default:
+    is_reset = false;
+    break;
+  }
+
+  return is_reset;
 }
 
 bool kind_is_unitary(Kind kind)

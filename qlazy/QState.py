@@ -84,6 +84,11 @@ class QState(ctypes.Structure):
         qid : list, default - qubit id's list for all of the qubits
             qubit id's list to reset.
 
+        Returns
+        -------
+        self : instance of QState
+            quantum state.
+
         Notes
         -----
         If 'qid' is set, specified qubits are reset after
@@ -93,6 +98,7 @@ class QState(ctypes.Structure):
 
         """
         qstate_reset(self, qid=qid)
+        return self
         
     @classmethod
     def add_method(cls, method):

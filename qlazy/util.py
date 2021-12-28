@@ -139,7 +139,7 @@ def densop_check_args(de, kind=None, qid=None, shots=None, angle=None,
 def get_qgate_qubit_num(kind=None):
 
     if (kind==SHOW or kind==MEASURE or
-        kind==MEASURE_X or kind==MEASURE_Y or kind==MEASURE_Z):  # 0 if any number
+        kind==MEASURE_X or kind==MEASURE_Y or kind==MEASURE_Z or kind==RESET):  # 0 if any number
         return 0
     elif (kind==BLOCH or kind==PAULI_X or kind==PAULI_Y or kind==PAULI_Z or
           kind==ROOT_PAULI_X or kind==ROOT_PAULI_X_ or kind==HADAMARD or
@@ -163,6 +163,7 @@ def get_qgate_param_num(kind=None):
 
     if (kind==SHOW or kind==BLOCH or
         kind==MEASURE or kind==MEASURE_X or kind==MEASURE_Y or kind==MEASURE_Z or kind==MEASURE_BELL or
+        kind==RESET or
         kind==PAULI_X or kind==PAULI_Y or kind==PAULI_Z or
         kind==ROOT_PAULI_X or kind==ROOT_PAULI_X_ or kind==HADAMARD or
         kind==PHASE_SHIFT_S or kind==PHASE_SHIFT_S_ or kind==PHASE_SHIFT_T or kind==PHASE_SHIFT_T_ or
@@ -195,6 +196,13 @@ def is_clifford_gate(kind):
 def is_measurement_gate(kind):
 
     if kind in (MEASURE, MEASURE_X, MEASURE_Y, MEASURE_Z, MEASURE_BELL):
+        return True
+    else:
+        return False
+
+def is_reset_gate(kind):
+
+    if kind == RESET:
         return True
     else:
         return False

@@ -73,10 +73,9 @@ MEASURE_X      = 201
 MEASURE_Y      = 202
 MEASURE_Z      = 203
 MEASURE_BELL   = 204
+RESET          = 205
 NOT_A_GATE     = 1000
 IDENTITY       = 2000
-
-# GATE = {'x':PAULI_X}
 
 # MatrixType
 
