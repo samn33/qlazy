@@ -11,7 +11,7 @@ class Backend:
 
     Attributes
     ----------
-    name : str
+    product : str
         name of the backend
         ('qlazy' or 'qulacs' or 'ibmq')
     device : str
@@ -22,28 +22,28 @@ class Backend:
 
     Example
     -------
-    >>> bk = Backend(name='qlazy', device='stabilizer_simulator')
-    >>> bk = Backend(name='qulacs', device='gpu_simulator')
-    >>> bk = Backend(name='ibmq', device='least_busy')
+    >>> bk = Backend(product='qlazy', device='stabilizer_simulator')
+    >>> bk = Backend(product='qulacs', device='gpu_simulator')
+    >>> bk = Backend(product='ibmq', device='least_busy')
 
     """
 
-    def __init__(self, name=None, device=None):
+    def __init__(self, product=None, device=None):
 
-        if name == None:
+        if product == None:
             if device == None:
-                name = 'qlazy'
+                product = 'qlazy'
                 device = 'qstate_simulator'
             else:
                 raise Backend_Error_NameNotSpecified()            
         
-        if name in BACKEND_DEVICES.keys():
-            self.name = name
+        if product in BACKEND_DEVICES.keys():
+            self.product = product
 
-            if device in BACKEND_DEVICES[name]:
+            if device in BACKEND_DEVICES[product]:
                 self.device = device
             elif device == None:
-                self.device = BACKEND_DEVICES[name][0]
+                self.device = BACKEND_DEVICES[product][0]
             else:
                 if name == 'ibmq':
                     self.device = device
@@ -53,3 +53,9 @@ class Backend:
         else:
             raise Backend_Error_NameNotSupported()
 
+    @classmethod
+    def print(cls):
+
+        for k,v in BACKEND_DEVICES.items():
+            print("product: {}".format(k))
+            print("- devices: {}".format(v))
