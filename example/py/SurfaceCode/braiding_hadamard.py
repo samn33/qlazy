@@ -1,15 +1,17 @@
 import copy
 import networkx as nx
 
-from qlazy import QComp, Backend
+from qlazy import Stabilizer
 from qlazy.tools.Register import CreateRegister, InitRegister
 
-class QComp_SurfaceCode(QComp):
+class Stabilizer_SurfaceCode(Stabilizer):
 
-    def __init__(self, qubit_num=0, qid=None, backend=None):
+    def initialize(self, qid=None):
+        """ 符号空間を初期化(真空状態を作成) """
 
-        cmem_num = qubit_num
-        super().__init__(qubit_num=qubit_num, cmem_num=cmem_num, backend=backend)
+        self.set_all('Z')
+        cmem_num = self.qubit_num
+        self.cmem = [0] * cmem_num
         self.qid = qid
         self.cid = copy.deepcopy(qid)
         self.lattice = self.__make_lattice(qid)
@@ -20,17 +22,7 @@ class QComp_SurfaceCode(QComp):
         self.Lz_chain = []
         self.Lx_ancilla = 0
         self.Lz_ancilla = 0
-
-    def run(self, clear_qubits=False, clear_cmem=False, clear_qcirc=True, shots=1, cid=[]):
-        """ 量子回路を実行
-            (default: 実行後、量子回路はクリアするが、量子状態と古典メモリはクリアしない) 
-        """
-        return super().run(clear_qubits=clear_qubits, clear_cmem=clear_cmem,
-                           clear_qcirc=clear_qcirc, shots=shots, cid=cid)
-
-    def initialize(self):
-        """ 符号空間を初期化(真空状態を作成) """
-
+        
         for i in range(len(self.xstab_id)):
             for j in range(len(self.xstab_id[0])):
                 self.__xstab_meas(i, j)
@@ -55,7 +47,6 @@ class QComp_SurfaceCode(QComp):
     def operate_Lx(self):
         """ 論理パウリX演算 """
         [self.x(n) for n in self.Lx_chain]
-        self.run()
 
     def measure_Lx(self, shots=1):
         """ 論理パウリX演算子の測定 """
@@ -63,18 +54,16 @@ class QComp_SurfaceCode(QComp):
         ancilla = self.Lx_ancilla
         self.h(ancilla)
         [self.cx(ancilla, n) for n in self.Lx_chain]
-        self.h(ancilla).measure(qid=[ancilla], cid=[ancilla])
-        result = self.run(shots=shots, cid=[ancilla])
-        return result.frequency
+        md = self.h(ancilla).m(qid=[ancilla], shots=shots)
+        return md.frequency
 
     def measure_Lz(self, shots=1):
         """ 論理パウリZ演算子の測定 """
 
         ancilla = self.Lz_ancilla
         [self.cx(n, ancilla) for n in self.Lz_chain]
-        self.measure(qid=[ancilla], cid=[ancilla])
-        result = self.run(shots=shots, cid=[ancilla])
-        return result.frequency
+        md = self.m(qid=[ancilla], shots=shots)
+        return md.frequency
 
     def operate_Lh(self):
         """ 論理アダマール演算 """
@@ -148,20 +137,21 @@ class QComp_SurfaceCode(QComp):
                 q_positions.append((i, j))
                 if (i%2 == 0 and j%2 == 1) or (i%2 == 1 and j%2 == 0):
                     d_positions.append((i,j))
-                    self.h(self.qid[i][j]).run()
+                    # self.h(self.qid[i][j]).run()
+                    self.h(self.qid[i][j])
 
         # スワップ
         # - データ量子ビットとその上の測定量子ビットをスワップ
         for (i, j) in d_positions:
             if (i <= 5 or i >= 13) or (j <= 6 or j >= 14): continue
             d_0, d_1 = self.qid[i][j], self.qid[i-1][j]
-            self.cx(d_0, d_1).cx(d_1, d_0).cx(d_0, d_1).run()
+            self.cx(d_0, d_1).cx(d_1, d_0).cx(d_0, d_1)
 
         # - 測定量子ビットとその左の測定量子ビットをスワップ
         for (i, j) in d_positions:
             if (i <= 5 or i >= 13) or (j <= 6 or j >= 14): continue
             d_0, d_1 = self.qid[i-1][j], self.qid[i-1][j-1]
-            self.cx(d_0, d_1).cx(d_1, d_0).cx(d_0, d_1).run()
+            self.cx(d_0, d_1).cx(d_1, d_0).cx(d_0, d_1)
 
         # - 補助量子ビットに対応した古典レジスタを左斜め上に移動
         for (i, j) in q_positions:
@@ -285,10 +275,8 @@ class QComp_SurfaceCode(QComp):
         self.h(ancilla)
         [self.cx(ancilla, n) for n in neighbors]
         self.h(ancilla)
-        self.measure(qid=[ancilla], cid=[ancilla])
-        result = self.run(cid=[ancilla])
-        if self.cmem[ancilla] == 1: self.x(ancilla).run(cid=[ancilla])
-        return result.frequency
+        self.cmem[ancilla] = int(self.measure(qid=[ancilla]))
+        if self.cmem[ancilla] == 1: self.x(ancilla)
 
     def __zstab_meas(self, i, j, shots=1):
         """ 面(i,j)に対応したZスタビライザを測定 """
@@ -296,25 +284,19 @@ class QComp_SurfaceCode(QComp):
         ancilla = self.zstab_id[i][j]
         neighbors = list(nx.neighbors(self.lattice, ancilla))
         [self.cx(n, ancilla) for n in neighbors]
-        self.measure(qid=[ancilla], cid=[ancilla])
-        result = self.run(shots=shots, cid=[ancilla])
-        if self.cmem[ancilla] == 1: self.x(ancilla).run(cid=[ancilla])
-        return result.frequency
+        self.cmem[ancilla] = int(self.measure(qid=[ancilla]))
+        if self.cmem[ancilla] == 1: self.x(ancilla)
 
     def __x_meas(self, q):
         """ q番目の量子ビットをX基底で測定 """
 
-        self.h(q).measure(qid=[q], cid=[q])
-        result = self.run()
-        self.h(q).run(cid=[q])
-        return result.frequency
+        self.cmem[q] = int(self.h(q).measure(qid=[q]))
+        self.h(q)
 
     def __z_meas(self, q):
         """ q番目の量子ビットをZ基底で測定 """
 
-        self.measure(qid=[q], cid=[q])
-        result = self.run(cid=[q])
-        return result.frequency
+        self.cmem[q] = int(self.measure(qid=[q]))
 
     def __move_defect_p(self, rows, cols):
         """ p型欠陥を移動
@@ -329,12 +311,10 @@ class QComp_SurfaceCode(QComp):
                 self.__x_meas(q)
                 if self.cmem[q] == 1:
                     [self.z(n) for n in list(nx.neighbors(self.lattice, self.zstab_id[rows[0]][cols[0]]))]
-                    self.run()
                 if i > 1:
                     self.__zstab_meas(row_pre, col_pre)
                     if self.cmem[self.zstab_id[row_pre][col_pre]] == 1:
                         [self.x(n) for n in chain]
-                        self.run()
                 chain.append(q)
             row_pre, col_pre = row, col
 
@@ -345,10 +325,9 @@ def main():
     qid = CreateRegister(row_length, col_length)  # 量子ビットは2次元配列(格子)に置く
     qubit_num = InitRegister(qid)
     
-    bk = Backend(name='qlazy', device='stabilizer_simulator')
-    qc = QComp_SurfaceCode(qubit_num=qubit_num, qid=qid, backend=bk)
+    qc = Stabilizer_SurfaceCode(qubit_num=qubit_num, gene_num=qubit_num)
 
-    qc.initialize()        # 真空状態を作成
+    qc.initialize(qid=qid)        # 真空状態を作成
     qc.set_logical_plus()  # 論理|+>状態を準備
     qc.operate_Lh()        # 論理アダマール演算
     # qc.operate_Lx()        # 論理パウリX演算
