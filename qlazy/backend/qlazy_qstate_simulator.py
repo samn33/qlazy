@@ -8,14 +8,7 @@ from qlazy.QState import *
 from qlazy.Result import *
 from qlazy.lib.qstate_c import *
 
-import sys
-
-def init(qubit_num=0, backend=None):
-
-    qstate = QState(qubit_num)
-    return qstate
-
-def run(qubit_num=0, cmem_num=0, qstate=None, qcirc=[], cmem=[], shots=1, cid=[], backend=None):
+def run(qcirc=[], shots=1, cid=[], backend=None):
 
     qcc = QCirc()
     for i, gate in enumerate(qcirc):
@@ -44,21 +37,21 @@ def run(qubit_num=0, cmem_num=0, qstate=None, qcirc=[], cmem=[], shots=1, cid=[]
             c = None
             qcc.append_gate(kind, qids, para, c, ctrl)
 
+    qubit_num = qcc.qubit_num
+    cmem_num = qcc.cmem_num
+    qstate = QState(qubit_num=qubit_num)
+    cmem = [0] * cmem_num
+
+    if cmem_num < len(cid):
+        raise ValueError("length of cid must be less than classical resister size of qcirc")
+
+    if cid == []:
+        cid = [i for i in range(cmem_num)]
+
     frequency = qstate_operate_qcirc(qstate, cmem, qcc, shots, cid)
 
-    if frequency is not None:
-        result = Result(cid=cid, frequency=frequency)
-    else:
-        result = None
-        
+    info = {'qstate': qstate, 'cmem': cmem}
+
+    result = Result(cid=cid, frequency=frequency, backend=backend, info=info)
+
     return result
-    
-def clear(qstate=None, backend=None):
-
-    if qstate != None:
-        qstate.reset()
-
-def free(qstate=None, backend=None):
-
-    if qstate != None:
-        del qstate

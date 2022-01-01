@@ -7,48 +7,33 @@
 された量子回路をユニタリゲートと測定の組み合わせという形で用意しておき、
 それを量子コンピュータに投入して測定結果を取得するということです。
 QCompクラスは、そのような一連の操作を実行できるように量子コンピュータ
-そのものを抽象化したクラスです。Backendクラスは、どの量子コンピュータ
-を使って量子計算を行うかを指定するためのクラスです。この2つのクラスを
-基本にして、どのように量子計算を実行するかについて、以下で説明します。
+そのものを抽象化したクラスです。このクラスを使って、どのように量子計算
+を実行するかについて、以下で説明します。
 
 ### 量子コンピュータの生成・初期化
 
 量子計算を実行するためには、当たり前ですが、まず量子コンピュータを用意
-する必要があります。一番簡単な方法は、
+する必要があります。QCompのインスタンスを生成するときに、どの量子コン
+ピュータのバックエンドで計算をさせるかをproduct(製品名)とdevice(デバイ
+ス名)の組で指定します。例えば、qlazyというproductのqstate_simulatorと
+いうdeviceで計算させたい場合、
 
     from qlazy import QComp
-    qc = QComp(qubit_num=2)
-	
-です。QCompのqubit_numには計算に必要な量子ビット数を指定します。これで
-2量子ビットの計算ができる量子コンピュータが用意できました。Backendを指
-定していない場合は、qlazyの「量子状態計算シミュレータ」('qlazy'という
-名前の'qstate_simulator'というデバイス)がセットされます。Backendを明示
-的に指定する場合は、
+	qc = QComp(product='qlazy', device='qstate_simulator')
 
-    from qlazy import QComp, Backend
-	bk = Backend(name='qlazy', device='qstate_simulator')
-	qc = QComp(qubit_num=2, backend=bk)
-	
-のようにします。Backendのnameには使用したいバックエンド名を指定します。
-deviceにはそのバックエンドでサポートされているデバイス名を指定します
-（今の例の場合、シミュレータですが）。qlazyの「スタビライザー計算シミュ
-レータ」を使用したい場合は、
+とします。qlazyのstabilizer_simulatorで計算させたい場合、
 
-    bk = Backend(name='qlazy', device='stabilizer_simulator')
+	qc = QComp(product='qlazy', device='stabilizer_simulator')
 
-とします。その他、現在のバージョンで対応しているバックエンドは、
-[qulacs](https://github.com/qulacs/qulacs)と
-[IBM Quantum(IBMQ)](https://quantum-computing.ibm.com/)です。
+とします。
+
+	qc = QComp()
+
+のようにproductとdeviceを指定しない場合、qlazyのqstate_simulatorが指定
+されます。その他、現在のバージョンで対応しているバックエンドは、
+[qulacs](https://github.com/qulacs/qulacs)と[IBM Quantum(IBMQ)](https://quantum-computing.ibm.com/)です。
 使用法などの詳細は「対応しているバックエンド」(後述)をご参照ください。
 
-これでいろんな量子計算を実行する準備ができたのですが、量子計算途中の測
-定値を古典レジスタに格納しておき、その値によってその後のゲート演算の制
-御をしたい場合があります。そのような場合、
-
-    qc = QComp(qubit_num=2, cmem_num=2, backend=bk)
-	
-のように、測定値を格納する古典メモリ(古典レジスタ)のサイズをcmem_numで
-指定しておけば、古典レジスタ用のメモリ領域が内部に確保されます。
 
 ### 量子回路の設定と実行
 
@@ -58,13 +43,13 @@ deviceにはそのバックエンドでサポートされているデバイス�
 やDensopクラスと同じ記法でゲートを追加していきます。例えば、Bell状態を
 作成する回路を設定したい場合は、
 
-    qc = QComp(qubit_num=2, cmem_num=2)
+    qc = QComp()
     qc.h(0)
     qc.cx(0,1)
 
 のようにします。hはアダマールゲート、cxはCNOTゲートを表します。または、
 
-    qc = QComp(qubit_num=2, cmem_num=2)
+    qc = QComp()
     qc.h(0).cx(0,1)
 
 のようにゲートをつなげて書いてもOKです。これで量子コンピュータ内部に、
@@ -73,11 +58,8 @@ deviceにはそのバックエンドでサポートされているデバイス�
             |
     q1 -----X---
     
-    c0 ---------	
-    c1 ---------	
-	
-という回路が設定されたことになります。ここで、q0,q1は量子レジスタ、
-c0,c1は古典レジスタを表しています。
+という回路が設定されたことになります。ここで、q0,q1は量子レジスタを表
+しています。
 
 QStateクラスやDensOpクラスやStabilizerクラスと違い、この段階ではまだゲー
 ト演算は実行されていません。以下のようにrunメソッドを適用することでは
@@ -144,7 +126,7 @@ runのオプションとして頻度を取得したい古典レジスタ番号ci
 古典レジスタに格納されている測定結果に応じて、以降のゲート制御をしたい
 ことがあります。そのような一例を以下に示します。
 
-    qc = QComp(qubit_num=2, cmem_num=2)
+    qc = QComp()
     qc.h(0).cx(0,1).measure(qid=[0],cid=[0]).x(0, ctrl=0).x(1, ctrl=0).measure(qid=[0,1], cid=[0,1])
 	result = qc.run(shots=10)
 	print(result.frequency)
@@ -187,7 +169,7 @@ xはQStateクラスやDensOpクラスと同様パウリXゲートを表してお
 を指定します。何も指定しなかった場合、すべての量子ビットが|0>にリセッ
 トされます。
 
-    qc = QComp(qubit_num=2, cmem_num=2)
+    qc = QComp()
     qc.h(0).cx(0,1).reset(qid=[0]).measure(qid=[0,1], cid=[0,1])
 	result = qc.run(shots=10)
 	print(result.frequency)
@@ -266,7 +248,7 @@ DensOpクラスのものと同様で、さらに上で説明したctrlという�
 のようにPauliProductクラスをimportする必要があります。例えば、3量子ビッ
 トの状態に対して、X2 Y0 Z1というパウリ積を演算したい場合、
 
-    qs = QComp(qubit_num=3)
+    qs = QComp()
 	pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
 	qc.operate(pp=pp)
 	
@@ -274,7 +256,7 @@ DensOpクラスのものと同様で、さらに上で説明したctrlという�
 定します。制御化されたパウリ積はoperateメソッドのctrlオプションに制御
 量子ビット番号を指定することで実現できます。以下のようにします。
 
-    qc = QComp(qubit_num=4)
+    qc = QComp()
 	pp = PauliProduct(pauli_str="XYZ", qid=[0,1,2])
 	qc.operate(pp=pp, ctlr=3)
 	
@@ -290,7 +272,7 @@ DensOpクラスのものと同様で、さらに上で説明したctrlという�
 
 上で説明した基本パターンを改めてまとめると、
 - (1) バックエンドの定義
-- (2) 量子コンピュータの初期化(量子レジスタ数、古典レジスタ数、バックエンドを設定)
+- (2) 量子コンピュータの初期化（バックエンドを指定）
 - (3) 量子回路の設定(ユニタリゲートと非ユニタリゲートを次々に追加)
 - (4) 量子回路の実行と結果取得
 ということになります。
@@ -298,18 +280,17 @@ DensOpクラスのものと同様で、さらに上で説明したctrlという�
 例えば、
 
     from qlazy import QComp, Backend
-	bk = Backend(name='qlazy_qstate_simulator')
-	qc = QComp(qubit_num=1, cmem_num=1, backend=bk)
+	bk = Backend(name='qlazy', device='qstate_simulator')
+	qc = QComp(backend=bk)
     result = qc.x(0).measure(qid=[0], cid=[0]).run(shots=10)
     print(result.frequency)
 
 という具合です。ここで、5行目のrunを実行したら、量子コンピュータ内部の
-「量子回路」と「量子状態」と「古典メモリ」はすべてリセットされる仕様に
-なっています。なので、再びrunしても何も起きません。しかし、同じ量子回
-路を保持したまま繰り返し何度も計算実行したい場合やすでに設定済の量子回
-路にさらにゲートを追加して計算実行したい場合があるかもしれません。そう
-いった場合、runのオプションclear_qcircにFalseを指定することで量子回路
-をクリアしないようにできます。
+「量子回路」はクリアされる仕様になっています。なので、再びrunしても何
+も起きません。しかし、同じ量子回路を保持したまま繰り返し何度も計算実行
+したい場合やすでに設定済の量子回路にさらにゲートを追加して計算実行した
+い場合があるかもしれません。そういった場合、runのオプションclear_qcirc
+にFalseを指定することで量子回路をクリアしないようにできます。
 
 上の例で、
 
@@ -342,19 +323,8 @@ DensOpクラスのものと同様で、さらに上で説明したctrlという�
 
 ### レジスタの設定
 
-大規模な量子回路を相手に量子プログラミングしたい場合、例えば、
-
-    qc = QComp(qubit_num=1000)
-
-とやるわけですが(幸か不幸か1000量子ビットを扱えるデバイスはまだどこに
-も存在していないですが...)、たいていの場合1000個の量子ビットは対等な役
-割を担っているわけではないと思います。よくありがちなのは、0番目からM番
-目までは補助量子ビットでM+1番目からN-1番目まではデータ量子ビットとして
-扱うとか、あるいはデータ量子ビットもグループ分けして扱った方がプログラ
-ミングが楽になる場合があります。
-
-というわけで、量子レジスタや古典レジスタをグループ分けしてプログラミン
-グしたい場合、レジスタ関連ツールを使うことができます。
+大規模な量子回路を相手に量子プログラミングしたい場合、レジスタ関連ツー
+ルを使うと便利です。
 
 まず、
 
@@ -437,8 +407,7 @@ QCompクラスを継承することで、自分専用の量子ゲートを簡単
             self.h(q0).cx(q0,q1)
             return self
 
-    bk = Backend(name='qlazy', device='qstate_simulator')
-    qc = MyQComp(backend=bk, qubit_num=2, cmem_num=2)
+    qc = MyQComp(name='qlazy', device='qstate_simulator')
     result = qc.bell(0,1).measure(qid=[0,1], cid=[0,1]).run(shots=10)
     ...
 

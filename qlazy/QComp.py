@@ -11,12 +11,6 @@ class QComp:
 
     Attributes
     ----------
-    qubit_num : int
-        size of qubits
-    cmem_num : int
-        size of classical memory
-    cmem : list
-        classical memory
     qcirc : list of dict
         quantum circuit
         dict = {'kind': kind, 'qid': qid, 'cid': cid, 
@@ -29,111 +23,69 @@ class QComp:
         phase1: float
         phase2: float
         ctrl: int
-    qstate : instance of quantum state
-        quantum state (depend on backend)
+    backend : instance of Backend
+        backend device of quantum computing
 
     """
-    def __init__(self, qubit_num=0, cmem_num=0, backend=None):
-
-        self.qubit_num = qubit_num
+    def __init__(self, product='qlazy', device='qstate_simulator'):
+    
         self.qcirc = []
-        self.cmem_num = cmem_num
-        self.cmem = [0] * cmem_num
-
-        if backend is None:
-            self.backend = Backend()
-        else:
-            self.backend = backend
-
+        self.backend = Backend(product=product, device=device)
+    
         # qlazy
-        if self.backend.name == 'qlazy':
-
+        if self.backend.product == 'qlazy':
+    
             # qstate simulator
             if self.backend.device == 'qstate_simulator':
-                from qlazy.backend.qlazy_qstate_simulator import init, run, clear, free
-                self.__init = init
+                from qlazy.backend.qlazy_qstate_simulator import run
                 self.__run = run
-                self.__clear = clear
-                self.__free = free
         
             # stabilizer simulator
             elif self.backend.device == 'stabilizer_simulator':
-                from qlazy.backend.qlazy_stabilizer_simulator import init, run, clear, free
-                self.__init = init
+                from qlazy.backend.qlazy_stabilizer_simulator import run
                 self.__run = run
-                self.__clear = clear
-                self.__free = free
                 
             else:
                 raise Backend_Error_DeviceNotSupported()
             
         # qulacs
-        elif self.backend.name == 'qulacs':
-
+        elif self.backend.product == 'qulacs':
+    
             # cpu_simulator
             if self.backend.device == 'cpu_simulator':
-                from qlazy.backend.qulacs_cpu_simulator import init, run, clear, free
-                self.__init = init
-                self.__run = run
-                self.__clear = clear
-                self.__free = free
+                from qlazy.backend.qulacs_simulator import run_cpu
+                self.__run = run_cpu
         
             # gpu_simulator
             elif self.backend.device == 'gpu_simulator':
-                from qlazy.backend.qulacs_gpu_simulator import init, run, clear, free
-                self.__init = init
-                self.__run = run
-                self.__clear = clear
-                self.__free = free
+                from qlazy.backend.qulacs_simulator import run_gpu
+                self.__run = run_gpu
                 
             else:
                 raise Backend_Error_DeviceNotSupported()
         
         # ibmq
-        elif self.backend.name == 'ibmq':
-            
-            from qlazy.backend.ibmq import init, run, clear, free
-            self.__init = init
+        elif self.backend.product == 'ibmq':
+            from qlazy.backend.ibmq import run
             self.__run = run
-            self.__clear = clear
-            self.__free = free
-
+    
         else:
             raise Backend_Error_NameNotSupported()
 
-        self.qstate = self.__init(qubit_num=qubit_num, backend=self.backend)
-            
-    def clear(self, clear_qubits=True, clear_cmem=True, clear_qcirc=True):
+    def clear(self):
         """
         clear quantum state, quantum circuit, and classical memory
 
         Parameters
         ----------
-        clear_qubits : bool, default True
-            clear quantum state or not.
-        clear_cmem : bool, default True
-            clear classical memory or not.
-        clear_qcirc : bool, default True
-            clear quantum circuit or not.
+        None
 
         Returns
         -------
         None
 
         """
-        # if reset_qubits == True:
-        if clear_qubits == True:
-            if self.qstate != None:
-                self.__clear(qstate=self.qstate, backend=self.backend)
-        else:
-            if self.backend.name == 'ibmq':
-                raise ValueError("clear_qubits must be True (can't maintain quantum state, when you clear QComp)")
-
-        if clear_cmem == True:
-            self.cmem = [0] * self.cmem_num
-
-        if clear_qcirc == True:
-            self.qcirc = []
+        self.qcirc = []
 
     def free(self):
         """
@@ -152,12 +104,13 @@ class QComp:
 
     def __del__(self):
         
-        if self.qstate != None:
-            self.__free(qstate=self.qstate, backend=self.backend)
-
-        del self.cmem
         del self.qcirc
 
+    @classmethod
+    def supported(cls):
+
+        Backend.print()
+        
     @classmethod
     def free_all(cls, *qcomps):
         """
@@ -198,7 +151,7 @@ class QComp:
             else:
                 raise QComp_Error_FreeAll()
 
-    def run(self, shots=DEF_SHOTS, cid=[], clear_qubits=True, clear_cmem=True, clear_qcirc=True):
+    def run(self, shots=DEF_SHOTS, cid=[], clear_qcirc=True):
         """
         run the quantum circuit.
 
@@ -208,10 +161,6 @@ class QComp:
             number of measurements.
         cid : list, default []
             classical register id list to count frequency.
-        clear_qubits : bool, default True
-            clear quantum state or not.
-        clear_cmem : bool, default True
-            clear classical memory or not.
         clear_qcirc : bool, default True
             clear quantum circuit or not.
 
@@ -223,25 +172,24 @@ class QComp:
         Examples
         --------
         >>> # simple example
-        >>> qc = QComp(qubit_num=2, cmem_num=2).h(0).cx(0,1).measure(qid=[0,1], cid=[0,1])  # add quantum gates, set circuit
+        >>> qc = QComp().h(0).cx(0,1).measure(qid=[0,1], cid=[0,1])  # add quantum gates, set circuit
         >>> result = qc.run(shots=10)  # run the circuit, get measured result
         >>> print(result.frequency)
         Counter({'00': 5, '11': 5})
         >>> ...
         >>> # control qubits by measured results
-        >>> qc = QComp(qubit_num=2, cmem_num=2)  # set quantum and classical register 
+        >>> qc = QComp()
         >>> qc.h(0).cx(0,1).measure(qid=[0],cid=[0]).x(0, ctrl=0).x(1, ctrl=0).measure(qid=[0,1], cid=[0,1])
 	>>> result = qc.run(shots=10)
 	>>> print(result.frequency)
         Counter({'00': 10})
 
         """
-        if cid == []:
-            cid = [i for i in range(self.cmem_num)]
-        result = self.__run(qubit_num=self.qubit_num, cmem_num=self.cmem_num,
-                            qstate=self.qstate, qcirc=self.qcirc, cmem=self.cmem, shots=shots, cid=cid,
-                            backend=self.backend)
-        self.clear(clear_qubits=clear_qubits, clear_cmem=clear_cmem, clear_qcirc=clear_qcirc)
+        result = self.__run(qcirc=self.qcirc, shots=shots, cid=cid, backend=self.backend)
+
+        if clear_qcirc == True:
+            self.clear()
+
         return result
 
     def measure(self, qid, cid=None):
@@ -1168,7 +1116,9 @@ class QComp:
         # non-clifford operation is not allowed for stabilizer calculation
         if (is_clifford_gate(kind) is False
             and is_measurement_gate(kind) is False
-            and self.backend.name == 'qlazy_stabilizer_simulator'):
+            and is_reset_gate(kind) is False
+            and self.backend.product == 'qlazy'
+            and self.backend.device == 'stabilizer_simulator'):
             raise QComp_Error_QgateNotSupported()
         
         else:

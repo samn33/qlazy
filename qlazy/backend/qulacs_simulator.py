@@ -68,12 +68,43 @@ GateFunctionName = {
     CONTROLLED_U3:'__get_CU3',
 }
 
-def init(qubit_num=0, backend=None):
+def run_cpu(qcirc=[], shots=1, cid=[], backend=None):
 
-    qstate = QuantumState(qubit_num)
-    return qstate
+    return __run_all(qcirc=qcirc, shots=shots, cid=cid, backend=backend, proc='CPU')
 
-def run(qubit_num=0, cmem_num=0, qstate=None, qcirc=[], cmem=[], shots=1, cid=[], backend=None):
+def run_gpu(qcirc=[], shots=1, cid=[], backend=None):
+
+    return __run_all(qcirc=qcirc, shots=shots, cid=cid, backend=backend, proc='GPU')
+
+def __run_all(qcirc=[], shots=1, cid=[], backend=None, proc='CPU'):
+
+    #
+    # get qubit_num and cmem_num
+    #
+
+    qubit_num = 0
+    cmem_num = 0
+    for c in qcirc:
+        if (c['qid'] is not None) and (c['qid'] != []):
+            qubit_num = max(qubit_num, max(c['qid']) + 1)
+        if (c['cid'] is not None) and (c['cid'] != []):
+            cmem_num = max(cmem_num, max(c['cid']) + 1)
+
+    if cmem_num < len(cid):
+        raise ValueError("length of cid must be less than classical resister size of qcirc")
+
+    if cid == []:
+        cid = [i for i in range(cmem_num)]
+
+    #
+    # initialize
+    #
+
+    if proc == 'CPU':
+        qstate = QuantumState(qubit_num)
+    else:
+        qstate = QuantumStateGpu(qubit_num)
+    cmem = [0] * cmem_num
 
     #
     # before measurement gate
@@ -94,7 +125,9 @@ def run(qubit_num=0, cmem_num=0, qstate=None, qcirc=[], cmem=[], shots=1, cid=[]
                                        phase=c['phase'], phase1=c['phase1'], phase2=c['phase2'])
 
     if exist_measurement == False:
-        return None
+        info = {'quantumstate': qstate, 'cmem': cmem}
+        result = Result(cid=cid, frequency=None, backend=backend, info=info)
+        return result
     
     #
     # after measurement gate
@@ -130,24 +163,15 @@ def run(qubit_num=0, cmem_num=0, qstate=None, qcirc=[], cmem=[], shots=1, cid=[]
     
     if qstate_tmp is not None:
         qstate.load(qstate_tmp.get_vector())
-        
-    if len(frequency) > 0:
-        result = Result(cid=cid, frequency=frequency)
-    else:
-        result = None
 
+    if len(frequency) == 0:
+        frequency = None
+
+    info = {'quantumstate': qstate, 'cmem': cmem}
+    result = Result(cid=cid, frequency=frequency, backend=backend, info=info)
+    
     return result
         
-def clear(qstate=None, backend=None):
-
-    if qstate != None:
-        qstate.set_zero_state()
-
-def free(qstate=None, backend=None):
-
-    if qstate != None:
-        del qstate
-
 def __is_supported_qgate(kind):
 
     if kind in GateFunctionName.keys():
@@ -334,62 +358,3 @@ def __qulacs_measure(qstate, qubit_num, qid):
     mval_list = [qstate.get_classical_value(i) for i in range(len(qid))]
 
     return mval_list
-
-# def __qulacs_measure_old(qstate, qubit_num, qid, shots=1):
-# 
-#     # error check
-#     # qubit_num = qstate.get_qubit_count()
-#     if max(qid) >= qubit_num:
-#         raise ValueError
-# 
-#     # list of binary vectors for len(qid) bit integers
-#     qid_sorted = sorted(qid)
-#     mbits_list = []
-#     for i in range(2**len(qid)):
-#         # ex)
-#         # qid = [5,0,2] -> qid_sorted = [0,2,5]
-#         # i = (0,1,2), idx = (2,0,1)
-#         # bits = [q0,q1,q2] -> mbits = [q1,q2,q0]
-#         bits = list(map(int, list(format(i, '0{}b'.format(len(qid))))))
-#         mbits = [0] * len(qid)
-#         for i, q in enumerate(qid):
-#             idx = qid_sorted.index(q)
-#             mbits[idx] = bits[i]
-#         mbits_list.append(mbits)
-# 
-#     # list of probabilities
-#     prob_list = []
-#     prob = 0.0
-#     for mbits in mbits_list:
-#         args = [2] * qubit_num
-#         for j, q in enumerate(qid):
-#             args[q] = mbits[j]
-#         prob += qstate.get_marginal_probability(args)
-#         prob_list.append(prob)
-#     if prob_list[-1] != 1.0:
-#         prob_list[-1] = 1.0
-# 
-#     # frequency
-#     mval_data = []
-#     if shots > 1:
-#         for i in range(shots - 1):
-#             rand = random.random()
-#             for mbits, prob in zip(mbits_list, prob_list):
-#                 mval = ''.join(map(str, mbits))
-#                 if rand <= prob:
-#                     mval_data.append(mval)
-#                     break
-# 
-#     # last quantum state
-#     circ = QuantumCircuit(qubit_num)
-#     for i, q in enumerate(qid):
-#         circ.add_gate(Measurement(q, i))
-#     circ.update_quantum_state(qstate)
-# 
-#     last = ''.join(map(str, [qstate.get_classical_value(i) for i in range(len(qid))]))
-#     mval_data.append(last)
-#     frequency = Counter(mval_data)
-# 
-#     measured_data = {'measured_qid': qid, 'frequency': frequency, 'last': last}
-#     
-#     return measured_data

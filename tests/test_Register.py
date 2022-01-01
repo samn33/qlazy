@@ -57,8 +57,7 @@ class TestRegisterQComp(unittest.TestCase):
         cid_0 = CreateRegister(1)
         cmem_num = InitRegister(cid_0)
 
-        bk = Backend(name='qlazy', device='qstate_simulator')
-        qc = QComp(qubit_num=qubit_num, cmem_num=cmem_num, backend=bk)
+        qc = QComp(product='qlazy', device='qstate_simulator')
         qc.h(qid_0[0])
         qc.cx(qid_0[0], qid_1[0][0]).cx(qid_0[0], qid_1[0][1]).cx(qid_0[0], qid_1[1][0]).cx(qid_0[0], qid_1[1][1])
         qc.h(qid_0[0])
@@ -77,8 +76,7 @@ class TestRegisterQComp(unittest.TestCase):
         cid_1 = CreateRegister(2,3)
         cmem_num = InitRegister(cid_0, cid_1)
         
-        bk = Backend(name='qlazy', device='qstate_simulator')
-        qc = QComp(qubit_num=qubit_num, cmem_num=cmem_num, backend=bk)
+        qc = QComp(product='qlazy', device='qstate_simulator')
         qc.h(qid_0[1]).cx(qid_0[1], qid_1[0][2]).measure(qid=[qid_0[1], qid_1[0][2]], cid=[cid_1[0][0],cid_1[1][1]])
         res = qc.run(shots=10, cid=[cid_1[0][0],cid_1[1][1]])
         freq = res.frequency
