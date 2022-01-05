@@ -76,19 +76,10 @@ def run_gpu(qcirc=[], shots=1, cid=[], backend=None):
 
     return __run_all(qcirc=qcirc, shots=shots, cid=cid, backend=backend, proc='GPU')
 
-def __run_all(qcirc=[], shots=1, cid=[], backend=None, proc='CPU'):
+def __run_all(qcirc=None, shots=1, cid=[], backend=None, proc='CPU'):
 
-    #
-    # get qubit_num and cmem_num
-    #
-
-    qubit_num = 0
-    cmem_num = 0
-    for c in qcirc:
-        if (c['qid'] is not None) and (c['qid'] != []):
-            qubit_num = max(qubit_num, max(c['qid']) + 1)
-        if (c['cid'] is not None) and (c['cid'] != []):
-            cmem_num = max(cmem_num, max(c['cid']) + 1)
+    qubit_num = qcirc.qubit_num
+    cmem_num = qcirc.cmem_num
 
     if cmem_num < len(cid):
         raise ValueError("length of cid must be less than classical resister size of qcirc")
@@ -110,21 +101,19 @@ def __run_all(qcirc=[], shots=1, cid=[], backend=None, proc='CPU'):
     # before measurement gate
     #
 
-    exist_measurement = False
-    for pos, c in enumerate(qcirc):
+    while True:
+        kind = qcirc.kind_first()
+        # if kind == None or kind == MEASURE or kind == RESET:
+        if kind is None or kind is MEASURE or kind is RESET:
+            break
 
-        if (c['ctrl'] == None or (c['ctrl'] != None and cmem[c['ctrl']] == 1)):
+        else:
+            (kind, qid, para, c, ctrl) = qcirc.pop_gate()
+            if ctrl == None or (ctrl != None and cmem[ctrl] == 1):
+                __qulacs_operate_qgate(qstate, qubit_num, kind=kind, qid=qid,
+                                       phase=para[0], phase1=para[1], phase2=para[2])
 
-            if c['kind'] == MEASURE:
-                exist_measurement = True
-                break
-            elif c['kind'] == RESET:
-                __qulacs_reset(qstate, qubit_num, qid=c['qid'])
-            else:
-                __qulacs_operate_qgate(qstate, qubit_num, kind=c['kind'], qid=c['qid'],
-                                       phase=c['phase'], phase1=c['phase1'], phase2=c['phase2'])
-
-    if exist_measurement == False:
+    if kind == None:
         info = {'quantumstate': qstate, 'cmem': cmem}
         result = Result(cid=cid, frequency=None, backend=backend, info=info)
         return result
@@ -138,24 +127,29 @@ def __run_all(qcirc=[], shots=1, cid=[], backend=None, proc='CPU'):
     for cnt in range(shots):
 
         qstate_tmp = qstate.copy()
+        qcirc_tmp = qcirc.clone()
 
-        for c in qcirc[pos:]:
+        while True:
 
-            if (c['ctrl'] == None or (c['ctrl'] != None and cmem[c['ctrl']] == 1)):
+            kind = qcirc_tmp.kind_first()
+            if kind == None:
+                break
 
-                if c['kind'] == MEASURE:
-                    m_list = __qulacs_measure(qstate_tmp, qubit_num, qid=c['qid'])
-
-                    if len(cmem) > 0 and c['cid'] != None:
-                        for k, m in enumerate(m_list):
-                            cmem[c['cid'][k]] = m
+            elif kind == MEASURE:
+                (kind, qid, para, c, ctrl) = qcirc_tmp.pop_gate()
+                mval = __qulacs_measure(qstate_tmp, qubit_num, qid[0])
+                if c != None:
+                    cmem[c] = mval
                         
-                elif c['kind'] == RESET:
-                    __qulacs_reset(qstate_tmp, qubit_num, qid=c['qid'])
-                
-                else:
-                    __qulacs_operate_qgate(qstate_tmp, qubit_num, kind=c['kind'], qid=c['qid'],
-                                           phase=c['phase'], phase1=c['phase1'], phase2=c['phase2'])
+            elif kind == RESET:
+                (kind, qid, para, c, ctrl) = qcirc_tmp.pop_gate()
+                __qulacs_reset(qstate_tmp, qubit_num, qid[0])
+
+            else:
+                (kind, qid, para, c, ctrl) = qcirc_tmp.pop_gate()
+                if (ctrl == None or (ctrl != None and cmem[ctrl] == 1)):
+                    __qulacs_operate_qgate(qstate_tmp, qubit_num, kind=kind, qid=qid,
+                                           phase=para[0], phase1=para[1], phase2=para[2])
 
         if len(cmem) > 0:
             mval = ''.join(map(str, [cmem[i] for i in cid]))
@@ -325,36 +319,30 @@ def __qulacs_operate_qgate(qstate, qubit_num, kind, qid, phase, phase1, phase2):
     
     circ.update_quantum_state(qstate)
 
-def __qulacs_reset(qstate, qubit_num, qid):
+def __qulacs_reset(qstate, qubit_num, q):
 
     # error check
     # qubit_num = qstate.get_qubit_count()
-    if max(qid) >= qubit_num:
-        raise ValueError
+    if q >= qubit_num:
+        raise ValueError("reset qubit id is out of bound")
 
-    # last quantum state
     circ = QuantumCircuit(qubit_num)
-    for i, q in enumerate(qid):
-        circ.add_gate(Measurement(q, i))
+    circ.add_gate(Measurement(q, 0))
     circ.update_quantum_state(qstate)
-
     circ_flip = QuantumCircuit(qubit_num)
-    for i, q in enumerate(qid):
-        if qstate.get_classical_value(i) == 1:
-            circ_flip.add_gate(X(q))
-    circ_flip.update_quantum_state(qstate)
+    if qstate.get_classical_value(0) == 1:
+        circ_flip.add_gate(X(q))
+        circ_flip.update_quantum_state(qstate)
 
-def __qulacs_measure(qstate, qubit_num, qid):
+def __qulacs_measure(qstate, qubit_num, q):
 
     # error check
-    if max(qid) >= qubit_num:
-        raise ValueError
+    if q >= qubit_num:
+        raise ValueError("measurement qubit id is out of bound")
 
-    # measurement
     circ = QuantumCircuit(qubit_num)
-    for i, q in enumerate(qid):
-        circ.add_gate(Measurement(q, i))
+    circ.add_gate(Measurement(q, 0))
     circ.update_quantum_state(qstate)
-    mval_list = [qstate.get_classical_value(i) for i in range(len(qid))]
+    mval = qstate.get_classical_value(0)
 
-    return mval_list
+    return mval

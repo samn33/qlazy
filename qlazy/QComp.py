@@ -5,6 +5,7 @@ from qlazy.config import *
 from qlazy.util import *
 from qlazy.error import *
 from qlazy.Backend import *
+from qlazy.QCirc import *
 
 class QComp:
     """ Quantum Computer.
@@ -29,7 +30,8 @@ class QComp:
     """
     def __init__(self, product='qlazy', device='qstate_simulator'):
     
-        self.qcirc = []
+        # self.qcirc = []
+        self.qcirc = QCirc()
         self.backend = Backend(product=product, device=device)
     
         # qlazy
@@ -1122,6 +1124,21 @@ class QComp:
             raise QComp_Error_QgateNotSupported()
         
         else:
-            self.qcirc.append({'kind': kind, 'qid': qid, 'cid': cid,
-                               'phase': phase, 'phase1': phase1, 'phase2': phase2,
-                               'ctrl': ctrl})
+
+            para = [phase, phase1, phase2]
+            if is_measurement_gate(kind) == True:
+                for i, q in enumerate(qid):
+                    qid = [q]
+                    if cid is not None:
+                        c = cid[i]
+                    else:
+                        c = None
+                    self.qcirc.append_gate(kind, qid, para, c, ctrl)
+            elif is_reset_gate(kind) == True:
+                for q in qid:
+                    qid = [q]
+                    c = None
+                    self.qcirc.append_gate(kind, qid, para, c, ctrl)
+            else:
+                c = None
+                self.qcirc.append_gate(kind, qid, para, c, ctrl)

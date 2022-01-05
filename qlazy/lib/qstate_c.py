@@ -173,7 +173,6 @@ def qstate_bloch(qs, q=0):
 def qstate_inner_product(qs_0, qs_1):
 
     try:
-            
         real = 0.0
         imag = 0.0
         c_real = ctypes.c_double(real)
@@ -397,11 +396,40 @@ def qstate_operate_qgate(qs, kind=None, qid=None,
     if ret == FALSE:
         raise QState_Error_OperateQgate()
 
-        
-def qstate_measure(qs, MDATA_TABLE, qid=None, shots=DEF_SHOTS, angle=0.0, phase=0.0,
-                   tag=None):
+def qstate_measure(qs, qid=None, angle=0.0, phase=0.0):
 
-    # global MDATA_TABLE
+    if qid is None or qid == []:
+        qid = [i for i in range(qs.qubit_num)]
+
+    # operate
+    qubit_num = len(qid)
+    qubit_id = [0 for _ in range(MAX_QUBIT_NUM)]
+    for i in range(len(qid)):
+        qubit_id[i] = qid[i]
+    IntArray = ctypes.c_int * MAX_QUBIT_NUM
+    qid_array = IntArray(*qubit_id)
+
+    mval = 0
+    c_mval = ctypes.c_int(mval)
+
+    lib.qstate_measure.restype = ctypes.c_int
+    lib.qstate_measure.argtypes = [ctypes.POINTER(QState),
+                                   ctypes.c_double, ctypes.c_double,
+                                   ctypes.c_int, IntArray, ctypes.POINTER(ctypes.c_int)]
+    ret = lib.qstate_measure(ctypes.byref(qs),
+                             ctypes.c_double(angle), ctypes.c_double(phase),
+                             ctypes.c_int(qubit_num), qid_array, ctypes.byref(c_mval))
+
+    if ret == FALSE:
+        raise QState_Error_Measure()
+
+    mval = c_mval.value
+    digits = len(qid)
+    mval = '{:0{digits}b}'.format(mval, digits=digits)
+
+    return mval
+
+def qstate_measure_stats(qs, qid=None, shots=DEF_SHOTS, angle=0.0, phase=0.0):
 
     if qid is None or qid == []:
         qid = [i for i in range(qs.qubit_num)]
@@ -420,14 +448,14 @@ def qstate_measure(qs, MDATA_TABLE, qid=None, shots=DEF_SHOTS, angle=0.0, phase=
     mdata = None
     c_mdata = ctypes.c_void_p(mdata)
 
-    lib.qstate_measure.restype = ctypes.c_int
-    lib.qstate_measure.argtypes = [ctypes.POINTER(QState), ctypes.c_int,
-                                   ctypes.c_double, ctypes.c_double,
-                                   ctypes.c_int, IntArray,
-                                   ctypes.POINTER(ctypes.c_void_p)]
-    ret = lib.qstate_measure(ctypes.byref(qs), ctypes.c_int(shots),
-                             ctypes.c_double(angle), ctypes.c_double(phase),
-                             ctypes.c_int(qubit_num), qid_array, c_mdata)
+    lib.qstate_measure_stats.restype = ctypes.c_int
+    lib.qstate_measure_stats.argtypes = [ctypes.POINTER(QState), ctypes.c_int,
+                                         ctypes.c_double, ctypes.c_double,
+                                         ctypes.c_int, IntArray,
+                                         ctypes.POINTER(ctypes.c_void_p)]
+    ret = lib.qstate_measure_stats(ctypes.byref(qs), ctypes.c_int(shots),
+                                   ctypes.c_double(angle), ctypes.c_double(phase),
+                                   ctypes.c_int(qubit_num), qid_array, c_mdata)
 
     if ret == FALSE:
         raise QState_Error_Measure()
@@ -440,20 +468,13 @@ def qstate_measure(qs, MDATA_TABLE, qid=None, shots=DEF_SHOTS, angle=0.0, phase=
     freq_list = [freq.contents[i] for i in range(state_num)]
     md = MData(freq_list=freq_list, last_state=last_state, qid=qid,
                qubit_num=qubit_num, state_num=state_num, angle=angle, phase=phase,
-               is_bell=False, tag=tag)
+               is_bell=False)
     out.contents.free()
-
-    if tag is None: tag = DEF_TAG
-    tag_long = repr(qs) + '.' + tag
-            
-    MDATA_TABLE[tag_long] = md
 
     return md
 
-def qstate_measure_bell(qs, MDATA_TABLE, qid=None, shots=DEF_SHOTS, tag=None):
+def qstate_measure_bell_stats(qs, qid=None, shots=DEF_SHOTS):
 
-    # global MDATA_TABLE
-        
     if qid is None or qid == []:
         qid = [i for i in range(2)]
             
@@ -472,13 +493,13 @@ def qstate_measure_bell(qs, MDATA_TABLE, qid=None, shots=DEF_SHOTS, tag=None):
     mdata = None
     c_mdata = ctypes.c_void_p(mdata)
 
-    lib.qstate_measure_bell.restype = ctypes.c_int
-    lib.qstate_measure_bell.argtypes = [ctypes.POINTER(QState), ctypes.c_int,
-                                        ctypes.c_int, IntArray,
-                                        ctypes.POINTER(ctypes.c_void_p)]
+    lib.qstate_measure_bell_stats.restype = ctypes.c_int
+    lib.qstate_measure_bell_stats.argtypes = [ctypes.POINTER(QState), ctypes.c_int,
+                                              ctypes.c_int, IntArray,
+                                              ctypes.POINTER(ctypes.c_void_p)]
 
-    ret = lib.qstate_measure_bell(ctypes.byref(qs), ctypes.c_int(shots),
-                                  ctypes.c_int(qubit_num), qid_array, c_mdata)
+    ret = lib.qstate_measure_bell_stats(ctypes.byref(qs), ctypes.c_int(shots),
+                                        ctypes.c_int(qubit_num), qid_array, c_mdata)
 
     if ret == FALSE:
         raise QState_Error_Measure()
@@ -490,27 +511,21 @@ def qstate_measure_bell(qs, MDATA_TABLE, qid=None, shots=DEF_SHOTS, tag=None):
     freq_list = [freq.contents[i] for i in range(state_num)]
     md = MData(freq_list=freq_list, last_state=last_state, qid=qid,
                qubit_num=qubit_num, state_num=state_num, angle=0.0, phase=0.0,
-               is_bell=True, tag=tag)
+               is_bell=True)
     out.contents.free()
 
-    if tag is None: tag = DEF_TAG
-    tag_long = repr(qs) + '.' + tag
-
-    MDATA_TABLE[tag_long] = md
-    
     return md
 
-def qstate_operate_qcirc(qstate, cmem_list, qcirc, shots, cid):
+def qstate_operate_qcirc(qstate, cmem, qcirc, shots, cid):
 
     lib.qstate_operate_qcirc.restype = ctypes.c_int
     lib.qstate_operate_qcirc.argtypes = [ctypes.POINTER(QState), ctypes.POINTER(CMem), ctypes.POINTER(QCirc)]
 
-    if len(cmem_list) != 0:
+    if cmem is not None:
 
         frequency = Counter()
         for n in range(shots):
             
-            cmem = CMem(len(cmem_list))
             if n < shots - 1:
                 qstate_tmp = qstate.clone()
                 ret = lib.qstate_operate_qcirc(ctypes.byref(qstate_tmp), ctypes.byref(cmem), ctypes.byref(qcirc))
@@ -522,9 +537,7 @@ def qstate_operate_qcirc(qstate, cmem_list, qcirc, shots, cid):
         
             cmem_num = cmem.cmem_num
             bit_array = ctypes.cast(cmem.bit_array, ctypes.POINTER(ctypes.c_int*cmem_num))
-            for i in range(len(cmem_list)):
-                cmem_list[i] = bit_array.contents[i]
-
+            cmem_list = [bit_array.contents[i] for i in range(cmem_num)]
             cmem_list_part = [cmem_list[c] for c in cid]
             mval = "".join(map(str, cmem_list_part))
 

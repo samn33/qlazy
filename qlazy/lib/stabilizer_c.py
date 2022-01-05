@@ -164,17 +164,16 @@ def stabilizer_measure(sb, q=None):
 
     return mval
     
-def stabilizer_operate_qcirc(sb, cmem_list, qcirc, shots, cid):
+def stabilizer_operate_qcirc(sb, cmem, qcirc, shots, cid):
 
     lib.stabilizer_operate_qcirc.restype = ctypes.c_int
     lib.stabilizer_operate_qcirc.argtypes = [ctypes.POINTER(Stabilizer), ctypes.POINTER(CMem), ctypes.POINTER(QCirc)]
 
-    if len(cmem_list) != 0:
+    if cmem is not None:
 
         frequency = Counter()
         for n in range(shots):
             
-            cmem = CMem(len(cmem_list))
             if n < shots - 1:
                 sb_tmp = sb.clone()
                 ret = lib.stabilizer_operate_qcirc(ctypes.byref(sb_tmp), ctypes.byref(cmem), ctypes.byref(qcirc))
@@ -186,9 +185,7 @@ def stabilizer_operate_qcirc(sb, cmem_list, qcirc, shots, cid):
         
             cmem_num = cmem.cmem_num
             bit_array = ctypes.cast(cmem.bit_array, ctypes.POINTER(ctypes.c_int*cmem_num))
-            for i in range(len(cmem_list)):
-                cmem_list[i] = bit_array.contents[i]
-
+            cmem_list = [bit_array.contents[i] for i in range(cmem_num)]
             cmem_list_part = [cmem_list[c] for c in cid]
             mval = "".join(map(str, cmem_list_part))
 

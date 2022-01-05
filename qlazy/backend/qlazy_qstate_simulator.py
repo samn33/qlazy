@@ -8,39 +8,15 @@ from qlazy.QState import *
 from qlazy.Result import *
 from qlazy.lib.qstate_c import *
 
-def run(qcirc=[], shots=1, cid=[], backend=None):
+def run(qcirc=None, shots=1, cid=[], backend=None):
 
-    qcc = QCirc()
-    for i, gate in enumerate(qcirc):
-        kind = gate['kind']
-        qids = gate['qid']
-        cids = gate['cid']
-        phase = gate['phase']
-        phase1 = gate['phase1']
-        phase2 = gate['phase2']
-        ctrl = gate['ctrl']
-        para = [phase, phase1, phase2]
-        if is_measurement_gate(kind) == True:
-            for i, q in enumerate(qids):
-                qids = [q]
-                if cids is not None:
-                    c = cids[i]
-                else:
-                    c = None
-                qcc.append_gate(kind, qids, para, c, ctrl)
-        elif is_reset_gate(kind) == True:
-            for q in qids:
-                qids = [q]
-                c = None
-                qcc.append_gate(kind, qids, para, c, ctrl)
-        else:
-            c = None
-            qcc.append_gate(kind, qids, para, c, ctrl)
-
-    qubit_num = qcc.qubit_num
-    cmem_num = qcc.cmem_num
+    qubit_num = qcirc.qubit_num
+    cmem_num = qcirc.cmem_num
     qstate = QState(qubit_num=qubit_num)
-    cmem = [0] * cmem_num
+    if cmem_num > 0:
+        cmem = CMem(cmem_num)
+    else:
+        cmem = None
 
     if cmem_num < len(cid):
         raise ValueError("length of cid must be less than classical resister size of qcirc")
@@ -48,7 +24,10 @@ def run(qcirc=[], shots=1, cid=[], backend=None):
     if cid == []:
         cid = [i for i in range(cmem_num)]
 
-    frequency = qstate_operate_qcirc(qstate, cmem, qcc, shots, cid)
+    qcirc_unitary, qcirc_non_unitary = qcirc.split_unitary_non_unitary()
+
+    frequency = qstate_operate_qcirc(qstate, cmem, qcirc_unitary, 1, cid)
+    frequency = qstate_operate_qcirc(qstate, cmem, qcirc_non_unitary, shots, cid)
 
     info = {'qstate': qstate, 'cmem': cmem}
 

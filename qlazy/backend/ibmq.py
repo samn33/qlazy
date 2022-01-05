@@ -16,17 +16,11 @@ from qiskit.qasm import pi
 from qiskit.providers.ibmq import least_busy
 from qiskit.circuit.library.standard_gates import SXdgGate
 
-def run(qubit_num=0, cmem_num=0, qstate=None, qcirc=[], cmem=[], shots=1, cid=[], backend=None):
-
-    # get qubit_num and cmem_num
-    qubit_num = 0
-    cmem_num = 0
-    for c in qcirc:
-        if (c['qid'] is not None) and (c['qid'] != []):
-            qubit_num = max(qubit_num, max(c['qid']) + 1)
-        if (c['cid'] is not None) and (c['cid'] != []):
-            cmem_num = max(cmem_num, max(c['cid']) + 1)
+def run(qcirc=None, shots=1, cid=[], backend=None):
             
+    qubit_num = qcirc.qubit_num
+    cmem_num = qcirc.cmem_num
+
     if cmem_num < len(cid):
         raise ValueError("length of cid must be less than classical resister size of qcirc")
     
@@ -39,37 +33,25 @@ def run(qubit_num=0, cmem_num=0, qstate=None, qcirc=[], cmem=[], shots=1, cid=[]
     args = [qubit_reg] + cmem_reg
     qc = QuantumCircuit(*args)
 
-    for crc in qcirc:
-        kind = crc['kind']
-        qids = crc['qid']
-        cids = crc['cid']
-        phase = crc['phase'] * np.pi
-        phase1 = crc['phase1'] * np.pi
-        phase2 = crc['phase2'] * np.pi
-        ctrl = crc['ctrl']
+    while True:
+        kind = qcirc.kind_first()
+        if kind == None: break
 
-        term_num = get_qgate_qubit_num(kind)
-        para_num = get_qgate_param_num(kind)
+        (kind, qid, para, c, ctrl) = qcirc.pop_gate()
 
         if kind == MEASURE:
 
-            if cids == None:
-                for q in qids:
-                    qc.measure(qubit_reg[q], cmem_reg[-1])
+            if c == None:
+                qc.measure(qubit_reg[qid[0]], cmem_reg[-1])
             else:
-                for q,c in zip(qids, cids):
-                    qc.measure(qubit_reg[q], cmem_reg[c])
-
+                qc.measure(qubit_reg[qid[0]], cmem_reg[c])
+                
         elif kind == RESET:
-            if ctrl == None:
-                for q in qids:
-                    qc.reset(qubit_reg[q])
-            else:
-                for q in qids:
-                    qc.reset(qubit_reg[q]).c_if(cmem_reg[ctrl], 1)
-
+            qc.reset(qubit_reg[qid[0]])
+            
         else:
-            __ibmq_add_qgate(qc, kind, qids, phase, phase1, phase2, ctrl, cmem_reg)
+            __ibmq_add_qgate(qc, kind, qid, para[0] * np.pi, para[1] * np.pi, para[2] * np.pi,
+                             ctrl, cmem_reg)
 
     # set backend
     if backend.device == 'qasm_simulator':
@@ -106,7 +88,7 @@ def run(qubit_num=0, cmem_num=0, qstate=None, qcirc=[], cmem=[], shots=1, cid=[]
             frequency = None
             break
 
-    info = {'statevector': statevector, 'cmem': cmem}
+    info = {'statevector': statevector, 'creg': cmem_reg}
     result = Result(cid=cid, frequency=frequency, backend=backend, info=info)
 
     return result
