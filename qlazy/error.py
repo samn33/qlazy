@@ -280,9 +280,21 @@ class QCirc_Error_Initialize(Exception):
     def __str__(self):
         return "QCirc: fail to initialize"
 
+class QCirc_Error_Copy(Exception):
+    def __str__(self):
+        return "QCirc: fail to copy"
+
 class QCirc_Error_AppendGate(Exception):
     def __str__(self):
         return "QCirc: fail to append gate"
+
+class QCirc_Error_KindFirst(Exception):
+    def __str__(self):
+        return "QCirc: fail to kind first"
+
+class QCirc_Error_PopGate(Exception):
+    def __str__(self):
+        return "QCirc: fail to pop gate"
 
 # CMem
 

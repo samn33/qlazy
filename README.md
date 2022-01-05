@@ -38,7 +38,7 @@ You may also need to install 'libreadline-dev'
 
 ## Usage
 
-### Command line tool
+### Command line tool (for state vector simulation)
 
 #### read file
 
@@ -47,11 +47,16 @@ foo.qc
     init 2
     h 0
     cx 0 1
+	show
     m
 
 run the circuit
 
     $ qlazy -qc foo.qc
+    c[00] = +0.7071+0.0000*i : 0.5000 |++++++
+    c[01] = +0.0000+0.0000*i : 0.0000 |
+    c[10] = +0.0000+0.0000*i : 0.0000 |
+    c[11] = +0.7071+0.0000*i : 0.5000 |++++++
     direction of measurement: z-axis
     frq[00] = 53
     frq[11] = 47
@@ -86,15 +91,14 @@ print help
 
 ### Python package
 
-#### QState class (for operating quantum state vectors)
+#### State Vector Simulation (by QState class)
 
 foo.py
 	
     from qlazy import QState
     
     qs = QState(2)
-    qs.h(0)
-    qs.cx(0,1)
+    qs.h(0).cx(0,1)
     qs.show()
     md = qs.m(shots=100)
     print(md.frequency)
@@ -107,8 +111,6 @@ execute the program
     c[10] = +0.0000+0.0000*i : 0.0000 |
     c[11] = +0.7071+0.0000*i : 0.5000 |++++++
     Counter({{'00':53,'11':47})
-
-note: no need to call 'free' method (new version >= v0.2.1)
 
 #### Other classes
 

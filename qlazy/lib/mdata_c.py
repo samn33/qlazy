@@ -62,4 +62,3 @@ def mdata_free(md):
 
     lib.mdata_free.argtypes = [ctypes.POINTER(MDataC)]
     lib.mdata_free(ctypes.byref(md))
-    
