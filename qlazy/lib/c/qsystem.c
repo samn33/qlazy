@@ -41,17 +41,17 @@ static bool _operate_qgate(QState* qstate, QG* qgate)
   case MEASURE_X:
   case MEASURE_Y:
   case MEASURE_Z:
-    if (!(qstate_measure(qstate, para->mes.shots,
-			 para->mes.angle, para->mes.phase, terminal_num,
+    if (!(qstate_measure_stats(qstate, para->mes.shots,
+			       para->mes.angle, para->mes.phase, terminal_num,
 			 qubit_id, (void**)&mdata)))
-      ERR_RETURN(ERROR_QSTATE_MEASURE,false);
+      ERR_RETURN(ERROR_QSTATE_MEASURE_STATS,false);
     mdata_print(mdata);
     mdata_free(mdata); mdata = NULL;
     break;
   case MEASURE_BELL:
-    if (!(qstate_measure_bell(qstate, para->mes.shots, terminal_num, qubit_id,
-			      (void**)&mdata)))
-      ERR_RETURN(ERROR_QSTATE_MEASURE_BELL,false);
+    if (!(qstate_measure_bell_stats(qstate, para->mes.shots, terminal_num, qubit_id,
+				    (void**)&mdata)))
+      ERR_RETURN(ERROR_QSTATE_MEASURE_BELL_STATS,false);
     mdata_print_bell(mdata);
     mdata_free(mdata); mdata = NULL;
     break;

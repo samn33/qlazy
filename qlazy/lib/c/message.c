@@ -88,8 +88,11 @@ void error_msg(ErrCode err)
   case ERROR_QSTATE_MEASURE:
     fprintf(stderr, "ERROR: qstate measure failure !\n");
     break;
-  case ERROR_QSTATE_MEASURE_BELL:
-    fprintf(stderr, "ERROR: qstate measure bell failure !\n");
+  case ERROR_QSTATE_MEASURE_STATS:
+    fprintf(stderr, "ERROR: qstate measure stats failure !\n");
+    break;
+  case ERROR_QSTATE_MEASURE_BELL_STATS:
+    fprintf(stderr, "ERROR: qstate measure bell stats failure !\n");
     break;
   case ERROR_QSTATE_OPERATE_QGATE:
     fprintf(stderr, "ERROR: qstate operate qgate failure !\n");
@@ -203,6 +206,13 @@ void error_msg(ErrCode err)
     break;
   case ERROR_STABILIZER_OPERATE_QCIRC:
     fprintf(stderr, "ERROR: stabilizer operate qcirc failure !\n");
+    break;
+
+  case ERROR_QCIRC_INIT:
+    fprintf(stderr, "ERROR: qcirc init failure !\n");
+    break;
+  case ERROR_QCIRC_APPEND_GATE:
+    fprintf(stderr, "ERROR: qcirc append gate failure !\n");
     break;
 
   case ERROR_NEED_TO_INITIALIZE:
