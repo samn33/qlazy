@@ -27,13 +27,11 @@ class MData:
         measured direction with Z-axis.
     phase : float
         measured direction with X-axis.
-    tag : str
-        tag of measurement.
 
     """
 
     def __init__(self, freq_list=None, last_state=0, qid=None, qubit_num=0, state_num=0,
-                 angle=0.0, phase=0.0, is_bell=False, tag=None):
+                 angle=0.0, phase=0.0, is_bell=False):
         self.frq = freq_list
         self.lst = last_state
         self.qid = qid
@@ -42,7 +40,6 @@ class MData:
         self.angle = angle
         self.phase = phase
         self.is_bell = is_bell
-        self.tag = tag
 
     @property
     def last(self):
@@ -59,7 +56,6 @@ class MData:
     def __str__(self):
 
         s = ""
-        s += "tag: {}\n".format(self.tag)
         s += "qid: {}\n".format(self.qid)
         s += "qubit num: {}\n".format(self.qubit_num)
         s += "state num: {}\n".format(self.state_num)

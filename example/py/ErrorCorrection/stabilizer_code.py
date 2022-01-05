@@ -49,36 +49,31 @@ class MyQState(QState):
 
         # g1
         self.h(qid_anc[0]).ctr_g1(qid_anc[0], qid_cod).h(qid_anc[0])
-        self.m(qid=[qid_anc[0]])
-        mval = self.m_value(binary=True)
+        mval = self.m(qid=[qid_anc[0]]).last
         if mval == '1': self.z(qid_cod[0]).z(qid_cod[2])
         self.reset(qid=[qid_anc[0]])
 
         # g2
         self.h(qid_anc[1]).ctr_g2(qid_anc[1], qid_cod).h(qid_anc[1])
-        self.m(qid=[qid_anc[1]])
-        mval = self.m_value(binary=True)
+        mval = self.m(qid=[qid_anc[1]]).last
         if mval == '1': self.z(qid_cod[0]).z(qid_cod[1]).z(qid_cod[2]).z(qid_cod[3])
         self.reset(qid=[qid_anc[1]])
     
         # g3
         self.h(qid_anc[2]).ctr_g3(qid_anc[2], qid_cod).h(qid_anc[2])
-        self.m(qid=[qid_anc[2]])
-        mval = self.m_value(binary=True)
+        mval = self.m(qid=[qid_anc[2]]).last
         if mval == '1': self.z(qid_cod[0]).z(qid_cod[1]).z(qid_cod[3]).z(qid_cod[4])
         self.reset(qid=[qid_anc[2]])
     
         # g4
         self.h(qid_anc[3]).ctr_g4(qid_anc[3], qid_cod).h(qid_anc[3])
-        self.m(qid=[qid_anc[3]])
-        mval = self.m_value(binary=True)
+        mval = self.m(qid=[qid_anc[3]]).last
         if mval == '1': self.z(qid_cod[0]).z(qid_cod[2]).z(qid_cod[3])
         self.reset(qid=[qid_anc[3]])
 
         # logical z
         self.h(qid_anc[4]).ctr_logic_z(qid_anc[4], qid_cod).h(qid_anc[4])
-        self.m(qid=[qid_anc[4]])
-        mval = self.m_value(binary=True)
+        mval = self.m(qid=[qid_anc[4]]).last
         if mval == '1':
             self.x(qid_cod[0]).x(qid_cod[1]).x(qid_cod[2]).x(qid_cod[3]).x(qid_cod[4])
         self.reset(qid=[qid_anc[4]])
@@ -92,8 +87,7 @@ class MyQState(QState):
         self.h(qid_anc[1])
         self.ctr_logic_x(qid_anc[1], qid_cod).cx(qid_anc[0], qid_anc[1])
         self.h(qid_anc[0])
-        self.m(qid=qid_anc[0:2])
-        mval = self.m_value(binary=True)
+        mval = self.m(qid=qid_anc[0:2]).last
         if mval == '00': pass
         elif mval == '01': self.logic_x(qid_cod)
         elif mval == '10': self.logic_z(qid_cod)
@@ -118,8 +112,7 @@ class MyQState(QState):
         self.h(qid_anc[1]).ctr_g2(qid_anc[1], qid_cod).h(qid_anc[1])
         self.h(qid_anc[2]).ctr_g3(qid_anc[2], qid_cod).h(qid_anc[2])
         self.h(qid_anc[3]).ctr_g4(qid_anc[3], qid_cod).h(qid_anc[3])
-        self.m(qid=qid_anc[0:4])
-        mval = self.m_value(binary=True)
+        mval = self.m(qid=qid_anc[0:4]).last
         print("* syndrome =", mval)
 
         # recovery

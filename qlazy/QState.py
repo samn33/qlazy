@@ -12,8 +12,6 @@ from qlazy.Observable import *
 from qlazy.PauliProduct import *
 from qlazy.lib.qstate_mcx import *
 
-MDATA_TABLE = {}
-
 class QState(ctypes.Structure):
     """ Quantum State
 
@@ -1456,10 +1454,10 @@ class QState(ctypes.Structure):
         c[11] = +0.0000+0.0000*i : 0.0000 |
 
         """
-        mval = self.m(qid=qid, shots=1).last
+        mval = qstate_measure(self, qid=qid, angle=0.0, phase=0.0)
         return mval
     
-    def m(self, qid=None, shots=DEF_SHOTS, angle=0.0, phase=0.0, tag=None):
+    def m(self, qid=None, shots=DEF_SHOTS, angle=0.0, phase=0.0):
         """
         measurement in any direction (default: Z-axis).
 
@@ -1473,8 +1471,6 @@ class QState(ctypes.Structure):
             direction of measurement (angle with Z-axis).
         phase : float, default 0.0
             direction of measurement (phase around Z-axis).
-        tag : str
-            tag of measurement data.
 
         Returns
         -------
@@ -1496,11 +1492,11 @@ class QState(ctypes.Structure):
         MData class (MData.py)
 
         """
-        md = qstate_measure(self, MDATA_TABLE, qid=qid, shots=shots,
-                              angle=angle, phase=phase, tag=tag)
+        md = qstate_measure_stats(self, qid=qid, shots=shots,
+                                  angle=angle, phase=phase)
         return md
         
-    def mx(self, qid=None, shots=DEF_SHOTS, tag=None):
+    def mx(self, qid=None, shots=DEF_SHOTS):
         """
         X-axis measurement.
 
@@ -1510,8 +1506,6 @@ class QState(ctypes.Structure):
             qubit id list to measure.
         shots : int, default 1
             number of measurements.
-        tag : str
-            tag of measurement data.
 
         Returns
         -------
@@ -1523,11 +1517,11 @@ class QState(ctypes.Structure):
         MData class (MData.py)
 
         """
-        md = qstate_measure(self, MDATA_TABLE, qid=qid, shots=shots,
-                              angle=0.5, phase=0.0, tag=tag)
+        md = qstate_measure_stats(self, qid=qid, shots=shots,
+                                  angle=0.5, phase=0.0)
         return md
         
-    def my(self, qid=None, shots=DEF_SHOTS, tag=None):
+    def my(self, qid=None, shots=DEF_SHOTS):
         """
         Y-axis measurement.
 
@@ -1537,8 +1531,6 @@ class QState(ctypes.Structure):
             qubit id list to measure.
         shots : int, default 1
             number of measurements.
-        tag : str
-            tag of measurement data.
 
         Returns
         -------
@@ -1550,11 +1542,11 @@ class QState(ctypes.Structure):
         MData class (MData.py)
 
         """
-        md =  qstate_measure(self, MDATA_TABLE, qid=qid, shots=shots,
-                              angle=0.5, phase=0.5, tag=tag)
+        md =  qstate_measure_stats(self, qid=qid, shots=shots,
+                                   angle=0.5, phase=0.5)
         return md
         
-    def mz(self, qid=None, shots=DEF_SHOTS, tag=None):
+    def mz(self, qid=None, shots=DEF_SHOTS):
         """
         Z-axis measurement.
 
@@ -1564,8 +1556,6 @@ class QState(ctypes.Structure):
             qubit id list to measure.
         shots : int, default 1
             number of measurements.
-        tag : str
-            tag of measurement data.
 
         Returns
         -------
@@ -1577,120 +1567,13 @@ class QState(ctypes.Structure):
         MData class (MData.py)
 
         """
-        md =  qstate_measure(self, MDATA_TABLE, qid=qid, shots=shots,
-                              angle=0.0, phase=0.0, tag=tag)
+        md =  qstate_measure_stats(self, qid=qid, shots=shots,
+                                   angle=0.0, phase=0.0)
         return md
 
-    def mb(self, qid=None, shots=DEF_SHOTS, tag=None):
-        return qstate_measure_bell(self, MDATA_TABLE, qid=qid, shots=shots, tag=tag)
+    def mb(self, qid=None, shots=DEF_SHOTS):
+        return qstate_measure_bell_stats(self, qid=qid, shots=shots)
         
-    def m_value(self, tag=None, angle=0.0, phase=0.0, binary=False):
-        """
-        get measurement value.
-
-        Parameters
-        ----------
-        tag : str
-            tag of measurement data.
-        angle : float, default 0.0
-            direction of measurement (angle with Z-axis).
-        phase : float, default 0.0
-            direction of measurement (phase around Z-axis).
-        binary : bool
-            format of measurement value.
-
-        Returns
-        -------
-        mval : str (binary:True) or int (binary:False)
-            measurement value (if shots>1, last measured value).
-            - binary=True -> '00','01','10','11' for 2 qubits measurement
-            - binary=False -> 0,1,2,3 for 2 qubits measurement
-
-        Examples
-        --------
-        >>> qs = QState(2).h(0).cx(0,1)
-        >>> qs.m(shots=100)
-        >>> print(qs.m_value(binary=True))
-        00
-
-        """
-        if tag is None: tag = DEF_TAG
-        tag_long = repr(self) + '.' + tag
-        mval = MDATA_TABLE[tag_long].measured_value(angle=angle, phase=phase)
-        if binary == True:
-            digits = len(MDATA_TABLE[tag_long].qid)
-            mval = '{:0{digits}b}'.format(mval, digits=digits)
-        return mval
-
-    def m_bit(self, q, tag=None, angle=0.0, phase=0.0, boolean=False):
-        """
-        get measured bit value.
-
-        Parameters
-        ----------
-        q : int
-        tag : str
-            tag of measurement data.
-        angle : float, default 0.0
-            direction of measurement (angle with Z-axis).
-        phase : float, default 0.0
-            direction of measurement (phase around Z-axis).
-        boolean : bool
-            format of measured bit.
-
-        Returns
-        -------
-        mbit : bool (boolean:True) or int (boolean:False)
-            measured bit value (if shots>1, last measured bit value).
-            - boolean=True -> False,True
-            - boolean=False -> 0,1
-
-        Examples
-        --------
-        >>> qs = QState(2).h(0).cx(0,1)
-        >>> qs.m(shots=100)
-        >>> print(qs.m_bit(boolean=True))
-        True
-
-        """
-        if tag is None: tag = DEF_TAG
-        tag_long = repr(self) + '.' + tag
-        mbit =  MDATA_TABLE[tag_long].measured_bit(q, angle=angle, phase=phase)
-        if boolean == True:
-            mbit = bool(mbit)
-        return mbit
-        
-    def m_freq(self, tag=None, angle=0.0, phase=0.0):
-        """
-        get measurement value.
-
-        Parameters
-        ----------
-        tag : str
-            tag of measurement data.
-        angle : float, default 0.0
-            direction of measurement (angle with Z-axis).
-        phase : float, default 0.0
-            direction of measurement (phase around Z-axis).
-
-        Returns
-        -------
-        mfrq : instance of Counter from collection (Python standard library)
-            measurement frequency.
-
-        Examples
-        --------
-        >>> qs = QState(2).h(0).cx(0,1)
-        >>> qs.m(shots=100)
-        >>> print(qs.m_freq())
-        Counter({'11': 53, '00': 47})
-
-        """
-        if tag is None: tag = DEF_TAG
-        tag_long = repr(self) + '.' + tag
-        mfrq = MDATA_TABLE[tag_long].measured_freq(angle=angle, phase=phase)
-        return mfrq
-
     def operate(self, pp=None, ctrl=None):
         """
         operate unitary operator to quantum state.

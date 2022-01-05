@@ -1001,47 +1001,47 @@ class TestQState_measure(unittest.TestCase):
         self.assertEqual(md.frq[0], 10)
         self.assertEqual(md.frq[1], 0)
 
-    def test_m_value(self):
-        """test 'm_value'
-        """
-        qs = QState(qubit_num=2).h(0).cx(0,1)
-        qs.m(shots=10)
-        qs.m([0], shots=10, tag='foo')
-        qs.m([1], shots=10, tag='bar', angle=0.25, phase=0.25)
-        actual = (qs.m_value() == 0 or qs.m_value() == 3)
-        self.assertEqual(actual, True)
-        actual = (qs.m_value(binary=True) == '00' or qs.m_value(binary=True) == '11')
-        self.assertEqual(actual, True)
-        actual = (qs.m_value(tag='foo') == 0 or qs.m_value(tag='foo') == 1)
-        self.assertEqual(actual, True)
-        actual = (qs.m_value(tag='bar', angle=0.25, phase=0.25) == 0
-                  or qs.m_value(tag='bar', angle=0.25, phase=0.25) == 1)
-        self.assertEqual(actual, True)
-        
-    def test_m_bit(self):
-        """test 'm_bit'
-        """
-        qs = QState(qubit_num=4)
-        [qs.h(i) for i in range(4)]
-        qs.m(shots=10, angle=0.25, phase=0.25)
-        qs.m(shots=10, tag='foo')
-        actual = (qs.m_bit(1, angle=0.25, phase=0.25) == 0
-                  or qs.m_bit(1, angle=0.25, phase=0.25) == 1)
-        self.assertEqual(actual, True)
-        actual = (qs.m_bit(3, tag='foo') == 0 or qs.m_bit(3, tag='foo') == 1)
-        self.assertEqual(actual, True)
-        actual = ((qs.m_bit(3, tag='foo', boolean=True) == False
-                   or qs.m_bit(3, tag='foo', boolean=True) == True))
-        self.assertEqual(actual, True)
-        
-    def test_m_freq(self):
-        """test 'm_freq'
-        """
-        qs = QState(2)
-        qs.h(0).cx(0,1).m(shots=100)
-        freq = qs.m_freq()
-        actual = sum(freq.values())
-        self.assertEqual(actual, 100)
+    # def test_m_value(self):
+    #     """test 'm_value'
+    #     """
+    #     qs = QState(qubit_num=2).h(0).cx(0,1)
+    #     qs.m(shots=10)
+    #     qs.m([0], shots=10, tag='foo')
+    #     qs.m([1], shots=10, tag='bar', angle=0.25, phase=0.25)
+    #     actual = (qs.m_value() == 0 or qs.m_value() == 3)
+    #     self.assertEqual(actual, True)
+    #     actual = (qs.m_value(binary=True) == '00' or qs.m_value(binary=True) == '11')
+    #     self.assertEqual(actual, True)
+    #     actual = (qs.m_value(tag='foo') == 0 or qs.m_value(tag='foo') == 1)
+    #     self.assertEqual(actual, True)
+    #     actual = (qs.m_value(tag='bar', angle=0.25, phase=0.25) == 0
+    #               or qs.m_value(tag='bar', angle=0.25, phase=0.25) == 1)
+    #     self.assertEqual(actual, True)
+    #     
+    # def test_m_bit(self):
+    #     """test 'm_bit'
+    #     """
+    #     qs = QState(qubit_num=4)
+    #     [qs.h(i) for i in range(4)]
+    #     qs.m(shots=10, angle=0.25, phase=0.25)
+    #     qs.m(shots=10, tag='foo')
+    #     actual = (qs.m_bit(1, angle=0.25, phase=0.25) == 0
+    #               or qs.m_bit(1, angle=0.25, phase=0.25) == 1)
+    #     self.assertEqual(actual, True)
+    #     actual = (qs.m_bit(3, tag='foo') == 0 or qs.m_bit(3, tag='foo') == 1)
+    #     self.assertEqual(actual, True)
+    #     actual = ((qs.m_bit(3, tag='foo', boolean=True) == False
+    #                or qs.m_bit(3, tag='foo', boolean=True) == True))
+    #     self.assertEqual(actual, True)
+    #     
+    # def test_m_freq(self):
+    #     """test 'm_freq'
+    #     """
+    #     qs = QState(2)
+    #     qs.h(0).cx(0,1).m(shots=100)
+    #     freq = qs.m_freq()
+    #     actual = sum(freq.values())
+    #     self.assertEqual(actual, 100)
 
 class TestQState_schmidt_decocmp(unittest.TestCase):
     """ test 'QState' : 'schmidt_decomp'
