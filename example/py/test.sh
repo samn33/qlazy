@@ -30,6 +30,7 @@ directories=(
     DataCompression
     ErrorCorrection
     SurfaceCode
+    LatticeSurgery
 )
 for dir in ${directories[@]}; do
 
