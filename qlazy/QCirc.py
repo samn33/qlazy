@@ -48,6 +48,65 @@ class QCirc(ctypes.Structure):
         qcirc = ctypes.cast(obj.value, ctypes.POINTER(cls)).contents
         return qcirc
             
+    def clone(self):
+        """
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        qcirc : instance of QCirc
+            quantum circuit
+
+        """
+        obj = qcirc_copy(self)
+        qcirc = ctypes.cast(obj.value, ctypes.POINTER(self.__class__)).contents
+        return qcirc
+
+    def kind_first(self):
+        """
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        kind : int
+            kind of first quantum gate of quantum circuit
+
+        Note
+        ----
+        return None if none of gates included
+
+        """
+        kind = qcirc_kind_first(self)
+        return kind
+
+    def pop_gate(self):
+        """
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        gate : tupple of (int, [int,int], [float,float,float], int, int)
+            tupple of (kind, qid, para, c, ctrl)
+            - kind ... kind of gate
+            - qid ... qubit id list
+            - para ... parameters for rotation
+            - c ... classical register ID to store measured data (only for measurement gate)
+            - ctrl ... classical register id to controll the gate
+
+        Note
+        ----
+        return NOT_A_GATE if none of gates included
+
+        """
+        (kind, qid, para, c, ctrl) = qcirc_pop_gate(self)
+        return (kind, qid, para, c, ctrl)
+
     def append_gate(self, kind, qid, para=None, c=None, ctrl=None):
         """
         Parameters
@@ -69,6 +128,30 @@ class QCirc(ctypes.Structure):
 
         """
         qcirc_append_gate(self, kind, qid, para, c, ctrl)
+
+    def split_unitary_non_unitary(self):
+        """
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        qc_pair : tupple of (QCirc, Qcirc)
+            former part includes only unitary gates and later part includes non-unitary gate (measure or reset) first
+        """
+        qc_unitary = QCirc()
+        qc_non_unitary = self.clone()
+        while True:
+            kind_ori = qc_non_unitary.kind_first()
+            if kind_ori is None or kind_ori is MEASURE or kind_ori is RESET:
+                break
+            else:
+                (kind, qid, para, c, ctrl) = qc_non_unitary.pop_gate()
+                qc_unitary.append_gate(kind, qid, para, c, ctrl)
+
+        qc_pair = (qc_unitary, qc_non_unitary)
+        return qc_pair
 
     def free(self):
         """

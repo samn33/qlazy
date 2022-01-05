@@ -22,6 +22,41 @@ bool qcirc_init(void** qcirc_out)
   SUC_RETURN(true);
 }
 
+// static void _qcirc_print(QCirc* qcirc)
+// {
+//   QGate* gate = qcirc->first;
+//   while (gate) {
+//     printf("===\n");
+//     printf("kind = %d\n", gate->kind);
+//     printf("qid  = %d, %d\n", gate->qid[0], gate->qid[1]);
+//     printf("para = %f, %f, %f\n", gate->para[0], gate->para[1], gate->para[2]);
+//     printf("c    = %d\n", gate->c);
+//     printf("ctrl = %d\n", gate->ctrl);
+//     gate = gate->next;
+//   }
+// }
+
+bool qcirc_copy(QCirc* qcirc_in, void** qcirc_out)
+{
+  QCirc*	qcirc = NULL;
+  QGate*        gate  = NULL;
+
+  if (qcirc_in == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
+
+  if (!(qcirc_init((void**)&qcirc))) ERR_RETURN(ERROR_QCIRC_INIT, NULL);
+
+  gate = qcirc_in->first;
+  while (gate != NULL) {
+    if (!(qcirc_append_gate(qcirc, gate->kind, gate->qid, gate->para, gate->c, gate->ctrl)))
+      ERR_RETURN(ERROR_QCIRC_APPEND_GATE, NULL);
+    gate = gate->next;
+  }
+
+  *qcirc_out = qcirc;
+
+  SUC_RETURN(true);
+}
+
 bool qcirc_append_gate(QCirc* qcirc, Kind kind, int* qid, double* para, int c, int ctrl)
 {
   QGate* qgate = NULL;
@@ -71,6 +106,41 @@ bool qcirc_append_gate(QCirc* qcirc, Kind kind, int* qid, double* para, int c, i
     qgate->next = NULL;
     qcirc->last = qgate;
   }
+  
+  SUC_RETURN(true);
+}
+
+bool qcirc_kind_first(QCirc* qcirc, Kind* kind)
+{
+  if (qcirc == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
+  if (qcirc->first == NULL) {
+    *kind = NOT_A_GATE;
+  }
+  else {
+    *kind = qcirc->first->kind;
+  }
+
+  SUC_RETURN(true);
+}
+
+bool qcirc_pop_gate(QCirc* qcirc, Kind* kind, int* qid, double* para, int* c, int* ctrl)
+{
+  QGate* ori_first;
+  
+  if (qcirc == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
+
+  /* get first gate */
+  *kind = qcirc->first->kind;
+  memcpy(qid, qcirc->first->qid, sizeof(int) * 2);
+  memcpy(para, qcirc->first->para, sizeof(double) * 3);
+  *c = qcirc->first->c;
+  *ctrl = qcirc->first->ctrl;
+
+  /* free first gate (original) */
+  ori_first = qcirc->first;
+  qcirc->first = qcirc->first->next;
+
+  free(ori_first); ori_first = NULL;
   
   SUC_RETURN(true);
 }

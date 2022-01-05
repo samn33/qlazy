@@ -28,6 +28,21 @@ def qcirc_init():
 
     return c_qcirc
 
+def qcirc_copy(qc):
+
+    qcirc = None
+    c_qcirc = ctypes.c_void_p(qcirc)
+            
+    lib.qcirc_copy.restype = ctypes.c_int
+    lib.qcirc_copy.argtypes = [ctypes.POINTER(QCirc),
+                               ctypes.POINTER(ctypes.c_void_p)]
+    ret = lib.qcirc_copy(ctypes.byref(qc), c_qcirc)
+
+    if ret == FALSE:
+        raise QCirc_Error_Copy()
+
+    return c_qcirc
+
 def qcirc_append_gate(qcirc, kind, qid, para, c, ctrl):
 
     if para == None: para = [0.0, 0.0, 0.0]
@@ -49,6 +64,62 @@ def qcirc_append_gate(qcirc, kind, qid, para, c, ctrl):
 
     if ret == FALSE:
         raise QCirc_Error_AppendGate()
+    
+def qcirc_kind_first(qc):
+
+    kind = 0
+    c_kind = ctypes.c_int(kind)
+            
+    lib.qcirc_kind_first.restype = ctypes.c_int
+    lib.qcirc_kind_first.argtypes = [ctypes.POINTER(QCirc), ctypes.POINTER(ctypes.c_int)]
+    ret = lib.qcirc_kind_first(ctypes.byref(qc), ctypes.byref(c_kind))
+
+    if ret == FALSE:
+        raise QState_Error_KindFirst()
+
+    kind = c_kind.value
+
+    if kind == NOT_A_GATE:
+        kind = None
+    
+    return kind
+
+def qcirc_pop_gate(qc):
+
+    kind = 0
+    c_kind = ctypes.c_int(kind)
+    qid = [0] * 2
+    IntArray = ctypes.c_int * 2
+    c_qid = IntArray(*qid)
+    para = [0.0] * 3
+    DoubleArray = ctypes.c_double * 3
+    c_para = DoubleArray(*para)
+    c = -1
+    c_c = ctypes.c_int(c)
+    ctrl = -1
+    c_ctrl = ctypes.c_int(ctrl)
+            
+    lib.qcirc_pop_gate.restype = ctypes.c_int
+    lib.qcirc_pop_gate.argtypes = [ctypes.POINTER(QCirc), ctypes.POINTER(ctypes.c_int),
+                                     ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_double),
+                                     ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_int)]
+                                     
+    ret = lib.qcirc_pop_gate(ctypes.byref(qc), ctypes.byref(c_kind), c_qid, c_para,
+                             ctypes.byref(c_c), ctypes.byref(c_ctrl))
+
+    if ret == FALSE:
+        raise QState_Error_PopGate()
+
+    kind = c_kind.value
+    qid = [c_qid[i] for i in range(2)]
+    para = [c_para[i] for i in range(3)]
+    c = c_c.value
+    ctrl = c_ctrl.value
+
+    if c == -1: c = None
+    if ctrl == -1: ctrl = None
+
+    return (kind, qid, para, c, ctrl)
     
 def qcirc_free(qcirc):
 

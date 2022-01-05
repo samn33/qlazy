@@ -114,7 +114,8 @@ typedef enum _ErrCode {
   ERROR_QSTATE_BLOCH,
   ERROR_QSTATE_PRINT_BLOCH,
   ERROR_QSTATE_MEASURE,
-  ERROR_QSTATE_MEASURE_BELL,
+  ERROR_QSTATE_MEASURE_STATS,
+  ERROR_QSTATE_MEASURE_BELL_STATS,
   ERROR_QSTATE_OPERATE_QGATE,
   ERROR_QSTATE_EVOLVE,
   ERROR_QSTATE_INNER_PRODUCT,
@@ -151,6 +152,8 @@ typedef enum _ErrCode {
   ERROR_STABILIZER_OPERATE_QGATE,
   ERROR_STABILIZER_MEASURE,
   ERROR_STABILIZER_OPERATE_QCIRC,
+  ERROR_QCIRC_INIT,
+  ERROR_QCIRC_APPEND_GATE,
   ERROR_CMEM_INIT,
   ERROR_CMEM_COPY,
 
@@ -486,10 +489,12 @@ bool     qstate_get_camp(QState* qstate, int qubit_num, int qubit_id[MAX_QUBIT_N
 bool	 qstate_print(QState* qstate, int qubit_num, int qubit_id[MAX_QUBIT_NUM], bool nonzero);
 bool     qstate_bloch(QState* qstate, int qid, double* theta, double* phi);
 bool     qstate_print_bloch(QState* qstate, int qid);
-bool	 qstate_measure(QState* qstate, int shot_num, double angle, double phase,
-			int qubit_num, int qubit_id[MAX_QUBIT_NUM], void** mdata_out);
-bool     qstate_measure_bell(QState* qstate, int shot_num, int qubit_num,
-			     int qubit_id[MAX_QUBIT_NUM], void** mdata_out);
+bool     qstate_measure(QState* qstate, double angle, double phase,
+			int qubit_num, int qubit_id[MAX_QUBIT_NUM], int* mval_out);
+bool	 qstate_measure_stats(QState* qstate, int shot_num, double angle, double phase,
+			      int qubit_num, int qubit_id[MAX_QUBIT_NUM], void** mdata_out);
+bool     qstate_measure_bell_stats(QState* qstate, int shot_num, int qubit_num,
+				   int qubit_id[MAX_QUBIT_NUM], void** mdata_out);
 bool	 qstate_operate_qgate(QState* qstate, Kind kind, double alpha, double beta,
 			      double gamma, int qubit_id[MAX_QUBIT_NUM]);
 bool     qstate_evolve(QState* qstate, Observable* observ, double time, int iter);
@@ -563,7 +568,10 @@ void	stabilizer_free(Stabilizer* stab);
 
 /* qcirc.c */
 bool qcirc_init(void** qcirc_out);
+bool qcirc_copy(QCirc* qcirc, void** qcirc_out);
+bool qcirc_kind_first(QCirc* qcirc, Kind* kind);
 bool qcirc_append_gate(QCirc* qcirc, Kind kind, int* qid, double* para, int c, int ctrl);
+bool qcirc_pop_gate(QCirc* qcirc, Kind* kind, int* qid, double* para, int* c, int* ctrl);
 void qcirc_free(QCirc* qcirc);
 
 /* cmem.c */
