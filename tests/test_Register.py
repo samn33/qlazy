@@ -2,7 +2,7 @@
 import unittest
 
 from qlazy.tools.Register import CreateRegister, InitRegister
-from qlazy import QState, QComp, Backend
+from qlazy import QState, QCirc, Backend
 
 class TestRegister(unittest.TestCase):
     """ test 'Register' : CreateRegister, InitRegister
@@ -57,12 +57,13 @@ class TestRegisterQComp(unittest.TestCase):
         cid_0 = CreateRegister(1)
         cmem_num = InitRegister(cid_0)
 
-        qc = QComp(product='qlazy', device='qstate_simulator')
+        bk = Backend(product='qlazy', device='qstate_simulator')
+        qc = QCirc()
         qc.h(qid_0[0])
         qc.cx(qid_0[0], qid_1[0][0]).cx(qid_0[0], qid_1[0][1]).cx(qid_0[0], qid_1[1][0]).cx(qid_0[0], qid_1[1][1])
         qc.h(qid_0[0])
         qc.measure(qid=[qid_0[0]], cid=[cid_0[0]])
-        res = qc.run(shots=10)
+        res = bk.run(qcirc=qc, shots=10)
         freq = res.frequency
         self.assertEqual(freq['0']+freq['1'], 10)
         
@@ -76,9 +77,10 @@ class TestRegisterQComp(unittest.TestCase):
         cid_1 = CreateRegister(2,3)
         cmem_num = InitRegister(cid_0, cid_1)
         
-        qc = QComp(product='qlazy', device='qstate_simulator')
+        bk = Backend(product='qlazy', device='qstate_simulator')
+        qc = QCirc()
         qc.h(qid_0[1]).cx(qid_0[1], qid_1[0][2]).measure(qid=[qid_0[1], qid_1[0][2]], cid=[cid_1[0][0],cid_1[1][1]])
-        res = qc.run(shots=10, cid=[cid_1[0][0],cid_1[1][1]])
+        res = bk.run(qcirc=qc, shots=10, cid=[cid_1[0][0],cid_1[1][1]])
         freq = res.frequency
         self.assertEqual(freq['00']+freq['11'], 10)
 

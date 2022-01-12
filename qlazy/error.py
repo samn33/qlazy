@@ -242,23 +242,23 @@ class Stabilizer_Error_OperateQcirc(Exception):
     def __str__(self):
         return "Stabilizer: fail to operate qcirc"
 
-# QComp
-
-class QComp_Error_QgateNotSupported(Exception):
-    def __str__(self):
-        return "QComp: qgate is not supported"
-
-class QComp_Error_BackendNotSupported(Exception):
-    def __str__(self):
-        return "QComp: backend is not supported"
-
-class QComp_Error_NumberOfClassicalReg(Exception):
-    def __str__(self):
-        return "QComp: number of classical register must be equal to corresponding quantum register"
-
-class QComp_Error_FreeAll(Exception):
-    def __str__(self):
-        return "QComp: fail to free all"
+# # QComp
+# 
+# class QComp_Error_QgateNotSupported(Exception):
+#     def __str__(self):
+#         return "QComp: qgate is not supported"
+# 
+# class QComp_Error_BackendNotSupported(Exception):
+#     def __str__(self):
+#         return "QComp: backend is not supported"
+# 
+# class QComp_Error_NumberOfClassicalReg(Exception):
+#     def __str__(self):
+#         return "QComp: number of classical register must be equal to corresponding quantum register"
+# 
+# class QComp_Error_FreeAll(Exception):
+#     def __str__(self):
+#         return "QComp: fail to free all"
     
 # Backend
 
@@ -284,6 +284,10 @@ class QCirc_Error_Copy(Exception):
     def __str__(self):
         return "QCirc: fail to copy"
 
+class QCirc_Error_Merge(Exception):
+    def __str__(self):
+        return "QCirc: fail to merge"
+
 class QCirc_Error_AppendGate(Exception):
     def __str__(self):
         return "QCirc: fail to append gate"
@@ -301,4 +305,8 @@ class QCirc_Error_PopGate(Exception):
 class CMem_Error_Initialize(Exception):
     def __str__(self):
         return "CMem: fail to initialize"
+
+class CMem_Error_Clone(Exception):
+    def __str__(self):
+        return "CMem: fail to clone"
 

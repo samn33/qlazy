@@ -43,6 +43,37 @@ def qcirc_copy(qc):
 
     return c_qcirc
 
+def qcirc_merge(qc_L, qc_R):
+
+    qcirc = None
+    c_qcirc = ctypes.c_void_p(qcirc)
+            
+    lib.qcirc_merge.restype = ctypes.c_int
+    lib.qcirc_merge.argtypes = [ctypes.POINTER(QCirc), ctypes.POINTER(QCirc),
+                               ctypes.POINTER(ctypes.c_void_p)]
+    ret = lib.qcirc_merge(ctypes.byref(qc_L), ctypes.byref(qc_R), c_qcirc)
+
+    if ret == FALSE:
+        raise QCirc_Error_Merge()
+
+    return c_qcirc
+
+def qcirc_is_equal(qc_L, qc_R):
+
+    ans = True
+    c_ans = ctypes.c_bool(ans)
+            
+    lib.qcirc_is_equal.restype = ctypes.c_int
+    lib.qcirc_is_equal.argtypes = [ctypes.POINTER(QCirc), ctypes.POINTER(QCirc),
+                                   ctypes.POINTER(ctypes.c_bool)]
+    ret = lib.qcirc_is_equal(ctypes.byref(qc_L), ctypes.byref(qc_R), ctypes.byref(c_ans))
+
+    if ret == FALSE:
+        raise QCirc_Error_Merge()
+
+    ans = c_ans.value
+    return ans
+
 def qcirc_append_gate(qcirc, kind, qid, para, c, ctrl):
 
     if para == None: para = [0.0, 0.0, 0.0]

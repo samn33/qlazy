@@ -48,7 +48,6 @@ foo.qc
     h 0
     cx 0 1
 	show
-    m
 
 run the circuit
 
@@ -57,10 +56,6 @@ run the circuit
     c[01] = +0.0000+0.0000*i : 0.0000 |
     c[10] = +0.0000+0.0000*i : 0.0000 |
     c[11] = +0.7071+0.0000*i : 0.5000 |++++++
-    direction of measurement: z-axis
-    frq[00] = 53
-    frq[11] = 47
-    last state => 00
 
 print help
 	
@@ -112,12 +107,27 @@ execute the program
     c[11] = +0.7071+0.0000*i : 0.5000 |++++++
     Counter({{'00':53,'11':47})
 
+#### Quantum Circuit Execution (by QCirc and Backend class)
+
+bar.py
+	
+    from qlazy import QCirc, Backend
+    
+    bk = Backend(product='qlazy', device='qstate_simulator')
+    qc = QCirc().h(0).cx(0,1).measure(qid=[0,1], cid=[0,1])
+    result = bk.run(qcirc=qc, shots=100)
+    print(result.frequency)
+
+execute the program
+
+    $ python bar.py
+	Count({'00':52, '11':48})
+
 #### Other classes
 
 - DensOp class: for operating density operators.
 - Stabilizer class: for operating stabilizer states.
 - Observable class: for specifying observables.
-- QComp, Backend class: for quantum computer simulation/execution and specifying backend.
 - PauliProduct: for operations related to pauli product.
 
 ## Documents

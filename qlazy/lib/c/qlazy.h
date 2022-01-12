@@ -569,6 +569,8 @@ void	stabilizer_free(Stabilizer* stab);
 /* qcirc.c */
 bool qcirc_init(void** qcirc_out);
 bool qcirc_copy(QCirc* qcirc, void** qcirc_out);
+bool qcirc_merge(QCirc* qcirc_L, QCirc* qcirc_R, void** qcirc_out);
+bool qcirc_is_equal(QCirc* qcirc_L, QCirc* qcirc_R, bool* ans);
 bool qcirc_kind_first(QCirc* qcirc, Kind* kind);
 bool qcirc_append_gate(QCirc* qcirc, Kind kind, int* qid, double* para, int c, int ctrl);
 bool qcirc_pop_gate(QCirc* qcirc, Kind* kind, int* qid, double* para, int* c, int* ctrl);
