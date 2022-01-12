@@ -77,6 +77,50 @@ RESET          = 205
 NOT_A_GATE     = 1000
 IDENTITY       = 2000
 
+GATE_STRING = {
+    PAULI_X:'x',
+    PAULI_Y:'y',
+    PAULI_Z:'z',
+    ROOT_PAULI_X:'xr',
+    ROOT_PAULI_X_:'xr+',
+    HADAMARD:'h',
+    PHASE_SHIFT_S:'s',
+    PHASE_SHIFT_S_:'s+',
+    PHASE_SHIFT_T:'t',
+    PHASE_SHIFT_T_:'t+',
+    PHASE_SHIFT:'p',
+    ROTATION_X:'rx',
+    ROTATION_Y:'ry',
+    ROTATION_Z:'rz',
+    ROTATION_U1:'u1',
+    ROTATION_U2:'u2',
+    ROTATION_U3:'u3',
+    CONTROLLED_X:'cx',
+    CONTROLLED_Y:'cy',
+    CONTROLLED_Z:'cz',
+    CONTROLLED_XR:'cxy',
+    CONTROLLED_XR_:'cxr+',
+    CONTROLLED_H:'ch',
+    CONTROLLED_S:'cs',
+    CONTROLLED_S_:'cs+',
+    CONTROLLED_T:'ct',
+    CONTROLLED_T_:'ct+',
+    CONTROLLED_P:'cp',
+    CONTROLLED_RX:'crx',
+    CONTROLLED_RY:'cry',
+    CONTROLLED_RZ:'crz',
+    CONTROLLED_U1:'cu1',
+    CONTROLLED_U2:'cu2',
+    CONTROLLED_U3:'cu3',
+    SWAP_QUBITS:'sw',
+    MEASURE:'measure',
+    MEASURE_X:'measure_x',
+    MEASURE_Y:'measure_y',
+    MEASURE_Z:'measure_z',
+    MEASURE_BELL:'meaxure_bell',
+    RESET:'reset'
+}
+
 # MatrixType
 
 KRAUS = 1
