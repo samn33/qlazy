@@ -15,7 +15,7 @@ class Observable(ctypes.Structure):
         ('spro_array', ctypes.c_void_p),
     ]
 
-    def __new__(cls, string=None):
+    def __new__(cls, string=None, **kwargs):
         """
         Parameters
         ----------

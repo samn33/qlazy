@@ -8,7 +8,7 @@ Python Package
 - [密度演算子(DensOpクラス)](usage/densop.md)
 - [オブザーバブル(Observableクラス)](usage/observable.md)
 - [スタビライザー(Stabilizerクラス)](usage/stabilizer.md)
-- [量子コンピュータ(QCompクラス, Backendクラス)](usage/qcomp.md)
+- [量子回路実行(QCircクラス, Backendクラス)](usage/qcirc.md)
 
 ## 使用例
 

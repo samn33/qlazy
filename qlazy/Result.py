@@ -5,7 +5,7 @@ from qlazy.config import *
 from qlazy.error import *
 
 class Result:
-    """ Result data of running quantum computer
+    """ Result of quantum circuit execution
 
     Attributes
     ----------

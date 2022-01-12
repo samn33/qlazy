@@ -78,6 +78,9 @@ def run_gpu(qcirc=[], shots=1, cid=[], backend=None):
 
 def __run_all(qcirc=None, shots=1, cid=[], backend=None, proc='CPU'):
 
+    if qcirc is None:
+        raise ValueError("quantum circuit must be specified.")
+
     qubit_num = qcirc.qubit_num
     cmem_num = qcirc.cmem_num
 
@@ -322,7 +325,6 @@ def __qulacs_operate_qgate(qstate, qubit_num, kind, qid, phase, phase1, phase2):
 def __qulacs_reset(qstate, qubit_num, q):
 
     # error check
-    # qubit_num = qstate.get_qubit_count()
     if q >= qubit_num:
         raise ValueError("reset qubit id is out of bound")
 

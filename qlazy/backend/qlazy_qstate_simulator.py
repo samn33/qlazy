@@ -10,6 +10,9 @@ from qlazy.lib.qstate_c import *
 
 def run(qcirc=None, shots=1, cid=[], backend=None):
 
+    if qcirc is None:
+        raise ValueError("quantum circuit must be specified.")
+    
     qubit_num = qcirc.qubit_num
     cmem_num = qcirc.cmem_num
     qstate = QState(qubit_num=qubit_num)

@@ -34,7 +34,7 @@ class DensOp(ctypes.Structure):
         ('gbank', ctypes.c_void_p),
     ]
     
-    def __new__(cls, qubit_num=0, qstate=[], prob=[], matrix=None):
+    def __new__(cls, qubit_num=0, qstate=[], prob=[], matrix=None, **kwargs):
         """
         Parameters
         ----------

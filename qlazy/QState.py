@@ -36,7 +36,7 @@ class QState(ctypes.Structure):
         ('gbank', ctypes.c_void_p),
     ]
 
-    def __new__(cls, qubit_num=None, vector=None, seed=None):
+    def __new__(cls, qubit_num=None, vector=None, seed=None, **kwargs):
         """
         Parameters
         ----------
@@ -67,7 +67,6 @@ class QState(ctypes.Structure):
             
         self = ctypes.cast(obj.value, ctypes.POINTER(cls)).contents
         return self
-
 
     def __str__(self):
 

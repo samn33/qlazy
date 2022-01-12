@@ -523,20 +523,22 @@ def qstate_operate_qcirc(qstate, cmem, qcirc, shots, cid):
 
     if cmem is not None:
 
+        cmem_num = cmem.cmem_num
         frequency = Counter()
         for n in range(shots):
             
             if n < shots - 1:
                 qstate_tmp = qstate.clone()
-                ret = lib.qstate_operate_qcirc(ctypes.byref(qstate_tmp), ctypes.byref(cmem), ctypes.byref(qcirc))
+                cmem_tmp = cmem.clone()
+                ret = lib.qstate_operate_qcirc(ctypes.byref(qstate_tmp), ctypes.byref(cmem_tmp), ctypes.byref(qcirc))
+                bit_array = ctypes.cast(cmem_tmp.bit_array, ctypes.POINTER(ctypes.c_int*cmem_num))
             else:
                 ret = lib.qstate_operate_qcirc(ctypes.byref(qstate), ctypes.byref(cmem), ctypes.byref(qcirc))
+                bit_array = ctypes.cast(cmem.bit_array, ctypes.POINTER(ctypes.c_int*cmem_num))
 
             if ret == FALSE:
                 raise QState_Error_OperateQcirc()
         
-            cmem_num = cmem.cmem_num
-            bit_array = ctypes.cast(cmem.bit_array, ctypes.POINTER(ctypes.c_int*cmem_num))
             cmem_list = [bit_array.contents[i] for i in range(cmem_num)]
             cmem_list_part = [cmem_list[c] for c in cid]
             mval = "".join(map(str, cmem_list_part))

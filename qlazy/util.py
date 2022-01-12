@@ -221,4 +221,3 @@ def reverse_bit_order(vec_in):
         vec_out[idx_rev] = val
 
     return vec_out
-

@@ -17,9 +17,9 @@ static void _help_print_outline() {
 * quit:                     .,quit \n\
 * help:                     ?,help \n\
 [quantum gates]\n\
-* 1-qubit gates:            X,Y,Z,XR,XR+,H,S,S+,T,T+,P,RX,RY,RZ,U1,U2,U3\n\
-* 2-qubit gates:            CX,CY,CZ,CXR,CXR+,CH,CS,CS+,CT,CT+,CP,CRX,CRY,CRZ,CU1,CU2,CU3,SW\n\
-* measurement:              M,MX,MY,MZ,MB\n\
+* 1-qubit gates:            x,y,z,xr,xr+,h,s,s+,t,t+,p,rx,ry,rz,u1,u2,u3\n\
+* 2-qubit gates:            cx,cy,cz,cxr,cxr+,ch,cs,cs+,ct,ct+,cp,crx,cry,crz,cu1,cu2,cu3,sw\n\
+* measurement:              m,mx,my,mz,mb\n\
 * reset:                    reset\n\
 [notes] \n\
 * see \'help <item>\', for more information\n\
@@ -34,7 +34,7 @@ static void _help_print_init() {
   You must initialize before operating any quantum gate.\n\
 [usage] \n\
   >> input <qubit_num> \n\
-f[alias] \n\
+[alias] \n\
   %% \n\
 ");
 }
@@ -147,13 +147,11 @@ static void _help_print_m() {
   - phase ... angle around z-axis in bloch sphere (unit: PI radian) \n\
   If angle,phase aren't zero value, then measured state is u/d instead of 0/1. \n\
 [usage] \n\
-  >> M \n\
-  >> M <qubit_id>...\n\
-  >> M(<shots>)\n\
-  >> M(<shots>,<angle>,<phase>)\n\
-  >> M(<shots>,<angle>,<phase>) <qubit_id>...\n\
-[alias] \n\
-  m \n\
+  >> m \n\
+  >> m <qubit_id>...\n\
+  >> m(<shots>)\n\
+  >> m(<shots>,<angle>,<phase>)\n\
+  >> m(<shots>,<angle>,<phase>) <qubit_id>...\n\
 ", DEF_SHOTS);
 }
 
@@ -168,12 +166,10 @@ static void _help_print_mx() {
 [note] \n\
   Measured state is u/d instead of 0/1. \n\
 [usage] \n\
-  >> MX \n\
-  >> MX <qubit_id>... \n\
-  >> MX(<shots>) \n\
-  >> MX(<shots>) <qubit_id>... \n\
-[alias] \n\
-  mx \n\
+  >> mx \n\
+  >> mx <qubit_id>... \n\
+  >> mx(<shots>) \n\
+  >> mx(<shots>) <qubit_id>... \n\
 ", DEF_SHOTS);
 }
 
@@ -188,12 +184,10 @@ static void _help_print_my() {
 [note] \n\
   Measured state is u/d instead of 0/1. \n\
 [usage] \n\
-  >> MY \n\
-  >> MY <qubit_id>... \n\
-  >> MY(<shots>) \n\
-  >> MY(<shots>) <qubit_id>... \n\
-[alias] \n\
-  my \n\
+  >> my \n\
+  >> my <qubit_id>... \n\
+  >> my(<shots>) \n\
+  >> my(<shots>) <qubit_id>... \n\
 ", DEF_SHOTS);
 }
 
@@ -206,12 +200,10 @@ static void _help_print_mz() {
   Default shots is %d, and default qubit id's are all \n\
   (all of the qubit id's are measured).\n\
 [usage] \n\
-  >> MZ \n\
-  >> MZ <qubit_id>... \n\
-  >> MZ(<shots>) \n\
-  >> MZ(<shots>) <qubit_id>... \n\
-[alias] \n\
-  mz \n\
+  >> mz \n\
+  >> mz <qubit_id>... \n\
+  >> mz(<shots>) \n\
+  >> mz(<shots>) <qubit_id>... \n\
 ", DEF_SHOTS);
 }
 
@@ -223,10 +215,8 @@ static void _help_print_mb() {
   You can set number of mesurements (=shots) and set 2 qubit ids you want to bell-measure.\n\
   Default shots is %d.\n\
 [usage] \n\
-  >> MB <qubit_id> <qubit_id> \n\
-  >> MB(<shots>) <qubit_id> <qubit_id> \n\
-[alias] \n\
-  mb \n\
+  >> mb <qubit_id> <qubit_id> \n\
+  >> mb(<shots>) <qubit_id> <qubit_id> \n\
 ", DEF_SHOTS);
 }
 
@@ -239,9 +229,7 @@ static void _help_print_x() {
     | 0 1 | \n\
     | 1 0 | \n\
 [usage] \n\
-  >> X <qubit_id>\n\
-[alias] \n\
-  x \n\
+  >> x <qubit_id>\n\
 ");
 }
 
@@ -254,9 +242,7 @@ static void _help_print_y() {
     | 0 -i | \n\
     | i  0 | \n\
 [usage] \n\
-  >> Y <qubit_id>\n\
-[alias] \n\
-  y \n\
+  >> y <qubit_id>\n\
 ");
 }
 
@@ -269,9 +255,7 @@ static void _help_print_z() {
     | 1  0 | \n\
     | 0 -1 | \n\
 [usage] \n\
-  >> Z <qubit_id>\n\
-[alias] \n\
-  z \n\
+  >> z <qubit_id>\n\
 ");
 }
 
@@ -284,9 +268,7 @@ static void _help_print_xr() {
     | (1+i)/2 (1-i)/2 | \n\
     | (1-i)/2 (1+i)/2 | \n\
 [usage] \n\
-  >> XR <qubit_id>\n\
-[alias] \n\
-  xr \n\
+  >> xr <qubit_id>\n\
 ");
 }
 
@@ -299,9 +281,7 @@ static void _help_print_xr_dagger() {
     | (1-i)/2 (1+i)/2 | \n\
     | (1+i)/2 (1-i)/2 | \n\
 [usage] \n\
-  >> XR+ <qubit_id>\n\
-[alias] \n\
-  xr+ \n\
+  >> xr+ <qubit_id>\n\
 ");
 }
 
@@ -314,9 +294,7 @@ static void _help_print_h() {
     | 1/sqrt(2)  1/sqrt(2) | \n\
     | 1/sqrt(2) -1/sqrt(2) | \n\
 [usage] \n\
-  >> H <qubit_id>\n\
-[alias] \n\
-  h \n\
+  >> h <qubit_id>\n\
 ");
 }
 
@@ -330,9 +308,7 @@ static void _help_print_s() {
     | 1 0 | \n\
     | 0 i | \n\
 [usage] \n\
-  >> S <qubit_id>\n\
-[alias] \n\
-  s \n\
+  >> s <qubit_id>\n\
 ");
 }
 
@@ -345,9 +321,7 @@ static void _help_print_s_dagger() {
     | 1  0 | \n\
     | 0 -i | \n\
 [usage] \n\
-  >> S+ <qubit_id>\n\
-[alias] \n\
-  s+ \n\
+  >> s+ <qubit_id>\n\
 ");
 }
 
@@ -361,9 +335,7 @@ static void _help_print_t() {
     | 1 0             | \n\
     | 0 (1+i)/sqrt(2) | \n\
 [usage] \n\
-  >> T <qubit_id>\n\
-[alias] \n\
-  t \n\
+  >> t <qubit_id>\n\
 ");
 }
 
@@ -376,9 +348,7 @@ static void _help_print_t_dagger() {
     | 1 0             | \n\
     | 0 (1-i)/sqrt(2) | \n\
 [usage] \n\
-  >> T+ <qubit_id>\n\
-[alias] \n\
-  t+ \n\
+  >> t+ <qubit_id>\n\
 ");
 }
 
@@ -391,9 +361,7 @@ static void _help_print_p() {
     | 1 0               | \n\
     | 0 exp(i*phase*PI) | \n\
 [usage] \n\
-  >> P(<phase>) <qubit_id>\n\
-[alias] \n\
-  p \n\
+  >> p(<phase>) <qubit_id>\n\
 ");
 }
 
@@ -406,9 +374,7 @@ static void _help_print_rx() {
     |  cos(phase*PI/2)   -i*sin(phase*PI/2) | \n\
     | -i*sin(phase*PI/2)  cos(phase*PI/2)   | \n\
 [usage] \n\
-  >> RX(<phase>) <qubit_id>\n\
-[alias] \n\
-  rx \n\
+  >> rx(<phase>) <qubit_id>\n\
 ");
 }
 
@@ -421,9 +387,7 @@ static void _help_print_ry() {
     | cos(phase*PI/2) -sin(phase*PI/2) | \n\
     | sin(phase*PI/2)  cos(phase*PI/2) | \n\
 [usage] \n\
-  >> RY(<phase>) <qubit_id>\n\
-[alias] \n\
-  ry \n\
+  >> ry(<phase>) <qubit_id>\n\
 ");
 }
 
@@ -436,9 +400,7 @@ static void _help_print_rz() {
     | exp(-i*phase*PI/2) 0                 | \n\
     | 0                  exp(i*phase*PI/2) | \n\
 [usage] \n\
-  >> RZ(<phase>) <qubit_id>\n\
-[alias] \n\
-  rz \n\
+  >> rz(<phase>) <qubit_id>\n\
 ");
 }
 
@@ -451,9 +413,7 @@ static void _help_print_u1() {
     | 1 0               | \n\
     | 0 exp(i*alpha*PI) | \n\
 [usage] \n\
-  >> U1(<alpha>) <qubit_id>\n\
-[alias] \n\
-  u1 \n\
+  >> u1(<alpha>) <qubit_id>\n\
 ");
 }
 
@@ -466,9 +426,7 @@ static void _help_print_u2() {
     | 1/sqrt(2)              -exp(i*alpha*PI)/sqrt(2)       | \n\
     | exp(i*beta*PI)/sqrt(2) exp(i*(alpha+beta)*PI)/sqrt(2) | \n\
 [usage] \n\
-  >> U2(<alpha>,<beta>) <qubit_id>\n\
-[alias] \n\
-  u2 \n\
+  >> u2(<alpha>,<beta>) <qubit_id>\n\
 ");
 }
 
@@ -481,9 +439,7 @@ static void _help_print_u3() {
     | cos(gamma/2)                -exp(i*alpha*PI)*sin(gamma/2)       | \n\
     | exp(i*beta*PI)*sin(gamma/2) exp(i*(alpha+beta)*PI)*cos(gamma/2) | \n\
 [usage] \n\
-  >> U3(<alpha>,<beta>,<gamma>) <qubit_id>\n\
-[alias] \n\
-  u3 \n\
+  >> u3(<alpha>,<beta>,<gamma>) <qubit_id>\n\
 ");
 }
 
@@ -499,9 +455,7 @@ static void _help_print_cx() {
     | 0 0 0 1 | \n\
     | 0 0 1 0 | \n\
 [usage] \n\
-  >> CX <qubit_id> <qubit_id>\n\
-[alias] \n\
-  cx \n\
+  >> cx <qubit_id> <qubit_id>\n\
 ");
 }
 
@@ -516,9 +470,7 @@ static void _help_print_cy() {
     | 0 0 0 -i | \n\
     | 0 0 i 0  | \n\
 [usage] \n\
-  >> CY <qubit_id> <qubit_id>\n\
-[alias] \n\
-  cy \n\
+  >> cy <qubit_id> <qubit_id>\n\
 ");
 }
 
@@ -534,9 +486,7 @@ static void _help_print_cz() {
     | 0 0 1  0 | \n\
     | 0 0 0 -1 | \n\
 [usage] \n\
-  >> CZ <qubit_id> <qubit_id>\n\
-[alias] \n\
-  cz \n\
+  >> cz <qubit_id> <qubit_id>\n\
 ");
 }
 
@@ -552,9 +502,7 @@ static void _help_print_cxr() {
     | 0 0 (1.0+1.0i)/2.0 (1.0-1.0i)/2.0 | \n\
     | 0 0 (1.0-1.0i)/2.0 (1.0+1.0i)/2.0 | \n\
 [usage] \n\
-  >> CXR <qubit_id> <qubit_id>\n\
-[alias] \n\
-  cxr \n\
+  >> cxr <qubit_id> <qubit_id>\n\
 ");
 }
 
@@ -570,9 +518,7 @@ static void _help_print_cxr_dagger() {
     | 0 0 (1.0-1.0i)/2.0 (1.0+1.0i)/2.0 | \n\
     | 0 0 (1.0+1.0i)/2.0 (1.0-1.0i)/2.0 | \n\
 [usage] \n\
-  >> CXR+ <qubit_id> <qubit_id>\n\
-[alias] \n\
-  cxr+ \n\
+  >> cxr+ <qubit_id> <qubit_id>\n\
 ");
 }
 
@@ -583,9 +529,7 @@ static void _help_print_ch() {
   CH gate is 2-qubit gate called \'controlled H gate\'.\n\
   It operate H gate to the second qubit if and only if the first qubit is |1>.\n\
 [usage] \n\
-  >> CH <qubit_id> <qubit_id>\n\
-[alias] \n\
-  ch \n\
+  >> ch <qubit_id> <qubit_id>\n\
 ");
 }
 
@@ -601,9 +545,7 @@ static void _help_print_cs() {
     | 0 0 1 0 | \n\
     | 0 0 0 i | \n\
 [usage] \n\
-  >> CS <qubit_id> <qubit_id>\n\
-[alias] \n\
-  cs \n\
+  >> cs <qubit_id> <qubit_id>\n\
 ");
 }
 
@@ -619,9 +561,7 @@ static void _help_print_cs_dagger() {
     | 0 0 1  0 | \n\
     | 0 0 0 -i | \n\
 [usage] \n\
-  >> CS+ <qubit_id> <qubit_id>\n\
-[alias] \n\
-  cs+ \n\
+  >> cs+ <qubit_id> <qubit_id>\n\
 ");
 }
 
@@ -637,9 +577,7 @@ static void _help_print_ct() {
     | 0 0 1 0                    | \n\
     | 0 0 0 (1.0+1.0i)/sqrt(2.0) | \n\
 [usage] \n\
-  >> CT <qubit_id> <qubit_id>\n\
-[alias] \n\
-  ct \n\
+  >> ct <qubit_id> <qubit_id>\n\
 ");
 }
 
@@ -655,9 +593,7 @@ static void _help_print_ct_dagger() {
     | 0 0 1 0                    | \n\
     | 0 0 0 (1.0-1.0i)/sqrt(2.0) | \n\
 [usage] \n\
-  >> CT+ <qubit_id> <qubit_id>\n\
-[alias] \n\
-  ct+ \n\
+  >> ct+ <qubit_id> <qubit_id>\n\
 ");
 }
 
@@ -668,9 +604,7 @@ static void _help_print_cp() {
   CP gate is 2-qubit gate called \'controlled Phase Shift gate\'.\n\
   It operate P gate to the second qubit if and only if the first qubit is |1>.\n\
 [usage] \n\
-  >> CP(<phase>) <qubit_id> <qubit_id>\n\
-[alias] \n\
-  cp \n\
+  >> cp(<phase>) <qubit_id> <qubit_id>\n\
 ");
 }
 
@@ -681,9 +615,7 @@ static void _help_print_crx() {
   CRX gate is 2-qubit gate called \'controlled RX gate\'.\n\
   It operate RX gate to the second qubit if and only if the first qubit is |1>.\n\
 [usage] \n\
-  >> CRX(<phase>) <qubit_id> <qubit_id>\n\
-[alias] \n\
-  crx \n\
+  >> crx(<phase>) <qubit_id> <qubit_id>\n\
 ");
 }
 
@@ -694,9 +626,7 @@ static void _help_print_cry() {
   CRY gate is 2-qubit gate called \'controlled RY gate\'.\n\
   It operate RY gate to the second qubit if and only if the first qubit is |1>.\n\
 [usage] \n\
-  >> CRY(<phase>) <qubit_id> <qubit_id>\n\
-[alias] \n\
-  cry \n\
+  >> cry(<phase>) <qubit_id> <qubit_id>\n\
 ");
 }
 
@@ -707,9 +637,7 @@ static void _help_print_crz() {
   CRZ gate is 2-qubit gate called \'controlled RZ gate\'.\n\
   It operate RZ gate to the second qubit if and only if the first qubit is |1>.\n\
 [usage] \n\
-  >> CRZ(<phase>) <qubit_id> <qubit_id>\n\
-[alias] \n\
-  crz \n\
+  >> crz(<phase>) <qubit_id> <qubit_id>\n\
 ");
 }
 
@@ -719,9 +647,7 @@ static void _help_print_cu1() {
 [description] \n\
   CU1 gate is 2-qubit gate called \'controlled U1 gate\'.\n\
 [usage] \n\
-  >> CU1(<alpha>) <qubit_id> <qubit_id>\n\
-[alias] \n\
-  cu1 \n\
+  >> cu1(<alpha>) <qubit_id> <qubit_id>\n\
 ");
 }
 
@@ -731,9 +657,7 @@ static void _help_print_cu2() {
 [description] \n\
   CU2 gate is 2-qubit gate called \'controlled U2 gate\'.\n\
 [usage] \n\
-  >> CU2(<alpha>,<beta>) <qubit_id> <qubit_id>\n\
-[alias] \n\
-  cu2 \n\
+  >> cu2(<alpha>,<beta>) <qubit_id> <qubit_id>\n\
 ");
 }
 
@@ -743,9 +667,7 @@ static void _help_print_cu3() {
 [description] \n\
   CU3 gate is 2-qubit gate called \'controlled U3 gate\'.\n\
 [usage] \n\
-  >> CU3(<alpha>,<beta>,<gamma>) <qubit_id> <qubit_id>\n\
-[alias] \n\
-  cu3 \n\
+  >> cu3(<alpha>,<beta>,<gamma>) <qubit_id> <qubit_id>\n\
 ");
 }
 
@@ -755,9 +677,7 @@ static void _help_print_sw() {
 [description] \n\
   SW gate is 2-qubit swap gate.\n\
 [usage] \n\
-  >> SW <qubit_id> <qubit_id>\n\
-[alias] \n\
-  sw \n\
+  >> sw <qubit_id> <qubit_id>\n			\
 ");
 }
 

@@ -49,7 +49,7 @@ class Stabilizer(ctypes.Structure):
         ('check_matrix', ctypes.c_void_p),
     ]
 
-    def __new__(cls, qubit_num=None, gene_num=None, pp_list=None, seed=None):
+    def __new__(cls, qubit_num=None, gene_num=None, pp_list=None, seed=None, **kwargs):
         """
         Parameters
         ----------
