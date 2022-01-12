@@ -14,7 +14,7 @@ class CMem(ctypes.Structure):
     Attributes
     ----------
     cmem_num : int
-        number of the classical register.
+        number of the classical register (classical memory size).
     bit_array : list (int)
         bit array of classical memory.
 
@@ -24,7 +24,7 @@ class CMem(ctypes.Structure):
         ('bit_array', ctypes.c_void_p),
     ]
 
-    def __new__(cls, cmem_num):
+    def __new__(cls, cmem_num, **kwargs):
         """
         Parameters
         ----------
@@ -40,9 +40,9 @@ class CMem(ctypes.Structure):
         cmem = ctypes.cast(obj.value, ctypes.POINTER(cls)).contents
         return cmem
             
-    def free(self):
+    def clone(self):
         """
-        free memory of classical memory.
+        get the copy of the classical memory.
 
         Parameters
         ----------
@@ -50,12 +50,14 @@ class CMem(ctypes.Structure):
 
         Returns
         -------
-        None
+        cmem : instance of CMem
+            copy of the original classical memory.
 
         """
-        # cmem_free(self)
-        warnings.warn("No need to call 'free' method because free automatically, or you can use 'del' to free memory explicitly.")
-        
+        obj = cmem_copy(self)
+        cmem = ctypes.cast(obj.value, ctypes.POINTER(self.__class__)).contents
+        return cmem
+
     def __del__(self):
         
         cmem_free(self)
