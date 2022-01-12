@@ -18,6 +18,9 @@ from qiskit.circuit.library.standard_gates import SXdgGate
 
 def run(qcirc=None, shots=1, cid=[], backend=None):
             
+    if qcirc is None:
+        raise ValueError("quantum circuit must be specified.")
+
     qubit_num = qcirc.qubit_num
     cmem_num = qcirc.cmem_num
 
@@ -28,11 +31,11 @@ def run(qcirc=None, shots=1, cid=[], backend=None):
         cid = [i for i in range(cmem_num)]
 
     qubit_reg = QuantumRegister(qubit_num)
-    cmem_reg = [ClassicalRegister(1, name="cmem_reg_{}".format(i)) for i in range(cmem_num+1)]
+    cmem_reg = ClassicalRegister(cmem_num)
 
-    args = [qubit_reg] + cmem_reg
-    qc = QuantumCircuit(*args)
+    qc = QuantumCircuit(qubit_reg, cmem_reg)
 
+    exist_measurement = False
     while True:
         kind = qcirc.kind_first()
         if kind == None: break
@@ -40,9 +43,9 @@ def run(qcirc=None, shots=1, cid=[], backend=None):
         (kind, qid, para, c, ctrl) = qcirc.pop_gate()
 
         if kind == MEASURE:
-
+            exist_measurement = True
             if c == None:
-                qc.measure(qubit_reg[qid[0]], cmem_reg[-1])
+                raise ValueError("cid (classical register ID) must be specified")
             else:
                 qc.measure(qubit_reg[qid[0]], cmem_reg[c])
                 
@@ -68,25 +71,29 @@ def run(qcirc=None, shots=1, cid=[], backend=None):
                 raise ValueError("unknown device")
 
     # execute the circuit
-    res = execute(qc, ibmq_backend, shots=shots).result()
-    frq = res.get_counts(qc)
+    if exist_measurement == True:
+        res = execute(qc, ibmq_backend, shots=shots).result()
+        frq = res.get_counts(qc)
+
+        frequency = Counter()
+        for k,v in frq.items():
+            bits_list = list(k.replace(' ', ''))
+            bits_list.reverse()
+            measured_bits_list = [bits_list[c] for c in cid]
+            measured_bits = ''.join(measured_bits_list)
+            if measured_bits != '':
+                frequency[measured_bits] += v
+            else:
+                frequency = None
+                break
+    else:  # no measurement gates included
+        cid = []
+        frequency = None
 
     # execute the circuit (for state vector)
     ibmq_sv_backend = Aer.get_backend("statevector_simulator")
     res_sv = execute(qc, ibmq_sv_backend).result()
-    statevector = reverse_bit_order(res_sv.get_statevector(qc))
-
-    frequency = Counter()
-    for k,v in frq.items():
-        bits_list = list(k.replace(' ', ''))
-        bits_list.reverse()
-        measured_bits_list = [bits_list[c] for c in cid]
-        measured_bits = ''.join(measured_bits_list)
-        if measured_bits != '':
-            frequency[measured_bits] += v
-        else:
-            frequency = None
-            break
+    statevector = res_sv.get_statevector(qc)
 
     info = {'statevector': statevector, 'creg': cmem_reg}
     result = Result(cid=cid, frequency=frequency, backend=backend, info=info)
