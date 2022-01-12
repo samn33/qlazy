@@ -23,6 +23,12 @@ VECTOR_16 = [-0.20483596+0.23441366j, -0.169582+0.27101216j,
 
 class MyQState(QState):
 
+    def __init__(self, qubit_num=0, name=None):
+        self.name = name
+
+    def get_name(self):
+        return self.name
+     
     def bell(self, q0, q1):
         self.h(q0).cx(q0,q1)
         return self
@@ -1174,6 +1180,12 @@ class TestQState_inheritance(unittest.TestCase):
         qs_actual.bell(0,1).x(0)
         fid = qs_expect.fidelity(qs_actual)
         self.assertEqual(abs(fid-1.0) < EPS, True)
+
+    def test_inheritance_4(self):
+        """test 'inheritance_4'
+        """
+        qs = MyQState(qubit_num=1, name='hoge')
+        self.assertEqual(qs.get_name(), 'hoge')
 
 if __name__ == '__main__':
     unittest.main()

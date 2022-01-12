@@ -381,6 +381,12 @@ PROBS_16 = [0.1, 0.1, 0.1, 0.1, 0.05, 0.05, 0.05, 0.05,
 
 class MyDensOp(DensOp):
 
+    def __init__(self, qubit_num=0, name=None):
+        self.name = name
+
+    def get_name(self):
+        return self.name
+     
     def bell(self, q0, q1):
         self.h(q0).cx(q0,q1)
         return self
@@ -1632,6 +1638,12 @@ class TestDensOp_inheritance(unittest.TestCase):
         de_actual = de_actual.patrace(qid=[2]).bell(0,1).x(0)
         fid = de_expect.fidelity(de_actual)
         self.assertEqual(abs(fid-1.0) < EPS, True)
+
+    def test_inheritance_5(self):
+        """test 'inheritance_5'
+        """
+        de = MyDensOp(qubit_num=2, name='hoge').h(0).cx(0,1).x(0)
+        self.assertEqual(de.get_name(), 'hoge')
 
 if __name__ == '__main__':
     unittest.main()

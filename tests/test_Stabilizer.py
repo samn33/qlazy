@@ -7,6 +7,12 @@ from qlazy import Stabilizer, PauliProduct
 
 class MyStabilizer(Stabilizer):
 
+    def __init__(self, qubit_num=0, name=None):
+        self.name = name
+
+    def get_name(self):
+        return self.name
+     
     def bell(self, q0, q1):
         self.h(q0).cx(q0,q1)
         return self
@@ -1221,6 +1227,12 @@ class TestStabilizer_inheritance(unittest.TestCase):
         str_expect = sb_expect.get_str()
         str_actual = sb_actual.get_str()
         self.assertEqual(str_expect, str_actual)
+
+    def test_inheritance_2(self):
+        """test 'inheritance_2'
+        """
+        sb = MyStabilizer(qubit_num=2, name='hoge').set_all('Z')
+        self.assertEqual(sb.get_name(), 'hoge')
 
 if __name__ == '__main__':
     unittest.main()
