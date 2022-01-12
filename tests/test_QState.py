@@ -1060,7 +1060,7 @@ class TestQState_schmidt_decocmp(unittest.TestCase):
         coef, qs_0, qs_1 = qs_ori.schmidt_decomp(qid_0=[0,1], qid_1=[2,3])
         rank = len(coef)
         qs_list = [qs_0[i].tenspro(qs_1[i]) for i in range(rank)]
-        vec_comp = np.zeros(qs_ori.state_num, dtype=np.complex)
+        vec_comp = np.zeros(qs_ori.state_num, dtype=complex)
         for i in range(rank):
             vec_comp = vec_comp + coef[i] * qs_list[i].get_amp()
         qs_comp = QState(vector=vec_comp)

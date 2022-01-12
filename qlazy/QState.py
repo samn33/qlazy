@@ -598,7 +598,7 @@ class QState(ctypes.Structure):
 
         row = 2**len(qid_0)
         col = 2**len(qid_1)
-        mat = np.zeros((row, col), dtype=np.complex)
+        mat = np.zeros((row, col), dtype=complex)
         for idx,comp in enumerate(vec):
             mat[idx//col][idx%col] = comp
     
