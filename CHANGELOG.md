@@ -1,13 +1,15 @@
 # Change Log
 
-## [0.2.3] - 2021-xx-xx
+## [0.2.3] - 2022-01-14
 ### Added
-- examples of "Lattice Surgery"
+- QCirc class (quantum circuit)
+- Result class (result of quantum circuit execution)
 - 'measure' method of QState, Stabilizer (one shot measuremant in computational basis)
+- example of "Lattice Surgery"
 ### Changed
-- specifications of QComp
-### Fixed
-- 'measure' method of QComp for qlazy's qstate_simulator
+- Backend class (add run method to execute quantum circuit)
+### Removed
+- QComp class
 
 ## [0.2.2] - 2021-10-09
 ### Changed

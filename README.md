@@ -113,7 +113,7 @@ bar.py
 	
     from qlazy import QCirc, Backend
     
-    bk = Backend(product='qlazy', device='qstate_simulator')
+    bk = Backend()
     qc = QCirc().h(0).cx(0,1).measure(qid=[0,1], cid=[0,1])
     result = bk.run(qcirc=qc, shots=100)
     print(result.frequency)

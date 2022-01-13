@@ -15,7 +15,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
-#define VERSION "0.2.3.beta"
+#define VERSION "0.2.3"
 
 //#define TEST_NEW_VERSION
 
