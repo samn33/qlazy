@@ -73,11 +73,11 @@ def qstate_reset(qs, qid=None):
     
     try:
         qubit_num = len(qid)
-        qubit_id = [0 for _ in range(MAX_QUBIT_NUM)]
+        qubit_id = [0 for _ in range(qubit_num)]
         for i in range(len(qid)):
             qubit_id[i] = qid[i]
     
-        IntArray = ctypes.c_int * MAX_QUBIT_NUM
+        IntArray = ctypes.c_int * qubit_num
         qid_array = IntArray(*qubit_id)
             
         lib.qstate_reset.restype = ctypes.c_int
@@ -100,11 +100,11 @@ def qstate_print(qs, qid=None, nonzero=False):
         
     try:
         qubit_num = len(qid)
-        qubit_id = [0 for _ in range(MAX_QUBIT_NUM)]
+        qubit_id = [0 for _ in range(qubit_num)]
         for i in range(len(qid)):
             qubit_id[i] = qid[i]
 
-        IntArray = ctypes.c_int * MAX_QUBIT_NUM
+        IntArray = ctypes.c_int * qubit_num
         qid_array = IntArray(*qubit_id)
 
         
@@ -214,10 +214,10 @@ def qstate_get_camp(qs, qid=None):
 
     try:
         qubit_num = len(qid)
-        qubit_id = [0 for _ in range(MAX_QUBIT_NUM)]
+        qubit_id = [0 for _ in range(qubit_num)]
         for i in range(len(qid)):
             qubit_id[i] = qid[i]
-        IntArray = ctypes.c_int * MAX_QUBIT_NUM
+        IntArray = ctypes.c_int * qubit_num
         qid_array = IntArray(*qubit_id)
 
         camp = None
@@ -330,10 +330,10 @@ def qstate_apply_matrix(qs, matrix=None, qid=None):
 
     try:
         qubit_num = len(qid)
-        qubit_id = [0 for _ in range(MAX_QUBIT_NUM)]
+        qubit_id = [0 for _ in range(qubit_num)]
         for i in range(len(qid)):
             qubit_id[i] = qid[i]
-        IntArray = ctypes.c_int * MAX_QUBIT_NUM
+        IntArray = ctypes.c_int * qubit_num
         qid_array = IntArray(*qubit_id)
 
         row = len(matrix) # dimension of the unitary matrix
@@ -379,10 +379,10 @@ def qstate_operate_qgate(qs, kind=None, qid=None,
     qstate_check_args(qs, kind=kind, qid=qid, shots=None, angle=None,
                       phase=phase, phase1=phase1, phase2=phase2)
 
-    qubit_id = [0 for _ in range(MAX_QUBIT_NUM)]
+    qubit_id = [-1 for _ in range(2)]
     for i in range(len(qid)):
         qubit_id[i] = qid[i]
-    IntArray = ctypes.c_int * MAX_QUBIT_NUM
+    IntArray = ctypes.c_int * 2
     qid_array = IntArray(*qubit_id)
 
     lib.qstate_operate_qgate.restype = ctypes.c_int
@@ -403,10 +403,10 @@ def qstate_measure(qs, qid=None, angle=0.0, phase=0.0):
 
     # operate
     qubit_num = len(qid)
-    qubit_id = [0 for _ in range(MAX_QUBIT_NUM)]
+    qubit_id = [0 for _ in range(qubit_num)]
     for i in range(len(qid)):
         qubit_id[i] = qid[i]
-    IntArray = ctypes.c_int * MAX_QUBIT_NUM
+    IntArray = ctypes.c_int * qubit_num
     qid_array = IntArray(*qubit_id)
 
     mval = 0
@@ -439,10 +439,10 @@ def qstate_measure_stats(qs, qid=None, shots=DEF_SHOTS, angle=0.0, phase=0.0):
 
     # operate
     qubit_num = len(qid)
-    qubit_id = [0 for _ in range(MAX_QUBIT_NUM)]
+    qubit_id = [0 for _ in range(qubit_num)]
     for i in range(len(qid)):
         qubit_id[i] = qid[i]
-    IntArray = ctypes.c_int * MAX_QUBIT_NUM
+    IntArray = ctypes.c_int * qubit_num
     qid_array = IntArray(*qubit_id)
 
     mdata = None
@@ -460,18 +460,9 @@ def qstate_measure_stats(qs, qid=None, shots=DEF_SHOTS, angle=0.0, phase=0.0):
     if ret == FALSE:
         raise QState_Error_Measure()
 
-    out = ctypes.cast(c_mdata.value, ctypes.POINTER(MDataC))
+    out = ctypes.cast(c_mdata.value, ctypes.POINTER(MData))
         
-    state_num = out.contents.state_num
-    last_state = out.contents.last
-    freq = ctypes.cast(out.contents.freq, ctypes.POINTER(ctypes.c_int*state_num))
-    freq_list = [freq.contents[i] for i in range(state_num)]
-    md = MData(freq_list=freq_list, last_state=last_state, qid=qid,
-               qubit_num=qubit_num, state_num=state_num, angle=angle, phase=phase,
-               is_bell=False)
-    out.contents.free()
-
-    return md
+    return out.contents
 
 def qstate_measure_bell_stats(qs, qid=None, shots=DEF_SHOTS):
 
@@ -484,10 +475,10 @@ def qstate_measure_bell_stats(qs, qid=None, shots=DEF_SHOTS):
     # operate
     state_num = 4
     qubit_num = 2
-    qubit_id = [0 for _ in range(MAX_QUBIT_NUM)]
+    qubit_id = [0 for _ in range(qubit_num)]
     for i in range(qubit_num):
         qubit_id[i] = qid[i]
-    IntArray = ctypes.c_int * MAX_QUBIT_NUM
+    IntArray = ctypes.c_int * qubit_num
     qid_array = IntArray(*qubit_id)
         
     mdata = None
@@ -504,17 +495,9 @@ def qstate_measure_bell_stats(qs, qid=None, shots=DEF_SHOTS):
     if ret == FALSE:
         raise QState_Error_Measure()
 
-    out = ctypes.cast(c_mdata.value, ctypes.POINTER(MDataC))
+    out = ctypes.cast(c_mdata.value, ctypes.POINTER(MData))
         
-    last_state = out.contents.last
-    freq = ctypes.cast(out.contents.freq, ctypes.POINTER(ctypes.c_int*state_num))
-    freq_list = [freq.contents[i] for i in range(state_num)]
-    md = MData(freq_list=freq_list, last_state=last_state, qid=qid,
-               qubit_num=qubit_num, state_num=state_num, angle=0.0, phase=0.0,
-               is_bell=True)
-    out.contents.free()
-
-    return md
+    return out.contents
 
 def qstate_operate_qcirc(qstate, cmem, qcirc, shots, cid):
 
