@@ -46,7 +46,7 @@ if __name__ == '__main__':
 
     # reconstruction
     qs_list = [qs_0[i].tenspro(qs_1[i]) for i in range(rank)]
-    vec_comp = np.zeros(qs_ori.state_num, dtype=np.complex)
+    vec_comp = np.zeros(qs_ori.state_num)
     for i in range(rank):
         vec_comp = vec_comp + coef[i] * qs_list[i].get_amp()
     qs_comp = QState(vector=vec_comp)
