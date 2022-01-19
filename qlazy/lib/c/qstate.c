@@ -7,8 +7,7 @@
 
 #define METHOD_0
 
-static bool _select_bits(int* bits_out, int bits_in, int digits_out, int digits_in,
-			int digit_array[MAX_QUBIT_NUM])
+static bool _select_bits(int* bits_out, int bits_in, int digits_out, int digits_in, int* digit_array)
 {
   /*
     [description]
@@ -89,7 +88,7 @@ static bool _qstate_normalize(QState* qstate)
   SUC_RETURN(true);
 }
 
-static QState* _qstate_mask(QState* qstate_in, int qubit_num, int qubit_id[MAX_QUBIT_NUM])
+static QState* _qstate_mask(QState* qstate_in, int qubit_num, int* qubit_id)
 {
   MData*        mdata	    = NULL;	/* temporary in this function */
   QState*       mask_qstate = NULL;
@@ -131,7 +130,7 @@ static QState* _qstate_mask(QState* qstate_in, int qubit_num, int qubit_id[MAX_Q
   SUC_RETURN(mask_qstate);
 }
 
-static QState* _qstate_pickup(QState* qstate_in, int qubit_num, int qubit_id[MAX_QUBIT_NUM])
+static QState* _qstate_pickup(QState* qstate_in, int qubit_num, int* qubit_id)
 {
   QState*	qstate	    = NULL;
   QState*	mask_qstate = NULL;
@@ -298,7 +297,7 @@ bool qstate_init_with_vector(double* real, double* imag, int dim, void** qstate_
   SUC_RETURN(true);
 }
 
-bool qstate_reset(QState* qstate_in, int qubit_num, int qubit_id[MAX_QUBIT_NUM])
+bool qstate_reset(QState* qstate_in, int qubit_num, int* qubit_id)
 {
   QState*	qstate = NULL;
   int		mask   = 0;
@@ -358,7 +357,7 @@ bool qstate_copy(QState* qstate_in, void** qstate_out)
   SUC_RETURN(true);
 }
 
-bool qstate_get_camp(QState* qstate, int qubit_num, int qubit_id[MAX_QUBIT_NUM],
+bool qstate_get_camp(QState* qstate, int qubit_num, int* qubit_id,
 		     void** camp_out)
 {
   QState*	mask_qstate = NULL;
@@ -384,7 +383,7 @@ bool qstate_get_camp(QState* qstate, int qubit_num, int qubit_id[MAX_QUBIT_NUM],
   SUC_RETURN(true);
 }
 
-bool qstate_print(QState* qstate_in, int qubit_num, int qubit_id[MAX_QUBIT_NUM], bool nonzero)
+bool qstate_print(QState* qstate_in, int qubit_num, int* qubit_id, bool nonzero)
 {
   double	qreal,qimag,prob;
   int		prob_level = 0;
@@ -832,7 +831,7 @@ static bool _qstate_transform_basis_inv(QState* qstate, double angle, double pha
 
 static int _qstate_measure_one_time_without_change_state(QState* qstate_in, double angle,
 							 double phase, int qubit_num,
-							 int qubit_id[MAX_QUBIT_NUM])
+							 int* qubit_id)
 {
   double	r      = rand()/(double)RAND_MAX;
   double	prob_s = 0.0;
@@ -866,7 +865,7 @@ static int _qstate_measure_one_time_without_change_state(QState* qstate_in, doub
 }
 
 static int _qstate_measure_one_time(QState* qstate, double angle, double phase,
-				    int qubit_num, int qubit_id[MAX_QUBIT_NUM])
+				    int qubit_num, int* qubit_id)
 {
   double	r      = rand()/(double)RAND_MAX;
   double	prob_s = 0.0;
@@ -914,7 +913,7 @@ static int _qstate_measure_one_time(QState* qstate, double angle, double phase,
 }
 
 bool qstate_measure(QState* qstate, double angle, double phase,
-		    int qubit_num, int qubit_id[MAX_QUBIT_NUM], int* mval_out)
+		    int qubit_num, int* qubit_id, int* mval_out)
 {
   int state_id = 0;
   int mes_id = 0;
@@ -928,11 +927,10 @@ bool qstate_measure(QState* qstate, double angle, double phase,
 }
 
 bool qstate_measure_stats(QState* qstate, int shot_num, double angle, double phase,
-			  int qubit_num, int qubit_id[MAX_QUBIT_NUM], void** mdata_out)
+			  int qubit_num, int* qubit_id, void** mdata_out)
 {
   int		state_id;
   int		mes_id;
-  int		mes_num = (1<<qubit_num);
   MData*	mdata	= NULL;
 
   if ((qstate == NULL) ||
@@ -943,14 +941,15 @@ bool qstate_measure_stats(QState* qstate, int shot_num, double angle, double pha
   /* measure all bits, if no parameter set */
   if (qubit_num == 0) {
     qubit_num = qstate->qubit_num;
-    mes_num = (1<<qubit_num);
+    if (!(qubit_id = (int*)malloc(sizeof(int) * qubit_num)))
+      ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
     for (int i=0; i<qstate->qubit_num; i++) {
       qubit_id[i] = i;
     }
   }
 
   /* initialize mdata */
-  if (!(mdata_init(qubit_num, mes_num, shot_num, angle, phase, qubit_id,
+  if (!(mdata_init(qubit_num, shot_num, angle, phase, qubit_id,
 		   (void**)&mdata))) ERR_RETURN(ERROR_MDATA_INIT,false);
 
   /* execute mesurement */
@@ -966,14 +965,14 @@ bool qstate_measure_stats(QState* qstate, int shot_num, double angle, double pha
       ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
     mdata->freq[mes_id]++;
   }
-  mdata->last = mes_id;
+  mdata->last_val = mes_id;
 
   *mdata_out = mdata;
   SUC_RETURN(true);
 }
 
 bool qstate_measure_bell_stats(QState* qstate, int shot_num, int qubit_num,
-			       int qubit_id[MAX_QUBIT_NUM], void** mdata_out)
+			       int* qubit_id, void** mdata_out)
 {
   MData*	mdata  = NULL;
   
@@ -1011,7 +1010,7 @@ bool qstate_measure_bell_stats(QState* qstate, int shot_num, int qubit_num,
 }
 
 bool qstate_operate_qgate(QState* qstate, Kind kind, double alpha, double beta,
-			  double gamma, int qubit_id[MAX_QUBIT_NUM])
+			  double gamma, int* qubit_id)
 {
   int		q0  = qubit_id[0];
   int		q1  = qubit_id[1];
@@ -1316,7 +1315,7 @@ bool qstate_expect_value(QState* qstate, Observable* observ, double* value)
   SUC_RETURN(true);
 }
 
-bool qstate_apply_matrix(QState* qstate, int qnum_part, int qid[MAX_QUBIT_NUM],
+bool qstate_apply_matrix(QState* qstate, int qnum_part, int* qid,
 			 double* real, double *imag, int row, int col)
 {
   QState*	qstate_tmp = NULL;

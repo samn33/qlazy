@@ -89,7 +89,7 @@ bool densop_init_with_matrix(double* real, double* imag, int row, int col,
   SUC_RETURN(true);
 }
 
-bool densop_reset(DensOp* densop, int qubit_num, int qubit_id[MAX_QUBIT_NUM])
+bool densop_reset(DensOp* densop, int qubit_num, int* qubit_id)
 {
   DensOp*	densop_A  = NULL;
   DensOp*	densop_B  = NULL; /* |0><0| */
@@ -349,7 +349,7 @@ static int _get_id_traced(int in, int total_qubit_num,
 }
 
 /* partial trace */
-bool densop_patrace(DensOp* densop_in, int qubit_num, int qubit_id[MAX_QUBIT_NUM],
+bool densop_patrace(DensOp* densop_in, int qubit_num, int* qubit_id,
 		     void** densop_out)
 {
   DensOp*	densop = NULL;
@@ -415,7 +415,7 @@ static bool _hermitian_conj(double* real_in, double* imag_in, int row, int col,
   SUC_RETURN(true);
 }
 
-static bool _densop_rapply_matrix(DensOp* densop, int qnum_part, int qid[MAX_QUBIT_NUM],
+static bool _densop_rapply_matrix(DensOp* densop, int qnum_part, int* qid,
 				  double* real, double* imag, int row, int col)
 /*
   densop' = densop * matrix
@@ -486,7 +486,7 @@ static bool _densop_rapply_matrix(DensOp* densop, int qnum_part, int qid[MAX_QUB
   SUC_RETURN(true);
 }
 
-static bool _densop_lapply_matrix(DensOp* densop, int qnum_part, int qid[MAX_QUBIT_NUM],
+static bool _densop_lapply_matrix(DensOp* densop, int qnum_part, int* qid,
 				  double* real, double* imag, int row, int col)
 /*
   densop' = matrix * densop
@@ -557,7 +557,7 @@ static bool _densop_lapply_matrix(DensOp* densop, int qnum_part, int qid[MAX_QUB
   SUC_RETURN(true);
 }
 
-static bool _densop_bapply_matrix(DensOp* densop, int qnum_part, int qid[MAX_QUBIT_NUM],
+static bool _densop_bapply_matrix(DensOp* densop, int qnum_part, int* qid,
 				  double* real, double* imag, int row, int col)
 /*
   densop' = matrix * densop * matrix^{dagger}
@@ -580,7 +580,7 @@ static bool _densop_bapply_matrix(DensOp* densop, int qnum_part, int qid[MAX_QUB
   SUC_RETURN(true);
 }
 
-bool densop_apply_matrix(DensOp* densop, int qnum_part, int qid[MAX_QUBIT_NUM],
+bool densop_apply_matrix(DensOp* densop, int qnum_part, int* qid,
 			 ApplyDir adir, double* real, double* imag, int row, int col)
 {
   if (adir == LEFT) {
@@ -602,7 +602,7 @@ bool densop_apply_matrix(DensOp* densop, int qnum_part, int qid[MAX_QUBIT_NUM],
   SUC_RETURN(true);
 }
 
-static bool _densop_probability_kraus(DensOp* densop, int qnum_part, int qid[MAX_QUBIT_NUM],
+static bool _densop_probability_kraus(DensOp* densop, int qnum_part, int* qid,
 				      double* real, double* imag, int row, int col,
 				      double* prob_out)
 {
@@ -628,7 +628,7 @@ static bool _densop_probability_kraus(DensOp* densop, int qnum_part, int qid[MAX
   SUC_RETURN(true);
 }
 
-static bool _densop_probability_povm(DensOp* densop, int qnum_part, int qid[MAX_QUBIT_NUM],
+static bool _densop_probability_povm(DensOp* densop, int qnum_part, int* qid,
 				     double* real, double* imag, int row, int col,
 				     double* prob_out)
 {
@@ -654,7 +654,7 @@ static bool _densop_probability_povm(DensOp* densop, int qnum_part, int qid[MAX_
   SUC_RETURN(true);
 }
 
-bool densop_probability(DensOp* densop, int qnum_part, int qid[MAX_QUBIT_NUM],
+bool densop_probability(DensOp* densop, int qnum_part, int* qid,
 			MatrixType mtype, double* real, double* imag, int row, int col,
 			double* prob_out)
 {
@@ -678,7 +678,7 @@ bool densop_probability(DensOp* densop, int qnum_part, int qid[MAX_QUBIT_NUM],
 static bool _densop_operate_unitary(DensOp* densop, COMPLEX* U, int dim, int m, int n)
 {
   int		qnum_part;
-  int		qid[MAX_QUBIT_NUM];
+  int		qid[2];
   ApplyDir	adir = BOTH;
   double	real[16];
   double	imag[16];
@@ -723,7 +723,7 @@ static bool _densop_operate_unitary(DensOp* densop, COMPLEX* U, int dim, int m, 
 }
 
 bool densop_operate_qgate(DensOp* densop, Kind kind, double alpha, double beta,
-			  double gamma, int qubit_id[MAX_QUBIT_NUM])
+			  double gamma, int* qubit_id)
 {
   int		q0  = qubit_id[0];
   int		q1  = qubit_id[1];

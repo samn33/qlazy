@@ -204,7 +204,7 @@ bool binstr_from_decimal(char* binstr, int qubit_num, int decimal, int zflag)
   return true;
 }
 
-int bit_permutation(int bits_in, int qnum, int qnum_part, int qid[MAX_QUBIT_NUM])
+int bit_permutation(int bits_in, int qnum, int qnum_part, int* qid)
 /*
   [example]
   bits_in: abcdef (<-- binary array)

@@ -38,8 +38,6 @@ def densop_init(qstate=[], prob=[]):
     if ret == FALSE:
         raise DensOp_Error_Initialize()
             
-    # out = ctypes.cast(c_densop.value, ctypes.POINTER(DensOp))
-    # return out.contents
     return c_densop
 
 def densop_init_with_matrix(matrix=None):
@@ -73,8 +71,6 @@ def densop_init_with_matrix(matrix=None):
     if ret == FALSE:
         raise DensOp_Error_Initialize()
             
-    # out = ctypes.cast(c_densop.value, ctypes.POINTER(DensOp))
-    # return out.contents
     return c_densop
 
 
@@ -115,11 +111,11 @@ def densop_reset(de, qid=None):
 
     try:
         qubit_num = len(qid)
-        qubit_id = [0 for _ in range(MAX_QUBIT_NUM)]
+        qubit_id = [0 for _ in range(qubit_num)]
         for i in range(len(qid)):
             qubit_id[i] = qid[i]
 
-        IntArray = ctypes.c_int * MAX_QUBIT_NUM
+        IntArray = ctypes.c_int * qubit_num
         qid_array = IntArray(*qubit_id)
             
         lib.densop_reset.restype = ctypes.c_int
@@ -159,8 +155,6 @@ def densop_copy(de):
         if ret == FALSE:
             raise DensOp_Error_Clone()
 
-        # out = ctypes.cast(c_densop.value, ctypes.POINTER(DensOp))
-        # return out.contents
         return c_densop
         
     except Exception:
@@ -261,10 +255,10 @@ def densop_patrace(de, qid=None):
         c_densop = ctypes.c_void_p(densop)
             
         qubit_num = len(qid)
-        qubit_id = [0 for _ in range(MAX_QUBIT_NUM)]
+        qubit_id = [0 for _ in range(qubit_num)]
         for i in range(len(qid)):
             qubit_id[i] = qid[i]
-        IntArray = ctypes.c_int * MAX_QUBIT_NUM
+        IntArray = ctypes.c_int * qubit_num
         qid_array = IntArray(*qubit_id)
 
         lib.densop_patrace.restype = ctypes.c_int
@@ -277,8 +271,6 @@ def densop_patrace(de, qid=None):
         if ret == FALSE:
             raise DensOp_Error_PaTrace()
             
-        # out = ctypes.cast(c_densop.value, ctypes.POINTER(DensOp))
-        # return out.contents
         return c_densop
 
     except Exception:
@@ -300,8 +292,6 @@ def densop_tensor_product(de_0, de_1):
         if ret == FALSE:
             raise DensOp_Error_TensorProduct()
 
-        # out = ctypes.cast(c_densop_out.value, ctypes.POINTER(DensOp))
-        # return out.contents
         return c_densop_out
 
     except Exception:
@@ -311,8 +301,6 @@ def densop_apply_matrix(de, matrix=None, qid=[], dire='both'):
 
     if matrix is None:
         raise DensOp_Error_Apply()
-    # if (matrix.shape[0] > de.row or matrix.shape[1] > de.col):
-    #     raise DensOp_Error_Apply()
         
     if qid is None or qid == []:
         qnum = int(math.log2(de.row))
@@ -329,10 +317,10 @@ def densop_apply_matrix(de, matrix=None, qid=[], dire='both'):
 
     try:
         qubit_num = len(qid)
-        qubit_id = [0 for _ in range(MAX_QUBIT_NUM)]
+        qubit_id = [0 for _ in range(qubit_num)]
         for i in range(len(qid)):
             qubit_id[i] = qid[i]
-        IntArray = ctypes.c_int * MAX_QUBIT_NUM
+        IntArray = ctypes.c_int * qubit_num
         qid_array = IntArray(*qubit_id)
 
         row = len(matrix) # dimension of the unitary matrix
@@ -340,7 +328,6 @@ def densop_apply_matrix(de, matrix=None, qid=[], dire='both'):
         size = row * col
 
         # set array of matrix
-        # mat_complex = list(matrix.flatten())
         mat_complex = []
         for mat_row in matrix:
             for mat_elm in mat_row:
@@ -393,10 +380,10 @@ def densop_probability(de, matrix=None, qid=[], matrix_type=None):
             
     try:
         qubit_num = len(qid)
-        qubit_id = [0 for _ in range(MAX_QUBIT_NUM)]
+        qubit_id = [0 for _ in range(qubit_num)]
         for i in range(len(qid)):
             qubit_id[i] = qid[i]
-        IntArray = ctypes.c_int * MAX_QUBIT_NUM
+        IntArray = ctypes.c_int * qubit_num
         qid_array = IntArray(*qubit_id)
 
         row = len(matrix) # dimension of the unitary matrix
@@ -447,10 +434,10 @@ def densop_operate_qgate(de, kind=None, qid=None,
     densop_check_args(de, kind=kind, qid=qid, shots=None, angle=None,
                       phase=phase, phase1=phase1, phase2=phase2)
 
-    qubit_id = [0 for _ in range(MAX_QUBIT_NUM)]
+    qubit_id = [0 for _ in range(2)]
     for i in range(len(qid)):
         qubit_id[i] = qid[i]
-    IntArray = ctypes.c_int * MAX_QUBIT_NUM
+    IntArray = ctypes.c_int * 2
     qid_array = IntArray(*qubit_id)
 
     lib.densop_operate_qgate.restype = ctypes.c_int

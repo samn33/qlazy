@@ -15,7 +15,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
-#define VERSION "0.2.3"
+#define VERSION "0.2.4"
 
 //#define TEST_NEW_VERSION
 
@@ -351,13 +351,12 @@ typedef struct _QState {
 
 typedef struct _MData {
   int		qubit_num;
-  int		state_num;
   int		shot_num;
   double	angle;
   double	phase;
-  int		qubit_id[MAX_QUBIT_NUM];
+  int*		qubit_id;
   int*		freq;
-  int		last;
+  int		last_val;
 } MData;
 
 typedef struct _QSystem {
@@ -482,35 +481,34 @@ bool     gbank_get_unitary(GBank* gbank, Kind kind, double phase, double phase1,
 /* qstate.c */
 bool	 qstate_init(int qubit_num, void** qstate_out);
 bool	 qstate_init_with_vector(double* real, double* imag, int dim, void** qstate_out);
-bool	 qstate_reset(QState* qstate, int qubit_num, int qubit_id[MAX_QUBIT_NUM]);
+bool	 qstate_reset(QState* qstate, int qubit_num, int* qubit_id);
 bool	 qstate_copy(QState* qstate, void** qstate_out);
-bool     qstate_get_camp(QState* qstate, int qubit_num, int qubit_id[MAX_QUBIT_NUM],
+bool     qstate_get_camp(QState* qstate, int qubit_num, int* qubit_id,
 			 void** camp_out);
-bool	 qstate_print(QState* qstate, int qubit_num, int qubit_id[MAX_QUBIT_NUM], bool nonzero);
+bool	 qstate_print(QState* qstate, int qubit_num, int* qubit_id, bool nonzero);
 bool     qstate_bloch(QState* qstate, int qid, double* theta, double* phi);
 bool     qstate_print_bloch(QState* qstate, int qid);
 bool     qstate_measure(QState* qstate, double angle, double phase,
-			int qubit_num, int qubit_id[MAX_QUBIT_NUM], int* mval_out);
+			int qubit_num, int* qubit_id, int* mval_out);
 bool	 qstate_measure_stats(QState* qstate, int shot_num, double angle, double phase,
-			      int qubit_num, int qubit_id[MAX_QUBIT_NUM], void** mdata_out);
+			      int qubit_num, int* qubit_id, void** mdata_out);
 bool     qstate_measure_bell_stats(QState* qstate, int shot_num, int qubit_num,
-				   int qubit_id[MAX_QUBIT_NUM], void** mdata_out);
+				   int* qubit_id, void** mdata_out);
 bool	 qstate_operate_qgate(QState* qstate, Kind kind, double alpha, double beta,
-			      double gamma, int qubit_id[MAX_QUBIT_NUM]);
+			      double gamma, int* qubit_id);
 bool     qstate_evolve(QState* qstate, Observable* observ, double time, int iter);
 bool     qstate_inner_product(QState* qstate_0, QState* qstate_1, double* real,
 			      double* imag);
 bool     qstate_tensor_product(QState* qstate_0, QState* qstate_1, void** qstate_out);
 bool     qstate_expect_value(QState* qstate, Observable* observ, double* value);
-bool     qstate_apply_matrix(QState* qstate, int qnum, int qid[MAX_QUBIT_NUM],
+bool     qstate_apply_matrix(QState* qstate, int qnum, int* qid,
 			     double* real, double *imag, int row, int col);
 bool     qstate_operate_qcirc(QState* qstate, CMem* cmem, QCirc* qcirc);
 void	 qstate_free(QState* qstate);
 
 /* mdata.c */
-bool     mdata_init(int qubit_num, int state_num, int shot_num,
-		    double angle, double phase, int qubit_id[MAX_QUBIT_NUM],
-		    void** mdata_out);
+bool     mdata_init(int qubit_num, int shot_num,
+		    double angle, double phase, int* qubit_id, void** mdata_out);
 bool	 mdata_print(MData* mdata);
 bool	 mdata_print_bell(MData* mdata);
 void	 mdata_free(MData* mdata);
@@ -533,7 +531,7 @@ void     observable_free(Observable* observ);
 bool     densop_init(QState* qstate, double* prob, int num, void** densop_out);
 bool     densop_init_with_matrix(double* real, double* imag, int row, int col,
 				 void** densop_out);
-bool	 densop_reset(DensOp* densop, int qubit_num, int qubit_id[MAX_QUBIT_NUM]);
+bool	 densop_reset(DensOp* densop, int qubit_num, int* qubit_id);
 bool	 densop_copy(DensOp* densop_in, void** densop_out);
 bool     densop_get_elm(DensOp* densop, void** densop_out);
 bool     densop_print(DensOp* densop, bool nonzero);
@@ -541,15 +539,15 @@ bool     densop_add(DensOp* densop, DensOp* densop_add);
 bool     densop_mul(DensOp* densop, double factor);
 bool     densop_trace(DensOp* densop, double* real, double* imag);
 bool     densop_sqtrace(DensOp* densop, double* real, double* imag);
-bool     densop_patrace(DensOp* densop_in, int qubit_num, int qubit_id[MAX_QUBIT_NUM],
+bool     densop_patrace(DensOp* densop_in, int qubit_num, int* qubit_id,
 			void** densop_out);
-bool     densop_apply_matrix(DensOp* densop, int qnum_part, int qid[MAX_QUBIT_NUM],
+bool     densop_apply_matrix(DensOp* densop, int qnum_part, int* qid,
 			     ApplyDir adir, double* real, double* imag, int row, int col);
-bool     densop_probability(DensOp* densop, int qnum_part, int qid[MAX_QUBIT_NUM],
+bool     densop_probability(DensOp* densop, int qnum_part, int* qid,
 			    MatrixType mtype, double* real, double* imag, int row, int col,
 			    double* prob_out);
 bool     densop_operate_qgate(DensOp* densop, Kind kind, double alpha, double beta,
-			      double gamma, int qubit_id[MAX_QUBIT_NUM]);
+			      double gamma, int* qubit_id);
 bool     densop_tensor_product(DensOp* densop_0, DensOp* densop_1, void** densop_out);
 void     densop_free(DensOp* densop);
 
