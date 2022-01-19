@@ -105,7 +105,7 @@ execute the program
     c[01] = +0.0000+0.0000*i : 0.0000 |
     c[10] = +0.0000+0.0000*i : 0.0000 |
     c[11] = +0.7071+0.0000*i : 0.5000 |++++++
-    Counter({{'00':53,'11':47})
+    Counter({'00':53,'11':47})
 
 #### Quantum Circuit Execution (by QCirc and Backend class)
 
@@ -121,7 +121,7 @@ bar.py
 execute the program
 
     $ python bar.py
-	Count({'00':52, '11':48})
+	Counter({'00':52, '11':48})
 
 #### Other classes
 

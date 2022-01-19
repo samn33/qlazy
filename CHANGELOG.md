@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.2.4] - 2022-xx-xx
+### Changed
+- refactoring (about MData, MAX_QUBIT_NUM etc)
+
 ## [0.2.3] - 2022-01-14
 ### Added
 - QCirc class (quantum circuit)
