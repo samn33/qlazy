@@ -21,8 +21,10 @@ def run(qcirc=None, shots=1, cid=[], backend=None):
     if qcirc is None:
         raise ValueError("quantum circuit must be specified.")
 
-    qubit_num = qcirc.qubit_num
-    cmem_num = qcirc.cmem_num
+    qcirc_tmp = qcirc.clone()
+    
+    qubit_num = qcirc_tmp.qubit_num
+    cmem_num = qcirc_tmp.cmem_num
 
     if cmem_num < len(cid):
         raise ValueError("length of cid must be less than classical resister size of qcirc")
@@ -37,10 +39,10 @@ def run(qcirc=None, shots=1, cid=[], backend=None):
 
     exist_measurement = False
     while True:
-        kind = qcirc.kind_first()
+        kind = qcirc_tmp.kind_first()
         if kind == None: break
 
-        (kind, qid, para, c, ctrl) = qcirc.pop_gate()
+        (kind, qid, para, c, ctrl) = qcirc_tmp.pop_gate()
 
         if kind == MEASURE:
             exist_measurement = True
@@ -95,7 +97,8 @@ def run(qcirc=None, shots=1, cid=[], backend=None):
     res_sv = execute(qc, ibmq_sv_backend).result()
     statevector = res_sv.get_statevector(qc)
 
-    info = {'statevector': statevector, 'creg': cmem_reg}
+    # info = {'statevector': statevector, 'creg': cmem_reg}
+    info = {'statevector': statevector, 'creg': cmem_reg, 'quantum_circuit': qc}
     result = Result(cid=cid, frequency=frequency, backend=backend, info=info)
 
     return result
