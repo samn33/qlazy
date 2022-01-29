@@ -98,7 +98,7 @@ GATE_STRING = {
     CONTROLLED_X:'cx',
     CONTROLLED_Y:'cy',
     CONTROLLED_Z:'cz',
-    CONTROLLED_XR:'cxy',
+    CONTROLLED_XR:'cxr',
     CONTROLLED_XR_:'cxr+',
     CONTROLLED_H:'ch',
     CONTROLLED_S:'cs',
@@ -119,6 +119,29 @@ GATE_STRING = {
     MEASURE_Z:'measure_z',
     MEASURE_BELL:'meaxure_bell',
     RESET:'reset'
+}
+
+GATE_STRING_QASM = {
+    # 1-qubit
+    PAULI_X:'x',
+    PAULI_Z:'z',
+    HADAMARD:'h',
+    PHASE_SHIFT_S:'s',
+    PHASE_SHIFT_S_:'sdg',
+    PHASE_SHIFT_T:'t',
+    PHASE_SHIFT_T_:'tdg',
+    RESET:'reset',
+    # 1-qubit, 1-parameter
+    ROTATION_X:'rx',
+    ROTATION_Z:'rz',
+    # 2-qubit
+    CONTROLLED_X:'cx',
+    CONTROLLED_Z:'cz',
+    CONTROLLED_H:'ch',
+    # 2-qubit, 1-parameter
+    CONTROLLED_RZ:'crz',
+    # measurement
+    MEASURE:'measure',
 }
 
 # MatrixType

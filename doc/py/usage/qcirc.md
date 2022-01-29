@@ -278,6 +278,40 @@ qlazyの状態ベクトルシミュレータまたはスタビライザーシミ
 (x,y,z,h,s,s_dg,cx,cy,cz)のみです。
 
 
+## 他形式との相互変換
+
+qlazyで作成した量子回路をOpenQASM形式の文字列やファイルにエクスポート
+したり、それらをインポートする機能があります。
+
+### OpenQASMへのエクスポート
+
+to_qasmメソッドを使って、以下のようにQpenQASM形式の文字列を出力するこ
+とができます。
+
+    qc = QCirc().h(0).cx(0,1)
+	qasm = qc.to_qasm()
+	print(qasm)
+    >> OPENQASM 2.0;
+    >> include "qelib1.inc";
+    >> qreg q[2];
+    >> h q[0];
+    >> cx q[0],q[1];
+
+to_qasm_fileメソッドを使って、以下のようにOpenQASM形式のファイルを出力
+することができます。
+
+	qasm = qc.to_qasm_file("foo.qasm")
+
+### OpenQASMからのインポート
+
+from_qasmメソッドおよびfrom_qasm_fileメソッドを使って、以下のように
+OpenQASMの文字列およびファイルからqlazyの量子回路を作成することができ
+ます。
+
+    qc = QCirc.from_qasm(qasm)  # qasm: OpenQASM string
+    qc = QCirc.from_qasm_file("foo.qasm")  # foo.qasm: OpenQASM file
+
+
 ## 少し高度な技
 
 ### レジスタの設定

@@ -33,9 +33,10 @@ def run(qcirc=None, shots=1, cid=[], backend=None):
         cid = [i for i in range(cmem_num)]
 
     qubit_reg = QuantumRegister(qubit_num)
-    cmem_reg = ClassicalRegister(cmem_num)
+    cmem_reg = [ClassicalRegister(1, name="c{}".format(i)) for i in range(cmem_num)]
 
-    qc = QuantumCircuit(qubit_reg, cmem_reg)
+    args = [qubit_reg] + cmem_reg
+    qc = QuantumCircuit(*args)
 
     exist_measurement = False
     while True:

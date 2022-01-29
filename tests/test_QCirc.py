@@ -1,7 +1,32 @@
 import unittest
+import math
+import numpy as np
+import pyzx as zx
 
-from qlazy import QCirc
+from pyzx import Circuit
+from qlazy import QState, QCirc, Backend, PauliProduct
 from qlazy.config import *
+
+EPS = 1.0e-6
+
+def equal_or_not(qs_A, qs_B):
+
+    fid = qs_A.fidelity(qs_B)
+    if abs(fid - 1.0) < EPS:
+        return True
+    else:
+        return False
+
+def valid_or_not(qc):
+
+    bk = Backend(product='ibmq', device='qasm_simulator')
+    res = bk.run(qcirc=qc)
+    qasm_A = res.info['quantum_circuit'].qasm()
+    qasm_B = qc.to_qasm()
+    circ_A = Circuit.from_qasm(qasm_A)
+    circ_B = Circuit.from_qasm(qasm_B)
+    ans = circ_A.verify_equality(circ_B)
+    return ans
 
 class MyQCirc(QCirc):
 
@@ -157,6 +182,663 @@ class TestQCirc_pop_gate(unittest.TestCase):
         self.assertEqual(qc.qubit_num, 3)
         self.assertEqual(qc.cmem_num, 3)
         self.assertEqual(qc.gate_num, 6)
+
+#
+# export OpenQASM
+#
+
+class TestQCirc_to_qasm(unittest.TestCase):
+    """ test 'QCirc' : 'to_qasm'
+    """
+
+    def test_x(self):
+        """test x
+        """
+        qc = QCirc().x(0)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_B = QState(qubit_num=qc.qubit_num).x(0)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+        
+    def test_y(self):
+        """test y
+        """
+        qc = QCirc().y(0)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_B = QState(qubit_num=qc.qubit_num).y(0)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+        
+    def test_z(self):
+        """test z
+        """
+        qc = QCirc().z(0)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_B = QState(qubit_num=qc.qubit_num).z(0)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+        
+    def test_xr(self):
+        """test xr
+        """
+        qc = QCirc().xr(0)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_B = QState(qubit_num=qc.qubit_num).xr(0)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+        
+    def test_xr_dg(self):
+        """test xr_dg
+        """
+        qc = QCirc().xr_dg(0)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_B = QState(qubit_num=qc.qubit_num).xr_dg(0)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+        
+    def test_h(self):
+        """test h
+        """
+        qc = QCirc().h(0)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_B = QState(qubit_num=qc.qubit_num).h(0)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+        
+    def test_s(self):
+        """test s
+        """
+        qc = QCirc().s(0)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_B = QState(qubit_num=qc.qubit_num).s(0)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+        
+    def test_s_dg(self):
+        """test s_dg
+        """
+        qc = QCirc().s_dg(0)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_B = QState(qubit_num=qc.qubit_num).s_dg(0)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+        
+    def test_t(self):
+        """test t
+        """
+        qc = QCirc().t(0)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_B = QState(qubit_num=qc.qubit_num).t(0)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+        
+    def test_t_dg(self):
+        """test t_dg
+        """
+        qc = QCirc().t_dg(0)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_B = QState(qubit_num=qc.qubit_num).t_dg(0)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+        
+    def test_p(self):
+        """test p
+        """
+        qc = QCirc().p(0, phase=0.1)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_B = QState(qubit_num=qc.qubit_num).p(0, phase=0.1)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+        
+    def test_rx(self):
+        """test rx
+        """
+        qc = QCirc().rx(0, phase=0.1)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_B = QState(qubit_num=qc.qubit_num).rx(0, phase=0.1)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+        
+    def test_ry(self):
+        """test ry
+        """
+        qc = QCirc().ry(0, phase=0.1)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_B = QState(qubit_num=qc.qubit_num).ry(0, phase=0.1)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+        
+    def test_rz(self):
+        """test rz
+        """
+        qc = QCirc().rz(0, phase=0.1)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_B = QState(qubit_num=qc.qubit_num).rz(0, phase=0.1)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+    
+    def test_cx(self):
+        """test cx
+        """
+        qc = QCirc().cx(0,1)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_B = QState(qubit_num=qc.qubit_num).cx(0,1)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+    
+    def test_cy(self):
+        """test cy
+        """
+        qc = QCirc().cy(0,1)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_B = QState(qubit_num=qc.qubit_num).cy(0,1)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+    
+    def test_cz(self):
+        """test cz
+        """
+        qc = QCirc().cz(0,1)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_B = QState(qubit_num=qc.qubit_num).cz(0,1)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+    
+    def test_cxr(self):
+        """test cxr
+        """
+        qc = QCirc().cxr(0,1)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_B = QState(qubit_num=qc.qubit_num).cxr(0,1)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+    
+    def test_cxr_2(self):
+        """test cxr (2)
+        """
+        qc = QCirc().h(0).cxr(0,1)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_B = QState(qubit_num=qc.qubit_num).h(0).cxr(0,1)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+    
+    def test_cxr_dg(self):
+        """test cxr_dg
+        """
+        qc = QCirc().cxr_dg(0,1)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_B = QState(qubit_num=qc.qubit_num).cxr_dg(0,1)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+    
+    def test_ch(self):
+        """test ch
+        """
+        qc = QCirc().ch(0,1)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_B = QState(qubit_num=qc.qubit_num).ch(0,1)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+    
+    def test_cs(self):
+        """test cs
+        """
+        qc = QCirc().cs(0,1)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_B = QState(qubit_num=qc.qubit_num).cs(0,1)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+    
+    def test_cs_dg(self):
+        """test cs_dg
+        """
+        qc = QCirc().cs_dg(0,1)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_B = QState(qubit_num=qc.qubit_num).cs_dg(0,1)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+    
+    def test_ct(self):
+        """test ct
+        """
+        qc = QCirc().ct(0,1)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_B = QState(qubit_num=qc.qubit_num).ct(0,1)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+    
+    def test_ct_dg(self):
+        """test ct_dg
+        """
+        qc = QCirc().ct_dg(0,1)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_B = QState(qubit_num=qc.qubit_num).ct_dg(0,1)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+    
+    def test_cp(self):
+        """test cp
+        """
+        qc = QCirc().cp(0,1, phase=0.1)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_B = QState(qubit_num=qc.qubit_num).cp(0,1, phase=0.1)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+    
+    def test_crx(self):
+        """test crx
+        """
+        qc = QCirc().crx(0,1, phase=0.1)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_B = QState(qubit_num=qc.qubit_num).crx(0,1, phase=0.1)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+    
+    def test_cry(self):
+        """test cry
+        """
+        qc = QCirc().cry(0,1, phase=0.1)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_B = QState(qubit_num=qc.qubit_num).cry(0,1, phase=0.1)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+    
+    def test_crz(self):
+        """test crz
+        """
+        qc = QCirc().crz(0,1, phase=0.1)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_B = QState(qubit_num=qc.qubit_num).crz(0,1, phase=0.1)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+    
+    def test_sw(self):
+        """test sw
+        """
+        qc = QCirc().sw(0,1)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_B = QState(qubit_num=qc.qubit_num).sw(0,1)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+    
+    def test_ccx(self):
+        """test ccx
+        """
+        qc = QCirc().ccx(0,1,2)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_B = QState(qubit_num=qc.qubit_num).ccx(0,1,2)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+    
+    def test_csw(self):
+        """test csw
+        """
+        qc = QCirc().csw(0,1,2)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_B = QState(qubit_num=qc.qubit_num).csw(0,1,2)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+    
+    def test_many_unitary_gates(self):
+        """test many unitary gates
+        """
+        qc = QCirc().h(0).cx(0,1).crx(1,0, phase=0.1).csw(0,1,2)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_B = QState(qubit_num=qc.qubit_num).h(0).cx(0,1).crx(1,0, phase=0.1).csw(0,1,2)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+    
+    def test_measure(self):
+        """test measure
+        """
+        qc = QCirc().measure(qid=[0,1], cid=[0,1])
+        self.assertEqual(valid_or_not(qc), True)
+    
+    def test_reset(self):
+        """test reset
+        """
+        qc = QCirc().reset(qid=[0,1])
+        actual = qc.to_qasm()
+        expect = """OPENQASM 2.0;\ninclude "qelib1.inc";\nqreg q[2];\nreset q[0];\nreset q[1];"""
+        self.assertEqual(actual, expect)
+
+#
+# import OpenQASM
+#
+
+class TestQCirc_from_qasm(unittest.TestCase):
+    """ test 'QCirc' : 'from_qasm'
+    """
+
+    def test_x(self):
+        """test x
+        """
+        qc_A = QCirc().x(0)
+        str_A = qc_A.to_qasm()
+        qc_B = QCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+
+    def test_y(self):
+        """test y
+        """
+        qc_A = QCirc().y(0)
+        str_A = qc_A.to_qasm()
+        qc_B = QCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+        
+    def test_z(self):
+        """test z
+        """
+        qc_A = QCirc().z(0)
+        str_A = qc_A.to_qasm()
+        qc_B = QCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+        
+    def test_xr(self):
+        """test xr
+        """
+        qc_A = QCirc().xr(0)
+        str_A = qc_A.to_qasm()
+        qc_B = QCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+        
+    def test_xr_dg(self):
+        """test xr_dg
+        """
+        qc_A = QCirc().xr_dg(0)
+        str_A = qc_A.to_qasm()
+        qc_B = QCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+        
+    def test_h(self):
+        """test h
+        """
+        qc_A = QCirc().h(0)
+        str_A = qc_A.to_qasm()
+        qc_B = QCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+        
+    def test_s(self):
+        """test s
+        """
+        qc_A = QCirc().s(0)
+        str_A = qc_A.to_qasm()
+        qc_B = QCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+        
+    def test_s_dg(self):
+        """test s_dg
+        """
+        qc_A = QCirc().s_dg(0)
+        str_A = qc_A.to_qasm()
+        qc_B = QCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+        
+    def test_t(self):
+        """test t
+        """
+        qc_A = QCirc().t(0)
+        str_A = qc_A.to_qasm()
+        qc_B = QCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+        
+    def test_t_dg(self):
+        """test t_dg
+        """
+        qc_A = QCirc().t_dg(0)
+        str_A = qc_A.to_qasm()
+        qc_B = QCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+        
+    def test_p(self):
+        """test p
+        """
+        qc_A = QCirc().p(0, phase=0.1)
+        str_A = qc_A.to_qasm()
+        qc_B = QCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+        
+    def test_rx(self):
+        """test rx
+        """
+        qc_A = QCirc().rx(0, phase=0.1)
+        str_A = qc_A.to_qasm()
+        qc_B = QCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+        
+    def test_ry(self):
+        """test ry
+        """
+        qc_A = QCirc().ry(0, phase=0.1)
+        str_A = qc_A.to_qasm()
+        qc_B = QCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+        
+    def test_rz(self):
+        """test rz
+        """
+        qc_A = QCirc().rz(0, phase=0.1)
+        str_A = qc_A.to_qasm()
+        qc_B = QCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+    
+    def test_cx(self):
+        """test cx
+        """
+        qc_A = QCirc().cx(0,1)
+        str_A = qc_A.to_qasm()
+        qc_B = QCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+    
+    def test_cy(self):
+        """test cy
+        """
+        qc_A = QCirc().cy(0,1)
+        str_A = qc_A.to_qasm()
+        qc_B = QCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+    
+    def test_cz(self):
+        """test cz
+        """
+        qc_A = QCirc().cz(0,1)
+        str_A = qc_A.to_qasm()
+        qc_B = QCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+    
+    def test_cxr(self):
+        """test cxr
+        """
+        qc_A = QCirc().cxr(0,1)
+        str_A = qc_A.to_qasm()
+        qc_B = QCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+    
+    def test_cxr_2(self):
+        """test cxr (2)
+        """
+        qc_A = QCirc().h(0).cxr(0,1)
+        str_A = qc_A.to_qasm()
+        qc_B = QCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+    
+    def test_cxr_dg(self):
+        """test cxr_dg
+        """
+        qc_A = QCirc().cxr_dg(0,1)
+        str_A = qc_A.to_qasm()
+        qc_B = QCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+    
+    def test_ch(self):
+        """test ch
+        """
+        qc_A = QCirc().ch(0,1)
+        str_A = qc_A.to_qasm()
+        qc_B = QCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+    
+    def test_cs(self):
+        """test cs
+        """
+        qc_A = QCirc().cs(0,1)
+        str_A = qc_A.to_qasm()
+        qc_B = QCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+    
+    def test_cs_dg(self):
+        """test cs_dg
+        """
+        qc_A = QCirc().cs_dg(0,1)
+        str_A = qc_A.to_qasm()
+        qc_B = QCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+    
+    def test_ct(self):
+        """test ct
+        """
+        qc_A = QCirc().ct(0,1)
+        str_A = qc_A.to_qasm()
+        qc_B = QCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+    
+    def test_ct_dg(self):
+        """test ct_dg
+        """
+        qc_A = QCirc().ct_dg(0,1)
+        str_A = qc_A.to_qasm()
+        qc_B = QCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+    
+    def test_cp(self):
+        """test cp
+        """
+        qc_A = QCirc().cp(0,1, phase=0.1)
+        str_A = qc_A.to_qasm()
+        qc_B = QCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+    
+    def test_crx(self):
+        """test crx
+        """
+        qc_A = QCirc().crx(0,1, phase=0.1)
+        str_A = qc_A.to_qasm()
+        qc_B = QCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+    
+    def test_cry(self):
+        """test cry
+        """
+        qc_A = QCirc().cry(0,1, phase=0.1)
+        str_A = qc_A.to_qasm()
+        qc_B = QCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+    
+    def test_crz(self):
+        """test crz
+        """
+        qc_A = QCirc().crz(0,1, phase=0.1)
+        str_A = qc_A.to_qasm()
+        qc_B = QCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+    
+    def test_sw(self):
+        """test sw
+        """
+        qc_A = QCirc().sw(0,1)
+        str_A = qc_A.to_qasm()
+        qc_B = QCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+    
+    def test_ccx(self):
+        """test ccx
+        """
+        qc_A = QCirc().ccx(0,1,2)
+        str_A = qc_A.to_qasm()
+        qc_B = QCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+    
+    def test_csw(self):
+        """test csw
+        """
+        qc_A = QCirc().csw(0,1,2)
+        str_A = qc_A.to_qasm()
+        qc_B = QCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+    
+    def test_many_unitary_gates(self):
+        """test many unitary gates
+        """
+        qc_A = QCirc().h(0).cx(0,1).crx(1,0, phase=0.1).csw(0,1,2)
+        str_A = qc_A.to_qasm()
+        qc_B = QCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
 
 #
 # inheritance

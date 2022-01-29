@@ -2,12 +2,26 @@
 import ctypes
 from collections import Counter
 from ctypes.util import find_library
+from fractions import Fraction
 import warnings
 import ctypes
+import re
 
 from qlazy.config import *
 from qlazy.error import *
 
+def string_to_args(s):
+
+    token = s.split(' ')
+    if len(token) == 1:
+        args = token
+    elif len(token) > 1:
+        args = [token[0], ' '.join(token[1:])]
+    else:
+        raise ValueError("can't split string {}.".format(s))
+
+    return args
+            
 class QCirc(ctypes.Structure):
     """ Quantum Circuit
 
@@ -51,10 +65,10 @@ class QCirc(ctypes.Structure):
     def __str__(self):
 
         return self.to_string()
-    
+
     def to_string(self):
         """
-        get string of quantum circuit description.
+        get string of the circuit (qlazy format).
 
         Parameters
         ----------
@@ -101,6 +115,285 @@ class QCirc(ctypes.Structure):
                 qcirc_str += "{0:}{2:} {1:} {3:}{4:}\n".format(gate_str, qid_str, para_str, c_str, ctrl_str)
                 
         return qcirc_str.strip()
+    
+    @staticmethod
+    def from_qasm(string):
+        """
+        get QCirc instance from OpenQASM 2.0 string.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        qcirc : instance of QCirc
+
+        Notes
+        -----
+        Non-unitary gates (measure, reset) and user customized gates are not supported. Supported gates are 
+        'x', 'y', 'z', 'h', 's', 'sdg', 't', 'tdg', 'cx', 'cz', 'ch', 'rx', 'rz', 'crz'.
+
+        """
+        line_list = string.split('\n')
+
+        # line #0
+        line_count = 0
+        args = string_to_args(line_list[line_count])
+        if args[0] == 'OPENQASM' and args[1] == '2.0;':
+            line_count += 1
+        else:
+            raise ValueError("line #0 must be 'OPENQASM 2.0;'")
+
+        # line #1
+        args = string_to_args(line_list[line_count])
+        if args[0] == 'include' and args[1] == '"qelib1.inc";':
+            line_count += 1
+        else:
+            raise ValueError("""line #1 must be 'include "qelib1.inc;"' """)
+
+        # line #2 (#3)
+        args = string_to_args(line_list[line_count])
+        if args[0] == 'qreg' and re.match('q', args[1]).group() == 'q':
+            qubit_num = int(re.sub("q\[|\];", "", args[1]))
+            line_count += 1
+        else:
+            raise ValueError("""line #2 must be 'qreg q[<int>];"' """)
+
+        # line (#3) #4 ...
+        qcirc = QCirc()
+        for i in range(line_count, len(line_list)):
+            args = string_to_args(line_list[i])
+            if args[0] == '': continue
+
+            if args[0] in ('measure', 'reset'):
+                raise ValueError("sorry, 'measure', 'reset' is not supported.")
+            
+            if args[0] in ('x', 'y', 'z', 'h', 's', 'sdg', 't', 'tdg'):
+                res = re.search("q\[|\];", args[1])
+                if res is not None:
+                    q = int(re.sub("q\[|\];", "", args[1]))
+                else:
+                    raise ValueError("argument '{}' is not valid for '{}' gate.".format(args[1], args[0]))
+                
+                if args[0] == 'x':
+                    qcirc.x(q)
+                elif args[0] == 'z':
+                    qcirc.z(q)
+                elif args[0] == 'h':
+                    qcirc.h(q)
+                elif args[0] == 's':
+                    qcirc.s(q)
+                elif args[0] == 'sdg':
+                    qcirc.s_dg(q)
+                elif args[0] == 't':
+                    qcirc.t(q)
+                elif args[0] == 'tdg':
+                    qcirc.t_dg(q)
+                    
+            elif args[0] in ('cx', 'cz', 'ch'):
+                res = re.search("q\[[0-9]+\],\s*q\[[0-9]+\];", args[1])
+                if res is not None:
+                    qubits = args[1].split(',')
+                    q0 = int(re.sub("q\[|\]", "", qubits[0]))
+                    q1 = int(re.sub("q\[|\];", "", qubits[1]))
+                else:
+                    raise ValueError("argument '{}' is not valid for '{}' gate.".format(args[1], args[0]))
+                
+                if args[0] == 'cx':
+                    qcirc.cx(q0, q1)
+                elif args[0] == 'cz':
+                    qcirc.cz(q0, q1)
+                elif args[0] == 'ch':
+                    qcirc.ch(q0, q1)
+                    
+            elif (re.match('rx', args[0]) is not None or
+                  re.match('rz', args[0]) is not None):
+
+                res = re.search("q\[|\];", args[1])
+                if res is not None:
+                    q = int(re.sub("q\[|\];", "", args[1]))
+                else:
+                    raise ValueError("argument '{}' is not valid for '{}' gate.".format(args[1], args[0]))
+                
+                para_str = [s.strip('*').strip('/') for s in re.sub(".+\(|\)", "", args[0]).split("pi")]
+                if para_str[0] == '0':
+                    para = 0.
+                else:
+                    denominator = 1.
+                    if para_str[0] == '':
+                        numerator = 1.
+                    else:
+                        numerator = float(para_str[0])
+                    if para_str[1] == '':
+                        denominator = 1.
+                    else:
+                        denominator = float(para_str[1])
+                    para = numerator / denominator
+
+                if re.match('rx', args[0]) is not None:
+                    qcirc.rx(q, phase=para)
+                elif re.match('rz', args[0]) is not None:
+                    qcirc.rz(q, phase=para)
+                
+            elif re.match('crz', args[0]) is not None:
+
+                res = re.search("q\[[0-9]+\],\s*q\[[0-9]+\];", args[1])
+                if res is not None:
+                    qubits = args[1].split(',')
+                    q0 = int(re.sub("q\[|\]", "", qubits[0]))
+                    q1 = int(re.sub("q\[|\];", "", qubits[1]))
+                else:
+                    raise ValueError("argument '{}' is not valid for '{}' gate.".format(args[1], args[0]))
+                
+                para_str = [s.strip('*').strip('/') for s in re.sub(".+\(|\)", "", args[0]).split("pi")]
+                if para_str[0] == '0':
+                    para = 0.
+                else:
+                    denominator = 1.
+                    if para_str[0] == '':
+                        numerator = 1.
+                    else:
+                        numerator = float(para_str[0])
+                    if para_str[1] == '':
+                        denominator = 1.
+                    else:
+                        denominator = float(para_str[1])
+                    para = numerator / denominator
+                
+                if re.match('crz', args[0]) is not None:
+                    qcirc.crz(q0, q1, phase=para)
+                    
+            else:
+                raise ValueError("{} gate is not supported".format(args[0]))
+
+        return qcirc
+        
+    @staticmethod
+    def from_qasm_file(file_path):
+        """
+        get QCirc instance from OpenQASM 2.0 file.
+
+        Parameters
+        ----------
+        file_path: str
+            file path name of OpenQASM 2.0 file
+
+        Returns
+        -------
+        qcirc : instance of QCirc
+
+        Notes
+        -----
+        Non-unitary gates (measure, reset) and user customized gates are not supported. Supported gates are 
+        'x', 'y', 'z', 'h', 's', 'sdg', 't', 'tdg', 'cx', 'cz', 'ch', 'rx', 'rz', 'crz'.
+
+        """
+        with open(file_path, mode='r') as f:
+            s = f.read()
+            
+        qcirc = QCirc.from_qasm(s)
+        return qcirc
+    
+    def to_qasm(self):
+        """
+        get OpenQASM 2.0 string of the circuit.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        qcirc_str : str
+
+        """
+        qc = self.clone()
+
+        # header and include file
+        qcirc_str = """OPENQASM 2.0;\n"""
+        qcirc_str += """include "qelib1.inc";\n"""
+
+        # definition of qreg, creg
+        qcirc_str += """qreg q[{}];\n""".format(self.qubit_num)
+        for i in range(self.cmem_num):
+            qcirc_str += """creg c{}[1];\n""".format(i)
+        
+        # description of each gate operation
+        while True:
+            kind = qc.kind_first()
+            if kind is None:
+                break
+            else:
+                (kind, qid, para, c, ctrl) = qc.pop_gate()
+                term_num = get_qgate_qubit_num(kind)
+                if (kind == MEASURE) or (kind == RESET):
+                    term_num = 1
+
+                para_num = get_qgate_param_num(kind)
+                para_frac = [Fraction(str(p)) for p in para]
+
+                gate_str = GATE_STRING_QASM[kind]
+                qid_str = ",".join(["q[" + str(qid[i]) + "]" for i in range(term_num)])
+                qid_str.strip()
+
+                if para_num == 0:
+                    if kind == CONTROLLED_S:
+                        para_str = "(pi/2)"
+                    elif kind == CONTROLLED_S_:
+                        para_str = "(-pi/2)"
+                    elif kind == CONTROLLED_T:
+                        para_str = "(pi/4)"
+                    elif kind == CONTROLLED_T_:
+                        para_str = "(-pi/4)"
+                    else:
+                        para_str = ""
+                else:
+                    para_str_list = []
+                    for i, p in enumerate(para_frac):
+                        if i >= para_num:
+                            break
+                        if p.numerator == 0:
+                            para_str_list.append("0")
+                        elif p.numerator == 1:
+                            para_str_list.append("pi/"+ str(p.denominator))
+                        else:
+                            para_str_list.append(str(p.numerator) + "*pi/" + str(p.denominator))
+                            
+                    para_str = ",".join(para_str_list)
+                    para_str = "(" + para_str+ ")"
+                
+                if c is None:
+                    c_str = ""
+                else:
+                    c_str = " -> c{}[0]".format(c)
+
+                if ctrl is None:
+                    ctrl_str = ""
+                else:
+                    ctrl_str = "if(c{}==1) ".format(ctrl)
+                    
+                qcirc_str += "{4:}{0:}{2:} {1:}{3:};\n".format(gate_str, qid_str, para_str, c_str, ctrl_str)
+                
+        return qcirc_str.strip()
+
+    def to_qasm_file(self, file_path):
+        """
+        write to OpenQASM 2.0 file.
+
+        Parameters
+        ----------
+        file_path: str
+            file path name of OpenQASM 2.0 file
+
+        Returns
+        -------
+        None
+
+        """
+        s = self.to_qasm()
+        with open(file_path, mode='w') as f:
+            f.write(s)
         
     def __add__(self, qc):
         """
@@ -231,7 +524,7 @@ class QCirc(ctypes.Structure):
 
         Returns
         -------
-        kind : int
+        kind_list : int
             kind of first quantum gate of quantum circuit
 
         Note
@@ -242,6 +535,34 @@ class QCirc(ctypes.Structure):
         kind = qcirc_kind_first(self)
         return kind
 
+    def kind_list(self):
+        """
+        get list of kinds from the circuit.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        kinds : list of kind
+            kinds of the quantum circuit
+
+        Note
+        ----
+        return None if none of gates included
+
+        """
+        qc = self.clone()
+        kind_list = []
+        while True:
+            kind = qc.kind_first()
+            if kind is None: break
+            kind_list.append(kind)
+            qc.pop_gate()
+        
+        return kind_list
+    
     def pop_gate(self):
         """
         pop first gate of the circuit.
@@ -1279,14 +1600,96 @@ class QCirc(ctypes.Structure):
             for q, c in zip(qid, cid):
                 qid = [q]
                 self.append_gate(kind, qid, para, c, ctrl)
+
         elif is_reset_gate(kind) == True:
             for q in qid:
                 qid = [q]
                 c = None
                 self.append_gate(kind, qid, para, c, ctrl)
+        
         else:
             c = None
-            self.append_gate(kind, qid, para, c, ctrl)
+            if kind == PAULI_Y:
+                self.append_gate(PAULI_Z, qid, para, c, ctrl)
+                self.append_gate(PAULI_X, qid, para, c, ctrl)
+            elif kind == ROOT_PAULI_X:
+                para[0] = 0.5
+                self.append_gate(ROTATION_X, qid, para, c, ctrl)
+            elif kind == ROOT_PAULI_X_:
+                para[0] = -0.5
+                self.append_gate(ROTATION_X, qid, para, c, ctrl)
+            elif kind == PHASE_SHIFT:
+                self.append_gate(ROTATION_Z, qid, para, c, ctrl)
+            elif kind == ROTATION_Y:
+                self.append_gate(PHASE_SHIFT_S_, qid, para, c, ctrl)
+                self.append_gate(ROTATION_X, qid, para, c, ctrl)
+                self.append_gate(PHASE_SHIFT_S, qid, para, c, ctrl)
+            elif kind == CONTROLLED_XR:
+                para[0] = 0.5
+                self.append_gate(CONTROLLED_H, qid, para, c, ctrl)
+                self.append_gate(CONTROLLED_RZ, qid, para, c, ctrl)
+                self.append_gate(CONTROLLED_H, qid, para, c, ctrl)
+                para[0] = 0.25
+                self.append_gate(ROTATION_Z, qid, para, c, ctrl)
+            elif kind == CONTROLLED_XR_:
+                para[0] = -0.5
+                self.append_gate(CONTROLLED_H, qid, para, c, ctrl)
+                self.append_gate(CONTROLLED_RZ, qid, para, c, ctrl)
+                self.append_gate(CONTROLLED_H, qid, para, c, ctrl)
+                para[0] = -0.25
+                self.append_gate(ROTATION_Z, qid, para, c, ctrl)
+            elif kind == CONTROLLED_RX:
+                self.append_gate(CONTROLLED_H, qid, para, c, ctrl)
+                self.append_gate(CONTROLLED_RZ, qid, para, c, ctrl)
+                self.append_gate(CONTROLLED_H, qid, para, c, ctrl)
+            elif kind == CONTROLLED_RY:
+                # cs_dg gate
+                phase = [-0.5, 0.0, 0.0]
+                self.append_gate(CONTROLLED_RZ, qid, phase, c, ctrl)
+                phase[0] = -0.25
+                self.append_gate(ROTATION_Z, qid, phase, c, ctrl)
+
+                self.append_gate(CONTROLLED_H, qid, para, c, ctrl)
+                self.append_gate(CONTROLLED_RZ, qid, para, c, ctrl)
+                self.append_gate(CONTROLLED_H, qid, para, c, ctrl)
+
+                # cs gate
+                phase[0] = 0.5
+                self.append_gate(CONTROLLED_RZ, qid, phase, c, ctrl)
+                phase[0] = 0.25
+                self.append_gate(ROTATION_Z, qid, phase, c, ctrl)
+            elif kind == CONTROLLED_P:
+                self.append_gate(CONTROLLED_RZ, qid, para, c, ctrl)
+                para[0] = para[0] / 2
+                self.append_gate(ROTATION_Z, qid, para, c, ctrl)
+            elif kind == CONTROLLED_S:
+                para[0] = 0.5
+                self.append_gate(CONTROLLED_RZ, qid, para, c, ctrl)
+                para[0] = 0.25
+                self.append_gate(ROTATION_Z, qid, para, c, ctrl)
+            elif kind == CONTROLLED_S_:
+                para[0] = -0.5
+                self.append_gate(CONTROLLED_RZ, qid, para, c, ctrl)
+                para[0] = -0.25
+                self.append_gate(ROTATION_Z, qid, para, c, ctrl)
+            elif kind == CONTROLLED_T:
+                para[0] = 0.25
+                self.append_gate(CONTROLLED_RZ, qid, para, c, ctrl)
+                para[0] = 0.125
+                self.append_gate(ROTATION_Z, qid, para, c, ctrl)
+            elif kind == CONTROLLED_T_:
+                para[0] = -0.25
+                self.append_gate(CONTROLLED_RZ, qid, para, c, ctrl)
+                para[0] = -0.125
+                self.append_gate(ROTATION_Z, qid, para, c, ctrl)
+            elif kind == SWAP_QUBITS:
+                qid_inv = qid[:]
+                qid_inv[0], qid_inv[1] = qid[1], qid[0]
+                self.append_gate(CONTROLLED_X, qid, para, c, ctrl)
+                self.append_gate(CONTROLLED_X, qid_inv, para, c, ctrl)
+                self.append_gate(CONTROLLED_X, qid, para, c, ctrl)
+            else:
+                self.append_gate(kind, qid, para, c, ctrl)
         
 # c-library for qstate
 from qlazy.lib.qcirc_c import *
