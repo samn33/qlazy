@@ -3,6 +3,8 @@
 ## [0.2.4] - 2022-xx-xx
 ### Changed
 - refactoring (about MData, MAX_QUBIT_NUM etc)
+### Added
+- import/export OpenQASM 2.0 string/file
 
 ## [0.2.3] - 2022-01-14
 ### Added
