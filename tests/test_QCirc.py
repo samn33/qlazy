@@ -19,7 +19,7 @@ def equal_or_not(qs_A, qs_B):
 
 def valid_or_not(qc):
 
-    bk = Backend(product='ibmq', device='qasm_simulator')
+    bk = Backend(product='ibmq', device='aer_simulator')
     res = bk.run(qcirc=qc)
     qasm_A = res.info['quantum_circuit'].qasm()
     qasm_B = qc.to_qasm()
@@ -59,7 +59,7 @@ class TestQCirc_append_gate(unittest.TestCase):
     def test_append_gate_simple(self):
         """test 'append_gate' (simple)
         """
-        qc = QCirc().h(0).cx(0,1).u3(3, alpha=0.1, beta=0.2, gamma=0.3)
+        qc = QCirc().h(0).cx(0,1).rx(3, phase=0.1)
         self.assertEqual(qc.qubit_num, 4)
         self.assertEqual(qc.cmem_num, 0)
         self.assertEqual(qc.gate_num, 3)
@@ -67,7 +67,7 @@ class TestQCirc_append_gate(unittest.TestCase):
     def test_append_gate_with_cid(self):
         """test 'append_gate' (with cid)
         """
-        qc = QCirc().h(0).cx(0,1).u3(3, alpha=0.1, beta=0.2, gamma=0.3).measure(qid=[0,5], cid=[1,2]) 
+        qc = QCirc().h(0).cx(0,1).rx(3, phase=0.1).measure(qid=[0,5], cid=[1,2]) 
         self.assertEqual(qc.qubit_num, 6)
         self.assertEqual(qc.cmem_num, 3)
         self.assertEqual(qc.gate_num, 5)
@@ -75,7 +75,7 @@ class TestQCirc_append_gate(unittest.TestCase):
     def test_append_gate_with_cid(self):
         """test 'append_gate' (with ctrl)
         """
-        qc = QCirc().h(0).cx(0,1, ctrl=5).u3(3, alpha=0.1, beta=0.2, gamma=0.3)
+        qc = QCirc().h(0).cx(0,1, ctrl=5).rx(3, phase=0.1)
         self.assertEqual(qc.qubit_num, 4)
         self.assertEqual(qc.cmem_num, 6)
         self.assertEqual(qc.gate_num, 3)
@@ -89,7 +89,7 @@ class TestQCirc_is_equal(unittest.TestCase):
         """test 'is_equal'
         """
         qc_L = QCirc().h(0).cx(0,1).rx(1, phase=0.2)
-        qc_R = QCirc().cu3(0, 1, alpha=0.3, beta=0.4, gamma=0.5).measure(qid=[0,1,2], cid=[0,1,2])
+        qc_R = QCirc().crx(0, 1, phase=0.3).measure(qid=[0,1,2], cid=[0,1,2])
         qc_L_clone = qc_L.clone()
         ans = (qc_L == qc_R)
         self.assertEqual(qc_L == qc_R, False)
@@ -105,8 +105,8 @@ class TestQCirc_merge(unittest.TestCase):
         """test 'merge' (2 terms)
         """
         qc_L = QCirc().h(0).cx(0,1).rx(1, phase=0.2)
-        qc_R = QCirc().cu3(0, 1, alpha=0.3, beta=0.4, gamma=0.5).measure(qid=[0,1,2], cid=[0,1,2])
-        qc_LR = QCirc().h(0).cx(0,1).rx(1, phase=0.2).cu3(0, 1, alpha=0.3, beta=0.4, gamma=0.5).measure(qid=[0,1,2], cid=[0,1,2])
+        qc_R = QCirc().crx(0, 1, phase=0.3).measure(qid=[0,1,2], cid=[0,1,2])
+        qc_LR = QCirc().h(0).cx(0,1).rx(1, phase=0.2).crx(0, 1, phase=0.3).measure(qid=[0,1,2], cid=[0,1,2])
         self.assertEqual(qc_L + qc_R == qc_LR, True)
         self.assertEqual(qc_R + qc_L == qc_LR, False)
         
@@ -114,18 +114,18 @@ class TestQCirc_merge(unittest.TestCase):
         """test 'merge' (2 terms)
         """
         qc_1 = QCirc().h(0).cx(0,1).rx(1, phase=0.2)
-        qc_2 = QCirc().cu2(0, 1, alpha=0.3, beta=0.4).measure(qid=[0,1,2], cid=[0,1,2])
+        qc_2 = QCirc().cry(0, 1, phase=0.3).measure(qid=[0,1,2], cid=[0,1,2])
         qc_3 = QCirc().x(0).z(5)
-        qc_123 = QCirc().h(0).cx(0,1).rx(1, phase=0.2).cu2(0, 1, alpha=0.3, beta=0.4).measure(qid=[0,1,2], cid=[0,1,2]).x(0).z(5)
+        qc_123 = QCirc().h(0).cx(0,1).rx(1, phase=0.2).cry(0, 1, phase=0.3).measure(qid=[0,1,2], cid=[0,1,2]).x(0).z(5)
         self.assertEqual(qc_1 + qc_2 + qc_3 == qc_123, True)
         
     def test_merge_incremental(self):
         """test 'merge' (incremental)
         """
         qc_1 = QCirc().h(0).cx(0,1).rx(1, phase=0.2)
-        qc_2 = QCirc().cu2(0, 1, alpha=0.3, beta=0.4).measure(qid=[0,1,2], cid=[0,1,2])
+        qc_2 = QCirc().cry(0, 1, phase=0.3).measure(qid=[0,1,2], cid=[0,1,2])
         qc_3 = QCirc().x(0).z(5)
-        qc_expect = QCirc().h(0).cx(0,1).rx(1, phase=0.2).cu2(0, 1, alpha=0.3, beta=0.4).measure(qid=[0,1,2], cid=[0,1,2]).x(0).z(5)
+        qc_expect = QCirc().h(0).cx(0,1).rx(1, phase=0.2).cry(0, 1, phase=0.3).measure(qid=[0,1,2], cid=[0,1,2]).x(0).z(5)
         qc_actual = qc_1.clone()
         qc_actual += qc_2
         qc_actual += qc_3
@@ -139,10 +139,10 @@ class TestQCirc_kind_first(unittest.TestCase):
         """test 'kind_first'
         """
         qc_L = QCirc().h(0).cx(0,1).rx(1, phase=0.2)
-        qc_R = QCirc().cu2(0, 1, alpha=0.3, beta=0.4).measure(qid=[0,1,2], cid=[0,1,2])
-        qc_LR = QCirc().h(0).cx(0,1).rx(1, phase=0.2).cu3(0, 1, alpha=0.3, beta=0.4, gamma=0.5).measure(qid=[0,1,2], cid=[0,1,2])
+        qc_R = QCirc().crz(0, 1, phase=0.3).measure(qid=[0,1,2], cid=[0,1,2])
+        qc_LR = QCirc().h(0).cx(0,1).rx(1, phase=0.2).cry(0, 1, phase=0.3).measure(qid=[0,1,2], cid=[0,1,2])
         self.assertEqual(qc_L.kind_first(), HADAMARD)
-        self.assertEqual(qc_R.kind_first(), CONTROLLED_U2)
+        self.assertEqual(qc_R.kind_first(), CONTROLLED_RZ)
         self.assertEqual(qc_LR.kind_first(), HADAMARD)
 
 class TestQCirc_pop_gate(unittest.TestCase):
@@ -152,7 +152,7 @@ class TestQCirc_pop_gate(unittest.TestCase):
     def test_pop_gate_not_update(self):
         """test 'pop_gate' (not update)
         """
-        qc = QCirc().h(0).cx(0,1).rx(1, phase=0.2).cu3(0, 1, alpha=0.3, beta=0.4, gamma=0.5).measure(qid=[0,1,2], cid=[0,1,2])
+        qc = QCirc().h(0).cx(0,1).rx(1, phase=0.2).crz(0, 1, phase=0.3).measure(qid=[0,1,2], cid=[0,1,2])
         self.assertEqual(qc.qubit_num, 3)
         self.assertEqual(qc.cmem_num, 3)
         self.assertEqual(qc.gate_num, 7)
@@ -169,7 +169,7 @@ class TestQCirc_pop_gate(unittest.TestCase):
     def test_pop_gate_updte(self):
         """test 'pop_gate' (update)
         """
-        qc = QCirc().h(5, ctrl=6).cx(0,1).rx(1, phase=0.2).cu3(0, 1, alpha=0.3, beta=0.4, gamma=0.5).measure(qid=[0,1,2], cid=[0,1,2])
+        qc = QCirc().h(5, ctrl=6).cx(0,1).rx(1, phase=0.2).crz(0, 1, phase=0.3).measure(qid=[0,1,2], cid=[0,1,2])
         self.assertEqual(qc.qubit_num, 6)
         self.assertEqual(qc.cmem_num, 7)
         self.assertEqual(qc.gate_num, 7)

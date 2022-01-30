@@ -8,13 +8,13 @@ def main():
     
     # reference state: T|psi>
     qs_expect = QState(1)
-    qs_expect.u3(0, alpha=alpha, beta=beta, gamma=gamma).t(0)
+    qs_expect.rz(0, phase=alpha).rx(0, phase=beta).rz(0, phase=gamma).t(0)
 
     # prepare initial state
     qs = QState(3)
     qs.h(0).s(0)  # |Y>
     qs.h(1).t(1)  # |A>
-    qs.u3(2, alpha=alpha, beta=beta, gamma=gamma)  # |psi>
+    qs.rz(2, phase=alpha).rx(2, phase=beta).rz(2, phase=gamma)  # |psi>
 
     # T gate (only with X,Z,H,CNOT and measurement)
     qs.cx(1,2)

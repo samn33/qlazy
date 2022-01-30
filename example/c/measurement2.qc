@@ -20,4 +20,3 @@ m(100)
 
 @ == state ==
 show
-circ

@@ -912,86 +912,86 @@ class QState(ctypes.Structure):
         qstate_operate_qgate(self, kind=PHASE_SHIFT, phase=phase, qid=[q0])
         return self
 
-    def u1(self, q0, alpha=DEF_PHASE):
-        """
-        operate U1 gate (by IBM).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id.
-        alpha : float
-            rotation angle (unit of angle is PI radian).
-
-        Returns
-        -------
-        self : instance of QState
-
-        Notes
-        -----
-        this opration is equal to P gate (phase shift gate)
-
-        """
-        qstate_operate_qgate(self, kind=ROTATION_U1, phase=alpha, qid=[q0])
-        return self
-
-    def u2(self, q0, alpha=DEF_PHASE, beta=DEF_PHASE):
-        """
-        operate U2 gate (by IBM).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id.
-        alpha : float
-            rotation angle (unit of angle is pi radian).
-        beta : float
-            rotation angle (unit of angle is pi radian).
-
-        Returns
-        -------
-        self : instance of QState
-
-        Notes
-        -----
-        matrix experssion is following...
-        | 1/sqrt(2)              -exp(i*alpha*PI)/sqrt(2)       |
-        | exp(i*beta*PI)/sqrt(2) exp(i*(alpha+beta)*PI)/sqrt(2) |
-
-        """
-        qstate_operate_qgate(self, kind=ROTATION_U2, phase=alpha, phase1=beta, qid=[q0])
-        return self
-
-    def u3(self, q0, alpha=DEF_PHASE, beta=DEF_PHASE, gamma=DEF_PHASE):
-        """
-        operate U3 gate (by IBM).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id.
-        alpha : float
-            rotation angle (unit of angle is pi radian).
-        beta : float
-            rotation angle (unit of angle is pi radian).
-        gamma : float
-            rotation angle (unit of angle is pi radian).
-
-        Returns
-        -------
-        self : instance of QState
-
-        Notes
-        -----
-        matrix expression is following...
-        | cos(gamma/2)                -exp(i*alpha*PI)*sin(gamma/2)       |
-        | exp(i*beta*PI)*sin(gamma/2) exp(i*(alpha+beta)*PI)*cos(gamma/2) |
-
-
-        """
-        qstate_operate_qgate(self, kind=ROTATION_U3, phase=alpha, phase1=beta,
-                             phase2=gamma, qid=[q0])
-        return self
+    # def u1(self, q0, alpha=DEF_PHASE):
+    #     """
+    #     operate U1 gate (by IBM).
+    # 
+    #     Parameters
+    #     ----------
+    #     q0 : int
+    #         qubit id.
+    #     alpha : float
+    #         rotation angle (unit of angle is PI radian).
+    # 
+    #     Returns
+    #     -------
+    #     self : instance of QState
+    # 
+    #     Notes
+    #     -----
+    #     this opration is equal to P gate (phase shift gate)
+    # 
+    #     """
+    #     qstate_operate_qgate(self, kind=ROTATION_U1, phase=alpha, qid=[q0])
+    #     return self
+    # 
+    # def u2(self, q0, alpha=DEF_PHASE, beta=DEF_PHASE):
+    #     """
+    #     operate U2 gate (by IBM).
+    # 
+    #     Parameters
+    #     ----------
+    #     q0 : int
+    #         qubit id.
+    #     alpha : float
+    #         rotation angle (unit of angle is pi radian).
+    #     beta : float
+    #         rotation angle (unit of angle is pi radian).
+    # 
+    #     Returns
+    #     -------
+    #     self : instance of QState
+    # 
+    #     Notes
+    #     -----
+    #     matrix experssion is following...
+    #     | 1/sqrt(2)              -exp(i*alpha*PI)/sqrt(2)       |
+    #     | exp(i*beta*PI)/sqrt(2) exp(i*(alpha+beta)*PI)/sqrt(2) |
+    # 
+    #     """
+    #     qstate_operate_qgate(self, kind=ROTATION_U2, phase=alpha, phase1=beta, qid=[q0])
+    #     return self
+    # 
+    # def u3(self, q0, alpha=DEF_PHASE, beta=DEF_PHASE, gamma=DEF_PHASE):
+    #     """
+    #     operate U3 gate (by IBM).
+    # 
+    #     Parameters
+    #     ----------
+    #     q0 : int
+    #         qubit id.
+    #     alpha : float
+    #         rotation angle (unit of angle is pi radian).
+    #     beta : float
+    #         rotation angle (unit of angle is pi radian).
+    #     gamma : float
+    #         rotation angle (unit of angle is pi radian).
+    # 
+    #     Returns
+    #     -------
+    #     self : instance of QState
+    # 
+    #     Notes
+    #     -----
+    #     matrix expression is following...
+    #     | cos(gamma/2)                -exp(i*alpha*PI)*sin(gamma/2)       |
+    #     | exp(i*beta*PI)*sin(gamma/2) exp(i*(alpha+beta)*PI)*cos(gamma/2) |
+    # 
+    # 
+    #     """
+    #     qstate_operate_qgate(self, kind=ROTATION_U3, phase=alpha, phase1=beta,
+    #                          phase2=gamma, qid=[q0])
+    #     return self
 
     # 2-qubit gate
 
@@ -1286,76 +1286,76 @@ class QState(ctypes.Structure):
         qstate_operate_qgate(self, kind=CONTROLLED_RZ, phase=phase, qid=[q0,q1])
         return self
 
-    def cu1(self, q0, q1, alpha=DEF_PHASE):
-        """
-        operate CU1 gate (controlled U1 gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id (control qubit).
-        q1 : int
-            qubit id (target qubit).
-        alpha : float
-            rotation angle (unit of angle is PI radian).
-
-        Returns
-        -------
-        self : instance of QState
-
-        """
-        qstate_operate_qgate(self, kind=CONTROLLED_U1, phase=alpha, qid=[q0,q1])
-        return self
-
-    def cu2(self, q0, q1, alpha=DEF_PHASE, beta=DEF_PHASE):
-        """
-        operate CU2 gate (controlled U2 gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id (control qubit).
-        q1 : int
-            qubit id (target qubit).
-        alpha : float
-            rotation angle (unit of angle is PI radian).
-        beta : float
-            rotation angle (unit of angle is PI radian).
-
-        Returns
-        -------
-        self : instance of QState
-
-        """
-        qstate_operate_qgate(self, kind=CONTROLLED_U2, phase=alpha, phase1=beta,
-                             qid=[q0,q1])
-        return self
-
-    def cu3(self, q0, q1, alpha=DEF_PHASE, beta=DEF_PHASE, gamma=DEF_PHASE):
-        """
-        operate CU3 gate (controlled U3 gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id (control qubit).
-        q1 : int
-            qubit id (target qubit).
-        alpha : float
-            rotation angle (unit of angle is PI radian).
-        beta : float
-            rotation angle (unit of angle is PI radian).
-        gamma : float
-            rotation angle (unit of angle is PI radian).
-
-        Returns
-        -------
-        self : instance of QState
-
-        """
-        qstate_operate_qgate(self, kind=CONTROLLED_U3, phase=alpha, phase1=beta,
-                             phase2=gamma, qid=[q0,q1])
-        return self
+    # def cu1(self, q0, q1, alpha=DEF_PHASE):
+    #     """
+    #     operate CU1 gate (controlled U1 gate).
+    # 
+    #     Parameters
+    #     ----------
+    #     q0 : int
+    #         qubit id (control qubit).
+    #     q1 : int
+    #         qubit id (target qubit).
+    #     alpha : float
+    #         rotation angle (unit of angle is PI radian).
+    # 
+    #     Returns
+    #     -------
+    #     self : instance of QState
+    # 
+    #     """
+    #     qstate_operate_qgate(self, kind=CONTROLLED_U1, phase=alpha, qid=[q0,q1])
+    #     return self
+    # 
+    # def cu2(self, q0, q1, alpha=DEF_PHASE, beta=DEF_PHASE):
+    #     """
+    #     operate CU2 gate (controlled U2 gate).
+    # 
+    #     Parameters
+    #     ----------
+    #     q0 : int
+    #         qubit id (control qubit).
+    #     q1 : int
+    #         qubit id (target qubit).
+    #     alpha : float
+    #         rotation angle (unit of angle is PI radian).
+    #     beta : float
+    #         rotation angle (unit of angle is PI radian).
+    # 
+    #     Returns
+    #     -------
+    #     self : instance of QState
+    # 
+    #     """
+    #     qstate_operate_qgate(self, kind=CONTROLLED_U2, phase=alpha, phase1=beta,
+    #                          qid=[q0,q1])
+    #     return self
+    # 
+    # def cu3(self, q0, q1, alpha=DEF_PHASE, beta=DEF_PHASE, gamma=DEF_PHASE):
+    #     """
+    #     operate CU3 gate (controlled U3 gate).
+    # 
+    #     Parameters
+    #     ----------
+    #     q0 : int
+    #         qubit id (control qubit).
+    #     q1 : int
+    #         qubit id (target qubit).
+    #     alpha : float
+    #         rotation angle (unit of angle is PI radian).
+    #     beta : float
+    #         rotation angle (unit of angle is PI radian).
+    #     gamma : float
+    #         rotation angle (unit of angle is PI radian).
+    # 
+    #     Returns
+    #     -------
+    #     self : instance of QState
+    # 
+    #     """
+    #     qstate_operate_qgate(self, kind=CONTROLLED_U3, phase=alpha, phase1=beta,
+    #                          phase2=gamma, qid=[q0,q1])
+    #     return self
 
     # 3-qubit gate
     

@@ -245,7 +245,6 @@ qlazyの状態ベクトルシミュレータまたはスタビライザーシミ
 - t,t_dg: T and T dagger gate
 - p: phase shift gate
 - rx,ry,rz: RX/RY/RZ (rotation around X/Y/Z-axis) gate
-- u1,u2,u3: U1/U2/U3 gate (by IBM)
 
 #### 2量子ビットゲート(ユニタリゲート)
 
@@ -257,7 +256,6 @@ qlazyの状態ベクトルシミュレータまたはスタビライザーシミ
 - sw: swap gate
 - cp: controlled P gate
 - crx,cry,crz: controlled RX/RY/RZ gate
-- cu1,cu2,cu3: controlled U1/U2/U3 gate
 
 #### 3量子ビットゲート(ユニタリゲート)
 
@@ -281,7 +279,7 @@ qlazyの状態ベクトルシミュレータまたはスタビライザーシミ
 ## 他形式との相互変換
 
 qlazyで作成した量子回路をOpenQASM形式の文字列やファイルにエクスポート
-したり、それらをインポートする機能があります。
+したり、それらをインポートすることができます。
 
 ### OpenQASMへのエクスポート
 
@@ -300,16 +298,20 @@ to_qasmメソッドを使って、以下のようにQpenQASM形式の文字列�
 to_qasm_fileメソッドを使って、以下のようにOpenQASM形式のファイルを出力
 することができます。
 
-	qasm = qc.to_qasm_file("foo.qasm")
+	qc.to_qasm_file("foo.qasm")
 
 ### OpenQASMからのインポート
 
 from_qasmメソッドおよびfrom_qasm_fileメソッドを使って、以下のように
-OpenQASMの文字列およびファイルからqlazyの量子回路を作成することができ
-ます。
+OpenQASM(バージョン2.0)の文字列およびファイルからqlazyの量子回路を作成
+することができます。
 
     qc = QCirc.from_qasm(qasm)  # qasm: OpenQASM string
     qc = QCirc.from_qasm_file("foo.qasm")  # foo.qasm: OpenQASM file
+
+ただし、非ユニタリゲート(measure,reset)やユーザーがカスタマイズしたゲー
+トには対応していません。対応しているゲートは、'x', 'y', 'z', 'h', 's',
+'sdg', 't', 'tdg', 'cx', 'cz', 'ch', 'rx', 'rz', 'crz'の14種類です。
 
 
 ## 少し高度な技

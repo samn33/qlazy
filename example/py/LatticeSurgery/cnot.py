@@ -41,7 +41,7 @@ class QStateLogical(QState):
         ''' |cnt> = a |0> + b |1>, |tar> = |0> '''
         
         self.reset()
-        self.u3(self.__dat['cnt'][0], alpha=alpha, beta=beta, gamma=gamma)
+        self.rz(self.__dat['cnt'][0], phase=alpha).rx(self.__dat['cnt'][0], phase=beta).rz(self.__dat['cnt'][0], phase=gamma)
         self.cx(self.__dat['cnt'][0], self.__dat['cnt'][3])
         self.h(self.__dat['int'][0])
         self.cx(self.__dat['int'][0], self.__dat['int'][3])
@@ -94,5 +94,5 @@ if __name__ == '__main__':
     result_logical = qs_logical.measure(shots=shots)
     print("- actual =", result_logical)
 
-    result = QState(qubit_num=1).u3(0, alpha=alpha, beta=beta, gamma=gamma).m(shots=shots)
+    result = QState(qubit_num=1).rz(0, phase=alpha).rx(0, phase=beta).rz(0, phase=gamma).m(shots=shots)
     print("- expect =", result.frequency)

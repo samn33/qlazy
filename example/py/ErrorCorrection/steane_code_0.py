@@ -15,11 +15,11 @@ class MyQState(QState):
 
         i = np.random.randint(len(qid))
         alpha, beta, gamma = np.random.rand(3)
-        self.u3(qid[i], alpha=alpha, beta=beta, gamma=gamma)
+        self.rz(qid[i], phase=alpha).rx(qid[i], phase=beta).rz(qid[i], phase=gamma)
     
-        print("== random noise (random U3 operation)==")
+        print("== random noise ==")
         print("- qubit id = #{0:}".format(i, alpha, beta, gamma))
-        print("- parameter of U3 = {0:.4f},{1:.4f},{2:.4f}".format(alpha, beta, gamma))
+        print("- parameter of rotation = {0:.4f},{1:.4f},{2:.4f}".format(alpha, beta, gamma))
 
         return self
 

@@ -364,71 +364,71 @@ class TestBackend_1_qubit_qlazy_qstate_simulator(unittest.TestCase):
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
-    def test_u1(self):
-        """test 'u1' gate
-        """
-        bk = Backend(product='qlazy', device='qstate_simulator')
-        qc = QCirc().u1(0, alpha=0.1)
-        res = bk.run(qcirc=qc)
-        actual = res.info['qstate'].amp
-        expect = np.array([1.0, 0.0])
-        ans = equal_vectors(actual, expect)
-        self.assertEqual(ans,True)
-
-    def test_h_u1(self):
-        """test 'u1' gate (following 'h' gate)
-        """
-        bk = Backend(product='qlazy', device='qstate_simulator')
-        qc = QCirc().h(0).u1(0, alpha=0.1)
-        res = bk.run(qcirc=qc)
-        actual = res.info['qstate'].amp
-        expect = np.array([0.70710678+0.j, 0.67249851+0.21850801j])
-        ans = equal_vectors(actual, expect)
-        self.assertEqual(ans,True)
-
-    def test_u2(self):
-        """test 'u2' gate
-        """
-        bk = Backend(product='qlazy', device='qstate_simulator')
-        qc = QCirc().u2(0, alpha=0.1, beta=0.2)
-        res = bk.run(qcirc=qc)
-        actual = res.info['qstate'].amp
-        expect = np.array([0.70710678+0.j, 0.5720614 +0.41562694j])
-        ans = equal_vectors(actual, expect)
-        self.assertEqual(ans,True)
-
-    def test_h_u2(self):
-        """test 'u2' gate (following 'h' gate)
-        """
-        bk = Backend(product='qlazy', device='qstate_simulator')
-        qc = QCirc().h(0).u2(0, alpha=0.1, beta=0.2)
-        res = bk.run(qcirc=qc)
-        actual = res.info['qstate'].amp
-        expect = np.array([0.02447174-0.1545085j,0.69840112+0.69840112j])
-        ans = equal_vectors(actual, expect)
-        self.assertEqual(ans,True)
-
-    def test_u3(self):
-        """test 'u3' gate
-        """
-        bk = Backend(product='qlazy', device='qstate_simulator')
-        qc = QCirc().u3(0, alpha=0.1, beta=0.2, gamma=0.3)
-        res = bk.run(qcirc=qc)
-        actual = res.info['qstate'].amp
-        expect = np.array([0.89100652+0.j, 0.36728603+0.26684892j])
-        ans = equal_vectors(actual, expect)
-        self.assertEqual(ans,True)
-
-    def test_h_u3(self):
-        """test 'u3' gate (following 'h' gate)
-        """
-        bk = Backend(product='qlazy', device='qstate_simulator')
-        qc = QCirc().h(0).u3(0, alpha=0.1, beta=0.2, gamma=0.3)
-        res = bk.run(qcirc=qc)
-        actual = res.info['qstate'].amp
-        expect = np.array([0.32472882-0.09920056j, 0.63003676+0.69840112j])
-        ans = equal_vectors(actual, expect)
-        self.assertEqual(ans,True)
+#     def test_u1(self):
+#         """test 'u1' gate
+#         """
+#         bk = Backend(product='qlazy', device='qstate_simulator')
+#         qc = QCirc().u1(0, alpha=0.1)
+#         res = bk.run(qcirc=qc)
+#         actual = res.info['qstate'].amp
+#         expect = np.array([1.0, 0.0])
+#         ans = equal_vectors(actual, expect)
+#         self.assertEqual(ans,True)
+# 
+#     def test_h_u1(self):
+#         """test 'u1' gate (following 'h' gate)
+#         """
+#         bk = Backend(product='qlazy', device='qstate_simulator')
+#         qc = QCirc().h(0).u1(0, alpha=0.1)
+#         res = bk.run(qcirc=qc)
+#         actual = res.info['qstate'].amp
+#         expect = np.array([0.70710678+0.j, 0.67249851+0.21850801j])
+#         ans = equal_vectors(actual, expect)
+#         self.assertEqual(ans,True)
+# 
+#     def test_u2(self):
+#         """test 'u2' gate
+#         """
+#         bk = Backend(product='qlazy', device='qstate_simulator')
+#         qc = QCirc().u2(0, alpha=0.1, beta=0.2)
+#         res = bk.run(qcirc=qc)
+#         actual = res.info['qstate'].amp
+#         expect = np.array([0.70710678+0.j, 0.5720614 +0.41562694j])
+#         ans = equal_vectors(actual, expect)
+#         self.assertEqual(ans,True)
+# 
+#     def test_h_u2(self):
+#         """test 'u2' gate (following 'h' gate)
+#         """
+#         bk = Backend(product='qlazy', device='qstate_simulator')
+#         qc = QCirc().h(0).u2(0, alpha=0.1, beta=0.2)
+#         res = bk.run(qcirc=qc)
+#         actual = res.info['qstate'].amp
+#         expect = np.array([0.02447174-0.1545085j,0.69840112+0.69840112j])
+#         ans = equal_vectors(actual, expect)
+#         self.assertEqual(ans,True)
+# 
+#     def test_u3(self):
+#         """test 'u3' gate
+#         """
+#         bk = Backend(product='qlazy', device='qstate_simulator')
+#         qc = QCirc().u3(0, alpha=0.1, beta=0.2, gamma=0.3)
+#         res = bk.run(qcirc=qc)
+#         actual = res.info['qstate'].amp
+#         expect = np.array([0.89100652+0.j, 0.36728603+0.26684892j])
+#         ans = equal_vectors(actual, expect)
+#         self.assertEqual(ans,True)
+# 
+#     def test_h_u3(self):
+#         """test 'u3' gate (following 'h' gate)
+#         """
+#         bk = Backend(product='qlazy', device='qstate_simulator')
+#         qc = QCirc().h(0).u3(0, alpha=0.1, beta=0.2, gamma=0.3)
+#         res = bk.run(qcirc=qc)
+#         actual = res.info['qstate'].amp
+#         expect = np.array([0.32472882-0.09920056j, 0.63003676+0.69840112j])
+#         ans = equal_vectors(actual, expect)
+#         self.assertEqual(ans,True)
 
 #
 # 2-qubit gate
@@ -620,41 +620,41 @@ class TestBackend_2_qubit_qlazy_qstate_simulator(unittest.TestCase):
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
-    def test_cu1(self):
-        """test 'cu1' gate
-        """
-        bk = Backend(product='qlazy', device='qstate_simulator')
-        qc = QCirc().h(0).h(1).cu1(0,1, alpha=0.1)
-        res = bk.run(qcirc=qc)
-        actual = res.info['qstate'].amp
-        expect = np.array([(0.5+0j), (0.5+0j), (0.5+0j),
-                           (0.47552825814757677+0.1545084971874737j)])
-        ans = equal_vectors(actual, expect)
-        self.assertEqual(ans,True)
-
-    def test_cu2(self):
-        """test 'cu2' gate
-        """
-        bk = Backend(product='qlazy', device='qstate_simulator')
-        qc = QCirc().h(0).h(1).cu2(0,1, alpha=0.1, beta=0.2)
-        res = bk.run(qcirc=qc)
-        actual = res.info['qstate'].amp
-        expect = np.array([(0.5+0j), (0.5+0j), (0.0173041346112951-0.10925400611220525j),
-                           (0.49384417029756883+0.49384417029756883j)])
-        ans = equal_vectors(actual, expect)
-        self.assertEqual(ans,True)
-
-    def test_cu3(self):
-        """test 'cu3' gate
-        """
-        bk = Backend(product='qlazy', device='qstate_simulator')
-        qc = QCirc().h(0).h(1).cu3(0,1, alpha=0.1, beta=0.2, gamma=0.3)
-        res = bk.run(qcirc=qc)
-        actual = res.info['qstate'].amp
-        expect = np.array([(0.5+0j), (0.5+0j), (0.22961795053748937-0.07014538985214754j),
-                           (0.44550326209418395+0.4938441702975689j)])
-        ans = equal_vectors(actual, expect)
-        self.assertEqual(ans,True)
+#     def test_cu1(self):
+#         """test 'cu1' gate
+#         """
+#         bk = Backend(product='qlazy', device='qstate_simulator')
+#         qc = QCirc().h(0).h(1).cu1(0,1, alpha=0.1)
+#         res = bk.run(qcirc=qc)
+#         actual = res.info['qstate'].amp
+#         expect = np.array([(0.5+0j), (0.5+0j), (0.5+0j),
+#                            (0.47552825814757677+0.1545084971874737j)])
+#         ans = equal_vectors(actual, expect)
+#         self.assertEqual(ans,True)
+# 
+#     def test_cu2(self):
+#         """test 'cu2' gate
+#         """
+#         bk = Backend(product='qlazy', device='qstate_simulator')
+#         qc = QCirc().h(0).h(1).cu2(0,1, alpha=0.1, beta=0.2)
+#         res = bk.run(qcirc=qc)
+#         actual = res.info['qstate'].amp
+#         expect = np.array([(0.5+0j), (0.5+0j), (0.0173041346112951-0.10925400611220525j),
+#                            (0.49384417029756883+0.49384417029756883j)])
+#         ans = equal_vectors(actual, expect)
+#         self.assertEqual(ans,True)
+# 
+#     def test_cu3(self):
+#         """test 'cu3' gate
+#         """
+#         bk = Backend(product='qlazy', device='qstate_simulator')
+#         qc = QCirc().h(0).h(1).cu3(0,1, alpha=0.1, beta=0.2, gamma=0.3)
+#         res = bk.run(qcirc=qc)
+#         actual = res.info['qstate'].amp
+#         expect = np.array([(0.5+0j), (0.5+0j), (0.22961795053748937-0.07014538985214754j),
+#                            (0.44550326209418395+0.4938441702975689j)])
+#         ans = equal_vectors(actual, expect)
+#         self.assertEqual(ans,True)
 
 #
 # 3-qubit gate

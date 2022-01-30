@@ -19,4 +19,3 @@ mz(100)
 
 @ == state ==
 show
-circ

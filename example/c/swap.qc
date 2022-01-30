@@ -12,9 +12,6 @@ sw 0 1
 #cx 1 0
 #cx 0 1
 
-@ == circuit ==
-circ
-
 @ == final state ==
 show
 

@@ -15,8 +15,5 @@ rz(0.5) 0
 @ == final state ==
 show
 
-@ == circuit ==
-circ
-
 @ == measurement ==
 m(100)

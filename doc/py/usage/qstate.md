@@ -148,16 +148,6 @@ phase（実数値）が指定されなければ0ラジアンとみなされま�
 ない）。phaseに指定する値の単位はPIラジアンです。なので、0.5は0.5*PIラ
 ジアンを意味します。
 
-#### 回転ゲート(U1,U2,U3 by IBM)
-
-    qs.u1(q, alpha=xxx)
-    qs.u2(q, alpha=xxx, beta=xxx)
-    qs.u3(q, alpha=xxx, beta=xxx, gamma=xxx)
-	
-alpha,beta,gamma（実数値）が指定されなければ0ラジアンとみなされます
-（つまり何もしない）。phaseに指定する値の単位はPIラジアンです。なので、
-0.5は0.5*PIラジアンを意味します。
-
 #### 制御ユニタリゲート
 
 パウリX,Y,Zゲート、ルートパウリXゲート、アダマールゲート、位相シフトゲー
@@ -179,9 +169,6 @@ alpha,beta,gamma（実数値）が指定されなければ0ラジアンとみな
 	qs.crx(q0,q1, phase=xxx)  # 制御X軸回転ゲート
 	qs.cry(q0,q1, phase=xxx)  # 制御Y軸回転ゲート
 	qs.crz(q0,q1, phase=xxx)  # 制御Z軸回転ゲート
-	qs.cu1(q0,q1, alpha=xxx)                       # 制御U1ゲート
-	qs.cu2(q0,q1, alpha=xxx, beta=xxx)             # 制御U2ゲート
-	qs.cu3(q0,q1, alpha=xxx, beta=xxx, gamma=xxx)  # 制御U2ゲート
 
 #### 交換ゲート（スワップゲート）
 

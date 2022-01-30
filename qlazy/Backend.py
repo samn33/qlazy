@@ -4,7 +4,7 @@ from qlazy.error import *
 
 BACKEND_DEVICES = {'qlazy': ['qstate_simulator','stabilizer_simulator'],
                    'qulacs': ['cpu_simulator','gpu_simulator'],
-                   'ibmq': ['qasm_simulator', 'least_busy']}
+                   'ibmq': ['aer_simulator', 'qasm_simulator', 'least_busy']}
 
 class Backend:
     """ Backend device of quantum computing
@@ -46,7 +46,8 @@ class Backend:
             elif device == None:
                 self.device = BACKEND_DEVICES[product][0]
             else:
-                if name == 'ibmq':
+                if product == 'ibmq':
+                # if name == 'ibmq':
                     self.device = device
                 else:
                     raise Backend_Error_DeviceNotSupported()

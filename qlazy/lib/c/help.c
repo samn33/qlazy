@@ -17,8 +17,8 @@ static void _help_print_outline() {
 * quit:                     .,quit \n\
 * help:                     ?,help \n\
 [quantum gates]\n\
-* 1-qubit gates:            x,y,z,xr,xr+,h,s,s+,t,t+,p,rx,ry,rz,u1,u2,u3\n\
-* 2-qubit gates:            cx,cy,cz,cxr,cxr+,ch,cs,cs+,ct,ct+,cp,crx,cry,crz,cu1,cu2,cu3,sw\n\
+* 1-qubit gates:            x,y,z,xr,xr+,h,s,s+,t,t+,p,rx,ry,rz\n\
+* 2-qubit gates:            cx,cy,cz,cxr,cxr+,ch,cs,cs+,ct,ct+,cp,crx,cry,crz,sw\n\
 * measurement:              m,mx,my,mz,mb\n\
 * reset:                    reset\n\
 [notes] \n\
@@ -404,6 +404,7 @@ static void _help_print_rz() {
 ");
 }
 
+/*
 static void _help_print_u1() {
   printf("\
 == U1 gate ==\n\
@@ -442,6 +443,7 @@ static void _help_print_u3() {
   >> u3(<alpha>,<beta>,<gamma>) <qubit_id>\n\
 ");
 }
+*/
 
 static void _help_print_cx() {
   printf("\
@@ -641,6 +643,7 @@ static void _help_print_crz() {
 ");
 }
 
+/*
 static void _help_print_cu1() {
   printf("\
 == CU1 gate ==\n\
@@ -670,6 +673,7 @@ static void _help_print_cu3() {
   >> cu3(<alpha>,<beta>,<gamma>) <qubit_id> <qubit_id>\n\
 ");
 }
+*/
 
 static void _help_print_sw() {
   printf("\
@@ -791,15 +795,15 @@ bool help_print(char* item)
   case ROTATION_Z:
     _help_print_rz();
     break;
-  case ROTATION_U1:
-    _help_print_u1();
-    break;
-  case ROTATION_U2:
-    _help_print_u2();
-    break;
-  case ROTATION_U3:
-    _help_print_u3();
-    break;
+//  case ROTATION_U1:
+//    _help_print_u1();
+//    break;
+//  case ROTATION_U2:
+//    _help_print_u2();
+//    break;
+//  case ROTATION_U3:
+//    _help_print_u3();
+//    break;
   case CONTROLLED_X:
     _help_print_cx();
     break;
@@ -842,15 +846,15 @@ bool help_print(char* item)
   case CONTROLLED_RZ:
     _help_print_crz();
     break;
-  case CONTROLLED_U1:
-    _help_print_cu1();
-    break;
-  case CONTROLLED_U2:
-    _help_print_cu2();
-    break;
-  case CONTROLLED_U3:
-    _help_print_cu3();
-    break;
+//  case CONTROLLED_U1:
+//    _help_print_cu1();
+//    break;
+//  case CONTROLLED_U2:
+//    _help_print_cu2();
+//    break;
+//  case CONTROLLED_U3:
+//    _help_print_cu3();
+//    break;
   case SWAP_QUBITS:
     _help_print_sw();
     break;

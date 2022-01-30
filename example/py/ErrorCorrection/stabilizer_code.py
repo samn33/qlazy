@@ -80,7 +80,7 @@ class MyQState(QState):
 
         # make random quantum state and encode (with quantum teleportation)
 
-        self.u3(qid_anc[0], alpha=phase[0], beta=phase[1], gamma=phase[2]) # input quantum state
+        self.rz(qid_anc[0], phase=phase[0]).rx(qid_anc[0], phase=phase[1]).rz(qid_anc[0], phase=phase[2]) # input quantum state
         print("* input quantum state")
         self.show(qid=[qid_anc[0]])
     
