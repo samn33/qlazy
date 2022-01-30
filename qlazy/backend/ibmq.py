@@ -60,7 +60,9 @@ def run(qcirc=None, shots=1, cid=[], backend=None):
                              ctrl, cmem_reg)
 
     # set backend
-    if backend.device == 'qasm_simulator':
+    if backend.device == 'aer_simulator':
+        ibmq_backend = Aer.get_backend("aer_simulator")
+    elif backend.device == 'qasm_simulator':
         ibmq_backend = Aer.get_backend("qasm_simulator")
     else:
         provider = IBMQ.load_account()
@@ -96,9 +98,8 @@ def run(qcirc=None, shots=1, cid=[], backend=None):
     # execute the circuit (for state vector)
     ibmq_sv_backend = Aer.get_backend("statevector_simulator")
     res_sv = execute(qc, ibmq_sv_backend).result()
-    statevector = res_sv.get_statevector(qc)
+    statevector = np.asarray(res_sv.get_statevector(qc))
 
-    # info = {'statevector': statevector, 'creg': cmem_reg}
     info = {'statevector': statevector, 'creg': cmem_reg, 'quantum_circuit': qc}
     result = Result(cid=cid, frequency=frequency, backend=backend, info=info)
 
