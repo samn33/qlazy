@@ -11,7 +11,7 @@ show
 
 cxr 1 2
 cx 0 1
-cxr+ 1 2
+cxr_dg 1 2
 cx 0 1
 cxr 0 2
 

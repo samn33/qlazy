@@ -17,8 +17,8 @@ static void _help_print_outline() {
 * quit:                     .,quit \n\
 * help:                     ?,help \n\
 [quantum gates]\n\
-* 1-qubit gates:            x,y,z,xr,xr+,h,s,s+,t,t+,p,rx,ry,rz\n\
-* 2-qubit gates:            cx,cy,cz,cxr,cxr+,ch,cs,cs+,ct,ct+,cp,crx,cry,crz,sw\n\
+* 1-qubit gates:            x,y,z,xr,xr_dg,h,s,s_dg,t,t_dg,p,rx,ry,rz\n\
+* 2-qubit gates:            cx,cy,cz,cxr,cxr_dg,ch,cs,cs_dg,ct,ct_dg,cp,crx,cry,crz,sw\n\
 * measurement:              m,mx,my,mz,mb\n\
 * reset:                    reset\n\
 [notes] \n\
@@ -274,14 +274,14 @@ static void _help_print_xr() {
 
 static void _help_print_xr_dagger() {
   printf("\
-== XR+ gate ==\n\
+== XR_DG gate ==\n\
 [description] \n\
-  XR+ gate is 1-qubit gate called \'hermitian conjugate of root pauli X gate\'. \n\
+  XR_DG gate is 1-qubit gate called \'hermitian conjugate of root pauli X gate\'. \n\
   - matrix expression:\n\
     | (1-i)/2 (1+i)/2 | \n\
     | (1+i)/2 (1-i)/2 | \n\
 [usage] \n\
-  >> xr+ <qubit_id>\n\
+  >> xr_dg <qubit_id>\n\
 ");
 }
 
@@ -314,14 +314,14 @@ static void _help_print_s() {
 
 static void _help_print_s_dagger() {
   printf("\
-== S+ gate ==\n\
+== S_DG gate ==\n\
 [description] \n\
-  S+ gate is 1-qubit gate, hermitian conjugate of S gate. \n\
+  S_DG gate is 1-qubit gate, hermitian conjugate of S gate. \n\
   - matrix expression:\n\
     | 1  0 | \n\
     | 0 -i | \n\
 [usage] \n\
-  >> s+ <qubit_id>\n\
+  >> s_dg <qubit_id>\n\
 ");
 }
 
@@ -341,14 +341,14 @@ static void _help_print_t() {
 
 static void _help_print_t_dagger() {
   printf("\
-== T+ gate ==\n\
+== T_DG gate ==\n\
 [description] \n\
-  T+ gate is 1-qubit gate, hermitian conjugate of T gate. \n\
+  T_DG gate is 1-qubit gate, hermitian conjugate of T gate. \n\
   - matrix expression:\n\
     | 1 0             | \n\
     | 0 (1-i)/sqrt(2) | \n\
 [usage] \n\
-  >> t+ <qubit_id>\n\
+  >> t_dg <qubit_id>\n\
 ");
 }
 
@@ -510,7 +510,7 @@ static void _help_print_cxr() {
 
 static void _help_print_cxr_dagger() {
   printf("\
-== CXR+ gate ==\n\
+== CXR_DG gate ==\n\
 [description] \n\
   CXR+ gate is 2-qubit gate called \'controlled XR+ gate\'.\n\
   It operate XR+ gate to the second qubit if and only if the first qubit is |1>.\n\
@@ -520,7 +520,7 @@ static void _help_print_cxr_dagger() {
     | 0 0 (1.0-1.0i)/2.0 (1.0+1.0i)/2.0 | \n\
     | 0 0 (1.0+1.0i)/2.0 (1.0-1.0i)/2.0 | \n\
 [usage] \n\
-  >> cxr+ <qubit_id> <qubit_id>\n\
+  >> cxr_dg <qubit_id> <qubit_id>\n\
 ");
 }
 
