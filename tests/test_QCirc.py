@@ -840,6 +840,65 @@ class TestQCirc_from_qasm(unittest.TestCase):
         str_B = qc_B.to_qasm()
         self.assertEqual(str_A, str_B)
 
+class TestQCirc_get_stats(unittest.TestCase):
+    """ test 'QCirc' : get_stats
+    """
+
+    def test_get_stats(self):
+        """test get_stats
+        """
+        qc = QCirc().x(0).z(2).h(0).h(0).cx(0,1).h(0).h(1).crz(1,0, phase=0.1).rx(1, phase=0.2)
+        qc.measure(qid=[0,1], cid=[0,1]).reset(qid=[0])
+        stats = qc.get_stats()
+        self.assertEqual(stats['qubit_num'], 3)
+        self.assertEqual(stats['gate_num'], 12)
+        self.assertEqual(stats['gate_freq']['h'], 4)
+        self.assertEqual(stats['gate_freq']['x'], 1)
+        self.assertEqual(stats['gate_freq']['z'], 1)
+        self.assertEqual(stats['gate_freq']['cx'], 1)
+        self.assertEqual(stats['gate_freq']['crz'], 1)
+        self.assertEqual(stats['gate_freq']['rx'], 1)
+        self.assertEqual(stats['gate_freq']['measure'], 2)
+        self.assertEqual(stats['gate_freq']['reset'], 1)
+
+class TestQCirc_dump_load(unittest.TestCase):
+    """ test 'QCirc' : dump, load
+    """
+
+    def test_dump_load(self):
+        """test dump, load
+        """
+        qc_A = QCirc().x(0).z(2).h(0).h(0).cx(0,1).h(0).h(1).crz(1,0, phase=0.1).rx(1, phase=0.2)
+        qc_A.dump("tmp/foo.qc")
+        qc_B = QCirc.load("tmp/foo.qc")
+        self.assertEqual(qc_A, qc_B)
+
+class TestQCirc_get_gates(unittest.TestCase):
+    """ test 'QCirc' : get_gates, add_gates
+    """
+
+    def test_get_add_gates(self):
+        """test get_gates, add_gates
+        """
+        qc_A = QCirc().x(0).z(2).h(0).h(0).cx(0,1).h(0).h(1).crz(1,0, phase=0.1).rx(1, phase=0.2)
+        gates = qc_A.get_gates()
+        qc_B = QCirc().add_gates(gates)
+        self.assertEqual(qc_A, qc_B)
+
+class TestQCirc_generate_random_gates(unittest.TestCase):
+    """ test 'QCirc' : generate_random_gates
+    """
+
+    def test_generate_random_gates(self):
+        """test get_gates, add_gates
+        """
+        qc = QCirc.generate_random_gates(qubit_num=3, gate_num=1000,
+                                         prob={'h':5, 'cx':3, 't':2})
+        stats = qc.get_stats()
+        self.assertEqual(round(stats['gate_freq']['h'] / 100.), 5)
+        self.assertEqual(round(stats['gate_freq']['cx'] / 100.), 3)
+        self.assertEqual(round(stats['gate_freq']['t'] / 100.), 2)
+        
 #
 # inheritance
 #

@@ -6,11 +6,14 @@ from fractions import Fraction
 import warnings
 import ctypes
 import re
+import random
+import math
+import pickle
 
 from qlazy.config import *
 from qlazy.error import *
 
-def string_to_args(s):
+def string_to_args(s):  # for from_qasm
 
     token = s.split(' ')
     if len(token) == 1:
@@ -65,6 +68,70 @@ class QCirc(ctypes.Structure):
     def __str__(self):
 
         return self.to_string()
+
+    def __add__(self, qc):
+        """
+        Parameters
+        ----------
+        qc : instance of QCirc
+            quantum circuit (merged)
+
+        Returns
+        -------
+        qcirc : instance of QCirc
+            quantum circuit (result)
+
+        """
+        qcirc = self.merge(qc)
+        return qcirc
+
+    def __iadd__(self, qc):
+        """
+        Parameters
+        ----------
+        qc : instance of QCirc
+            quantum circuit (merged)
+
+        Returns
+        -------
+        qcirc : instance of QCirc
+            quantum circuit (result)
+
+        """
+        qcirc = self.merge(qc)
+        return qcirc
+
+    def __eq__(self, qc):
+        """
+        Parameters
+        ----------
+        qc : instance of QCirc
+            quantum circuit (merged)
+
+        Returns
+        -------
+        ans : bool
+            equal or not
+
+        """
+        ans = self.is_equal(qc)
+        return ans
+
+    def __ne__(self, qc):
+        """
+        Parameters
+        ----------
+        qc : instance of QCirc
+            quantum circuit (merged)
+
+        Returns
+        -------
+        ans : bool
+            equal or not
+
+        """
+        ans = not self.is_equal(qc)
+        return ans
 
     def to_string(self):
         """
@@ -395,70 +462,6 @@ class QCirc(ctypes.Structure):
         with open(file_path, mode='w') as f:
             f.write(s)
         
-    def __add__(self, qc):
-        """
-        Parameters
-        ----------
-        qc : instance of QCirc
-            quantum circuit (merged)
-
-        Returns
-        -------
-        qcirc : instance of QCirc
-            quantum circuit (result)
-
-        """
-        qcirc = self.merge(qc)
-        return qcirc
-
-    def __iadd__(self, qc):
-        """
-        Parameters
-        ----------
-        qc : instance of QCirc
-            quantum circuit (merged)
-
-        Returns
-        -------
-        qcirc : instance of QCirc
-            quantum circuit (result)
-
-        """
-        qcirc = self.merge(qc)
-        return qcirc
-
-    def __eq__(self, qc):
-        """
-        Parameters
-        ----------
-        qc : instance of QCirc
-            quantum circuit (merged)
-
-        Returns
-        -------
-        ans : bool
-            equal or not
-
-        """
-        ans = self.is_equal(qc)
-        return ans
-
-    def __ne__(self, qc):
-        """
-        Parameters
-        ----------
-        qc : instance of QCirc
-            quantum circuit (merged)
-
-        Returns
-        -------
-        ans : bool
-            equal or not
-
-        """
-        ans = not self.is_equal(qc)
-        return ans
-
     def clone(self):
         """
         clone quantum circuit.
@@ -563,6 +566,258 @@ class QCirc(ctypes.Structure):
         
         return kind_list
     
+    def get_gates(self):
+        """
+        get list of gates from the circuit.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        gates : list of dict
+            gates of the quantum circuit
+            gates = [{'kind':kind, 'qid':qid, 'phase':phase, 'cid':cid, 'ctrl':ctrl}, ...]
+            - kind: gate name
+            - qid: qubit id
+            - phase: phase parameter (non-zero only for rotation gates)
+            - cid: classical register id (set only for measurement gate)
+            - ctrl: classical register id to control gate operation
+
+        """
+        qc = self.clone()
+        gates = []
+        while True:
+            kind = qc.kind_first()
+            if kind is None:
+                break
+            else:
+                (kind, qid, para, c, ctrl) = qc.pop_gate()
+                qid = [q for q in qid if q >= 0]
+                if c is None: cid = None
+                else: cid = [c]
+                gates.append({'kind': GATE_STRING[kind], 'qid': qid, 'phase': para[0], 'cid': cid, 'ctrl': ctrl})
+
+        return gates
+
+    def add_gates(self, gates=None):
+        """
+        add list of gates to the circuit.
+
+        Parameters
+        ----------
+        gates : list of dict
+            gates of the quantum circuit
+            gates = [{'kind':kind, 'qid':qid, 'phase':phase, 'cid':cid, 'ctrl':ctrl}, ...]
+            - kind: gate name
+            - qid: qubit id
+            - phase: phase parameter (non-zero only for rotation gates)
+            - cid: classical register id (set only for measurement gate)
+            - ctrl: classical register id for controlling gate operation
+
+        Returns
+        -------
+        self: instance of QCirc
+            circuit after adding gates
+
+        """
+        if gates is None:
+            raise ValueError("gates must be specified.")
+        for g in gates:
+            kind = GATE_KIND[g['kind']]
+            qid = g['qid']
+            para = [g['phase'], 0.0, 0.0]
+            if g['cid'] is None:
+                c = None
+            else:
+                c = g['cid'][0]
+            ctrl = g['ctrl']
+            self.append_gate(kind, qid, para, c, ctrl)
+        return self
+
+    def dump(self, file_path=None):
+        """
+        dump the circuit
+
+        Parameters
+        ----------
+        file_path: str
+            file path of dump file
+
+        Returns
+        -------
+        None
+
+        """
+        gates = self.get_gates()
+        with open(file_path, mode='wb') as f:
+            pickle.dump(gates, f)
+
+    @staticmethod
+    def load(file_path=None):
+        """
+        load the circuit
+
+        Parameters
+        ----------
+        file_path: str
+            file path of dump file
+
+        Returns
+        -------
+        qcirc: instance of QCirc
+            loaded circuit
+
+        """
+        with open(file_path, mode='rb') as f:
+            gates = pickle.load(f)
+        qcirc = QCirc().add_gates(gates)
+        return qcirc
+    
+    def get_stats(self):
+        """
+        get statistics of the circuit.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        stats : dict
+            {'qubit_num':qubit_num, 'cmem_num':cmem_num, 'gate_num':gate_num, 'gate_freq':gate_freq}
+            - qubit_num: number of qubits
+            - cmem_num: number of classical bits
+            - gate_num: number of gates
+            - gate_freq: frequency of gates (Counter)
+
+        """
+        klist = [GATE_STRING[kind] for kind in self.kind_list()]
+        gate_freq = Counter(klist)
+        stats = {'qubit_num': self.qubit_num, 'cmem_num':self.cmem_num, 'gate_num': len(klist), 'gate_freq': gate_freq}
+        return stats
+
+    @staticmethod
+    def generate_random_gates(qubit_num=0, gate_num=0, phase=None, prob=None):
+        """
+        generate circuit including random gates.
+
+        Parameters
+        ----------
+        qubit_num: int
+            number of qubits
+        gate_num: int
+            numbner of gates
+        phase: tupple of float
+            phases selected randomly
+        prob: dict
+            {'x':prob_x, 'z':prob_z, 'h':prob_h, 's':prob_s, 's_dg':prob_s_dg,
+             't':prob_t, 't_dg':prob_t_dg, 'rx':prob_rx, 'rz':prob_rz, 'cx':prob_cx,
+             'cz':prob_cz, 'ch':prob_ch, 'crz':prob_crz}
+            - prob_x: probability of x
+            - prob_z: probability of z
+            - prob_h: probability of h
+            - prob_s: probability of s
+            - prob_s_dg: probability of s_dg
+            - prob_t: probability of t
+            - prob_t_dg: probability of t_dg
+            - prob_rx: probability of rx
+            - prob_rz: probability of rz
+            - prob_cx: probability of cx
+            - prob_cz: probability of cz
+            - prob_ch: probability of ch
+            - prob_crz: probability of crz
+
+        Returns
+        -------
+        qcirc: instance of QCirc
+            generated circuit
+
+        Examples
+        --------
+        >>> qc = QCirc.generate_random_gates(qubit_num=5, gate_num=100, phase_unit=0.25, prob={'h':3, 'cx':7, 'rz':1})
+
+        Notes
+        -----
+        * each probability values are normalized so that the sum of the probabilities is 1.0. 
+        * Phase parameters of rotation gates are selected randomly in the element of 'phase'.
+
+        """
+        if type(qubit_num) != int or type(gate_num) != int or qubit_num < 1 or gate_num < 1:
+            raise ValueError("qubit_num and/or gate_num must be positive integer.")
+        if phase is not None:
+            if type(phase) != float and type(phase) != int and type(phase) != tuple:
+                raise ValueError("phase value(s) must be int/float of tuple.")
+        
+        total_prob = 0.0
+        for p in prob.values():
+            total_prob += p
+        glist = []
+        plist = []
+        p = 0.0
+        for k, v in prob.items():
+            if v < 0.0:
+                raise ValueError("probability must be positive value.")
+            if k  in ('x', 'z', 'h', 's', 's_dg', 't', 't_dg', 'rx', 'rz', 'cx', 'cz', 'ch', 'crz'):
+                glist.append(k)
+                p += v / total_prob
+                plist.append(p)
+            else:
+                raise ValueError("gate '{}' is not supported.".format(k))
+
+        if plist[-1] != 1.0: plist[-1] = 1.0
+
+        qcirc = QCirc()
+
+        TRY_MAX = 10  # for random generation
+        for n in range(gate_num):
+            r = random.random()
+            kind = None
+            for i, p in enumerate(plist):
+                if r <= p:
+                    kind = GATE_KIND[glist[i]]
+                    break
+            term_num = get_qgate_qubit_num(kind)
+            para_num = get_qgate_param_num(kind)
+            
+            if term_num == 1 and para_num == 0:    # 1-qubit gate
+                q0 = random.randint(0, qubit_num - 1)
+                qcirc.append_gate(kind, [q0])
+            elif term_num == 1 and para_num == 1:  # 1-qubit and 1-parameter gate
+                q0 = random.randint(0, qubit_num - 1)
+                if phase is None: p = 0.0
+                elif type(phase) == float or type(phase) == int: p = phase
+                else: p = random.choice(phase)
+                qcirc.append_gate(kind, [q0], para=[p, 0., 0.])
+            elif term_num == 2 and para_num == 0:  # 2-qubit gate
+                q0 = random.randint(0, qubit_num - 1)
+                q1 = random.randint(0, qubit_num - 1)
+                cnt = 0
+                while q0 == q1 and cnt < TRY_MAX:
+                    q1 = random.randint(0, qubit_num - 1)
+                    cnt += 1
+                if cnt >= TRY_MAX:
+                    raise ValueError("can't generate qubit id for '{}' gate.".format(GATE_STRING[kind]))
+                qcirc.append_gate(kind, [q0, q1])
+            elif term_num == 2 and para_num == 1:  # 2-qubit and 1-parameter gate
+                q0 = random.randint(0, qubit_num - 1)
+                q1 = random.randint(0, qubit_num - 1)
+                cnt = 0
+                while q0 == q1 and cnt < TRY_MAX:
+                    q1 = random.randint(0, qubit_num - 1)
+                    cnt += 1
+                if cnt >= TRY_MAX:
+                    raise ValueError("can't generate qubit id for '{}' gate.".format(GATE_STRING[kind]))
+                if phase is None: p = 0.0
+                elif type(phase) == float or type(phase) == int: p = phase
+                else: p = random.choice(phase)
+                qcirc.append_gate(kind, [q0, q1], para=[p, 0., 0.])
+            else:
+                raise ValueError("gate of term_num={}, param_num={} is not supported".format(term_num, para_num))
+
+        return qcirc
+
     def pop_gate(self):
         """
         pop first gate of the circuit.
@@ -638,6 +893,8 @@ class QCirc(ctypes.Structure):
     def __del__(self):
         
         qcirc_free(self)
+
+    # non-unitary gate
 
     def measure(self, qid, cid):
         """
