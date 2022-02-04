@@ -137,6 +137,7 @@ bool qcirc_append_gate(QCirc* qcirc, Kind kind, int* qid, double* para, int c, i
   qid_size = kind_get_qid_size(kind);
   para_size = kind_get_para_size(kind);
   if (qid_size < 0) ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
+  if (qid_size == 2 && qid[0] == qid[1]) ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
   if (para_size < 0) ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
 
   if (!(qgate = (QGate*)malloc(sizeof(QGate))))
