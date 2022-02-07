@@ -184,6 +184,6 @@ class PauliProduct(UnitaryOperator):
 
         pauli_str = ''.join(pauli_list)
 
-        pp_out = PauliProduct(pauli_str=pauli_str, qid=qid)
+        pp_out = __class__(pauli_str=pauli_str, qid=qid)
 
         return pp_out

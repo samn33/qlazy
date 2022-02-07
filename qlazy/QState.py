@@ -302,7 +302,7 @@ class QState(ctypes.Structure):
 
         """
         vec = self.get_amp(qid)
-        qs = QState(vector=vec)
+        qs = __class__(vector=vec)
         return qs
         
     def show(self, qid=None, nonzero=False):
@@ -632,8 +632,8 @@ class QState(ctypes.Structure):
 
         """
         coef, vec_0, vec_1 = self.__schmidt_decomp(qid_0=qid_0, qid_1=qid_1)
-        qs_0 = [QState(vector=v) for i,v in enumerate(vec_0) if i < len(coef)]
-        qs_1 = [QState(vector=v) for i,v in enumerate(vec_1) if i < len(coef)]
+        qs_0 = [__class__(vector=v) for i,v in enumerate(vec_0) if i < len(coef)]
+        qs_1 = [__class__(vector=v) for i,v in enumerate(vec_1) if i < len(coef)]
     
         return (coef, qs_0, qs_1)
 
