@@ -5,9 +5,11 @@
 - default device of IBMQ backend: qasm_simulator -> aer_simulator
 ### Added
 - get stats of quantum circuit (frequency of each gate etc)
-- generate quantum circuit randomly
+- generate random quantum circuit
 - dump and load file of quntum circuit
 - import/export OpenQASM 2.0 string/file
+- quantum circuit optimization (using pyzx)
+- equivalent judgement of 2 quantum circuits (using pyzx)
 ### Removed
 - u1,u2,u3,cu1,cu2,cu3 gates
 
