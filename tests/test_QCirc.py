@@ -860,6 +860,10 @@ class TestQCirc_get_stats(unittest.TestCase):
         self.assertEqual(stats['gate_freq']['rx'], 1)
         self.assertEqual(stats['gate_freq']['measure'], 2)
         self.assertEqual(stats['gate_freq']['reset'], 1)
+        self.assertEqual(stats['gatetype_freq']['unitary'], 9)
+        self.assertEqual(stats['gatetype_freq']['non-unitary'], 3)
+        self.assertEqual(stats['gatetype_freq']['clifford'], 7)
+        self.assertEqual(stats['gatetype_freq']['non-clifford'], 2)
 
 class TestQCirc_dump_load(unittest.TestCase):
     """ test 'QCirc' : dump, load
@@ -899,6 +903,36 @@ class TestQCirc_generate_random_gates(unittest.TestCase):
         self.assertEqual(round(stats['gate_freq']['cx'] / 100.), 3)
         self.assertEqual(round(stats['gate_freq']['t'] / 100.), 2)
         
+class TestQCirc_equivalent(unittest.TestCase):
+    """ test 'QCirc' : equivalent
+    """
+
+    def test_equivalent_true(self):
+        """test equivalent (true)
+        """
+        qc_A = QCirc().h(0).h(1).cx(0,1).h(0).h(1)
+        qc_B = QCirc().cx(1,0)
+        self.assertEqual(qc_A.equivalent(qc_B), True)
+
+    def test_equivalent_false(self):
+        """test equivalent (false)
+        """
+        qc_A = QCirc().h(0).h(1).cx(0,1).h(0).h(1)
+        qc_B = QCirc().cx(1,0).t(1)
+        self.assertEqual(qc_A.equivalent(qc_B), False)
+
+class TestQCirc_optimize(unittest.TestCase):
+    """ test 'QCirc' : optimize
+    """
+
+    def test_optimize(self):
+        """test optimize
+        """
+        qc = QCirc.generate_random_gates(qubit_num=10, gate_num=100,
+                                         prob={'h':5, 'cx':5, 't':3})
+        qc_opt = qc.optimize()
+        self.assertEqual(qc_opt is not None, True)
+
 #
 # inheritance
 #

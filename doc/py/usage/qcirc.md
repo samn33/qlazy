@@ -278,7 +278,8 @@ qlazyの状態ベクトルシミュレータまたはスタビライザーシミ
 
 #### 量子回路の同等性
 
-2つの量子回路が全く同じものかどうか（同等性）は論理演算子'=='で判定できます。
+2つの量子回路が全く同じものかどうか（同等性と呼ぶことにします）は
+論理演算子'=='で判定できます。
 
     qc_A = QCirc().h(0).cx(0,1)
 	qc_B = QCirc().h(0).cx(0,1)
@@ -379,9 +380,10 @@ x,z,h,s,s_dg,t,t_dg,rx,rz,cx,cz,ch,crz,measure,resetの15種類に限定され
 get_statsメソッドを使えば、一気に取得することができます。
 以下のような辞書データとして結果が得られます。
 
-    qc = QCirc().h(0).cx(1,0).measure(qid=[0,1], cid=[0,1])
+    qc = QCirc().h(0).cx(1,0).t(1).measure(qid=[0,1], cid=[0,1])
 	print(qc.get_stats())
-    >>> {'qubit_num': 2, 'cmem_num': 2, 'gate_num': 4, 'gate_freq': Counter({'measure': 2, 'h': 1, 'cx': 1})}
+    >>> {'qubit_num': 2, 'cmem_num': 2, 'gate_num': 5, 'gate_freq': Counter({'measure': 2, 'h': 1, 'cx': 1, 't': 1}), 'gatetype_freq': Counter({'unitary': 3, 'clifford': 2, 'non-unitary': 2, 'non-clifford': 1})}
+
 
 ### 量子回路の生成
 
@@ -481,15 +483,97 @@ to_qasm_fileメソッドを使って、以下のようにOpenQASM形式のファ
 トには対応していません。対応しているゲートは、
 x,y,z,h,s,sdg,t,tdg,cx,cz,ch,rx,rz,crzの14種類です。
 
-### 量子回路の最適化(予定)
+### 量子回路の等価性(pyzx利用)
 
-(pyzx利用)optimize
+2つの量子回路が見た目は違っていても同じ効果を及ぼすユニタリゲートを表
+している場合があります。ここでは、前述の「同等性」に対して「等価性」と呼ぶことにします。
+qlazyでは、equivalentメソッドを使って等価であるかどうかを判断することができます
+(ただし非ユニタリゲートは非対応)。
+内部ではZX-calculusの計算ができるPythonモジュールである
+[pyzx](https://github.com/Quantomatic/pyzx)を使っていますので、
+この機能を使う場合、pyzxがインストールされていなければなりません。
 
-### 量子回路の等価判断(予定)
+というわけで、簡単な例ですが、
 
-(pyzx利用)equiv
+    --H--*--H--
+         |
+    --H--X--H--
+
+と
+
+    ---X---
+       |
+    ---*---
+
+が等価であるということを確認してみます（知っておくと便利な公式です）。
+
+    qc_A = QCirc().h(0).h(1).cx(0,1).h(0).h(1)
+    qc_B = QCirc().cx(1,0)
+    print(qc_A == qc_B)
+    print(qc_A.equivalent(qc_B))
+    >>> False
+    >>> True
+
+となり、確かに見た目が違うので同等ではないですが、
+その意味するところは同じということで等価であることが確認できました。
 
 
+#### 注意：pyzxのインストール
+
+現在の最新版である0.6.4をpip installでインストールしたところ、
+自分の環境(Ubuntu 20.04, Python 3.8.10)ではうまく動作しない機能がありました。
+cloneしてpython setup.py install --userとしたらうまく動作するようになりました。
+ご参考まで。
+
+
+### 量子回路の最適化
+
+non-cliffordゲートであるTゲートはあらゆる量子アルゴリズムで活躍する重
+要なゲートなのですが、ハードウェア的には難しいゲートなので、量子回路か
+らなるべく追放したいのですが、単に追放しても意味のない回路になるだけなので、
+等価性を保ったままTゲート数を削減できれば良いです。
+このような意味での量子回路最適化はこれまでいろいろ研究がなされていて、
+pyzxでもZX-calculusを使った手法が実装されています。
+qlazyではこの機能(full_optimize)を使って最適化を実行することができます
+(ただし非ユニタリゲートは非対応)。
+以下のようにoptimizeメソッドを使います。
+
+    qc_opt = qc_ori.optimize()
+
+試しに、h,cx,tを含んだ回路をランダムに発生させて、
+optimeizeの効果をget_statsで見てみます。
+
+    qc = QCirc.generate_random_gates(qubit_num=10, gate_num=100, prob={'h':5, 'cx':5, 't':3})
+    qc_opt = qc.optimize()
+	print("== before ==")
+    print(qc.get_stats())
+	print("== after ==")
+    print(qc_opt.get_stats())
+
+とすると、
+
+    == before ==
+    {'qubit_num': 10, 'cmem_num': 0, 'gate_num': 100, 'gate_freq': Counter({'cx': 45, 'h': 29, 't': 26}), 'gatetype_freq': Counter({'unitary': 100, 'clifford': 74, 'non-clifford': 26})}
+    == after ==
+    {'qubit_num': 10, 'cmem_num': 0, 'gate_num': 107, 'gate_freq': Counter({'cx': 55, 'h': 15, 'cz': 14, 'rz': 7, 's_dg': 5, 's': 4, 't': 3, 'z': 2, 'x': 2}), 'gatetype_freq': Counter({'unitary': 107, 'clifford': 97, 'non-clifford': 10})}
+
+となりました。non-cliffordゲートは26個から10個に減りました(t:3個,rz:7個)。
+その分、別のcliffordゲートが加わりますが、
+non-cliffordゲートが減ったことの方がうれしいのです(と思います)。
+
+### pyzxとのインターフェース
+
+pyzxにはいろんな機能があって最適化に限ってみてもいろんな最適化ができるようになっています。
+また、ZX-calculusのグラフを表示したり編集したりする機能もあったりします。諸々遊びたい人のために、
+pyzxのCircuitを入出力する機能も用意しました。
+
+    zxqc = qc.to_pyzx()
+	
+でpyzxのCircuitインスタンスを吐き出すことができます。また、
+
+    qc = QCirc.from_pyzx(zxqc)
+	
+でCircuitインスタンスをqlazyのQCircインスタンスに変換できます。
 
 
 ## 少し高度な技

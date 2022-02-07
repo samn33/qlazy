@@ -183,8 +183,8 @@ class QCirc(ctypes.Structure):
                 
         return qcirc_str.strip()
     
-    @staticmethod
-    def from_qasm(string):
+    @classmethod
+    def from_qasm(cls, string):
         """
         get QCirc instance from OpenQASM 2.0 string.
 
@@ -228,7 +228,7 @@ class QCirc(ctypes.Structure):
             raise ValueError("""line #2 must be 'qreg q[<int>];"' """)
 
         # line (#3) #4 ...
-        qcirc = QCirc()
+        qcirc = cls()
         for i in range(line_count, len(line_list)):
             args = string_to_args(line_list[i])
             if args[0] == '': continue
@@ -336,8 +336,8 @@ class QCirc(ctypes.Structure):
 
         return qcirc
         
-    @staticmethod
-    def from_qasm_file(file_path):
+    @classmethod
+    def from_qasm_file(cls, file_path):
         """
         get QCirc instance from OpenQASM 2.0 file.
 
@@ -359,7 +359,7 @@ class QCirc(ctypes.Structure):
         with open(file_path, mode='r') as f:
             s = f.read()
             
-        qcirc = QCirc.from_qasm(s)
+        qcirc = __class__.from_qasm(s)
         return qcirc
     
     def to_qasm(self):
@@ -654,8 +654,8 @@ class QCirc(ctypes.Structure):
         with open(file_path, mode='wb') as f:
             pickle.dump(gates, f)
 
-    @staticmethod
-    def load(file_path=None):
+    @classmethod
+    def load(cls, file_path=None):
         """
         load the circuit
 
@@ -672,7 +672,7 @@ class QCirc(ctypes.Structure):
         """
         with open(file_path, mode='rb') as f:
             gates = pickle.load(f)
-        qcirc = QCirc().add_gates(gates)
+        qcirc = cls().add_gates(gates)
         return qcirc
     
     def get_stats(self):
@@ -693,13 +693,29 @@ class QCirc(ctypes.Structure):
             - gate_freq: frequency of gates (Counter)
 
         """
-        klist = [GATE_STRING[kind] for kind in self.kind_list()]
-        gate_freq = Counter(klist)
-        stats = {'qubit_num': self.qubit_num, 'cmem_num':self.cmem_num, 'gate_num': len(klist), 'gate_freq': gate_freq}
+        gate_list = [GATE_STRING[kind] for kind in self.kind_list()]
+        gate_freq = Counter(gate_list)
+
+        gatetype_list = []
+        for kind in self.kind_list():
+            if is_clifford_gate(kind) == True or is_non_clifford_gate(kind) == True:
+                gatetype_list.append('unitary')
+                if is_clifford_gate(kind) == True:
+                    gatetype_list.append('clifford')
+                elif is_non_clifford_gate(kind) == True:
+                    gatetype_list.append('non-clifford')
+            elif is_measurement_gate(kind) == True or is_reset_gate(kind) == True:
+                gatetype_list.append('non-unitary')
+            else:
+                raise ValueError("unknown gate kind:{}".format(kind))
+        gatetype_freq = Counter(gatetype_list)
+
+        stats = {'qubit_num': self.qubit_num, 'cmem_num':self.cmem_num, 'gate_num': len(gate_list),
+                 'gate_freq': gate_freq, 'gatetype_freq': gatetype_freq}
         return stats
 
-    @staticmethod
-    def generate_random_gates(qubit_num=0, gate_num=0, phase=None, prob=None):
+    @classmethod
+    def generate_random_gates(cls, qubit_num=0, gate_num=0, phase=None, prob=None, **kwargs):
         """
         generate circuit including random gates.
 
@@ -768,7 +784,7 @@ class QCirc(ctypes.Structure):
 
         if plist[-1] != 1.0: plist[-1] = 1.0
 
-        qcirc = QCirc()
+        qcirc = cls()
 
         TRY_MAX = 10  # for random generation
         for n in range(gate_num):
@@ -817,6 +833,109 @@ class QCirc(ctypes.Structure):
                 raise ValueError("gate of term_num={}, param_num={} is not supported".format(term_num, para_num))
 
         return qcirc
+
+    def to_pyzx(self):
+        """
+        get pyzx's Circuit instance.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        zxqc: instance of pyzx's Circuit
+            quantum circuit
+
+        Notes
+        -----
+        Non-unitary gates: measure, reset are not supported.
+
+        """
+        import pyzx as zx
+        from pyzx import Circuit
+
+        zxqc = Circuit.from_qasm(self.to_qasm())
+        return zxqc
+
+    @classmethod
+    def from_pyzx(cls, zxqc):
+        """
+        get pyzx's Circuit instance.
+
+        Parameters
+        ----------
+        zxqc: instance of pyzx's Circuit
+            quantum circuit
+
+        Returns
+        -------
+        qc: instance of QCirc
+            quantum circuit
+
+        Notes
+        -----
+        Non-unitary gates: measure, reset are not supported.
+
+        """
+        import pyzx as zx
+        from pyzx import Circuit
+
+        qc = __class__.from_qasm(zxqc.to_qasm())
+        return qc
+        
+    def optimize(self, *args, **kwargs):
+        """
+        optimize the quantum circuit (using pyzx's full_optimize method).
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        qc: instance of QCirc
+            optimized circuit
+
+        Notes
+        -----
+        Non-unitary gates: measure, reset are not supported.
+
+        """
+        import pyzx as zx
+        from pyzx import Circuit
+
+        zxqc = self.to_pyzx()
+        zxqc_opt = zx.optimize.full_optimize(zxqc)
+        qc = __class__.from_pyzx(zxqc_opt)
+
+        return qc
+        
+    def equivalent(self, qc, *args, **kwargs):
+        """
+        two quantum circuits are equivalent or not (using pyzx's verify_equality method).
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        ans: bool
+
+        Notes
+        -----
+        Non-unitary gates: measure, reset are not supported.
+
+        """
+        import pyzx as zx
+        from pyzx import Circuit
+        
+        zxqc_A = Circuit.from_qasm(self.to_qasm())
+        zxqc_B = Circuit.from_qasm(qc.to_qasm())
+        ans =zxqc_A.verify_equality(zxqc_B)
+
+        return ans
 
     def pop_gate(self):
         """
@@ -877,7 +996,7 @@ class QCirc(ctypes.Structure):
         qc_pair : tupple of (QCirc, Qcirc)
             former part includes only unitary gates and later part includes non-unitary gate (measure or reset) first
         """
-        qc_unitary = QCirc()
+        qc_unitary = __class__()
         qc_non_unitary = self.clone()
         while True:
             kind_ori = qc_non_unitary.kind_first()
