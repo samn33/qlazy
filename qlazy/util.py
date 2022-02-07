@@ -193,6 +193,13 @@ def is_clifford_gate(kind):
     else:
         return False
 
+def is_non_clifford_gate(kind):
+
+    if is_clifford_gate(kind) == False and is_measurement_gate(kind) == False and is_reset_gate(kind) == False:
+        return True
+    else:
+        return False
+
 def is_measurement_gate(kind):
 
     if kind in (MEASURE, MEASURE_X, MEASURE_Y, MEASURE_Z, MEASURE_BELL):
