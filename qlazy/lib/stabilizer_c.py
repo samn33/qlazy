@@ -17,7 +17,7 @@ libc = ctypes.CDLL(find_library("c"),mode=ctypes.RTLD_GLOBAL)
 
 def stabilizer_init(gene_num=None, qubit_num=None, seed=None):
 
-    lib.init_qlazy(ctypes.c_int(seed))
+    libc.srand(ctypes.c_int(seed))
     
     stab = None
     c_stab = ctypes.c_void_p(stab)

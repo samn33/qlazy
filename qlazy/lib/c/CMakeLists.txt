@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0.0)
 project(qlazy)
-add_library(qlz SHARED qsystem.c init.c qg.c
+add_library(qlz SHARED qsystem.c qg.c
   qc.c qstate.c mdata.c gbank.c spro.c
   observable.c densop.c stabilizer.c misc.c message.c help.c cmem.c qcirc.c)
 add_executable(qlazy qlazy.c)

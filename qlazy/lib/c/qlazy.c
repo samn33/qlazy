@@ -106,7 +106,7 @@ int main(int argc, char** argv)
   if ((interactive == OFF) && (stdinput == OFF) && (fname_qc == NULL))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,1);
   
-  init_qlazy(seed);
+  srand(seed);
 
   if (!qsystem_init((void**)&qsystem)) ERR_RETURN(ERROR_QSYSTEM_INIT,1);
   

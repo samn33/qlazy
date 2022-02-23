@@ -20,7 +20,7 @@ libc = ctypes.CDLL(find_library("c"),mode=ctypes.RTLD_GLOBAL)
 
 def qstate_init(qubit_num=None, seed=None):
 
-    lib.init_qlazy(ctypes.c_int(seed))
+    libc.srand(ctypes.c_int(seed))
         
     qstate = None
     c_qstate = ctypes.c_void_p(qstate)
@@ -36,7 +36,7 @@ def qstate_init(qubit_num=None, seed=None):
 
 def qstate_init_with_vector(vector=None, seed=None):
         
-    lib.init_qlazy(ctypes.c_int(seed))
+    libc.srand(ctypes.c_int(seed))
         
     qstate = None
     c_qstate = ctypes.c_void_p(qstate)

@@ -39,7 +39,7 @@ bool stabilizer_init(int gene_num, int qubit_num, int seed, void** stab_out)
   Stabilizer*	stab	    = NULL;
   int		matrix_size = gene_num * qubit_num * 2;
 
-  init_qlazy(seed);
+  srand(seed);
 
   if ((qubit_num < 1) || (gene_num < 1))
     ERR_RETURN(ERROR_OUT_OF_BOUND,false);
