@@ -4,7 +4,7 @@ from qlazy.error import *
 
 BACKEND_DEVICES = {'qlazy': ['qstate_simulator','stabilizer_simulator'],
                    'qulacs': ['cpu_simulator','gpu_simulator'],
-                   'ibmq': ['aer_simulator', 'qasm_simulator', 'least_busy']}
+                   'ibmq': ['aer_simulator', 'qasm_simulator']}
 
 class Backend:
     """ Backend device of quantum computing
@@ -47,7 +47,6 @@ class Backend:
                 self.device = BACKEND_DEVICES[product][0]
             else:
                 if product == 'ibmq':
-                # if name == 'ibmq':
                     self.device = device
                 else:
                     raise Backend_Error_DeviceNotSupported()
@@ -105,12 +104,40 @@ class Backend:
         return list(BACKEND_DEVICES)
 
     @classmethod
-    def devices(cls, product=None):
-
-        if product is None:
-            return BACKEND_DEVICES
+    def qlazy_devices(cls):
+        return BACKEND_DEVICES['qlazy']
+    
+    @classmethod
+    def qulacs_devices(cls):
+        return BACKEND_DEVICES['qulacs']
+    
+    @classmethod
+    def ibmq_devices(cls):
+        devices = BACKEND_DEVICES['ibmq']
+        try:
+            from qiskit import IBMQ
+            provider = IBMQ.load_account()
+            ibmq_backend_system_names = [b.name() for b in
+                                         provider.backends(simulator=False, operational=True)]
+        except Exception as e:
+            print(e)
         else:
-            return BACKEND_DEVICES[product]
+            devices += ['least_busy']
+            devices += ibmq_backend_system_names
+        
+        return devices
+
+    @classmethod
+    def devices(cls, product):
+
+        if product == 'qlazy':
+            return Backend.qlazy_devices()
+        elif product == 'qulacs':
+            return Backend.qulacs_devices()
+        elif product == 'ibmq':
+            return Backend.ibmq_devices()
+        else:
+            raise ValueError("unknown product: {}".format(product))
 
     def run(self, qcirc=None, shots=1, cid=[]):
         """
