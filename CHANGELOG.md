@@ -1,6 +1,6 @@
 # Change Log
 
-## [0.2.4] - 2022-02-24
+## [0.2.4] - 2022-02-23
 ### Added
 - get stats of quantum circuit (frequency of each gate etc)
 - generate random quantum circuit
