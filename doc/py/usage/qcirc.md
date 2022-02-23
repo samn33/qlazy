@@ -35,6 +35,24 @@ qstate_simulator(状態ベクトルシミュレータ)というdeviceで計算�
 [qulacs](https://github.com/qulacs/qulacs)と[IBM Quantum(IBMQ)](https://quantum-computing.ibm.com/)です。
 使用法などの詳細は「対応しているバックエンド」(後述)をご参照ください。
 
+対応しているproductは、
+
+    print(Backend.products())
+    >>> ['qlazy', 'qulacs', 'ibmq']
+
+とすれば確認できます。各々のpruductで使えるdeviceは、
+
+    print(Backend.devices('qulacs'))
+    >>> ['qstate_simulator', 'stabilizer_simulator']
+
+    print(Backend.devices('qulacs'))
+	>>> ['cpu_simulator', 'gpu_simulator']
+
+	print(Backend.devices('ibmq'))
+    >>> ['aer_simulator', 'qasm_simulator', 'least_busy', 'ibmq_armonk', 'ibmq_bogota', 'ibmq_lima', 'ibmq_belem', 'ibmq_quito', 'ibmq_manila']
+
+とすれば確認できます。
+
 
 ### 量子回路の作成
 
@@ -88,7 +106,7 @@ qstate_simulator(状態ベクトルシミュレータ)というdeviceで計算�
 
 測定する場合は、測定ゲートに測定する量子ビット番号のリストqidとその値
 を格納するための古典ビット番号（古典メモリ番号または古典レジスタ番号）
-のリストcidを指定します(qidの長さとcidは一致していなければなりません)。
+のリストcidを指定します(qidとcidの長さは一致していなければなりません)。
 
     qc = QCirc().h(0).cx(0,1).measure(qid=[0,1], cid=[0,1])
 	
@@ -249,8 +267,6 @@ qlazyの状態ベクトルシミュレータまたはスタビライザーシミ
 
 'qlazy_stabilizer_simulator'の場合、指定できるのはクリフォードゲート
 (x,y,z,h,s,s_dg,cx,cy,cz)のみです。
-
-
 
 
 ## 量子回路の操作
@@ -516,14 +532,6 @@ qlazyでは、equivalentメソッドを使って等価であるかどうかを�
 
 となり、確かに見た目が違うので同等ではないですが、
 その意味するところは同じということで等価であることが確認できました。
-
-
-#### 注意：pyzxのインストール
-
-現在の最新版である0.6.4をpip installでインストールしたところ、
-自分の環境(Ubuntu 20.04, Python 3.8.10)ではうまく動作しない機能がありました。
-cloneしてpython setup.py install --userとしたらうまく動作するようになりました。
-ご参考まで。
 
 
 ### 量子回路の最適化
