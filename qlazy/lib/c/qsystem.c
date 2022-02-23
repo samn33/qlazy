@@ -129,23 +129,6 @@ static bool _qsystem_execute_one_line(QSystem* qsystem, char* line)
     if (!(qstate_print_bloch(qstate, qubit_id[0])))
       ERR_RETURN(ERROR_CANT_PRINT_BLOCH,false);
     SUC_RETURN(true);
-//  case CIRC:
-//    /* print quantum circuit */
-//    fprintf(stderr, "Warn: circ(&) command will be not supported in the near future.\n");
-//    if (tnum > 1) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
-//    if (anum > 1) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
-//    if ((qc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
-//    if (!(qc_set_cimage(qc))) ERR_RETURN(ERROR_CANT_INITIALIZE,false); 
-//    if (!(qc_print_qc(qc))) ERR_RETURN(ERROR_CANT_PRINT_CIRC,false);
-//    SUC_RETURN(true);
-//  case GATES:
-//    /* print quantum gates */
-//    fprintf(stderr, "Warn: gates(!) command will be not supported in the near future.\n");
-//    if (tnum > 1) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
-//    if (anum > 1) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
-//    if ((qc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
-//    if (!(qc_print_qgates(qc))) ERR_RETURN(ERROR_CANT_PRINT_GATES,false);
-//    SUC_RETURN(true);
   case ECHO:
     /* echo string */
     line_join_token(comment, token, 1, tnum);
@@ -575,9 +558,6 @@ bool qsystem_execute(QSystem* qsystem, char* fname)
 
   while (fgets(line, LINE_STRLEN, fp) != NULL) {
     if (!(_qsystem_execute_one_line(qsystem, line))) {
-#ifndef DEV
-      error_msg(g_Errno);
-#endif
       ERR_RETURN(ERROR_CANT_READ_LINE,false);
     }
   }
@@ -597,9 +577,6 @@ bool qsystem_intmode(QSystem* qsystem, char* fname_ini)
   if (fname_ini != NULL) {
     if (!(qsystem_execute(qsystem, fname_ini))) {
       ERR_RETURN(ERROR_QSYSTEM_EXECUTE,false);
-#ifndef DEV
-      error_msg(g_Errno);
-#endif
     }
   }
 
@@ -607,9 +584,6 @@ bool qsystem_intmode(QSystem* qsystem, char* fname_ini)
     line = readline(">> ");
     add_history(line);
     _qsystem_execute_one_line(qsystem, line);
-#ifndef DEV
-    if (g_Errno != SUCCESS) error_msg(g_Errno);
-#endif
   }
 
   free(line); line = NULL;

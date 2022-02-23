@@ -60,7 +60,6 @@
 #define IDX4(i,j) ((i<<2)+j)
 
 #define SUC_RETURN(ret) do {						\
-    g_Errno = SUCCESS;							\
     return ret;								\
   } while(0)
 
@@ -69,14 +68,13 @@
 #define ERR_RETURN(err,ret) do {					\
     fprintf(stderr, "%s,%s,%d - ", __FILE__, __FUNCTION__, __LINE__);	\
     error_msg(err);							\
-    g_Errno = err;							\
     return ret;								\
   } while(0)
 
 #else
 
 #define ERR_RETURN(err,ret) do {					\
-    g_Errno = err;							\
+    error_msg(err);							\
     return ret;								\
   } while(0)
 
@@ -405,18 +403,6 @@ typedef struct _Stabilizer {
 } Stabilizer;
 
 /*====================================================================*/
-/*  Global Variables                                                  */
-/*====================================================================*/
-
-#ifdef GLOBAL_VALUE_DEFINE
-  #define GLOBAL
-#else
-  #define GLOBAL extern
-#endif
-
-GLOBAL ErrCode  g_Errno;
-
-/*====================================================================*/
 /*  Functions                                                         */
 /*====================================================================*/
 
@@ -448,9 +434,6 @@ int      kind_get_para_size(Kind kind);
 bool     kind_is_measurement(Kind kind);
 bool     kind_is_reset(Kind kind);
 bool     kind_is_unitary(Kind kind);
-
-/* init.c */
-void	 init_qlazy(unsigned int seed);
 
 /* message.c */
 void	 error_msg(ErrCode err);
