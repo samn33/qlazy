@@ -51,7 +51,8 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
-        'numpy'
+        'numpy>=1.22.0',
+        'pyzx>=0.7.0',
     ],
     license='Apache Software License',
     classifiers=[
