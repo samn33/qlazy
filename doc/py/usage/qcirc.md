@@ -40,7 +40,7 @@ qstate_simulator(状態ベクトルシミュレータ)というdeviceで計算�
     print(Backend.products())
     >>> ['qlazy', 'qulacs', 'ibmq']
 
-とすれば確認できます。各々のpruductで使えるdeviceは、
+とすれば確認できます。各々のproductで使えるdeviceは、
 
     print(Backend.devices('qulacs'))
     >>> ['qstate_simulator', 'stabilizer_simulator']
