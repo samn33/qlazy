@@ -88,8 +88,9 @@ bool line_join_token(char* dst, char* token[], int ini, int fin)
 {
   int dpos = 0;
   int tpos = 0;
+  int i;
 
-  for (int i=ini; i<fin; i++) {
+  for (i=ini; i<fin; i++) {
     tpos = 0;
     while (1) {
       if (token[i][tpos] == '\0') {
@@ -179,6 +180,7 @@ bool binstr_from_decimal(char* binstr, int qubit_num, int decimal, int zflag)
   int	max_decimal = (1<<MAX_QUBIT_NUM) - 1;
   int	pos	    = 0;
   char	up,dn;
+  int   i;
 
   if (d >= max_decimal) return false;
 
@@ -191,7 +193,7 @@ bool binstr_from_decimal(char* binstr, int qubit_num, int decimal, int zflag)
     dn = 'd';
   }
   
-  for (int i=0; i<qubit_num; i++) binstr[i] = up;
+  for (i=0; i<qubit_num; i++) binstr[i] = up;
   binstr[qubit_num] = '\0';
 
   while (d > 0) {
@@ -217,17 +219,18 @@ int bit_permutation(int bits_in, int qnum, int qnum_part, int* qid)
   int	bit	 = 0;
   int	now	 = 0;
   bool	flg[MAX_QUBIT_NUM];
+  int   i;
 
-  for (int i=0; i<MAX_QUBIT_NUM; i++) flg[i] = false;
+  for (i=0; i<MAX_QUBIT_NUM; i++) flg[i] = false;
 
-  for (int i=0; i<qnum_part; i++) {
+  for (i=0; i<qnum_part; i++) {
     bit = (bits_in>>(qnum-1-qid[i]))&0x1;
     bits_out += (bit<<(qnum-1-i));
     flg[qid[i]] = true;
   }
 
   now = qnum_part;
-  for (int i=0; i<qnum; i++) {
+  for (i=0; i<qnum; i++) {
     if (flg[i] == false) {
       bit = (bits_in>>(qnum-1-i))&0x1;
       bits_out += (bit<<(qnum-1-now));
@@ -238,14 +241,17 @@ int bit_permutation(int bits_in, int qnum, int qnum_part, int* qid)
   return bits_out;
 }
 
-int* bit_permutation_array(int length, int qnum, int qnum_part, int qid[MAX_QUBIT_NUM])
+int* bit_permutation_array(int length, int qnum, int qnum_part, int* qid)
 {
   int* index = NULL;
+  int  i;
 
-  if (!(index = (int*)malloc(sizeof(int)*length)))
-    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
+  if (!(index = (int*)malloc(sizeof(int)*length))) {
+    printf("Error: can't alloc memory\n");
+    exit(1);
+  }  
 
-  for (int i=0; i<length; i++) {
+  for (i=0; i<length; i++) {
     index[i] = bit_permutation(i, qnum, qnum_part, qid);
   }
 

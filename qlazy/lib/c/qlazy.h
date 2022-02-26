@@ -53,6 +53,12 @@
 #define REMOVE_PHASE_FACTOR
 //#define SHOW_PHASE_FACTOR
 
+#ifndef S_SPLINT_S
+#define COMP_I 1.0i
+#else
+#define COMP_I 1.0
+#endif
+
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
@@ -407,12 +413,12 @@ typedef struct _Stabilizer {
 /*====================================================================*/
 
 /* complex.h */
-double	 cabs(double _Complex z);
-double	 carg(double _Complex z);
-double	 creal(double _Complex z);
-double	 cimag(double _Complex z);
-double _Complex conj(double _Complex z);
-double _Complex cexp(double _Complex z);
+double	 cabs(double _Complex);
+double	 carg(double _Complex);
+double	 creal(double _Complex);
+double	 cimag(double _Complex);
+double _Complex conj(double _Complex);
+double _Complex cexp(double _Complex);
 
 /* misc.c */
 bool	 line_check_length(char* str);
@@ -426,8 +432,8 @@ bool     line_remove_space(char* str);
 bool     is_number(char* str);
 bool     is_decimal(char* str);
 bool	 binstr_from_decimal(char* binstr, int qubit_num, int decimal, int zflag);
-int      bit_permutation(int bits_in, int qnum, int qnum_part, int qid[MAX_QUBIT_NUM]);
-int*     bit_permutation_array(int length, int qnum, int qnum_part, int qid[MAX_QUBIT_NUM]);
+int      bit_permutation(int bits_in, int qnum, int qnum_part, int* qid);
+int*     bit_permutation_array(int length, int qnum, int qnum_part, int* qid);
 bool     is_power_of_2(int n);
 int      kind_get_qid_size(Kind kind);
 int      kind_get_para_size(Kind kind);
@@ -448,7 +454,7 @@ bool	 qg_get_kind(char* symbol, Kind* kind_out);
 /* qc.c */
 bool	 qc_init(int qubit_num, int buf_length, void** qc_out);
 bool	 qc_append_qgate(QC* qc, Kind kind, int terminal_num,
-			 Para* para, int qubit_id[MAX_QUBIT_NUM]);
+			 Para* para, int* qubit_id);
 bool	 qc_set_cimage(QC* qc);
 bool	 qc_print_qc(QC* qc);
 bool	 qc_print_qgates(QC* qc);
@@ -535,7 +541,7 @@ bool     densop_tensor_product(DensOp* densop_0, DensOp* densop_1, void** densop
 void     densop_free(DensOp* densop);
 
 /* stabilizer.c */
-bool	stabilizer_init(int gene_num, int qubit_num, int seed, void** stab_out);
+bool	stabilizer_init(int gene_num, int qubit_num, unsigned int seed, void** stab_out);
 bool	stabilizer_copy(Stabilizer* stab, void** stab_out);
 bool	stabilizer_set_pauli_op(Stabilizer* stab, int gene_id, int qubit_id, Kind pauli_op);
 bool	stabilizer_get_pauli_op(Stabilizer* stab, int gene_id, int qubit_id, Kind* pauli_op);
@@ -543,7 +549,7 @@ bool	stabilizer_set_pauli_fac(Stabilizer* stab, int gene_id, ComplexAxis pauli_f
 bool	stabilizer_get_pauli_fac(Stabilizer* stab, int gene_id, ComplexAxis* pauli_fac);
 bool	stabilizer_operate_qgate(Stabilizer* stab, Kind kind, int q0, int q1);
 bool    stabilizer_get_rank(Stabilizer* stab, int* rank_out);
-bool	stabilizer_measure(Stabilizer* stab, int q, double prob_out[2], int* mval_out);
+bool	stabilizer_measure(Stabilizer* stab, int q, double* prob_out, int* mval_out);
 bool    stabilizer_operate_qcirc(Stabilizer* stab, CMem* cmem, QCirc* qcirc);
 void	stabilizer_free(Stabilizer* stab);
 

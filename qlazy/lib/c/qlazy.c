@@ -4,6 +4,8 @@
 
 #include "qlazy.h"
 
+int clock_gettime();
+
 static void _qlazy_print_help()
 {
   fprintf(stderr,"\
@@ -57,6 +59,7 @@ int main(int argc, char** argv)
   QC*           qc		     = NULL;
   QSystem*      qsystem		     = NULL;
   char          fname_ini[FNAME_LEN] = DEF_QLAZYINIT;
+  int           n;
   
   clock_t	  c_start	     = 0;
   clock_t	  c_end		     = 0;
@@ -70,7 +73,7 @@ int main(int argc, char** argv)
   if (argc == 1) { interactive = ON; }
   else {
     interactive = OFF;
-    for (int n=1; n<argc; n++) {
+    for (n=1; n<argc; n++) {
       if (strcmp(argv[n],"-v") == 0) {
 	_qlazy_print_version();
 	exit(0);

@@ -77,9 +77,10 @@ static bool _qsystem_execute_one_line(QSystem* qsystem, char* line)
   int           terminal_num = 0;
   int           qubit_id[MAX_QUBIT_NUM];
   QG*           qgate	     = NULL;
-  QC*	qc	     = qsystem->qc;
+  QC*		qc	     = qsystem->qc;
   QState*       qstate	     = qsystem->qstate;
   int		qubit_num    = qsystem->qubit_num;
+  int		i;
 
   if (!line_check_length(line)) ERR_RETURN(ERROR_CANT_READ_LINE,false);
   if (!line_chomp(line)) ERR_RETURN(ERROR_CANT_READ_LINE,false);
@@ -101,14 +102,14 @@ static bool _qsystem_execute_one_line(QSystem* qsystem, char* line)
     terminal_num = tnum - 1;  /* number of qubits to show */
     if (anum > 1) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
     if ((qc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
-    for (int i=0; i<terminal_num; i++) {
+    for (i=0; i<terminal_num; i++) {
       qubit_id[i] = strtol(token[1+i], NULL, 10);
       if (qubit_num < qubit_id[i] + 1) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
       if (qubit_id[i] < 0) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
     }
     if (terminal_num == 0) {  /* show all qubits in order */
       terminal_num = qubit_num;
-      for (int i=0; i<terminal_num; i++) {
+      for (i=0; i<terminal_num; i++) {
 	qubit_id[i] = i;
       }
     }
@@ -210,14 +211,14 @@ static bool _qsystem_execute_one_line(QSystem* qsystem, char* line)
       para.mes.phase = strtod(args[3], NULL);
     }
     else ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
-    for (int i=0; i<terminal_num; i++) {
+    for (i=0; i<terminal_num; i++) {
       qubit_id[i] = strtol(token[1+i], NULL, 10);
       if (qubit_num < qubit_id[i] + 1) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
       if (qubit_id[i] < 0) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
     }
     if (terminal_num == 0) {  /* measure all qubits in order */
       terminal_num = qubit_num;
-      for (int i=0; i<terminal_num; i++) {
+      for (i=0; i<terminal_num; i++) {
 	qubit_id[i] = i;
       }
     }
@@ -250,14 +251,14 @@ static bool _qsystem_execute_one_line(QSystem* qsystem, char* line)
     }
     else ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
-    for (int i=0; i<terminal_num; i++) {
+    for (i=0; i<terminal_num; i++) {
       qubit_id[i] = strtol(token[1+i], NULL, 10);
       if (qubit_num < qubit_id[i] + 1) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
       if (qubit_id[i] < 0) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
     }
     if (terminal_num == 0) {  /* measure all qubits in order */
       terminal_num = qubit_num;
-      for (int i=0; i<terminal_num; i++) {
+      for (i=0; i<terminal_num; i++) {
 	qubit_id[i] = i;
       }
     }
@@ -275,7 +276,7 @@ static bool _qsystem_execute_one_line(QSystem* qsystem, char* line)
       para.mes.shots = strtol(args[1], NULL, 10);
     }
     else ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
-    for (int i=0; i<terminal_num; i++) {
+    for (i=0; i<terminal_num; i++) {
       qubit_id[i] = strtol(token[1+i], NULL, 10);
       if (qubit_num < qubit_id[i] + 1) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
       if (qubit_id[i] < 0) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
@@ -287,14 +288,14 @@ static bool _qsystem_execute_one_line(QSystem* qsystem, char* line)
     terminal_num = tnum - 1;  /* number of qubits to reset */
     if (anum > 1) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
     if ((qc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
-    for (int i=0; i<terminal_num; i++) {
+    for (i=0; i<terminal_num; i++) {
       qubit_id[i] = strtol(token[1+i], NULL, 10);
       if (qubit_num < qubit_id[i] + 1) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
       if (qubit_id[i] < 0) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
     }
     if (terminal_num == 0) {  /* reset all qubit */
       terminal_num = qubit_num;
-      for (int i=0; i<terminal_num; i++) {
+      for (i=0; i<terminal_num; i++) {
 	qubit_id[i] = i;
       }
     }
@@ -344,63 +345,6 @@ static bool _qsystem_execute_one_line(QSystem* qsystem, char* line)
     if (qubit_num < qubit_id[0] + 1) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
     if (qubit_id[0] < 0) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
     break;
-//  case ROTATION_U2:
-//    /* 1-qubit 2-parameter gate */
-//    if ((qc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
-//    if (tnum > 2) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
-//    if (tnum < 2) ERR_RETURN(ERROR_NEED_MORE_ARGUMENTS,false);
-//    terminal_num = 1;
-//    if (anum == 1) {
-//      para.phase.alpha = DEF_PHASE;
-//      para.phase.beta = DEF_PHASE;
-//      para.phase.gamma = DEF_PHASE;
-//    }
-//    else if (anum == 2) {
-//      para.phase.alpha = strtod(args[1], NULL);
-//      para.phase.beta = DEF_PHASE;
-//      para.phase.gamma = DEF_PHASE;
-//    }
-//    else if (anum == 3) {
-//      para.phase.alpha = strtod(args[1], NULL);
-//      para.phase.beta = strtod(args[2], NULL);
-//      para.phase.gamma = DEF_PHASE;
-//    }
-//    else ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
-//    qubit_id[0] = strtol(token[1], NULL, 10);
-//    if (qubit_num < qubit_id[0] + 1) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
-//    if (qubit_id[0] < 0) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
-//    break;
-//  case ROTATION_U3:
-//    /* 1-qubit 3-parameter gate */
-//    if ((qc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
-//    if (tnum > 2) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
-//    if (tnum < 2) ERR_RETURN(ERROR_NEED_MORE_ARGUMENTS,false);
-//    terminal_num = 1;
-//    if (anum == 1) {
-//      para.phase.alpha = DEF_PHASE;
-//      para.phase.beta = DEF_PHASE;
-//      para.phase.gamma = DEF_PHASE;
-//    }
-//    else if (anum == 2) {
-//      para.phase.alpha = strtod(args[1], NULL);
-//      para.phase.beta = DEF_PHASE;
-//      para.phase.gamma = DEF_PHASE;
-//    }
-//    else if (anum == 3) {
-//      para.phase.alpha = strtod(args[1], NULL);
-//      para.phase.beta = strtod(args[2], NULL);
-//      para.phase.gamma = DEF_PHASE;
-//    }
-//    else if (anum == 4) {
-//      para.phase.alpha = strtod(args[1], NULL);
-//      para.phase.beta = strtod(args[2], NULL);
-//      para.phase.gamma = strtod(args[3], NULL);
-//    }
-//    else ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
-//    qubit_id[0] = strtol(token[1], NULL, 10);
-//    if (qubit_num < qubit_id[0] + 1) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
-//    if (qubit_id[0] < 0) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
-//    break;
   case CONTROLLED_X:
   case CONTROLLED_Y:
   case CONTROLLED_Z:
@@ -456,71 +400,7 @@ static bool _qsystem_execute_one_line(QSystem* qsystem, char* line)
     if (qubit_id[1] < 0) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
     if (qubit_id[0] == qubit_id[1]) ERR_RETURN(ERROR_SAME_QUBIT_ID,false);
     break;
-//  case CONTROLLED_U2:
-//    /* 2-qubit, 2-parameter gate */
-//    if ((qc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
-//    if (tnum > 3) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
-//    if (tnum < 3) ERR_RETURN(ERROR_NEED_MORE_ARGUMENTS,false);
-//    terminal_num = 2;
-//    if (anum == 1) {
-//      para.phase.alpha = DEF_PHASE;
-//      para.phase.beta = DEF_PHASE;
-//      para.phase.gamma = DEF_PHASE;
-//    }
-//    else if (anum == 2) {
-//      para.phase.alpha = strtod(args[1], NULL);
-//      para.phase.beta = DEF_PHASE;
-//      para.phase.gamma = DEF_PHASE;
-//    }
-//    else if (anum == 3) {
-//      para.phase.alpha = strtod(args[1], NULL);
-//      para.phase.beta = strtod(args[2], NULL);
-//      para.phase.gamma = DEF_PHASE;
-//    }
-//    else ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
-//    qubit_id[0] = strtol(token[1], NULL, 10);
-//    qubit_id[1] = strtol(token[2], NULL, 10);
-//    if (qubit_num < qubit_id[0] + 1) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
-//    if (qubit_num < qubit_id[1] + 1) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
-//    if (qubit_id[0] < 0) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
-//    if (qubit_id[1] < 0) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
-//    if (qubit_id[0] == qubit_id[1]) ERR_RETURN(ERROR_SAME_QUBIT_ID,false);
-//    break;
-//  case CONTROLLED_U3:
-//    /* 2-qubit, 3-parameter gate */
-//    if ((qc == NULL) || (qstate == NULL)) ERR_RETURN(ERROR_NEED_TO_INITIALIZE,false);
-//    if (tnum > 3) ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
-//    if (tnum < 3) ERR_RETURN(ERROR_NEED_MORE_ARGUMENTS,false);
-//    terminal_num = 2;
-//    if (anum == 1) {
-//      para.phase.alpha = DEF_PHASE;
-//      para.phase.beta = DEF_PHASE;
-//      para.phase.gamma = DEF_PHASE;
-//    }
-//    else if (anum == 2) {
-//      para.phase.alpha = strtod(args[1], NULL);
-//      para.phase.beta = DEF_PHASE;
-//      para.phase.gamma = DEF_PHASE;
-//    }
-//    else if (anum == 3) {
-//      para.phase.alpha = strtod(args[1], NULL);
-//      para.phase.beta = strtod(args[2], NULL);
-//      para.phase.gamma = DEF_PHASE;
-//    }
-//    else if (anum == 4) {
-//      para.phase.alpha = strtod(args[1], NULL);
-//      para.phase.beta = strtod(args[2], NULL);
-//      para.phase.gamma = strtod(args[3], NULL);
-//    }
-//    else ERR_RETURN(ERROR_TOO_MANY_ARGUMENTS,false);
-//    qubit_id[0] = strtol(token[1], NULL, 10);
-//    qubit_id[1] = strtol(token[2], NULL, 10);
-//    if (qubit_num < qubit_id[0] + 1) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
-//    if (qubit_num < qubit_id[1] + 1) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
-//    if (qubit_id[0] < 0) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
-//    if (qubit_id[1] < 0) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
-//    if (qubit_id[0] == qubit_id[1]) ERR_RETURN(ERROR_SAME_QUBIT_ID,false);
-//    break;
+    
   default:
     ERR_RETURN(ERROR_UNKNOWN_GATE,false);
   }

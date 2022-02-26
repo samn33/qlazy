@@ -17,8 +17,9 @@ bool gbank_init(void** gbank_out)
   gbank->PauliX[3] = 0.0;
 
   gbank->PauliY[0] =  0.0;
-  gbank->PauliY[1] = -1.0i;
-  gbank->PauliY[2] = 1.0i;
+  gbank->PauliY[1] = -1.0 * COMP_I;
+
+  gbank->PauliY[2] = 1.0 * COMP_I;
   gbank->PauliY[3] =  0.0;
 
   gbank->PauliZ[0] =  1.0;
@@ -26,15 +27,15 @@ bool gbank_init(void** gbank_out)
   gbank->PauliZ[2] =  0.0;
   gbank->PauliZ[3] = -1.0;
 
-  gbank->RootPauliX[0] = (1.0+1.0i)/2.0;
-  gbank->RootPauliX[1] = (1.0-1.0i)/2.0;
-  gbank->RootPauliX[2] = (1.0-1.0i)/2.0;
-  gbank->RootPauliX[3] = (1.0+1.0i)/2.0;
+  gbank->RootPauliX[0] = (1.0+1.0 * COMP_I)/2.0;
+  gbank->RootPauliX[1] = (1.0-1.0 * COMP_I)/2.0;
+  gbank->RootPauliX[2] = (1.0-1.0 * COMP_I)/2.0;
+  gbank->RootPauliX[3] = (1.0+1.0 * COMP_I)/2.0;
 
-  gbank->RootPauliX_[0] = (1.0-1.0i)/2.0;
-  gbank->RootPauliX_[1] = (1.0+1.0i)/2.0;
-  gbank->RootPauliX_[2] = (1.0+1.0i)/2.0;
-  gbank->RootPauliX_[3] = (1.0-1.0i)/2.0;
+  gbank->RootPauliX_[0] = (1.0-1.0 * COMP_I)/2.0;
+  gbank->RootPauliX_[1] = (1.0+1.0 * COMP_I)/2.0;
+  gbank->RootPauliX_[2] = (1.0+1.0 * COMP_I)/2.0;
+  gbank->RootPauliX_[3] = (1.0-1.0 * COMP_I)/2.0;
 
   gbank->Hadamard[0] =  1.0/sqrt(2.0);
   gbank->Hadamard[1] =  1.0/sqrt(2.0);
@@ -44,22 +45,22 @@ bool gbank_init(void** gbank_out)
   gbank->PhaseShiftS[0] =  1.0;
   gbank->PhaseShiftS[1] =  0.0;
   gbank->PhaseShiftS[2] =  0.0;
-  gbank->PhaseShiftS[3] =  1.0i;
+  gbank->PhaseShiftS[3] =  1.0 * COMP_I;
 
   gbank->PhaseShiftS_[0] =   1.0;
   gbank->PhaseShiftS_[1] =   0.0;
   gbank->PhaseShiftS_[2] =   0.0;
-  gbank->PhaseShiftS_[3] =  -1.0i;
+  gbank->PhaseShiftS_[3] =  -1.0 * COMP_I;
 
   gbank->PhaseShiftT[0] =  1.0;
   gbank->PhaseShiftT[1] =  0.0;
   gbank->PhaseShiftT[2] =  0.0;
-  gbank->PhaseShiftT[3] =  (1.0+1.0i)/sqrt(2.0);
+  gbank->PhaseShiftT[3] =  (1.0+1.0*COMP_I)/sqrt(2.0);
 
   gbank->PhaseShiftT_[0] =  1.0;
   gbank->PhaseShiftT_[1] =  0.0;
   gbank->PhaseShiftT_[2] =  0.0;
-  gbank->PhaseShiftT_[3] =  (1.0-1.0i)/sqrt(2.0);
+  gbank->PhaseShiftT_[3] =  (1.0-1.0*COMP_I)/sqrt(2.0);
 
   gbank->ControlledX[0]  = 1.0;
   gbank->ControlledX[1]  = 0.0;
@@ -264,8 +265,8 @@ static bool _gbank_get_rotation(Axis axis, double phase, double unit, void** mat
   switch (axis) {
   case X_AXIS:
     matrix[IDX2(0,0)] = cos(theta/2.0);
-    matrix[IDX2(0,1)] = - 1.0i * sin(theta/2.0);
-    matrix[IDX2(1,0)] = - 1.0i * sin(theta/2.0);
+    matrix[IDX2(0,1)] = - 1.0 * COMP_I * sin(theta/2.0);
+    matrix[IDX2(1,0)] = - 1.0 * COMP_I * sin(theta/2.0);
     matrix[IDX2(1,1)] = cos(theta/2.0);
     break;
   case Y_AXIS:
@@ -275,10 +276,10 @@ static bool _gbank_get_rotation(Axis axis, double phase, double unit, void** mat
     matrix[IDX2(1,1)] = cos(theta/2.0);
     break;
   case Z_AXIS:
-    matrix[IDX2(0,0)] = cos(theta/2.0) - 1.0i * sin(theta/2.0);
-    matrix[IDX2(0,1)] = 0.0 + 0.0i;
-    matrix[IDX2(1,0)] = 0.0 + 0.0i;
-    matrix[IDX2(1,1)] = cos(theta/2.0) + 1.0i * sin(theta/2.0);
+    matrix[IDX2(0,0)] = cos(theta/2.0) - 1.0 * COMP_I * sin(theta/2.0);
+    matrix[IDX2(0,1)] = 0.0 + 0.0 * COMP_I;
+    matrix[IDX2(1,0)] = 0.0 + 0.0 * COMP_I;
+    matrix[IDX2(1,1)] = cos(theta/2.0) + 1.0 * COMP_I * sin(theta/2.0);
     break;
   default:
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
@@ -291,38 +292,41 @@ static bool _gbank_get_rotation(Axis axis, double phase, double unit, void** mat
 
 static bool _gbank_get_ctr_rotation(Axis axis, double phase, double unit, void** matrix_out)
 {
-  COMPLEX* matrix = NULL;
-  double theta = phase * unit;
+  COMPLEX*	matrix = NULL;
+  double	theta;
+  int		i;
+
+  theta = phase * unit;
 
   if (!(matrix = (COMPLEX*)malloc(sizeof(COMPLEX)*16)))
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
 
-  for (int i=0; i<16; i++) matrix[i] = 0.0 + 0.0i;
+  for (i=0; i<16; i++) matrix[i] = 0.0 + 0.0 * COMP_I;
 
   switch (axis) {
   case X_AXIS:
-    matrix[IDX4(0,0)] = 1.0 + 0.0i;
-    matrix[IDX4(1,1)] = 1.0 + 0.0i;
+    matrix[IDX4(0,0)] = 1.0 + 0.0 * COMP_I;
+    matrix[IDX4(1,1)] = 1.0 + 0.0 * COMP_I;
     matrix[IDX4(2,2)] = cos(theta/2.0);
-    matrix[IDX4(2,3)] = - 1.0i * sin(theta/2.0);
-    matrix[IDX4(3,2)] = - 1.0i * sin(theta/2.0);
+    matrix[IDX4(2,3)] = - 1.0 * COMP_I * sin(theta/2.0);
+    matrix[IDX4(3,2)] = - 1.0 * COMP_I * sin(theta/2.0);
     matrix[IDX4(3,3)] = cos(theta/2.0);
     break;
   case Y_AXIS:
-    matrix[IDX4(0,0)] = 1.0 + 0.0i;
-    matrix[IDX4(1,1)] = 1.0 + 0.0i;
+    matrix[IDX4(0,0)] = 1.0 + 0.0 * COMP_I;
+    matrix[IDX4(1,1)] = 1.0 + 0.0 * COMP_I;
     matrix[IDX4(2,2)] = cos(theta/2.0);
     matrix[IDX4(2,3)] = -sin(theta/2.0);
     matrix[IDX4(3,2)] = sin(theta/2.0);
     matrix[IDX4(3,3)] = cos(theta/2.0);
     break;
   case Z_AXIS:
-    matrix[IDX4(0,0)] = 1.0 + 0.0i;
-    matrix[IDX4(1,1)] = 1.0 + 0.0i;
-    matrix[IDX4(2,2)] = cos(theta/2.0) - 1.0i * sin(theta/2.0);
-    matrix[IDX4(2,3)] = 0.0 + 0.0i;
-    matrix[IDX4(3,2)] = 0.0 + 0.0i;
-    matrix[IDX4(3,3)] = cos(theta/2.0) + 1.0i * sin(theta/2.0);
+    matrix[IDX4(0,0)] = 1.0 + 0.0 * COMP_I;
+    matrix[IDX4(1,1)] = 1.0 + 0.0 * COMP_I;
+    matrix[IDX4(2,2)] = cos(theta/2.0) - 1.0 * COMP_I * sin(theta/2.0);
+    matrix[IDX4(2,3)] = 0.0 + 0.0 * COMP_I;
+    matrix[IDX4(3,2)] = 0.0 + 0.0 * COMP_I;
+    matrix[IDX4(3,3)] = cos(theta/2.0) + 1.0 * COMP_I * sin(theta/2.0);
     break;
   default:
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
@@ -336,15 +340,17 @@ static bool _gbank_get_ctr_rotation(Axis axis, double phase, double unit, void**
 static bool _gbank_get_phase_shift(double phase, double unit, void** matrix_out)
 {
   COMPLEX*	matrix = NULL;
-  double	theta  = phase * unit;
+  double	theta;
+
+  theta  = phase * unit;
 
   if (!(matrix = (COMPLEX*)malloc(sizeof(COMPLEX)*4)))
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
 
-  matrix[IDX2(0,0)] = 1.0 + 0.0i;
-  matrix[IDX2(0,1)] = 0.0 + 0.0i;
-  matrix[IDX2(1,0)] = 0.0 + 0.0i;
-  matrix[IDX2(1,1)] = cos(theta) + 1.0i * sin(theta);
+  matrix[IDX2(0,0)] = 1.0 + 0.0 * COMP_I;
+  matrix[IDX2(0,1)] = 0.0 + 0.0 * COMP_I;
+  matrix[IDX2(1,0)] = 0.0 + 0.0 * COMP_I;
+  matrix[IDX2(1,1)] = cos(theta) + 1.0 * COMP_I * sin(theta);
 
   *matrix_out = matrix;
 
@@ -367,16 +373,19 @@ static bool _gbank_get_rotation_u2(double phase, double phase1, double unit,
 				   void** matrix_out)
 {
   COMPLEX*	matrix = NULL;
-  double	alpha  = phase * unit;
-  double	beta   = phase1 * unit;
+  double	alpha;
+  double	beta;
+  
+  alpha  = phase * unit;
+  beta   = phase1 * unit;
   
   if (!(matrix = (COMPLEX*)malloc(sizeof(COMPLEX)*4)))
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
 
   matrix[IDX2(0,0)] = 1.0 / sqrt(2.0);
-  matrix[IDX2(0,1)] = -cexp(1.0i*alpha) / sqrt(2.0);
-  matrix[IDX2(1,0)] = cexp(1.0i*beta) / sqrt(2.0);
-  matrix[IDX2(1,1)] = cexp(1.0i*(alpha+beta)) / sqrt(2.0);
+  matrix[IDX2(0,1)] = -cexp(1.0*COMP_I*alpha) / sqrt(2.0);
+  matrix[IDX2(1,0)] = cexp(1.0*COMP_I*beta) / sqrt(2.0);
+  matrix[IDX2(1,1)] = cexp(1.0*COMP_I*(alpha+beta)) / sqrt(2.0);
 
   *matrix_out = matrix;
   
@@ -387,17 +396,21 @@ static bool _gbank_get_rotation_u3(double phase, double phase1, double phase2,
 				   double unit, void** matrix_out)
 {
   COMPLEX*	matrix = NULL;
-  double	alpha  = phase * unit;
-  double	beta   = phase1 * unit;
-  double	gamma  = phase2 * unit;
+  double	alpha;
+  double	beta;
+  double	gamma;
+  
+  alpha  = phase * unit;
+  beta   = phase1 * unit;
+  gamma  = phase2 * unit;
   
   if (!(matrix = (COMPLEX*)malloc(sizeof(COMPLEX)*4)))
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
 
   matrix[IDX2(0,0)] = cos(gamma/2.0);
-  matrix[IDX2(0,1)] = -cexp(1.0i*alpha) * sin(gamma/2.0);
-  matrix[IDX2(1,0)] = cexp(1.0i*beta) * sin(gamma/2.0);
-  matrix[IDX2(1,1)] = cexp(1.0i*(alpha+beta)) * cos(gamma/2.0);
+  matrix[IDX2(0,1)] = -cexp(1.0*COMP_I*alpha) * sin(gamma/2.0);
+  matrix[IDX2(1,0)] = cexp(1.0*COMP_I*beta) * sin(gamma/2.0);
+  matrix[IDX2(1,1)] = cexp(1.0*COMP_I*(alpha+beta)) * cos(gamma/2.0);
 
   *matrix_out = matrix;
   
@@ -406,17 +419,20 @@ static bool _gbank_get_rotation_u3(double phase, double phase1, double phase2,
 
 static bool _gbank_get_ctr_phase_shift(double phase, double unit, void** matrix_out)
 {
-  COMPLEX* matrix = NULL;
-  double theta = phase * unit;
+  COMPLEX*	matrix = NULL;
+  double	theta;
+  int		i;
+
+  theta = phase * unit;
 
   if (!(matrix = (COMPLEX*)malloc(sizeof(COMPLEX)*16)))
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
 
-  for (int i=0; i<16; i++) matrix[i] = 0.0 + 0.0i;
-  matrix[IDX4(0,0)] = 1.0 + 0.0i;
-  matrix[IDX4(1,1)] = 1.0 + 0.0i;
-  matrix[IDX4(2,2)] = 1.0 + 0.0i;
-  matrix[IDX4(3,3)] = cos(theta) + 1.0i * sin(theta);
+  for (i=0; i<16; i++) matrix[i] = 0.0 + 0.0 * COMP_I;
+  matrix[IDX4(0,0)] = 1.0 + 0.0 * COMP_I;
+  matrix[IDX4(1,1)] = 1.0 + 0.0 * COMP_I;
+  matrix[IDX4(2,2)] = 1.0 + 0.0 * COMP_I;
+  matrix[IDX4(3,3)] = cos(theta) + 1.0 * COMP_I * sin(theta);
 
   *matrix_out = matrix;
 
@@ -439,19 +455,23 @@ static bool _gbank_get_ctr_u2(double phase, double phase1, double unit,
 			      void** matrix_out)
 {
   COMPLEX*	matrix = NULL;
-  double	alpha  = phase * unit;
-  double	beta   = phase1 * unit;
+  double	alpha;
+  double	beta;
+  int           i;
+  
+  alpha  = phase * unit;
+  beta   = phase1 * unit;
   
   if (!(matrix = (COMPLEX*)malloc(sizeof(COMPLEX)*16)))
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
 
-  for (int i=0; i<16; i++) matrix[i] = 0.0 + 0.0i;
-  matrix[IDX4(0,0)] = 1.0 + 0.0i;
-  matrix[IDX4(1,1)] = 1.0 + 0.0i;
+  for (i=0; i<16; i++) matrix[i] = 0.0 + 0.0 * COMP_I;
+  matrix[IDX4(0,0)] = 1.0 + 0.0 * COMP_I;
+  matrix[IDX4(1,1)] = 1.0 + 0.0 * COMP_I;
   matrix[IDX4(2,2)] = 1.0 / sqrt(2.0);
-  matrix[IDX4(2,3)] = -cexp(1.0i*alpha) / sqrt(2.0);
-  matrix[IDX4(3,2)] = cexp(1.0i*beta) / sqrt(2.0);
-  matrix[IDX4(3,3)] = cexp(1.0i*(alpha+beta)) / sqrt(2.0);
+  matrix[IDX4(2,3)] = -cexp(1.0*COMP_I*alpha) / sqrt(2.0);
+  matrix[IDX4(3,2)] = cexp(1.0*COMP_I*beta) / sqrt(2.0);
+  matrix[IDX4(3,3)] = cexp(1.0*COMP_I*(alpha+beta)) / sqrt(2.0);
   
   *matrix_out = matrix;
   
@@ -462,20 +482,25 @@ static bool _gbank_get_ctr_u3(double phase, double phase1, double phase2,
 			      double unit, void** matrix_out)
 {
   COMPLEX*	matrix = NULL;
-  double	alpha  = phase * unit;
-  double	beta   = phase1 * unit;
-  double	gamma  = phase2 * unit;
+  double	alpha;
+  double	beta;
+  double	gamma;
+  int           i;
+  
+  alpha  = phase * unit;
+  beta   = phase1 * unit;
+  gamma  = phase2 * unit;
   
   if (!(matrix = (COMPLEX*)malloc(sizeof(COMPLEX)*16)))
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
 
-  for (int i=0; i<16; i++) matrix[i] = 0.0 + 0.0i;
-  matrix[IDX4(0,0)] = 1.0 + 0.0i;
-  matrix[IDX4(1,1)] = 1.0 + 0.0i;
+  for (i=0; i<16; i++) matrix[i] = 0.0 + 0.0 * COMP_I;
+  matrix[IDX4(0,0)] = 1.0 + 0.0 * COMP_I;
+  matrix[IDX4(1,1)] = 1.0 + 0.0 * COMP_I;
   matrix[IDX4(2,2)] = cos(gamma/2.0);
-  matrix[IDX4(2,3)] = -cexp(1.0i*alpha) * sin(gamma/2.0);
-  matrix[IDX4(3,2)] = cexp(1.0i*beta) * sin(gamma/2.0);
-  matrix[IDX4(3,3)] = cexp(1.0i*(alpha+beta)) * cos(gamma/2.0);
+  matrix[IDX4(2,3)] = -cexp(1.0*COMP_I*alpha) * sin(gamma/2.0);
+  matrix[IDX4(3,2)] = cexp(1.0*COMP_I*beta) * sin(gamma/2.0);
+  matrix[IDX4(3,3)] = cexp(1.0*COMP_I*(alpha+beta)) * cos(gamma/2.0);
   
   *matrix_out = matrix;
   

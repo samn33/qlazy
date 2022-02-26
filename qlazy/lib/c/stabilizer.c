@@ -34,10 +34,12 @@ static ComplexAxis _mul_complex_axis(ComplexAxis a, ComplexAxis b)
   return out;
 }
 
-bool stabilizer_init(int gene_num, int qubit_num, int seed, void** stab_out)
+//bool stabilizer_init(int gene_num, int qubit_num, int seed, void** stab_out)
+bool stabilizer_init(int gene_num, int qubit_num, unsigned int seed, void** stab_out)
 {
   Stabilizer*	stab	    = NULL;
   int		matrix_size = gene_num * qubit_num * 2;
+  int		i;
 
   srand(seed);
 
@@ -52,11 +54,11 @@ bool stabilizer_init(int gene_num, int qubit_num, int seed, void** stab_out)
 
   if (!(stab->pauli_factor = (ComplexAxis*)malloc(sizeof(ComplexAxis)*stab->gene_num)))
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
-  for (int i=0; i<stab->gene_num; i++) stab->pauli_factor[i] = REAL_PLUS;
+  for (i=0; i<stab->gene_num; i++) stab->pauli_factor[i] = REAL_PLUS;
 
   if (!(stab->check_matrix = (int*)malloc(sizeof(int)*matrix_size)))
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
-  for (int i=0; i<matrix_size; i++) stab->check_matrix[i] = 0;
+  for (i=0; i<matrix_size; i++) stab->check_matrix[i] = 0;
 
   *stab_out = stab;
 
@@ -93,6 +95,8 @@ bool stabilizer_copy(Stabilizer* stab_in, void** stab_out)
 
 bool stabilizer_set_pauli_fac(Stabilizer* stab, int gene_id, ComplexAxis pauli_fac)
 {
+  int i;
+  
   /* error check */
   if (stab == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
   if ((gene_id < 0) || (gene_id >= stab->gene_num))
@@ -101,7 +105,7 @@ bool stabilizer_set_pauli_fac(Stabilizer* stab, int gene_id, ComplexAxis pauli_f
   /* if generator have pauli-Ys */
   int col = 2 * stab->qubit_num;
   ComplexAxis pf = pauli_fac;
-  for (int i=0; i<stab->qubit_num; i++) {
+  for (i=0; i<stab->qubit_num; i++) {
     if ((stab->check_matrix[gene_id*col+i] == 1) &&
 	(stab->check_matrix[gene_id*col+i+stab->qubit_num] == 1)) {
       pf = _mul_complex_axis(pf, IMAG_PLUS);
@@ -115,6 +119,8 @@ bool stabilizer_set_pauli_fac(Stabilizer* stab, int gene_id, ComplexAxis pauli_f
 
 bool stabilizer_get_pauli_fac(Stabilizer* stab, int gene_id, ComplexAxis* pauli_fac)
 {
+  int i;
+  
   /* error check */
   if (stab == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
   if ((gene_id < 0) || (gene_id >= stab->gene_num))
@@ -123,7 +129,7 @@ bool stabilizer_get_pauli_fac(Stabilizer* stab, int gene_id, ComplexAxis* pauli_
   /* if generator have pauli-Ys */
   int col = 2 * stab->qubit_num;
   ComplexAxis pf = stab->pauli_factor[gene_id];
-  for (int i=0; i<stab->qubit_num; i++) {
+  for (i=0; i<stab->qubit_num; i++) {
     if ((stab->check_matrix[gene_id*col+i] == 1) &&
 	(stab->check_matrix[gene_id*col+i+stab->qubit_num] == 1)) {
       pf = _mul_complex_axis(pf, IMAG_MINUS);
@@ -223,7 +229,9 @@ bool stabilizer_get_pauli_op(Stabilizer* stab, int gene_id, int qubit_id, Kind* 
 
 static void _add_vector(int* vec_0, int* vec_1, int dim)
 {
-  for (int i=0; i<dim; i++) {
+  int i;
+  
+  for (i=0; i<dim; i++) {
     vec_0[i] = (vec_0[i] + vec_1[i]) % 2;
   }
 }
@@ -233,12 +241,14 @@ static int _row_reduction(int* coef, int row, int col)
 {
   int i = 0;
   int j = 0;
+  int rank = 0;
+  int k,l;
 
   /* row reducction */
   while (i < row) {
     while (j < col) {
       if (coef[i*col+j] == 0) {
-	for (int k=i+1; k<row; k++) {
+	for (k=i+1; k<row; k++) {
 	  if (coef[k*col+j] == 1) {
 	    _add_vector(&coef[i*col], &coef[k*col], col);
 	    break;
@@ -249,7 +259,7 @@ static int _row_reduction(int* coef, int row, int col)
       else { break; }
     }
 
-    for (int l=0; l<row; l++) {
+    for (l=0; l<row; l++) {
       if ((l != i) && (coef[l*col+j] == 1)) {
     	_add_vector(&coef[l*col], &coef[i*col], col);
       }
@@ -258,7 +268,6 @@ static int _row_reduction(int* coef, int row, int col)
   }
 
   /* rank */
-  int rank = 0;
   for (i=0; i<row; i++) {
     for (j=0; j<col; j++) {
       if (coef[i*col+j] == 1) {
@@ -292,9 +301,10 @@ bool stabilizer_get_rank(Stabilizer* stab, int* rank_out)
 
 static bool _stabilizer_operate_x(Stabilizer* stab, int q)
 {
-  Kind pauli_op;
+  Kind	pauli_op;
+  int	i;
 
-  for (int i=0; i<stab->gene_num; i++) {
+  for (i=0; i<stab->gene_num; i++) {
     stabilizer_get_pauli_op(stab, i, q, &pauli_op);
     if ((pauli_op == PAULI_Y) || (pauli_op == PAULI_Z))
       stab->pauli_factor[i] = _mul_complex_axis(stab->pauli_factor[i], REAL_MINUS);
@@ -304,9 +314,10 @@ static bool _stabilizer_operate_x(Stabilizer* stab, int q)
 
 static bool _stabilizer_operate_y(Stabilizer* stab, int q)
 {
-  Kind pauli_op;
+  Kind	pauli_op;
+  int	i;
 
-  for (int i=0; i<stab->gene_num; i++) {
+  for (i=0; i<stab->gene_num; i++) {
     stabilizer_get_pauli_op(stab, i, q, &pauli_op);
     if ((pauli_op == PAULI_X) || (pauli_op == PAULI_Z))
       stab->pauli_factor[i] = _mul_complex_axis(stab->pauli_factor[i], REAL_MINUS);
@@ -317,8 +328,9 @@ static bool _stabilizer_operate_y(Stabilizer* stab, int q)
 static bool _stabilizer_operate_z(Stabilizer* stab, int q)
 {
   Kind pauli_op;
+  int  i;
 
-  for (int i=0; i<stab->gene_num; i++) {
+  for (i=0; i<stab->gene_num; i++) {
     stabilizer_get_pauli_op(stab, i, q, &pauli_op);
     if ((pauli_op == PAULI_X) || (pauli_op == PAULI_Y))
       stab->pauli_factor[i] = _mul_complex_axis(stab->pauli_factor[i], REAL_MINUS);
@@ -329,8 +341,9 @@ static bool _stabilizer_operate_z(Stabilizer* stab, int q)
 static bool _stabilizer_operate_h(Stabilizer* stab, int q)
 {
   Kind pauli_op;
+  int  i;
 
-  for (int i=0; i<stab->gene_num; i++) {
+  for (i=0; i<stab->gene_num; i++) {
     stabilizer_get_pauli_op(stab, i, q, &pauli_op);
     if (pauli_op == PAULI_X) {
       stabilizer_set_pauli_op(stab, i, q, PAULI_Z);
@@ -349,8 +362,9 @@ static bool _stabilizer_operate_h(Stabilizer* stab, int q)
 static bool _stabilizer_operate_s(Stabilizer* stab, int q)
 {
   Kind pauli_op;
+  int  i;
 
-  for (int i=0; i<stab->gene_num; i++) {
+  for (i=0; i<stab->gene_num; i++) {
     stabilizer_get_pauli_op(stab, i, q, &pauli_op);
     if (pauli_op == PAULI_X) {
       stabilizer_set_pauli_op(stab, i, q, PAULI_Y);
@@ -366,8 +380,9 @@ static bool _stabilizer_operate_s(Stabilizer* stab, int q)
 static bool _stabilizer_operate_s_dg(Stabilizer* stab, int q)
 {
   Kind pauli_op;
-
-  for (int i=0; i<stab->gene_num; i++) {
+  int  i;
+  
+  for (i=0; i<stab->gene_num; i++) {
     stabilizer_get_pauli_op(stab, i, q, &pauli_op);
     if (pauli_op == PAULI_X) {
       stabilizer_set_pauli_op(stab, i, q, PAULI_Y);
@@ -385,8 +400,9 @@ static bool _stabilizer_operate_cx(Stabilizer* stab, int q_1, int q_2)
 {
   Kind pop_1;
   Kind pop_2;
+  int  i;
 
-  for (int i=0; i<stab->gene_num; i++) {
+  for (i=0; i<stab->gene_num; i++) {
     stabilizer_get_pauli_op(stab, i, q_1, &pop_1);
     stabilizer_get_pauli_op(stab, i, q_2, &pop_2);
     /* X1 */
@@ -463,8 +479,9 @@ static bool _stabilizer_operate_cz(Stabilizer* stab, int q_1, int q_2)
 {
   Kind pop_1;
   Kind pop_2;
+  int  i;
 
-  for (int i=0; i<stab->gene_num; i++) {
+  for (i=0; i<stab->gene_num; i++) {
     stabilizer_get_pauli_op(stab, i, q_1, &pop_1);
     stabilizer_get_pauli_op(stab, i, q_2, &pop_2);
     /* X1 */
@@ -589,18 +606,19 @@ static bool _get_solution(Stabilizer* stab, int* measured_op, int* variables)
   int	row    = stab->gene_num;
   int	col    = 2 * stab->qubit_num;
   int   size   = row * col;
+  int   i,j;
 
   /* copy 'stab->check_matrix' + 'measured_op' to 'coef' */
   if (!(coef = (int*)malloc(sizeof(int)*(size+col))))
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
   memcpy(coef, stab->check_matrix, sizeof(int)*size);
-  for (int i=0; i<col; i++) coef[row*col+i] = measured_op[i];
+  for (i=0; i<col; i++) coef[row*col+i] = measured_op[i];
 
   /* transpose of 'coef' ('coef_T') */
   if (!(coef_T = (int*)malloc(sizeof(int)*(size+col))))
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
-  for (int i=0; i<col; i++) {
-    for (int j=0; j<row+1; j++) {
+  for (i=0; i<col; i++) {
+    for (j=0; j<row+1; j++) {
       coef_T[i*(row+1)+j] = coef[j*col+i];
     }
   }
@@ -608,7 +626,7 @@ static bool _get_solution(Stabilizer* stab, int* measured_op, int* variables)
   /* solve (row reduction) */
   _row_reduction(coef_T, col, row+1);
 
-  for (int i=0; i<col; i++) {
+  for (i=0; i<col; i++) {
     variables[i] = coef_T[i*(row+1)+row];
   }
 
@@ -618,12 +636,13 @@ static bool _get_solution(Stabilizer* stab, int* measured_op, int* variables)
   SUC_RETURN(true);
 }
 
-bool stabilizer_measure(Stabilizer* stab, int q, double prob_out[2], int* mval_out)
+bool stabilizer_measure(Stabilizer* stab, int q, double* prob_out, int* mval_out)
 {
   /* measured_op: binary vector corresponding to Z(q)   */
   /* ex) Z(0) for 3-qubit-system = (0,0,0,1,0,0)        */
   int*	measured_op = NULL;	/* dimension = 2*qubit_num  */
   bool* commute_flg = NULL;	/* dimention = gene_num     */
+  int   i;
   
   /* error check */
   if (stab == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
@@ -639,7 +658,7 @@ bool stabilizer_measure(Stabilizer* stab, int q, double prob_out[2], int* mval_o
   /* set measured_op : Z(q) */
   if (!(measured_op = (int*)malloc(sizeof(int)*2*stab->qubit_num)))
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
-  for (int i=0; i<2*stab->qubit_num; i++) measured_op[i] = 0;
+  for (i=0; i<2*stab->qubit_num; i++) measured_op[i] = 0;
   measured_op[stab->qubit_num + q] = 1;
 
   /* commute or not */
@@ -648,7 +667,7 @@ bool stabilizer_measure(Stabilizer* stab, int q, double prob_out[2], int* mval_o
   int row = stab->gene_num;
   int col = 2 * stab->qubit_num;
   int commute = 0;
-  for (int i=0; i<row; i++) {
+  for (i=0; i<row; i++) {
     if (stab->check_matrix[i*col+q] == 0) {
       commute_flg[i] = true; commute++;
     }
@@ -673,7 +692,7 @@ bool stabilizer_measure(Stabilizer* stab, int q, double prob_out[2], int* mval_o
       ERR_RETURN(ERROR_STABILIZER_MEASURE,false);
 
     ComplexAxis sign = REAL_PLUS;
-    for (int i=0; i<row; i++) {
+    for (i=0; i<row; i++) {
       if (variables[i] == 1) {
 	sign = _mul_complex_axis(sign, stab->pauli_factor[i]);
       }
@@ -696,13 +715,13 @@ bool stabilizer_measure(Stabilizer* stab, int q, double prob_out[2], int* mval_o
   else if (not_commute >= 1) {
 
     int not_commute_id = 0;
-    for (int i=0; i<row; i++) {
+    for (i=0; i<row; i++) {
       if (commute_flg[i] == false) { not_commute_id = i; break; }
     }
 
     /* number of generators not commute will be only one */
     if (not_commute > 1) {
-      for (int i=not_commute_id+1; i<row; i++) {
+      for (i=not_commute_id+1; i<row; i++) {
 	if (commute_flg[i] == false) {
 	  _add_vector(&(stab->check_matrix[i*col]),
 		       &(stab->check_matrix[not_commute_id*col]), col);
@@ -713,7 +732,7 @@ bool stabilizer_measure(Stabilizer* stab, int q, double prob_out[2], int* mval_o
     }
 
     /* replace generator to mesured operator (Z(q) of -Z(q)) */
-    for (int i=0; i<col; i++) {
+    for (i=0; i<col; i++) {
       stab->check_matrix[not_commute_id*col+i] = measured_op[i];
     }
     

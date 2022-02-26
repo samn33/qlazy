@@ -28,12 +28,13 @@ bool observable_init(char* str, void** observ_out)
   char*		token[TOKEN_NUM];
   int		term_num = 0;
   int           spin_num = 0;
+  int           i;
 
   /* expand string buffer: str -> exp_str */
   if (!line_check_length(str)) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
   if (!line_chomp(str)) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
   if (!line_remove_space(str)) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
-  str_len = strlen(str);
+  str_len = (int)strlen(str);
   str_len += _get_term_num(str);
   if (!(exp_str = (char*)malloc(sizeof(char)*str_len)))
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
@@ -64,7 +65,7 @@ bool observable_init(char* str, void** observ_out)
   if (!(observ->spro_array = (SPro**)malloc(sizeof(SPro*)*observ->array_num)))
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
 
-  for (int i=0; i<observ->array_num; i++) {
+  for (i=0; i<observ->array_num; i++) {
     if (!(spro_init(token[i], (void**)&(observ->spro_array[i]))))
       ERR_RETURN(ERROR_SPRO_INIT,false);
     
@@ -82,9 +83,11 @@ bool observable_init(char* str, void** observ_out)
 
 void observable_free(Observable* observ)
 {
+  int i;
+  
   if (observ != NULL) {
     if (observ->spro_array != NULL) {
-      for (int i=0; i<observ->array_num; i++) {
+      for (i=0; i<observ->array_num; i++) {
 	if (observ->spro_array[i] != NULL) {
 	  spro_free(observ->spro_array[i]);
 	  observ->spro_array[i] = NULL;

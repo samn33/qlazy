@@ -122,6 +122,7 @@ bool qcirc_append_gate(QCirc* qcirc, Kind kind, int* qid, double* para, int c, i
   QGate* qgate = NULL;
   int qid_size = 0;
   int para_size = 0;
+  int i;
   
   if (qcirc == NULL ||
       (kind_is_measurement(kind) == false &&
@@ -143,15 +144,15 @@ bool qcirc_append_gate(QCirc* qcirc, Kind kind, int* qid, double* para, int c, i
   if (!(qgate = (QGate*)malloc(sizeof(QGate))))
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY, false);
   qgate->kind = kind;
-  for (int i=0; i<qid_size; i++) qgate->qid[i] = qid[i];
-  for (int i=qid_size; i<2; i++) qgate->qid[i] = -1;
-  for (int i=0; i<para_size; i++) qgate->para[i] = para[i];
-  for (int i=para_size; i<3; i++) qgate->para[i] = 0.0;
+  for (i=0; i<qid_size; i++) qgate->qid[i] = qid[i];
+  for (i=qid_size; i<2; i++) qgate->qid[i] = -1;
+  for (i=0; i<para_size; i++) qgate->para[i] = para[i];
+  for (i=para_size; i<3; i++) qgate->para[i] = 0.0;
   qgate->c = c;
   qgate->ctrl = ctrl;
 
   /* update qubit_num, cmem_num, gate_num */
-  for (int i=0; i<qid_size; i++) qcirc->qubit_num = MAX(qcirc->qubit_num, qgate->qid[i] + 1);
+  for (i=0; i<qid_size; i++) qcirc->qubit_num = MAX(qcirc->qubit_num, qgate->qid[i] + 1);
   if (qgate->c != -1) qcirc->cmem_num = MAX(qcirc->cmem_num, qgate->c + 1);
   if (qgate->ctrl != -1) qcirc->cmem_num = MAX(qcirc->cmem_num, qgate->ctrl + 1);
   qcirc->gate_num += 1;
@@ -191,10 +192,11 @@ static void _qcirc_update(QCirc* qcirc)
   int		qubit_num = 0;
   int		cmem_num  = 0;
   int		gate_num  = 0;
+  int		i;
   
   qgate = qcirc->first;
   while (qgate != NULL) {
-    for (int i=0; i<2; i++) qubit_num = MAX(qubit_num, qgate->qid[i] + 1);
+    for (i=0; i<2; i++) qubit_num = MAX(qubit_num, qgate->qid[i] + 1);
     cmem_num = MAX(cmem_num, qgate->c + 1);
     cmem_num = MAX(cmem_num, qgate->ctrl + 1);
     gate_num += 1;
@@ -211,6 +213,7 @@ bool qcirc_pop_gate(QCirc* qcirc, Kind* kind, int* qid, double* para, int* c, in
   QGate*	ori_first;
   int		q_max = -1;
   int		c_max = -1;
+  int           i;
   
   if (qcirc == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
 
@@ -227,7 +230,7 @@ bool qcirc_pop_gate(QCirc* qcirc, Kind* kind, int* qid, double* para, int* c, in
   free(ori_first); ori_first = NULL;
 
   /* update qubit_num, cmem_num, gate_num */
-  for (int i=0; i<2; i++) q_max = MAX(q_max, qid[i] + 1);
+  for (i=0; i<2; i++) q_max = MAX(q_max, qid[i] + 1);
   c_max = MAX(c_max, *c);
   c_max = MAX(c_max, *ctrl);
   if ((q_max >= qcirc->qubit_num) || (c_max >= qcirc->cmem_num)) _qcirc_update(qcirc);

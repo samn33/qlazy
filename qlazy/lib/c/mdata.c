@@ -7,8 +7,9 @@
 bool mdata_init(int qubit_num, int shot_num,
 		double angle, double phase, int* qubit_id, void** mdata_out)
 {
-  MData* mdata = NULL;
-  int state_num;
+  MData*	mdata = NULL;
+  int		state_num;
+  int		i;
 
   if (!(mdata = (MData*)malloc(sizeof(MData))))
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
@@ -20,10 +21,10 @@ bool mdata_init(int qubit_num, int shot_num,
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
   memcpy(mdata->qubit_id, qubit_id, sizeof(int) * qubit_num);
 
-  state_num = (int)pow(2.0, qubit_num);
+  state_num = (int)pow(2.0, (double)qubit_num);
   if (!(mdata->freq = (int*)malloc(sizeof(int)*state_num)))
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
-  for (int i=0; i<state_num; i++) mdata->freq[i] = 0;
+  for (i=0; i<state_num; i++) mdata->freq[i] = 0;
 
   *mdata_out = mdata;
 
@@ -36,6 +37,7 @@ bool mdata_print(MData* mdata)
   char	last_state[MAX_QUBIT_NUM+1];
   int   zflag = ON;
   int   state_num;
+  int   i;
 
   if (mdata == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
@@ -56,9 +58,9 @@ bool mdata_print(MData* mdata)
 	   mdata->angle, mdata->phase);
   }
 
-  state_num = (int)pow(2.0, mdata->qubit_num);
+  state_num = (int)pow(2.0, (double)(mdata->qubit_num));
 
-  for (int i=0; i<state_num; i++) {
+  for (i=0; i<state_num; i++) {
     if (!(binstr_from_decimal(state, mdata->qubit_num, i, zflag)))
       ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
     if (mdata->freq[i] > 0) {
@@ -76,15 +78,16 @@ bool mdata_print(MData* mdata)
 bool mdata_print_bell(MData* mdata)
 {
   int state_num;
+  int i;
   
   if ((mdata == NULL) || (mdata->qubit_num != 2))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
   printf("bell-measurement\n");
 
-  state_num = (int)pow(2.0, mdata->qubit_num);
+  state_num = (int)pow(2.0, (double)(mdata->qubit_num));
   
-  for (int i=0; i<state_num; i++) {
+  for (i=0; i<state_num; i++) {
     if (mdata->freq[i] > 0) {
       if (i == BELL_PHI_PLUS)       printf("frq[phi+] = %d\n", mdata->freq[i]);
       else if (i == BELL_PSI_PLUS)  printf("frq[psi+] = %d\n", mdata->freq[i]);

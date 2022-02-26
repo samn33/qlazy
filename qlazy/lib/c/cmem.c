@@ -7,6 +7,7 @@
 bool cmem_init(int cmem_num, void** cmem_out)
 {
   CMem* cmem = NULL;
+  int	i;
 
   if (cmem_num < 1) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
@@ -16,7 +17,7 @@ bool cmem_init(int cmem_num, void** cmem_out)
   cmem->cmem_num = cmem_num;
   if (!(cmem->bit_array = (int*)malloc(sizeof(int) * cmem_num)))
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,NULL);
-  for (int i=0; i<cmem_num; i++) cmem->bit_array[i] = 0;
+  for (i=0; i<cmem_num; i++) cmem->bit_array[i] = 0;
 
   *cmem_out = cmem;
   

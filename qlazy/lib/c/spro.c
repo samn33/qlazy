@@ -18,8 +18,9 @@ bool spro_init(char* str, void** spro_out)
   int		anum;
   int		spin_id;
   int           flg[MAX_QUBIT_NUM];
+  int		i;
 
-  for (int i=0; i<MAX_QUBIT_NUM; i++) flg[i] = OFF;
+  for (i=0; i<MAX_QUBIT_NUM; i++) flg[i] = OFF;
 
   if (!line_check_length(str)) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
   if (!line_chomp(str)) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
@@ -35,11 +36,11 @@ bool spro_init(char* str, void** spro_out)
   
   if (!(spro = (SPro*)malloc(sizeof(SPro))))
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
-  for (int i=0; i<MAX_QUBIT_NUM; i++) spro->spin_type[i] = NONE;
+  for (i=0; i<MAX_QUBIT_NUM; i++) spro->spin_type[i] = NONE;
 
   spro->coef = 1.0;
   spro->spin_num = 0;
-  for (int i=0; i<tnum; i++) {
+  for (i=0; i<tnum; i++) {
     if ((i==0) && (is_number(token[i])==true)) {
       spro->coef = strtod(token[0], NULL);
     }
