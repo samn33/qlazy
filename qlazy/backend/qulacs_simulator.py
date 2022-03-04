@@ -68,15 +68,18 @@ GateFunctionName = {
     CONTROLLED_U3:'__get_CU3',
 }
 
-def run_cpu(qcirc=[], shots=1, cid=[], backend=None):
+# def run_cpu(qcirc=[], shots=1, cid=[], backend=None):
+def run_cpu(qcirc=[], shots=1, cid=None, backend=None):
 
     return __run_all(qcirc=qcirc, shots=shots, cid=cid, backend=backend, proc='CPU')
 
-def run_gpu(qcirc=[], shots=1, cid=[], backend=None):
+# def run_gpu(qcirc=[], shots=1, cid=[], backend=None):
+def run_gpu(qcirc=[], shots=1, cid=None, backend=None):
 
     return __run_all(qcirc=qcirc, shots=shots, cid=cid, backend=backend, proc='GPU')
 
-def __run_all(qcirc=None, shots=1, cid=[], backend=None, proc='CPU'):
+# def __run_all(qcirc=None, shots=1, cid=[], backend=None, proc='CPU'):
+def __run_all(qcirc=None, shots=1, cid=None, backend=None, proc='CPU'):
 
     if qcirc is None:
         raise ValueError("quantum circuit must be specified.")
@@ -84,11 +87,11 @@ def __run_all(qcirc=None, shots=1, cid=[], backend=None, proc='CPU'):
     qubit_num = qcirc.qubit_num
     cmem_num = qcirc.cmem_num
 
+    if cid is None:
+        cid = [i for i in range(cmem_num)]
+
     if cmem_num < len(cid):
         raise ValueError("length of cid must be less than classical resister size of qcirc")
-
-    if cid == []:
-        cid = [i for i in range(cmem_num)]
 
     #
     # initialize

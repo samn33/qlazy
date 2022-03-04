@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-from qlazy.config import *
-from qlazy.error import *
+""" Backend device of quantum computing """
 
-BACKEND_DEVICES = {'qlazy': ['qstate_simulator','stabilizer_simulator'],
-                   'qulacs': ['cpu_simulator','gpu_simulator'],
+BACKEND_DEVICES = {'qlazy': ['qstate_simulator', 'stabilizer_simulator'],
+                   'qulacs': ['cpu_simulator', 'gpu_simulator'],
                    'ibmq': ['aer_simulator', 'qasm_simulator']}
 
 class Backend:
@@ -30,116 +29,125 @@ class Backend:
         #
         # set attributes (procuct, device)
         #
-        
-        if product == None:
-            if device == None:
-                product = 'qlazy'
-                device = 'qstate_simulator'
-            else:
-                raise Backend_Error_NameNotSpecified()            
-        
-        if product in BACKEND_DEVICES.keys():
-            self.product = product
 
+        if product is None:
+            self.product = 'qlazy'
+            if device is None:
+                self.device = 'qstate_simulator'
+            elif device in BACKEND_DEVICES[product]:
+                self.device = device
+            else:
+                raise ValueError("device:'{}' is unknown for product:'{}'."
+                                 .format(device, self.product))
+
+        elif product in BACKEND_DEVICES.keys():
+            self.product = product
             if device in BACKEND_DEVICES[product]:
                 self.device = device
-            elif device == None:
-                self.device = BACKEND_DEVICES[product][0]
+            elif product == 'ibmq':
+                self.device = device
             else:
-                if product == 'ibmq':
-                    self.device = device
-                else:
-                    raise Backend_Error_DeviceNotSupported()
+                raise ValueError("device:'{}' is unknown for product:'{}'."
+                                 .format(device, self.product))
 
         else:
-            raise Backend_Error_NameNotSupported()
+            raise ValueError("product:{} is unknown.".format(product))
 
         #
         # set method (__run)
         #
-        
+
         # qlazy
         if self.product == 'qlazy':
-    
+
             # qstate simulator
             if self.device == 'qstate_simulator':
                 from qlazy.backend.qlazy_qstate_simulator import run
                 self.__run = run
-        
+
             # stabilizer simulator
             elif self.device == 'stabilizer_simulator':
                 from qlazy.backend.qlazy_stabilizer_simulator import run
                 self.__run = run
-                
+
             else:
-                raise Backend_Error_DeviceNotSupported()
-            
+                raise ValueError("device:'{}' is unknown for product:'{}'."
+                                 .format(self.device, self.product))
+
         # qulacs
         elif self.product == 'qulacs':
-    
+
             # cpu_simulator
             if self.device == 'cpu_simulator':
                 from qlazy.backend.qulacs_simulator import run_cpu
                 self.__run = run_cpu
-        
+
             # gpu_simulator
             elif self.device == 'gpu_simulator':
                 from qlazy.backend.qulacs_simulator import run_gpu
                 self.__run = run_gpu
-                
+
             else:
-                raise Backend_Error_DeviceNotSupported()
-        
+                raise ValueError("device:'{}' is unknown for product:'{}'."
+                                 .format(self.device, self.product))
+
         # ibmq
         elif self.product == 'ibmq':
             from qlazy.backend.ibmq import run
             self.__run = run
-    
+
         else:
-            raise Backend_Error_NameNotSupported()
+            raise ValueError("device:'{}' is unknown for product:'{}'."
+                             .format(self.device, self.product))
 
     @classmethod
     def products(cls):
-
+        """ get products list """
         return list(BACKEND_DEVICES)
 
     @classmethod
     def qlazy_devices(cls):
+        """ get qlazy's devices list """
         return BACKEND_DEVICES['qlazy']
-    
+
     @classmethod
     def qulacs_devices(cls):
+        """ get qulacs's devices list """
         return BACKEND_DEVICES['qulacs']
-    
+
     @classmethod
     def ibmq_devices(cls):
+        """ get ibmq's devices list """
         devices = BACKEND_DEVICES['ibmq']
         try:
             from qiskit import IBMQ
             provider = IBMQ.load_account()
             ibmq_backend_system_names = [b.name() for b in
                                          provider.backends(simulator=False, operational=True)]
-        except Exception as e:
-            print(e)
+        except Exception:
+            pass
         else:
             devices += ['least_busy']
             devices += ibmq_backend_system_names
-        
+
         return devices
 
     @classmethod
     def devices(cls, product):
+        """ get devices list for the product """
 
         if product == 'qlazy':
-            return Backend.qlazy_devices()
+            device_list = Backend.qlazy_devices()
         elif product == 'qulacs':
-            return Backend.qulacs_devices()
+            device_list = Backend.qulacs_devices()
         elif product == 'ibmq':
-            return Backend.ibmq_devices()
+            device_list = Backend.ibmq_devices()
         else:
             raise ValueError("unknown product: {}".format(product))
 
-    def run(self, qcirc=None, shots=1, cid=[]):
+        return device_list
+
+    def run(self, qcirc=None, shots=1, cid=None):
         """
         run the quantum circuit.
 
@@ -170,7 +178,9 @@ class Backend:
         >>> # control quantum gate by measured results
         >>> from qlazy import QCirc, Backend
         >>> bk = Backend(product='qlazy', device='qstate_simulator')
-        >>> qc = QCirc.h(0).cx(0,1).measure(qid=[0],cid=[0]).x(0, ctrl=0).x(1, ctrl=0).measure(qid=[0,1], cid=[0,1])
+        >>> qc = QCirc.h(0)
+        >>> qc.cx(0,1).measure(qid=[0],cid=[0])
+        >>> qc.x(0, ctrl=0).x(1, ctrl=0).measure(qid=[0,1], cid=[0,1])
         >>> result = bk.run(qcirc=qc, shots=100)
 	>>> print(result.frequency)
         Counter({'00': 100})

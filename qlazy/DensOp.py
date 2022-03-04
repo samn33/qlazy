@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
-import random
+""" Density Operator """
+import ctypes
 import math
 import numpy as np
-import warnings
-import ctypes
 
-from qlazy.config import *
-from qlazy.error import *
-from qlazy.QState import *
-from qlazy.lib.densop_mcx import *
+import qlazy.config as cfg
+from qlazy.QState import QState
+from qlazy.lib.densop_mcx import densop_mcx
 
 class DensOp(ctypes.Structure):
     """ Density Operator
@@ -33,8 +31,8 @@ class DensOp(ctypes.Structure):
         ('buffer_1', ctypes.c_void_p),
         ('gbank', ctypes.c_void_p),
     ]
-    
-    def __new__(cls, qubit_num=0, qstate=[], prob=[], matrix=None, **kwargs):
+
+    def __new__(cls, qubit_num=0, qstate=None, prob=None, matrix=None, **kwargs):
         """
         Parameters
         ----------
@@ -62,16 +60,16 @@ class DensOp(ctypes.Structure):
         If 'prob' isn't set, equal probabilities are set.
 
         """
-        if qstate != [] and prob == []:
+        if qstate is not None and prob is None:
             mixed_num = len(qstate)
             prob = [1.0/mixed_num for _ in range(mixed_num)]
-        
+
         if qubit_num != 0:
             qstate = [QState(qubit_num=qubit_num)]
             prob = [1.0]
             obj = densop_init(qstate, prob)
-        
-        elif qstate != [] and prob != []:
+
+        elif qstate is not None and prob is not None:
             obj = densop_init(qstate, prob)
 
         else:
@@ -79,12 +77,12 @@ class DensOp(ctypes.Structure):
 
         self = ctypes.cast(obj.value, ctypes.POINTER(cls)).contents
         return self
-    
+
     def __str__(self):
 
         return str(self.get_elm())
 
-    def reset(self, qid=[]):
+    def reset(self, qid=None):
         """
         reset to |0><0| state.
 
@@ -105,9 +103,9 @@ class DensOp(ctypes.Structure):
         """
         densop_reset(self, qid=qid)
         return self
-        
+
     @classmethod
-    def mix(cls, densop=[], prob=[]):
+    def mix(cls, densop=None, prob=None):
         """
         linear sum of the density operators.
 
@@ -119,15 +117,18 @@ class DensOp(ctypes.Structure):
             probabilities (coefficients of the linear sum).
 
         """
-        N = len(densop)
-        
+        if densop is None:
+            densop = []
+        if prob is None:
+            prob = []
+
         if sum(prob) != 1.0:
             s = sum(prob)
             prob = [p/s for p in prob]
-         
+
         de_out = densop[0].clone()
         de_out.mul(factor=prob[0])
-        for i in range(1,len(densop)):
+        for i in range(1, len(densop)):
             de_tmp = densop[i].clone()
             de_tmp.mul(factor=prob[i])
             de_out.add(densop=de_tmp)
@@ -153,10 +154,10 @@ class DensOp(ctypes.Structure):
         >>> qs = DensOp(qubit_num=2)
         >>> qs.bell(0,1)
         >>> ...
-        
+
         """
         setattr(cls, method.__name__, method)
-        
+
     @classmethod
     def add_methods(cls, *methods):
         """
@@ -182,14 +183,14 @@ class DensOp(ctypes.Structure):
         >>> de.bell(0,1)
         >>> de.flip(0,1)
         >>> ...
-        
+
         """
         for method in methods:
             if callable(method):
                 setattr(cls, method.__name__, method)
             else:
-                raise DensOp_Error_AddMethods()
-            
+                raise ValueError("fail to add method.")
+
     @classmethod
     def create_register(cls, num):
         """
@@ -210,7 +211,7 @@ class DensOp(ctypes.Structure):
         >>> qid = DensOp.create_register(3)
         >>> print(qid)
         [0,0,0]
-        
+
         """
         qid = [0]*num
         return qid
@@ -242,28 +243,11 @@ class DensOp(ctypes.Structure):
 
         """
         idx = 0
-        for i in range(len(args)):
-            for j in range(len(args[i])):
+        for i, arg in enumerate(args):
+            for j in range(len(arg)):
                 args[i][j] = idx
                 idx += 1
         return idx
-    
-    @classmethod
-    def free_all(cls, *densops):
-        """
-        free memory of the all density operators.
-
-        Parameters
-        ----------
-        densops : instance of DensOp,instance of DensOp,...
-            set of DensOp instances
-
-        Returns
-        -------
-        None
-
-        """
-        warnings.warn("No need to call 'free_all' method because free automatically, or you can use class method 'del_all' to free memory explicitly.")
 
     @classmethod
     def del_all(cls, *densops):
@@ -281,19 +265,19 @@ class DensOp(ctypes.Structure):
 
         """
         for de in densops:
-            if type(de) is list or type(de) is tuple:
+            if isinstance(de, (list, tuple)):
                 cls.del_all(*de)
-            elif type(de) is DensOp:
+            elif isinstance(de, cls):
                 del de
             else:
-                raise DensOp_Error_FreeAll()
+                raise ValueError("fail to free_all.")
 
     @property
     def element(self):
         """ matrix elements of density operator. """
         return self.get_elm()
-    
-    def get_elm(self, qid=[]):
+
+    def get_elm(self, qid=None):
         """
         get the matrix elements of density operator.
 
@@ -318,8 +302,8 @@ class DensOp(ctypes.Structure):
         de_part = self.partial(qid=qid)
         elm = densop_get_elm(de_part)
         return elm
-    
-    def show(self, qid=[], nonzero=False):
+
+    def show(self, qid=None, nonzero=False):
         """
         show the elements of density operator.
 
@@ -376,7 +360,7 @@ class DensOp(ctypes.Structure):
         obj = densop_copy(self)
         de = ctypes.cast(obj.value, ctypes.POINTER(self.__class__)).contents
         return de
-    
+
     def add(self, densop=None):
         """
         add the density operator.
@@ -435,7 +419,7 @@ class DensOp(ctypes.Structure):
         """
         trace = densop_trace(self)
         return trace
-        
+
     def sqtrace(self):
         """
         get the square trace of density operator.
@@ -452,8 +436,8 @@ class DensOp(ctypes.Structure):
         """
         sqtrace = densop_sqtrace(self)
         return sqtrace
-        
-    def patrace(self, qid=[]):
+
+    def patrace(self, qid=None):
         """
         get the partial trace of density operator.
 
@@ -472,7 +456,7 @@ class DensOp(ctypes.Structure):
         de = ctypes.cast(obj.value, ctypes.POINTER(self.__class__)).contents
         return de
 
-    def partial(self, qid=[]):
+    def partial(self, qid=None):
         """
         get the density operator for partial system.
 
@@ -484,21 +468,21 @@ class DensOp(ctypes.Structure):
         Returns
         -------
         densop : instance of DensOp
-            density operator for partial system 
+            density operator for partial system
             (= partial trace for remaining system).
 
         """
         if qid is None or qid == []:
             return self.clone()
-        else:
-            qubit_num = int(math.log2(self.row))
-            qid_remained = []
-            for x in range(qubit_num):
-                if not x in qid:
-                    qid_remained.append(x)
-            de_remained = self.patrace(qid=qid_remained)
-            return de_remained
-        
+
+        qubit_num = int(math.log2(self.row))
+        qid_remained = []
+        for x in range(qubit_num):
+            if not x in qid:
+                qid_remained.append(x)
+        de_remained = self.patrace(qid=qid_remained)
+        return de_remained
+
     def tenspro(self, densop):
         """
         get the tensor product with density operator.
@@ -535,13 +519,13 @@ class DensOp(ctypes.Structure):
         """
         if num <= 1:
             return self
-        else:
-            de = self.clone()
-            for i in range(num-1):
-                de_tmp = de.tenspro(self)
-                de = de_tmp.clone()
-            return de
-        
+
+        de = self.clone()
+        for _ in range(num-1):
+            de_tmp = de.tenspro(self)
+            de = de_tmp.clone()
+        return de
+
     def join(self, de_list):
         """
         get tensor product state (density operator) of the density operators' list.
@@ -587,8 +571,8 @@ class DensOp(ctypes.Structure):
         densop_apply_matrix(densop, matrix=matrix, dire='left')
         value = densop.trace()
         return value
-        
-    def apply(self, matrix=None, qid=[], dire='both'):
+
+    def apply(self, matrix=None, qid=None, dire='both'):
         """
         apply the matrix to density operator.
         (= [matrix] * [self] * [dagger of matrix])
@@ -612,9 +596,9 @@ class DensOp(ctypes.Structure):
         densop_apply_matrix(self, matrix=matrix, qid=qid, dire=dire)
         return self
 
-    def probability(self, kraus=[], povm=[], qid=[]):
+    def probability(self, kraus=None, povm=None, qid=None):
         """
-        get the probabilities for measuring operators. 
+        get the probabilities for measuring operators.
         (Kraus or POVM operators).
 
         Parameters
@@ -642,28 +626,28 @@ class DensOp(ctypes.Structure):
         original density operator.
 
         """
-        if kraus != []:
+        if kraus is not None:
             N = len(kraus)
             prob = [0.0]*N
             for i in range(N):
-                 prob[i] = densop_probability(self, matrix=kraus[i], qid=qid,
+                prob[i] = densop_probability(self, matrix=kraus[i], qid=qid,
                                              matrix_type='kraus')
-                 if abs(prob[i]) < EPS:
-                     prob[i] = 0.0
-        elif povm != []:
+                if abs(prob[i]) < cfg.EPS:
+                    prob[i] = 0.0
+        elif povm is not None:
             N = len(povm)
             prob = [0.0]*N
             for i in range(N):
                 prob[i] = densop_probability(self, matrix=povm[i], qid=qid,
                                              matrix_type='povm')
-                if abs(prob[i]) < EPS:
+                if abs(prob[i]) < cfg.EPS:
                     prob[i] = 0.0
         else:
-            raise DensOp_Error_Probability()
-                
+            raise ValueError("kraus or povm must be set.")
+
         return prob
 
-    def instrument(self, kraus=[], qid=[], measured_value=None):
+    def instrument(self, kraus=None, qid=None, measured_value=None):
         """
         instrument to the density operator
 
@@ -674,7 +658,7 @@ class DensOp(ctypes.Structure):
         qid : list
             qubit id's list to measure.
         measured_value : int
-            index of measurement 
+            index of measurement
             (in the case of selective measurement).
 
         Returns
@@ -693,15 +677,15 @@ class DensOp(ctypes.Structure):
         """
         if qid is None or qid == []:
             qnum = int(math.log2(self.row))
-            qid = [i for i in range(qnum)]
+            qid = list(range(qnum))
 
-        if kraus == []:
-            raise DensOp_Error_Instrument()
-        else:
-            N = len(kraus)
+        if kraus is None:
+            raise ValueError("kraus must be set.")
+
+        N = len(kraus)
 
         if measured_value is None:  # non-selective measurement
-            
+
             densop_ori = self.clone()
             for i in range(N):
                 if i == 0:
@@ -710,14 +694,12 @@ class DensOp(ctypes.Structure):
                     densop_tmp = densop_ori.clone()
                     densop_tmp.apply(matrix=kraus[i], qid=qid, dire='both')
                     self.add(densop=densop_tmp)
-                
+
         else:  # selective measurement
 
             if (measured_value < 0 or measured_value >= N):
-                raise DensOp_Error_Instrument()
-            self.apply(matrix=kraus[measured_value],qid=qid)
-            #prob = self.trace()
-            #self.mul(factor=1.0/prob)
+                raise ValueError("measured value must be set 0-{}".format(N-1))
+            self.apply(matrix=kraus[measured_value], qid=qid)
 
         return self
 
@@ -738,16 +720,14 @@ class DensOp(ctypes.Structure):
 
         """
         Sigma_0 = np.eye(2)
-        Sigma_1 = np.array([[0,1],[1,0]])
-        Sigma_2 = np.array([[0,-1j],[1j,0]])
-        Sigma_3 = np.array([[1,0],[0,-1]])
+        Sigma_1 = np.array([[0, 1], [1, 0]])
 
         para_a = math.sqrt(1-prob)
         para_b = math.sqrt(prob)
         kraus = [para_a*Sigma_0, para_b*Sigma_1]
         self.instrument(qid=[q], kraus=kraus)
         return self
-    
+
     def phase_flip(self, q, prob=0.0):
         """
         execute the quantum channel of phase flip.
@@ -765,16 +745,14 @@ class DensOp(ctypes.Structure):
 
         """
         Sigma_0 = np.eye(2)
-        Sigma_1 = np.array([[0,1],[1,0]])
-        Sigma_2 = np.array([[0,-1j],[1j,0]])
-        Sigma_3 = np.array([[1,0],[0,-1]])
+        Sigma_3 = np.array([[1, 0], [0, -1]])
 
         para_a = math.sqrt(1-prob)
         para_b = math.sqrt(prob)
         kraus = [para_a*Sigma_0, para_b*Sigma_3]
         self.instrument(qid=[q], kraus=kraus)
         return self
-    
+
     def bit_phase_flip(self, q, prob=0.0):
         """
         execute the quantum channel of bit and phase flip.
@@ -792,16 +770,14 @@ class DensOp(ctypes.Structure):
 
         """
         Sigma_0 = np.eye(2)
-        Sigma_1 = np.array([[0,1],[1,0]])
-        Sigma_2 = np.array([[0,-1j],[1j,0]])
-        Sigma_3 = np.array([[1,0],[0,-1]])
+        Sigma_2 = np.array([[0, -1j], [1j, 0]])
 
         para_a = math.sqrt(1-prob)
         para_b = math.sqrt(prob)
         kraus = [para_a*Sigma_0, para_b*Sigma_2]
         self.instrument(qid=[q], kraus=kraus)
         return self
-    
+
     def depolarize(self, q, prob=0.0):
         """
         execute the quantum channel of depolarize.
@@ -819,9 +795,9 @@ class DensOp(ctypes.Structure):
 
         """
         Sigma_0 = np.eye(2)
-        Sigma_1 = np.array([[0,1],[1,0]])
-        Sigma_2 = np.array([[0,-1j],[1j,0]])
-        Sigma_3 = np.array([[1,0],[0,-1]])
+        Sigma_1 = np.array([[0, 1], [1, 0]])
+        Sigma_2 = np.array([[0, -1j], [1j, 0]])
+        Sigma_3 = np.array([[1, 0], [0, -1]])
 
         para_a = math.sqrt(1-0.75*prob)
         para_b = math.sqrt(0.25*prob)
@@ -830,7 +806,7 @@ class DensOp(ctypes.Structure):
         kraus = [para_a*Sigma_0, para_b*Sigma_1, para_c*Sigma_2, para_d*Sigma_3]
         self.instrument(qid=[q], kraus=kraus)
         return self
-    
+
     def amp_dump(self, q, prob=0.0):
         """
         execute the quantum channel of amplitude dumping.
@@ -849,10 +825,10 @@ class DensOp(ctypes.Structure):
         """
         transmit = math.sqrt(1.0-prob)
         reflect = math.sqrt(prob)
-        kraus = [np.array([[1,0],[0,transmit]]), np.array([[0,reflect],[0,0]])]
+        kraus = [np.array([[1, 0], [0, transmit]]), np.array([[0, reflect], [0, 0]])]
         self.instrument(qid=[q], kraus=kraus)
         return self
-    
+
     def phase_dump(self, q, prob=0.0):
         """
         execute the quantum channel of phase dumping.
@@ -871,28 +847,32 @@ class DensOp(ctypes.Structure):
         """
         transmit = math.sqrt(1.0-prob)
         reflect = math.sqrt(prob)
-        kraus = [np.array([[1,0],[0,transmit]]), np.array([[0,0],[0,reflect]])]
+        kraus = [np.array([[1, 0], [0, transmit]]), np.array([[0, 0], [0, reflect]])]
         self.instrument(qid=[q], kraus=kraus)
         return self
-    
-    def __mat_sqrt(self,mat):  # mat is hermite
+
+    @staticmethod
+    def mat_sqrt(mat):  # mat is hermite
+        """ square root of the matrix """
 
         eigenvals, unitary = np.linalg.eigh(mat)
         unitary_dg = np.conjugate(unitary.T)
         mat_diag = np.sqrt(np.abs(np.diag(eigenvals)))
-        mat_sq = np.dot(np.dot(unitary,mat_diag),unitary_dg)
+        mat_sq = np.dot(np.dot(unitary, mat_diag), unitary_dg)
 
         return mat_sq
 
-    def __mat_norm(self,mat):
+    @staticmethod
+    def mat_norm(mat):
+        """ norm of the matrix """
 
-        mat2 = np.dot(np.conjugate(mat.T),mat)  # mat2 is hermite
-        mat2_sqrt = self.__mat_sqrt(mat2)
+        mat2 = np.dot(np.conjugate(mat.T), mat)  # mat2 is hermite
+        mat2_sqrt = DensOp.mat_sqrt(mat2)
         norm = np.trace(mat2_sqrt).real
 
-        return norm 
+        return norm
 
-    def fidelity(self, densop=None, qid=[]):
+    def fidelity(self, densop=None, qid=None):
         """
         get the fidelity with density operator.
 
@@ -913,16 +893,16 @@ class DensOp(ctypes.Structure):
         mat2 = densop.get_elm(qid=qid)
 
         if mat1.shape != mat2.shape:
-            raise DensOp_Error_Fidelity()
+            raise ValueError("dimensions are not match.")
 
-        mat1_sqrt = self.__mat_sqrt(mat1)
-        mat2_sqrt = self.__mat_sqrt(mat2)
+        mat1_sqrt = DensOp.mat_sqrt(mat1)
+        mat2_sqrt = DensOp.mat_sqrt(mat2)
 
-        fid = self.__mat_norm(np.dot(mat1_sqrt,mat2_sqrt))
-            
+        fid = DensOp.mat_norm(np.dot(mat1_sqrt, mat2_sqrt))
+
         return fid
 
-    def distance(self, densop=None, qid=[]):
+    def distance(self, densop=None, qid=None):
         """
         get the trace distance with the density operator.
 
@@ -944,17 +924,19 @@ class DensOp(ctypes.Structure):
         mat2 = densop.get_elm(qid=qid)
 
         if mat1.shape != mat2.shape:
-            raise DensOp_Error_Distance()
+            raise ValueError("dimensions are not match.")
 
-        dis = 0.5 * self.__mat_norm(mat1-mat2)
-            
+        dis = 0.5 * DensOp.mat_norm(mat1-mat2)
+
         return dis
 
-    def __mat_spectrum(self, mat):  # mat is hermite
+    @staticmethod
+    def mat_spectrum(mat):  # mat is hermite
+        """ spectrum of the hermitian matrix """
 
         eigenvals, unitary = np.linalg.eigh(mat)
         unitary_T = unitary.T
-        return eigenvals,unitary_T
+        return eigenvals, unitary_T
 
     def spectrum(self):
         """
@@ -973,24 +955,35 @@ class DensOp(ctypes.Structure):
 
         """
         mat = self.get_elm()
-        eigvals,eigvecs = self.__mat_spectrum(mat)
-        prob = [eigvals[i] for i in range(len(eigvals)) if abs(eigvals[i]) > EPS]
-        vecs = [eigvecs[i] for i in range(len(eigvals)) if abs(eigvals[i]) > EPS]
+        eigvals, eigvecs = DensOp.mat_spectrum(mat)
+        prob = [eigvals[i] for i in range(len(eigvals)) if abs(eigvals[i]) > cfg.EPS]
+        vecs = [eigvecs[i] for i in range(len(eigvals)) if abs(eigvals[i]) > cfg.EPS]
         qstate = [QState(vector=vecs[i]) for i in range(len(prob))]
 
-        #return prob,qstate
-        return qstate,prob
+        return qstate, prob
 
-    def __von_neumann_entropy(self):  # von neumann entropy
+    def von_neumann_entropy(self):  # von neumann entropy
+        """
+        get the von neumann entropy (or entanglement entropy).
 
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        ent : float
+            von neumann entropy.
+
+        """
         mat = self.get_elm()
         eigvals = np.linalg.eigvalsh(mat)
         diag = [-eigvals[i]*np.log2(eigvals[i])
-                for i in range(len(eigvals)) if abs(eigvals[i]) > EPS]
+                for i in range(len(eigvals)) if abs(eigvals[i]) > cfg.EPS]
         ent = np.sum(diag)
         return ent
-    
-    def entropy(self, qid=[]):
+
+    def entropy(self, qid=None):
         """
         get the von neumann entropy (or entanglement entropy).
 
@@ -1006,21 +999,21 @@ class DensOp(ctypes.Structure):
 
         """
         qubit_num = int(math.log2(self.row))
-        
-        if qid == []:
-            ent = self.__von_neumann_entropy()
+
+        if qid is None:
+            ent = self.von_neumann_entropy()
         else:
-            if (min(qid) < 0 or max(qid) >= qubit_num or len(qid)!=len(set(qid))):
-                raise DensOp_Error_Entropy()
+            if (min(qid) < 0 or max(qid) >= qubit_num or len(qid) != len(set(qid))):
+                raise IndexError("index out of range.")
             if len(qid) == qubit_num:
-                ent = self.__von_neumann_entropy()
+                ent = self.von_neumann_entropy()
             else:
                 de_part = self.partial(qid=qid)
-                ent = de_part.__von_neumann_entropy()
-                
+                ent = de_part.von_neumann_entropy()
+
         return ent
 
-    def cond_entropy(self, qid_0=[], qid_1=[]):
+    def cond_entropy(self, qid_0=None, qid_1=None):
         """
         get the conditional entropy.
 
@@ -1035,24 +1028,27 @@ class DensOp(ctypes.Structure):
         -------
         ent : float
             conditianal entropy (S(qid_0|qid_1)).
-        
+
         """
         qubit_num = int(math.log2(self.row))
-        
-        if (qid_0 == [] or qid_1 == []
-            or min(qid_0) < 0 or max(qid_0) >= qubit_num
-            or min(qid_1) < 0 or max(qid_1) >= qubit_num
-            or len(qid_0) != len(set(qid_0))
-            or len(qid_1) != len(set(qid_1))):
-            raise DensOp_Error_Entropy()
-        else:
-            qid_merge = qid_0 + qid_1
-            qid_whole = set(qid_merge)
-            ent = self.entropy(qid_whole) - self.entropy(qid_1)
-            
+
+        if ((qid_0 is None or
+             min(qid_0) < 0 or max(qid_0) >= qubit_num or
+             len(qid_0) != len(set(qid_0)))):
+            raise IndexError("index out of range.")
+
+        if ((qid_1 is None or
+             min(qid_1) < 0 or max(qid_1) >= qubit_num or
+             len(qid_1) != len(set(qid_1)))):
+            raise IndexError("index out of range.")
+
+        qid_merge = qid_0 + qid_1
+        qid_whole = set(qid_merge)
+        ent = self.entropy(qid_whole) - self.entropy(qid_1)
+
         return ent
 
-    def mutual_info(self, qid_0=[], qid_1=[]):  # mutual information
+    def mutual_info(self, qid_0=None, qid_1=None):  # mutual information
         """
         get the mutual information.
 
@@ -1067,19 +1063,22 @@ class DensOp(ctypes.Structure):
         -------
         ent : float
             mutual information (S(qid_0:qid_1)).
-        
+
         """
         qubit_num = int(math.log2(self.row))
-        
-        if (qid_0 == [] or qid_1 == []
-            or min(qid_0) < 0 or max(qid_0) >= qubit_num
-            or min(qid_1) < 0 or max(qid_1) >= qubit_num
-            or len(qid_0) != len(set(qid_0))
-            or len(qid_1) != len(set(qid_1))):
-            raise DensOp_Error_Entropy()
-        else:
-            ent = self.entropy(qid_0) - self.cond_entropy(qid_0,qid_1)
-            
+
+        if ((qid_0 is None or
+             min(qid_0) < 0 or max(qid_0) >= qubit_num or
+             len(qid_0) != len(set(qid_0)))):
+            raise IndexError("index out of range.")
+
+        if ((qid_1 is None or
+             min(qid_1) < 0 or max(qid_1) >= qubit_num or
+             len(qid_1) != len(set(qid_1)))):
+            raise IndexError("index out of range.")
+
+        ent = self.entropy(qid_0) - self.cond_entropy(qid_0, qid_1)
+
         return ent
 
     def relative_entropy(self, densop=None):  # relative entropy
@@ -1095,31 +1094,28 @@ class DensOp(ctypes.Structure):
         -------
         ent : float
             relative entropy.
-        
+
         """
         if self.row != densop.row:
-            raise DensOp_Error_Entropy()
-        
-        mat_A = self.get_elm()
-        mat_B = densop.get_elm()
+            raise ValueError("dimensions are not match.")
 
-        eigvals_A,eigvecs_A = self.__mat_spectrum(mat_A)
-        eigvals_B,eigvecs_B = self.__mat_spectrum(mat_B)
+        eigvals_A, eigvecs_A = DensOp.mat_spectrum(self.get_elm())
+        eigvals_B, eigvecs_B = DensOp.mat_spectrum(densop.get_elm())
 
-        P = np.dot(np.conjugate(eigvecs_A.T),eigvecs_B)
+        P = np.dot(np.conjugate(eigvecs_A.T), eigvecs_B)
         P = np.conjugate(P)*P
-        
-        diag_A = [eigvals_A[i]*np.log2(eigvals_A[i])
-                for i in range(len(eigvals_A)) if abs(eigvals_A[i]) > EPS]
+
+        diag_A = [eigvals_A[i]*np.log2(eigvals_A[i]) for i in
+                  range(len(eigvals_A)) if abs(eigvals_A[i]) > cfg.EPS]
         relent_A = np.sum(diag_A)
 
         relent_B = 0.0
-        for i in range(len(eigvals_A)):
-            if eigvals_A[i] < EPS:
+        for i, ev_a in enumerate(eigvals_A):
+            if ev_a < cfg.EPS:
                 continue
-            for j in range(len(eigvals_B)):
-                relent_B += abs(P[i][j]) * eigvals_A[i] *np.log2(eigvals_B[j])
-        
+            for j, ev_b in enumerate(eigvals_B):
+                relent_B += abs(P[i][j]) * ev_a *np.log2(ev_b)
+
         relent = relent_A - relent_B
         return relent
 
@@ -1139,7 +1135,7 @@ class DensOp(ctypes.Structure):
         self : instance of DensOp
 
         """
-        densop_operate_qgate(self, kind=PAULI_X, phase=DEF_PHASE, qid=[q0])
+        densop_operate_qgate(self, kind=cfg.PAULI_X, phase=cfg.DEF_PHASE, qid=[q0])
         return self
 
     def y(self, q0):
@@ -1156,7 +1152,7 @@ class DensOp(ctypes.Structure):
         self : instance of DensOp
 
         """
-        densop_operate_qgate(self, kind=PAULI_Y, phase=DEF_PHASE, qid=[q0])
+        densop_operate_qgate(self, kind=cfg.PAULI_Y, phase=cfg.DEF_PHASE, qid=[q0])
         return self
 
     def z(self, q0):
@@ -1173,7 +1169,7 @@ class DensOp(ctypes.Structure):
         self : instance of DensOp
 
         """
-        densop_operate_qgate(self, kind=PAULI_Z, phase=DEF_PHASE, qid=[q0])
+        densop_operate_qgate(self, kind=cfg.PAULI_Z, phase=cfg.DEF_PHASE, qid=[q0])
         return self
 
     def xr(self, q0):
@@ -1190,12 +1186,12 @@ class DensOp(ctypes.Structure):
         self : instance of DensOp
 
         """
-        densop_operate_qgate(self,kind=ROOT_PAULI_X, phase=DEF_PHASE, qid=[q0])
+        densop_operate_qgate(self, kind=cfg.ROOT_PAULI_X, phase=cfg.DEF_PHASE, qid=[q0])
         return self
 
     def xr_dg(self, q0):
         """
-        operate root X dagger gate 
+        operate root X dagger gate
         (hermmitian conjugate of root X gate).
 
         Parameters
@@ -1208,7 +1204,7 @@ class DensOp(ctypes.Structure):
         self : instance of DensOp
 
         """
-        densop_operate_qgate(self, kind=ROOT_PAULI_X_, phase=DEF_PHASE, qid=[q0])
+        densop_operate_qgate(self, kind=cfg.ROOT_PAULI_X_, phase=cfg.DEF_PHASE, qid=[q0])
         return self
 
     def h(self, q0):
@@ -1225,7 +1221,7 @@ class DensOp(ctypes.Structure):
         self : instance of DensOp
 
         """
-        densop_operate_qgate(self, kind=HADAMARD, phase=DEF_PHASE, qid=[q0])
+        densop_operate_qgate(self, kind=cfg.HADAMARD, phase=cfg.DEF_PHASE, qid=[q0])
         return self
 
     def s(self, q0):
@@ -1242,7 +1238,7 @@ class DensOp(ctypes.Structure):
         self : instance of DensOp
 
         """
-        densop_operate_qgate(self, kind=PHASE_SHIFT_S, phase=DEF_PHASE, qid=[q0])
+        densop_operate_qgate(self, kind=cfg.PHASE_SHIFT_S, phase=cfg.DEF_PHASE, qid=[q0])
         return self
 
     def s_dg(self, q0):
@@ -1259,7 +1255,7 @@ class DensOp(ctypes.Structure):
         self : instance of DensOp
 
         """
-        densop_operate_qgate(self, kind=PHASE_SHIFT_S_, phase=DEF_PHASE, qid=[q0])
+        densop_operate_qgate(self, kind=cfg.PHASE_SHIFT_S_, phase=cfg.DEF_PHASE, qid=[q0])
         return self
 
     def t(self, q0):
@@ -1276,7 +1272,7 @@ class DensOp(ctypes.Structure):
         self : instance of DensOp
 
         """
-        densop_operate_qgate(self, kind=PHASE_SHIFT_T, phase=DEF_PHASE, qid=[q0])
+        densop_operate_qgate(self, kind=cfg.PHASE_SHIFT_T, phase=cfg.DEF_PHASE, qid=[q0])
         return self
 
     def t_dg(self, q0):
@@ -1293,10 +1289,10 @@ class DensOp(ctypes.Structure):
         self : instance of DensOp
 
         """
-        densop_operate_qgate(self, kind=PHASE_SHIFT_T_, phase=DEF_PHASE, qid=[q0])
+        densop_operate_qgate(self, kind=cfg.PHASE_SHIFT_T_, phase=cfg.DEF_PHASE, qid=[q0])
         return self
 
-    def rx(self, q0, phase=DEF_PHASE):
+    def rx(self, q0, phase=cfg.DEF_PHASE):
         """
         operate RX gate (rotation around X-axis).
 
@@ -1312,10 +1308,10 @@ class DensOp(ctypes.Structure):
         self : instance of DensOp
 
         """
-        densop_operate_qgate(self, kind=ROTATION_X, phase=phase, qid=[q0])
+        densop_operate_qgate(self, kind=cfg.ROTATION_X, phase=phase, qid=[q0])
         return self
 
-    def ry(self, q0, phase=DEF_PHASE):
+    def ry(self, q0, phase=cfg.DEF_PHASE):
         """
         operate RY gate (rotation around Y-axis).
 
@@ -1331,10 +1327,10 @@ class DensOp(ctypes.Structure):
         self : instance of DensOp
 
         """
-        densop_operate_qgate(self, kind=ROTATION_Y, phase=phase, qid=[q0])
+        densop_operate_qgate(self, kind=cfg.ROTATION_Y, phase=phase, qid=[q0])
         return self
 
-    def rz(self, q0, phase=DEF_PHASE):
+    def rz(self, q0, phase=cfg.DEF_PHASE):
         """
         operate RZ gate (rotation around Z-axis).
 
@@ -1350,10 +1346,10 @@ class DensOp(ctypes.Structure):
         self : instance of DensOp
 
         """
-        densop_operate_qgate(self, kind=ROTATION_Z, phase=phase, qid=[q0])
+        densop_operate_qgate(self, kind=cfg.ROTATION_Z, phase=phase, qid=[q0])
         return self
 
-    def p(self, q0, phase=DEF_PHASE):
+    def p(self, q0, phase=cfg.DEF_PHASE):
         """
         operate P gate (phase shift gate).
 
@@ -1375,89 +1371,8 @@ class DensOp(ctypes.Structure):
         | 0.0 exp(i*phase*PI) |
 
         """
-        densop_operate_qgate(self, kind=PHASE_SHIFT, phase=phase, qid=[q0])
+        densop_operate_qgate(self, kind=cfg.PHASE_SHIFT, phase=phase, qid=[q0])
         return self
-
-    # def u1(self, q0, alpha=DEF_PHASE):
-    #     """
-    #     operate U1 gate (by IBM).
-    # 
-    #     Parameters
-    #     ----------
-    #     q0 : int
-    #         qubit id.
-    #     alpha : float
-    #         rotation angle (unit of angle is PI radian).
-    # 
-    #     Returns
-    #     -------
-    #     self : instance of DensOp
-    # 
-    #     Notes
-    #     -----
-    #     this opration is equal to P gate (phase shift gate)
-    # 
-    #     """
-    #     densop_operate_qgate(self, kind=ROTATION_U1, phase=alpha, qid=[q0])
-    #     return self
-    # 
-    # def u2(self, q0, alpha=DEF_PHASE, beta=DEF_PHASE):
-    #     """
-    #     operate U2 gate (by IBM).
-    # 
-    #     Parameters
-    #     ----------
-    #     q0 : int
-    #         qubit id.
-    #     alpha : float
-    #         rotation angle (unit of angle is PI radian).
-    #     beta : float
-    #         rotation angle (unit of angle is PI radian).
-    # 
-    #     Returns
-    #     -------
-    #     self : instance of DensOp
-    # 
-    #     Notes
-    #     -----
-    #     matrix experssion is following...
-    #     | 1/sqrt(2)              -exp(i*alpha*PI)/sqrt(2)       |
-    #     | exp(i*beta*PI)/sqrt(2) exp(i*(alpha+beta)*PI)/sqrt(2) |
-    # 
-    #     """
-    #     densop_operate_qgate(self, kind=ROTATION_U2, phase=alpha, phase1=beta, qid=[q0])
-    #     return self
-    # 
-    # def u3(self, q0, alpha=DEF_PHASE, beta=DEF_PHASE, gamma=DEF_PHASE):
-    #     """
-    #     operate U3 gate (by IBM).
-    # 
-    #     Parameters
-    #     ----------
-    #     q0 : int
-    #         qubit id.
-    #     alpha : float
-    #         rotation angle (unit of angle is PI radian).
-    #     beta : float
-    #         rotation angle (unit of angle is PI radian).
-    #     gamma : float
-    #         rotation angle (unit of angle is PI radian).
-    # 
-    #     Returns
-    #     -------
-    #     self : instance of DensOp
-    # 
-    #     Notes
-    #     -----
-    #     matrix expression is following...
-    #     | cos(gamma/2)                -exp(i*alpha*PI)*sin(gamma/2)       |
-    #     | exp(i*beta*PI)*sin(gamma/2) exp(i*(alpha+beta)*PI)*cos(gamma/2) |
-    # 
-    # 
-    #     """
-    #     densop_operate_qgate(self, kind=ROTATION_U3, phase=alpha, phase1=beta,
-    #                          phase2=gamma, qid=[q0])
-    #     return self
 
     # 2-qubit gate
 
@@ -1477,7 +1392,7 @@ class DensOp(ctypes.Structure):
         self : instance of DensOp
 
         """
-        densop_operate_qgate(self, kind=CONTROLLED_X, phase=DEF_PHASE, qid=[q0,q1])
+        densop_operate_qgate(self, kind=cfg.CONTROLLED_X, phase=cfg.DEF_PHASE, qid=[q0, q1])
         return self
 
     def cy(self, q0, q1):
@@ -1496,7 +1411,7 @@ class DensOp(ctypes.Structure):
         self : instance of DensOp
 
         """
-        densop_operate_qgate(self, kind=CONTROLLED_Y, phase=DEF_PHASE, qid=[q0,q1])
+        densop_operate_qgate(self, kind=cfg.CONTROLLED_Y, phase=cfg.DEF_PHASE, qid=[q0, q1])
         return self
 
     def cz(self, q0, q1):
@@ -1515,7 +1430,7 @@ class DensOp(ctypes.Structure):
         self : instance of DensOp
 
         """
-        densop_operate_qgate(self, kind=CONTROLLED_Z, phase=DEF_PHASE, qid=[q0,q1])
+        densop_operate_qgate(self, kind=cfg.CONTROLLED_Z, phase=cfg.DEF_PHASE, qid=[q0, q1])
         return self
 
     def cxr(self, q0, q1):
@@ -1534,7 +1449,7 @@ class DensOp(ctypes.Structure):
         self : instance of DensOp
 
         """
-        densop_operate_qgate(self, kind=CONTROLLED_XR, phase=DEF_PHASE, qid=[q0,q1])
+        densop_operate_qgate(self, kind=cfg.CONTROLLED_XR, phase=cfg.DEF_PHASE, qid=[q0, q1])
         return self
 
     def cxr_dg(self, q0, q1):
@@ -1553,7 +1468,7 @@ class DensOp(ctypes.Structure):
         self : instance of DensOp
 
         """
-        densop_operate_qgate(self, kind=CONTROLLED_XR_, phase=DEF_PHASE, qid=[q0,q1])
+        densop_operate_qgate(self, kind=cfg.CONTROLLED_XR_, phase=cfg.DEF_PHASE, qid=[q0, q1])
         return self
 
     def ch(self, q0, q1):
@@ -1572,7 +1487,7 @@ class DensOp(ctypes.Structure):
         self : instance of DensOp
 
         """
-        densop_operate_qgate(self, kind=CONTROLLED_H, phase=DEF_PHASE, qid=[q0,q1])
+        densop_operate_qgate(self, kind=cfg.CONTROLLED_H, phase=cfg.DEF_PHASE, qid=[q0, q1])
         return self
 
     def cs(self, q0, q1):
@@ -1591,7 +1506,7 @@ class DensOp(ctypes.Structure):
         self : instance of DensOp
 
         """
-        densop_operate_qgate(self, kind=CONTROLLED_S, phase=DEF_PHASE, qid=[q0,q1])
+        densop_operate_qgate(self, kind=cfg.CONTROLLED_S, phase=cfg.DEF_PHASE, qid=[q0, q1])
         return self
 
     def cs_dg(self, q0, q1):
@@ -1610,7 +1525,7 @@ class DensOp(ctypes.Structure):
         self : instance of DensOp
 
         """
-        densop_operate_qgate(self, kind=CONTROLLED_S_, phase=DEF_PHASE, qid=[q0,q1])
+        densop_operate_qgate(self, kind=cfg.CONTROLLED_S_, phase=cfg.DEF_PHASE, qid=[q0, q1])
         return self
 
     def ct(self, q0, q1):
@@ -1629,7 +1544,7 @@ class DensOp(ctypes.Structure):
         self : instance of DensOp
 
         """
-        densop_operate_qgate(self, kind=CONTROLLED_T, phase=DEF_PHASE, qid=[q0,q1])
+        densop_operate_qgate(self, kind=cfg.CONTROLLED_T, phase=cfg.DEF_PHASE, qid=[q0, q1])
         return self
 
     def ct_dg(self, q0, q1):
@@ -1648,7 +1563,7 @@ class DensOp(ctypes.Structure):
         self : instance of DensOp
 
         """
-        densop_operate_qgate(self, kind=CONTROLLED_T_, phase=DEF_PHASE, qid=[q0,q1])
+        densop_operate_qgate(self, kind=cfg.CONTROLLED_T_, phase=cfg.DEF_PHASE, qid=[q0, q1])
         return self
 
     def sw(self, q0, q1):
@@ -1667,10 +1582,10 @@ class DensOp(ctypes.Structure):
         self : instance of DensOp
 
         """
-        densop_operate_qgate(self, kind=SWAP_QUBITS, phase=DEF_PHASE, qid=[q0,q1])
+        densop_operate_qgate(self, kind=cfg.SWAP_QUBITS, phase=cfg.DEF_PHASE, qid=[q0, q1])
         return self
 
-    def cp(self, q0, q1, phase=DEF_PHASE):
+    def cp(self, q0, q1, phase=cfg.DEF_PHASE):
         """
         operate CP gate (controlled P gate).
 
@@ -1686,10 +1601,10 @@ class DensOp(ctypes.Structure):
         self : instance of DensOp
 
         """
-        densop_operate_qgate(self, kind=CONTROLLED_P, phase=phase, qid=[q0,q1])
+        densop_operate_qgate(self, kind=cfg.CONTROLLED_P, phase=phase, qid=[q0, q1])
         return self
 
-    def crx(self, q0, q1, phase=DEF_PHASE):
+    def crx(self, q0, q1, phase=cfg.DEF_PHASE):
         """
         operate CRX gate (controlled RX gate).
 
@@ -1707,10 +1622,10 @@ class DensOp(ctypes.Structure):
         self : instance of DensOp
 
         """
-        densop_operate_qgate(self, kind=CONTROLLED_RX, phase=phase, qid=[q0,q1])
+        densop_operate_qgate(self, kind=cfg.CONTROLLED_RX, phase=phase, qid=[q0, q1])
         return self
 
-    def cry(self, q0, q1, phase=DEF_PHASE):
+    def cry(self, q0, q1, phase=cfg.DEF_PHASE):
         """
         operate CRY gate (controlled RY gate).
 
@@ -1728,10 +1643,10 @@ class DensOp(ctypes.Structure):
         self : instance of DensOp
 
         """
-        densop_operate_qgate(self, kind=CONTROLLED_RY, phase=phase, qid=[q0,q1])
+        densop_operate_qgate(self, kind=cfg.CONTROLLED_RY, phase=phase, qid=[q0, q1])
         return self
 
-    def crz(self, q0, q1, phase=DEF_PHASE):
+    def crz(self, q0, q1, phase=cfg.DEF_PHASE):
         """
         operate CRZ gate (controlled RZ gate).
 
@@ -1749,82 +1664,11 @@ class DensOp(ctypes.Structure):
         self : instance of DensOp
 
         """
-        densop_operate_qgate(self, kind=CONTROLLED_RZ, phase=phase, qid=[q0,q1])
+        densop_operate_qgate(self, kind=cfg.CONTROLLED_RZ, phase=phase, qid=[q0, q1])
         return self
 
-    # def cu1(self, q0, q1, alpha=DEF_PHASE):
-    #     """
-    #     operate CU1 gate (controlled U1 gate).
-    # 
-    #     Parameters
-    #     ----------
-    #     q0 : int
-    #         qubit id (control qubit).
-    #     q1 : int
-    #         qubit id (target qubit).
-    #     alpha : float
-    #         rotation angle (unit of angle is PI radian).
-    # 
-    #     Returns
-    #     -------
-    #     self : instance of DensOp
-    # 
-    #     """
-    #     densop_operate_qgate(self, kind=CONTROLLED_U1, phase=alpha, qid=[q0,q1])
-    #     return self
-    # 
-    # def cu2(self, q0, q1, alpha=DEF_PHASE, beta=DEF_PHASE):
-    #     """
-    #     operate CU2 gate (controlled U2 gate).
-    # 
-    #     Parameters
-    #     ----------
-    #     q0 : int
-    #         qubit id (control qubit).
-    #     q1 : int
-    #         qubit id (target qubit).
-    #     alpha : float
-    #         rotation angle (unit of angle is PI radian).
-    #     beta : float
-    #         rotation angle (unit of angle is PI radian).
-    # 
-    #     Returns
-    #     -------
-    #     self : instance of DensOp
-    # 
-    #     """
-    #     densop_operate_qgate(self, kind=CONTROLLED_U2, phase=alpha, phase1=beta,
-    #                          qid=[q0,q1])
-    #     return self
-    # 
-    # def cu3(self, q0, q1, alpha=DEF_PHASE, beta=DEF_PHASE, gamma=DEF_PHASE):
-    #     """
-    #     operate CU3 gate (controlled U3 gate).
-    # 
-    #     Parameters
-    #     ----------
-    #     q0 : int
-    #         qubit id (control qubit).
-    #     q1 : int
-    #         qubit id (target qubit).
-    #     alpha : float
-    #         rotation angle (unit of angle is PI radian).
-    #     beta : float
-    #         rotation angle (unit of angle is PI radian).
-    #     gamma : float
-    #         rotation angle (unit of angle is PI radian).
-    # 
-    #     Returns
-    #     -------
-    #     self : instance of DensOp
-    # 
-    #     """
-    #     densop_operate_qgate(self, kind=CONTROLLED_U3, phase=alpha, phase1=beta,
-    #                          phase2=gamma, qid=[q0,q1])
-    #     return self
-
     # 3-qubit gate
-    
+
     def ccx(self, q0, q1, q2):
         """
         operate CCX gate (toffoli gate, controlled controlled X gate).
@@ -1843,7 +1687,7 @@ class DensOp(ctypes.Structure):
         self : instance of DensOp
 
         """
-        self.cxr(q1,q2).cx(q0,q1).cxr_dg(q1,q2).cx(q0,q1).cxr(q0,q2)
+        self.cxr(q1, q2).cx(q0, q1).cxr_dg(q1, q2).cx(q0, q1).cxr(q0, q2)
         return self
 
     def csw(self, q0, q1, q2):
@@ -1864,24 +1708,24 @@ class DensOp(ctypes.Structure):
         self : instance of DensOp
 
         """
-        self.cx(q2,q1).ccx(q0,q1,q2).cx(q2,q1)
+        self.cx(q2, q1).ccx(q0, q1, q2).cx(q2, q1)
         return self
-    
+
     # other gate
-    
-    def mcx(self,qid=[]):
+
+    def mcx(self, qid=None):
         """
         operate MCX gate (multi-controlled X gate).
-       
+
         Parameters
         ----------
         qid : list of int
             qubit id list [control, control, ... , control, target]
-    
+
         Returns
         -------
         self : instance of DensOp
-        
+
         """
         densop_mcx(self, qid)
         return self
@@ -1905,7 +1749,7 @@ class DensOp(ctypes.Structure):
         """
         pauli_list = pp.pauli_list
         qid = pp.qid
-    
+
         if ctrl is None:
             for q, pauli in zip(qid, pauli_list):
                 if pauli == 'X':
@@ -1919,7 +1763,7 @@ class DensOp(ctypes.Structure):
         else:
             if ctrl in qid:
                 raise ValueError("controll and target qubit id conflict")
-        
+
             for q, pauli in zip(qid, pauli_list):
                 if pauli == 'X':
                     self.cx(ctrl, q)
@@ -1929,29 +1773,17 @@ class DensOp(ctypes.Structure):
                     self.cz(ctrl, q)
                 else:
                     continue
-    
+
         return self
-
-    def free(self):
-        """
-        free memory of quantum state.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-        self : instance of DensOp
-
-        """
-        # densop_free(self)
-        warnings.warn("No need to call 'free' method because free automatically, or you can use 'del' to free memory explicitly.")
 
     def __del__(self):
 
         densop_free(self)
-    
+
 # c-library for densop
-from qlazy.lib.densop_c import *
+from qlazy.lib.densop_c import (densop_init, densop_init_with_matrix, densop_get_elm,
+                                densop_reset, densop_print, densop_copy, densop_add,
+                                densop_mul, densop_trace, densop_sqtrace,
+                                densop_patrace, densop_tensor_product,
+                                densop_apply_matrix, densop_probability,
+                                densop_operate_qgate, densop_free)

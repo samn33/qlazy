@@ -895,7 +895,7 @@ class TestQState_evolve(unittest.TestCase):
         """
         hm = Observable("x_0")
         qs = QState(qubit_num=1)
-        qs.evolve(observable=hm, time=0.2, iter=100)
+        qs.evolve(observable=hm, time=0.2, iteration=100)
         actual = qs.amp
         expect = np.array([(0.8090169943749473+0j), 0.5877852522924732j])
         ans = equal_vectors(actual, expect)
@@ -911,7 +911,7 @@ class TestQState_expect(unittest.TestCase):
         ob = Observable("y_0")
         hm = Observable("x_0")
         qs = QState(qubit_num=1)
-        qs.evolve(observable=hm, time=0.2, iter=100)
+        qs.evolve(observable=hm, time=0.2, iteration=100)
         actual = qs.expect(observable=ob)
         expect = 0.9510565162951199
         ans = equal_values(actual, expect)
@@ -923,7 +923,7 @@ class TestQState_expect(unittest.TestCase):
         qs = QState(qubit_num=2).x(0)
         hm = Observable("z_0*z_1+x_0+x_1")
         ob = Observable("2.0+z_0+z_1")
-        qs.evolve(observable=hm,time=0.1,iter=10)
+        qs.evolve(observable=hm,time=0.1,iteration=10)
         actual = qs.expect(observable=ob)
         expect = 1.9999999999999898+0j
         ans = equal_values(actual, expect)

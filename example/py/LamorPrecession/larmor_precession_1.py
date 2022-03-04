@@ -12,7 +12,7 @@ def main():
         qs = QState(1)
 
         # time evolution
-        qs.evolve(observable=hm, time=t, iter=100)
+        qs.evolve(observable=hm, time=t, iteration=100)
 
         # expectation values of Observable Y,Z
         exp_y = qs.expect(observable=ob_y).real

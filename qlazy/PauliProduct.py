@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
+"""  Pauli Product """
 
-from qlazy.UnitaryOperator import UnitaryOperator
-        
-class PauliProduct(UnitaryOperator):
+class PauliProduct:
 
     """ Pauli Product
 
@@ -27,7 +26,8 @@ class PauliProduct(UnitaryOperator):
 
         Notes
         -----
-        'pauli_str' must consist of 'X','Y','Z', and length of 'pauli_str' must be equal to length of 'qid'
+        'pauli_str' must consist of 'X','Y','Z', and length of 'pauli_str'
+        must be equal to length of 'qid'
 
         Examples
         --------
@@ -40,13 +40,13 @@ class PauliProduct(UnitaryOperator):
         if pauli_str is None:
             raise ValueError("pauli_str or qid is not specified")
         if qid is None:
-            qid = [i for i in range(len(pauli_str))]
-    
+            qid = list(range(len(pauli_str)))
+
         if len(pauli_str) != len(qid):
             raise ValueError("length of 'pauli_str' is not equal to length of 'qid'")
-        elif len(qid) != len(set(qid)):
+        if len(qid) != len(set(qid)):
             raise ValueError("some elements of 'qid' are duplicated")
-        elif sum([0 if p in ['X','Y','Z','I'] else 1 for p in list(pauli_str)]) > 0:
+        if sum([0 if p in ['X', 'Y', 'Z', 'I'] else 1 for p in list(pauli_str)]) > 0:
             raise ValueError("'pauli_str' must consist of 'X','Y','Z'")
 
         qid_sorted = []
@@ -57,17 +57,20 @@ class PauliProduct(UnitaryOperator):
             pauli_list_sorted = ['I']
         else:
             for q, p in sorted(zip(qid, list(pauli_str))):
-                if p == 'I': continue
+                if p == 'I':
+                    continue
                 qid_sorted.append(q)
                 pauli_list_sorted.append(p)
 
-        super().__init__(qid=qid_sorted)
+        self.qid = qid_sorted
+        self.qubit_num = max(qid_sorted) + 1
+
         self.pauli_list = pauli_list_sorted
 
     def __str__(self):
 
         pauli_product = ""
-        for i,p in sorted(zip(self.qid, self.pauli_list)):
+        for i, p in sorted(zip(self.qid, self.pauli_list)):
             pauli_product += "{0:}({1:}) ".format(p, str(i))
 
         pauli_product = pauli_product.rstrip()
@@ -98,8 +101,8 @@ class PauliProduct(UnitaryOperator):
             qubit_num = self.qubit_num
 
         if qubit_num < max(self.qid) + 1:
-            raise Valueerror("qubit_num is smaller than the size required by pauli product")
-            
+            raise ValueError("qubit_num is smaller than the size required by pauli product")
+
         binary_rep = [0] * qubit_num * 2
         for q in range(qubit_num):
             if q in self.qid:
@@ -140,11 +143,8 @@ class PauliProduct(UnitaryOperator):
             inner_prod += (binary_rep_self[qubit_num + i] * binary_rep_pp[i])
         inner_prod = inner_prod % 2
 
-        if inner_prod == 0:
-            ans = True
-        else:
-            ans = False
-        
+        ans = bool(inner_prod == 0)
+
         return ans
 
     def tenspro(self, pp):
@@ -163,7 +163,7 @@ class PauliProduct(UnitaryOperator):
 
         """
         qubit_num = max(max(self.qid), max(pp.qid)) + 1
-        
+
         binary_rep_self = self.get_binary_rep(qubit_num)
         binary_rep_pp = pp.get_binary_rep(qubit_num)
 
@@ -184,6 +184,6 @@ class PauliProduct(UnitaryOperator):
 
         pauli_str = ''.join(pauli_list)
 
-        pp_out = __class__(pauli_str=pauli_str, qid=qid)
+        pp_out = self.__class__(pauli_str=pauli_str, qid=qid)
 
         return pp_out

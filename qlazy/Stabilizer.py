@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
+""" Stabilizer State """
 import ctypes
 import random
 from collections import Counter
-import warnings
-import ctypes
 
-from qlazy.config import *
-from qlazy.error import *
+import qlazy.config as cfg
 
 class MDataStabilizer:
     """ Measured Data for Stabilizer
@@ -25,14 +23,14 @@ class MDataStabilizer:
     """
 
     def __init__(self, frequency=None, last=None, qid=None, qubit_num=0):
-        
+
         self.frequency = frequency
         self.last = last
         self.qid = qid
         self.qubit_num = qubit_num
-        
+
 class Stabilizer(ctypes.Structure):
-    """ Quantum State
+    """ Stabilizer State
 
     Attributes
     ----------
@@ -60,12 +58,12 @@ class Stabilizer(ctypes.Structure):
 
         Notes
         -----
-        You must specify 'qubit_num'. If 'gene_num' is not specified, 
+        You must specify 'qubit_num'. If 'gene_num' is not specified,
         'gene_num' is equal to 'qubit_num.'
 
         """
         if seed is None:
-            seed = random.randint(0,1000000)
+            seed = random.randint(0, 1000000)
 
         if pp_list is not None:
             gene_num = len(pp_list)
@@ -78,19 +76,19 @@ class Stabilizer(ctypes.Structure):
             for i, pp in enumerate(pp_list):
                 for j, q in enumerate(pp.qid):
                     sb.set_pauli_op(i, q, pp.pauli_list[j])
-            return sb
 
         else:
             if qubit_num is None:
-                raise Stabilizer_Error_Initialize()
+                raise ValueError("qubit number must be set.")
             if gene_num is None:
                 gene_num = qubit_num
             if qubit_num < 1 or gene_num < 1:
-                raise Stabilizer_Error_Initialize()
+                raise ValueError("qubit_num and gene_num must be positive integer.")
             obj = stabilizer_init(gene_num, qubit_num, seed)
             sb = ctypes.cast(obj.value, ctypes.POINTER(cls)).contents
-            return sb
-            
+
+        return sb
+
     def __str__(self):
 
         return self.get_str()
@@ -104,10 +102,10 @@ class Stabilizer(ctypes.Structure):
         ----------
         method : func
             method (custum gate) to add.
-        
+
         """
         setattr(cls, method.__name__, method)
-        
+
     @classmethod
     def add_methods(cls, *methods):
         """
@@ -117,15 +115,16 @@ class Stabilizer(ctypes.Structure):
         ----------
         methods : func, func, ...
             arguments of methods (custum gates) to add.
-        
+
         """
         for method in methods:
             if callable(method):
                 setattr(cls, method.__name__, method)
             else:
-                raise Stabillizer_Error_AddMethods()
-            
+                raise ValueError("can't add method.")
+
     def get_str(self):
+        """ get string of the stabilzer """
 
         str_out = ""
         for i in range(self.gene_num):
@@ -133,7 +132,7 @@ class Stabilizer(ctypes.Structure):
 
             gene_str = ""
             for j in range(self.qubit_num):
-                s = self.get_pauli_op(i,j)
+                s = self.get_pauli_op(i, j)
                 gene_str += s
 
             if pauli_fac_complex == 1+0j:
@@ -145,12 +144,12 @@ class Stabilizer(ctypes.Structure):
             elif pauli_fac_complex == -1j:
                 pauli_fac_str = "-i"
             else:
-                raise Stabilizer_Error_GetStr()
+                raise ValueError("can't get string.")
 
-            str_out += "{0:}{1:}\n".format(pauli_fac_str,gene_str)
-                
+            str_out += "{0:}{1:}\n".format(pauli_fac_str, gene_str)
+
         return str_out
-        
+
     def show(self):
         """
         show the generators of stabilizer.
@@ -167,8 +166,8 @@ class Stabilizer(ctypes.Structure):
         digits = len(str(self.gene_num - 1))
         s = self.get_str()
         gene_list = s.rstrip().split('\n')
-        for i,gene_str in enumerate(gene_list):
-            print("g[{0:{digits}d}]:{1:}".format(i,gene_str, digits=digits))
+        for i, gene_str in enumerate(gene_list):
+            print("g[{0:{digits}d}]:{1:}".format(i, gene_str, digits=digits))
 
     def reset(self):
         """
@@ -182,14 +181,14 @@ class Stabilizer(ctypes.Structure):
         -------
         self : instance of Stabilizer
             stabilizer state.
- 
+
         """
         for i in range(self.gene_num):
             for j in range(self.qubit_num):
-                self.set_pauli_op(i,j,'I')
-            self.set_pauli_fac(i,'+1')
+                self.set_pauli_op(i, j, 'I')
+            self.set_pauli_fac(i, '+1')
         return self
-        
+
     def clone(self):
         """
         get the copy of the quantum state.
@@ -209,10 +208,11 @@ class Stabilizer(ctypes.Structure):
         return sb
 
     def get_rank(self):
+        """ get rank of the stabilizer """
 
         rank = stabilizer_get_rank(self)
         return rank
-    
+
     def set_all(self, pauli_op_str):
         """
         set all of the qubits same pauli operators.
@@ -237,10 +237,10 @@ class Stabilizer(ctypes.Structure):
 
         """
         self.reset()
-        len = min(self.gene_num, self.qubit_num)
-        [self.set_pauli_op(i, i, pauli_op_str) for i in range(len)]
+        length = min(self.gene_num, self.qubit_num)
+        [self.set_pauli_op(i, i, pauli_op_str) for i in range(length)]
         return self
-    
+
     def set_pauli_fac(self, gene_id, pauli_fac_str):
         """
         set pauli factor of generator ('+1','-1','+i','-i').
@@ -255,17 +255,17 @@ class Stabilizer(ctypes.Structure):
         self : instance of Stabilizer
 
         """
-        if pauli_fac_str == "+1" or pauli_fac_str == "1":
-            pauli_fac = REAL_PLUS
+        if pauli_fac_str in ("+1", "1"):
+            pauli_fac = cfg.REAL_PLUS
         elif pauli_fac_str == "+i":
-            pauli_fac = IMAG_PLUS
+            pauli_fac = cfg.IMAG_PLUS
         elif pauli_fac_str == "-1":
-            pauli_fac = REAL_MINUS
+            pauli_fac = cfg.REAL_MINUS
         elif pauli_fac_str == "-i":
-            pauli_fac = IMAG_MINUS
+            pauli_fac = cfg.IMAG_MINUS
         else:
-            raise Stabilizer_Error_SetPauliFac()
-            
+            raise ValueError("can't set pauli factor.")
+
         stabilizer_set_pauli_fac(self, gene_id, pauli_fac)
 
         return self
@@ -287,16 +287,16 @@ class Stabilizer(ctypes.Structure):
         """
         pauli_fac = stabilizer_get_pauli_fac(self, gene_id)
 
-        if pauli_fac == REAL_PLUS:
+        if pauli_fac == cfg.REAL_PLUS:
             pauli_fac_complex = 1+0j
-        elif pauli_fac == IMAG_PLUS:
+        elif pauli_fac == cfg.IMAG_PLUS:
             pauli_fac_complex = 1j
-        elif pauli_fac == REAL_MINUS:
+        elif pauli_fac == cfg.REAL_MINUS:
             pauli_fac_complex = -1+0j
-        elif pauli_fac == IMAG_MINUS:
+        elif pauli_fac == cfg.IMAG_MINUS:
             pauli_fac_complex = -1j
         else:
-            raise Stabilizer_Error_GetPauliFac()
+            raise ValueError("can't get pauli factor.")
 
         return pauli_fac_complex
 
@@ -317,20 +317,20 @@ class Stabilizer(ctypes.Structure):
 
         """
         if pauli_op_str == 'X':
-            pauli_op = PAULI_X
+            pauli_op = cfg.PAULI_X
         elif pauli_op_str == 'Y':
-            pauli_op = PAULI_Y
+            pauli_op = cfg.PAULI_Y
         elif pauli_op_str == 'Z':
-            pauli_op = PAULI_Z
+            pauli_op = cfg.PAULI_Z
         elif pauli_op_str == 'I':
-            pauli_op = IDENTITY
+            pauli_op = cfg.IDENTITY
         else:
-            raise Stabilizer_Error_SetPauliOp()
-            
+            raise ValueError("can't set pauli operator.")
+
         stabilizer_set_pauli_op(self, gene_id, qubit_id, pauli_op)
 
         return self
-    
+
     def get_pauli_op(self, gene_id, qubit_id):
         """
         get pauli operator ('I','X','Y','Z').
@@ -350,21 +350,21 @@ class Stabilizer(ctypes.Structure):
         """
         pauli_op = stabilizer_get_pauli_op(self, gene_id, qubit_id)
 
-        if pauli_op == PAULI_X:
+        if pauli_op == cfg.PAULI_X:
             pauli_op_str = 'X'
-        elif pauli_op == PAULI_Y:
+        elif pauli_op == cfg.PAULI_Y:
             pauli_op_str = 'Y'
-        elif pauli_op == PAULI_Z:
+        elif pauli_op == cfg.PAULI_Z:
             pauli_op_str = 'Z'
-        elif pauli_op == IDENTITY:
+        elif pauli_op == cfg.IDENTITY:
             pauli_op_str = 'I'
         else:
-            raise Stabilizer_Error_GetPauliOp()
+            raise ValueError("can't get pauli operator.")
 
         return pauli_op_str
 
     # 1-qubit gate
-    
+
     def x(self, q):
         """
         operate X gate.
@@ -379,9 +379,9 @@ class Stabilizer(ctypes.Structure):
         self : instans of Stabilizer
 
         """
-        stabilizer_operate_qgate(self, PAULI_X, q, 0)
+        stabilizer_operate_qgate(self, cfg.PAULI_X, q, 0)
         return self
-    
+
     def y(self, q):
         """
         operate Y gate.
@@ -396,9 +396,9 @@ class Stabilizer(ctypes.Structure):
         self : instans of Stabilizer
 
         """
-        stabilizer_operate_qgate(self, PAULI_Y, q, 0)
+        stabilizer_operate_qgate(self, cfg.PAULI_Y, q, 0)
         return self
-    
+
     def z(self, q):
         """
         operate Z gate.
@@ -413,9 +413,9 @@ class Stabilizer(ctypes.Structure):
         self : instans of Stabilizer
 
         """
-        stabilizer_operate_qgate(self, PAULI_Z, q, 0)
+        stabilizer_operate_qgate(self, cfg.PAULI_Z, q, 0)
         return self
-    
+
     def h(self, q):
         """
         operate H gate.
@@ -430,9 +430,9 @@ class Stabilizer(ctypes.Structure):
         self : instans of Stabilizer
 
         """
-        stabilizer_operate_qgate(self, HADAMARD, q, 0)
+        stabilizer_operate_qgate(self, cfg.HADAMARD, q, 0)
         return self
-    
+
     def s(self, q):
         """
         operate S gate.
@@ -447,9 +447,9 @@ class Stabilizer(ctypes.Structure):
         self : instans of Stabilizer
 
         """
-        stabilizer_operate_qgate(self, PHASE_SHIFT_S, q, 0)
+        stabilizer_operate_qgate(self, cfg.PHASE_SHIFT_S, q, 0)
         return self
-    
+
     def s_dg(self, q):
         """
         operate S dagger gate.
@@ -464,9 +464,9 @@ class Stabilizer(ctypes.Structure):
         self : instans of Stabilizer
 
         """
-        stabilizer_operate_qgate(self, PHASE_SHIFT_S_, q, 0)
+        stabilizer_operate_qgate(self, cfg.PHASE_SHIFT_S_, q, 0)
         return self
-    
+
     # 2-qubit gate
 
     def cx(self, q0, q1):
@@ -483,9 +483,9 @@ class Stabilizer(ctypes.Structure):
         self : instans of Stabilizer
 
         """
-        stabilizer_operate_qgate(self, CONTROLLED_X, q0, q1)
+        stabilizer_operate_qgate(self, cfg.CONTROLLED_X, q0, q1)
         return self
-    
+
     def cz(self, q0, q1):
         """
         operate CZ gate.
@@ -500,9 +500,9 @@ class Stabilizer(ctypes.Structure):
         self : instans of Stabilizer
 
         """
-        stabilizer_operate_qgate(self, CONTROLLED_Z, q0, q1)
+        stabilizer_operate_qgate(self, cfg.CONTROLLED_Z, q0, q1)
         return self
-    
+
     def cy(self, q0, q1):
         """
         operate CY gate.
@@ -551,8 +551,8 @@ class Stabilizer(ctypes.Structure):
         """
         mval = self.m(qid=qid, shots=1).last
         return mval
-    
-    def m(self, qid=None, shots=DEF_SHOTS):
+
+    def m(self, qid=None, shots=cfg.DEF_SHOTS):
         """
         measurement in Z-direction.
 
@@ -584,8 +584,8 @@ class Stabilizer(ctypes.Structure):
         """
         md = self.mz(qid=qid, shots=shots)
         return md
-    
-    def mx(self, qid=None, shots=DEF_SHOTS):
+
+    def mx(self, qid=None, shots=cfg.DEF_SHOTS):
         """
         measurement in X-direction.
 
@@ -606,8 +606,8 @@ class Stabilizer(ctypes.Structure):
         md = self.mz(qid=qid, shots=shots)
         [self.h(q) for q in qid]
         return md
-    
-    def my(self, qid=None, shots=DEF_SHOTS):
+
+    def my(self, qid=None, shots=cfg.DEF_SHOTS):
         """
         measurement in Y-direction.
 
@@ -629,8 +629,8 @@ class Stabilizer(ctypes.Structure):
         md = self.mz(qid=qid, shots=shots)
         [self.h(q).s(q) for q in qid]
         return md
-    
-    def mz(self, qid=None, shots=DEF_SHOTS):
+
+    def mz(self, qid=None, shots=cfg.DEF_SHOTS):
         """
         measurement in Z-direction.
 
@@ -666,15 +666,15 @@ class Stabilizer(ctypes.Structure):
         for _ in range(shots-1):
             st = self.clone()
             mval_str = ''
-            for i in range(len(qid)):
-                mval = stabilizer_measure(st, qid[i])
+            for q in qid:
+                mval = stabilizer_measure(st, q)
                 mval_str += str(mval)
             frequency += {mval_str:1}
 
         # last measurement
         mval_str = ''
-        for i in range(len(qid)):
-            m = stabilizer_measure(self, qid[i])
+        for q in qid:
+            m = stabilizer_measure(self, q)
             mval_str += str(m)
         frequency += {mval_str:1}
         last = mval_str
@@ -683,23 +683,6 @@ class Stabilizer(ctypes.Structure):
                              qubit_num=self.qubit_num)
 
         return md
-
-    @classmethod
-    def free_all(cls, *stabs):
-        """
-        free memory of the all stabilizer.
-
-        Parameters
-        ----------
-        stabs : instance of Stabilizer,instance of Stabilizer,...
-            set of Stabilizer instances
-
-        Returns
-        -------
-        None
-
-        """
-        warnings.warn("No need to call 'free_all' method because free automatically, or you can use class method 'del_all' to free memory explicitly.")
 
     @classmethod
     def del_all(cls, *stabs):
@@ -717,12 +700,12 @@ class Stabilizer(ctypes.Structure):
 
         """
         for sb in stabs:
-            if type(sb) is list or type(sb) is tuple:
+            if isinstance(sb, (list, tuple)):
                 cls.del_all(*sb)
-            elif type(sb) is Stabilizer:
+            elif isinstance(sb, cls):
                 del sb
             else:
-                raise Stabilizer_Error_FreeAll()
+                raise ValueError("can't free stabilizer.")
 
     def operate(self, pp=None, ctrl=None):
         """
@@ -743,7 +726,7 @@ class Stabilizer(ctypes.Structure):
         """
         pauli_list = pp.pauli_list
         qid = pp.qid
-    
+
         if ctrl is None:
             for q, pauli in zip(qid, pauli_list):
                 if pauli == 'X':
@@ -757,7 +740,7 @@ class Stabilizer(ctypes.Structure):
         else:
             if ctrl in qid:
                 raise ValueError("controll and target qubit id conflict")
-        
+
             for q, pauli in zip(qid, pauli_list):
                 if pauli == 'X':
                     self.cx(ctrl, q)
@@ -767,27 +750,16 @@ class Stabilizer(ctypes.Structure):
                     self.cz(ctrl, q)
                 else:
                     continue
-    
+
         return self
-
-    def free(self):
-        """
-        free memory of stabilizer.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-
-        """
-        warnings.warn("No need to call 'free' method because free automatically, or you can use 'del' to free memory explicitly.")
 
     def __del__(self):
 
         stabilizer_free(self)
-        
+
 # c-library for stabilizer
-from qlazy.lib.stabilizer_c import *
+from qlazy.lib.stabilizer_c import (stabilizer_init, stabilizer_copy,
+                                    stabilizer_set_pauli_fac, stabilizer_get_pauli_fac,
+                                    stabilizer_set_pauli_op, stabilizer_get_pauli_op,
+                                    stabilizer_operate_qgate, stabilizer_get_rank,
+                                    stabilizer_measure, stabilizer_free)

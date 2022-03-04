@@ -16,7 +16,8 @@ from qiskit.qasm import pi
 from qiskit.providers.ibmq import least_busy
 from qiskit.circuit.library.standard_gates import SXdgGate
 
-def run(qcirc=None, shots=1, cid=[], backend=None):
+# def run(qcirc=None, shots=1, cid=[], backend=None):
+def run(qcirc=None, shots=1, cid=None, backend=None):
             
     if qcirc is None:
         raise ValueError("quantum circuit must be specified.")
@@ -26,12 +27,12 @@ def run(qcirc=None, shots=1, cid=[], backend=None):
     qubit_num = qcirc_tmp.qubit_num
     cmem_num = qcirc_tmp.cmem_num
 
+    if cid is None:
+        cid = [i for i in range(cmem_num)]
+
     if cmem_num < len(cid):
         raise ValueError("length of cid must be less than classical resister size of qcirc")
     
-    if cid == []:
-        cid = [i for i in range(cmem_num)]
-
     qubit_reg = QuantumRegister(qubit_num)
     cmem_reg = [ClassicalRegister(1, name="c{}".format(i)) for i in range(cmem_num)]
 

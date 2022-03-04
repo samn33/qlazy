@@ -1,12 +1,6 @@
 # -*- coding: utf-8 -*-
+""" Classical Memory """
 import ctypes
-from collections import Counter
-from ctypes.util import find_library
-import warnings
-import ctypes
-
-from qlazy.config import *
-from qlazy.error import *
 
 class CMem(ctypes.Structure):
     """ Classical Memory
@@ -39,7 +33,7 @@ class CMem(ctypes.Structure):
         obj = cmem_init(cmem_num)
         cmem = ctypes.cast(obj.value, ctypes.POINTER(cls)).contents
         return cmem
-            
+
     def clone(self):
         """
         get the copy of the classical memory.
@@ -59,8 +53,8 @@ class CMem(ctypes.Structure):
         return cmem
 
     def __del__(self):
-        
+
         cmem_free(self)
-        
+
 # c-library for qstate
-from qlazy.lib.cmem_c import *
+from qlazy.lib.cmem_c import cmem_init, cmem_copy, cmem_free

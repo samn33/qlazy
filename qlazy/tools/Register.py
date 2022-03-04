@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+""" functions to create and initialize registers """
 import numpy as np
 
 def CreateRegister(*args):
@@ -23,7 +24,7 @@ def CreateRegister(*args):
     >>> reg = CreateRegister(2,3)
     >>> print(reg)
     [[0,0,0],[0,0,0]]
-        
+
     """
     global COUNT
     COUNT = 0
@@ -56,9 +57,9 @@ def InitRegister(*args):
     """
     global COUNT
     for x in args:
-        if type(x) is list:
-            for i,v in enumerate(x):
-                if type(v) is int:
+        if isinstance(x, list):
+            for i, v in enumerate(x):
+                if isinstance(v, int):
                     x[i] = COUNT
                     COUNT += 1
                 else:

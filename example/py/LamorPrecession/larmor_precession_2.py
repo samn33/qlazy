@@ -9,7 +9,7 @@ def main():
         qs = QState(1)
 
         # time evolution
-        qs.evolve(observable=hm, time=t, iter=100)
+        qs.evolve(observable=hm, time=t, iteration=100)
 
         # quantum stat in bloch spere
         theta, phi = qs.bloch(0)

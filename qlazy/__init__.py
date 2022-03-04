@@ -12,5 +12,5 @@ from . import config
 from . import error
 from . import util
 
-__all__ = ["QState","Observable","DensOp","Stabilizer","Backend","QCirc","CMem",
-           "UnitaryOperator","PauliProduct","Result","config","error","util"]
+__all__ = ["QState", "Observable", "DensOp", "Stabilizer", "Backend", "QCirc", "CMem",
+           "PauliProduct", "Result", "config", "error", "util"]

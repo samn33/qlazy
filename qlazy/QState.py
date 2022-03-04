@@ -1,16 +1,11 @@
 # -*- coding: utf-8 -*-
+""" Quantum State """
+import ctypes
 import random
 import numpy as np
-from collections import Counter
-import warnings
-import ctypes
 
-from qlazy.config import *
-from qlazy.error import *
-from qlazy.MData import *
-from qlazy.Observable import *
-from qlazy.PauliProduct import *
-from qlazy.lib.qstate_mcx import *
+import qlazy.config as cfg
+from qlazy.lib.qstate_mcx import qstate_mcx
 
 class QState(ctypes.Structure):
     """ Quantum State
@@ -53,18 +48,17 @@ class QState(ctypes.Structure):
 
         """
         if seed is None:
-            seed = random.randint(0,1000000)
+            seed = random.randint(0, 1000000)
 
         if qubit_num is not None:
-            if qubit_num > MAX_QUBIT_NUM:
-                print("qubit number must be {0:d} or less.".format(MAX_QUBIT_NUM))
-                raise QState_Error_Initialize()
+            if qubit_num > cfg.MAX_QUBIT_NUM:
+                raise ValueError("qubit number must be {0:d} or less.".format(cfg.MAX_QUBIT_NUM))
 
             obj = qstate_init(qubit_num, seed)
 
         else:
             obj = qstate_init_with_vector(vector, seed)
-            
+
         self = ctypes.cast(obj.value, ctypes.POINTER(cls)).contents
         return self
 
@@ -72,7 +66,7 @@ class QState(ctypes.Structure):
 
         return str(self.get_amp())
 
-    def reset(self, qid=[]):
+    def reset(self, qid=None):
         """
         reset to |00..0> state.
 
@@ -96,7 +90,7 @@ class QState(ctypes.Structure):
         """
         qstate_reset(self, qid=qid)
         return self
-        
+
     @classmethod
     def add_method(cls, method):
         """
@@ -117,10 +111,10 @@ class QState(ctypes.Structure):
         >>> qs = QState(qubit_num=2)
         >>> qs.bell(0,1)
         >>> ...
-        
+
         """
         setattr(cls, method.__name__, method)
-        
+
     @classmethod
     def add_methods(cls, *methods):
         """
@@ -146,14 +140,14 @@ class QState(ctypes.Structure):
         >>> qs.bell(0,1)
         >>> qs.flip(0,1)
         >>> ...
-        
+
         """
         for method in methods:
             if callable(method):
                 setattr(cls, method.__name__, method)
             else:
-                raise QState_Error_AddMethods()
-            
+                raise ValueError("can't add method.")
+
     @classmethod
     def create_register(cls, num):
         """
@@ -169,7 +163,7 @@ class QState(ctypes.Structure):
         >>> qid = QState.create_register(3)
         >>> print(qid)
         [0,0,0]
-        
+
         """
         qid = [0]*num
         return qid
@@ -198,31 +192,15 @@ class QState(ctypes.Structure):
         >>> qnum = QState.init_register(qid_0, qid_1)
         >>> print(qnum, qid_0, qid_1)
         5 [0,1,2] [3,4]
+
         """
         idx = 0
-        for i in range(len(args)):
-            for j in range(len(args[i])):
+        for i, arg in enumerate(args):
+            for j in range(len(arg)):
                 args[i][j] = idx
                 idx += 1
         return idx
-    
-    @classmethod
-    def free_all(cls, *qstates):
-        """
-        free memory of the all quantum states.
 
-        Parameters
-        ----------
-        qstates : instance of QState,instance of QState,...
-            set of QState instances
-
-        Returns
-        -------
-        None
-
-        """
-        warnings.warn("No need to call 'free_all' method because free automatically, or you can use class method 'del_all' to free memory explicitly.")
-        
     @classmethod
     def del_all(cls, *qstates):
         """
@@ -239,18 +217,18 @@ class QState(ctypes.Structure):
 
         """
         for qs in qstates:
-            if type(qs) is list or type(qs) is tuple:
+            if isinstance(qs, (list, tuple)):
                 cls.del_all(*qs)
-            elif type(qs) is QState:
+            elif isinstance(qs, cls):
                 del qs
             else:
-                raise QState_Error_FreeAll()
+                raise ValueError("can't free qstate.")
 
     @property
-    def amp(self, qid=None):
+    def amp(self):
         """ elements of quantum state vector. """
         return self.get_amp()
-        
+
     def get_amp(self, qid=None):
         """
         get the elements of quantum state vector.
@@ -274,7 +252,7 @@ class QState(ctypes.Structure):
         elements of the quantum state.
 
         """
-        ret =  qstate_get_camp(self, qid)
+        ret = qstate_get_camp(self, qid)
         return ret
 
     def partial(self, qid=None):
@@ -302,12 +280,12 @@ class QState(ctypes.Structure):
 
         """
         vec = self.get_amp(qid)
-        qs = __class__(vector=vec)
+        qs = self.__class__(vector=vec)
         return qs
-        
+
     def show(self, qid=None, nonzero=False):
         """
-        show the quantum state 
+        show the quantum state
         (elements of the state vector and probabilities).
 
         Parameters
@@ -390,10 +368,10 @@ class QState(ctypes.Structure):
         (radian).
 
         """
-        theta, phi = qstate_bloch(self, q=0)
+        theta, phi = qstate_bloch(self, q=q)
         return theta, phi
 
-    def inpro(self, qstate, qid=[]):
+    def inpro(self, qstate, qid=None):
         """
         get the inner product with quantum state.
 
@@ -417,14 +395,14 @@ class QState(ctypes.Structure):
         while original quantum states do not change.
 
         """
-        if qid == []:
+        if qid == [] or qid is None:
             inp = qstate_inner_product(self, qstate)
         else:
             qs_0 = self.partial(qid=qid)
             qs_1 = qstate.partial(qid=qid)
             inp = qstate_inner_product(qs_0, qs_1)
         return inp
-        
+
     def tenspro(self, qstate):
         """
         get the tensor product with quantum state.
@@ -444,7 +422,7 @@ class QState(ctypes.Structure):
         qs = ctypes.cast(obj.value, ctypes.POINTER(self.__class__)).contents
         return qs
 
-    def fidelity(self, qstate, qid=[]):
+    def fidelity(self, qstate, qid=None):
         """
         get the fidelity with quantum state.
 
@@ -488,13 +466,13 @@ class QState(ctypes.Structure):
         """
         if num <= 1:
             return self
-        else:
-            qs = self.clone()
-            for i in range(num-1):
-                qs_tmp = qs.tenspro(self)
-                qs = qs_tmp.clone()
-            return qs
-        
+
+        qs = self.clone()
+        for _ in range(num-1):
+            qs_tmp = qs.tenspro(self)
+            qs = qs_tmp.clone()
+        return qs
+
     def join(self, qs_list):
         """
         get tensor product state of the quantum states' list.
@@ -516,7 +494,7 @@ class QState(ctypes.Structure):
             qs_out = qs_tmp.tenspro(qs)
         return qs_out
 
-    def evolve(self, observable=None, time=0.0, iter=0):
+    def evolve(self, observable=None, time=0.0, iteration=0):
         """
         evolve the quantum state.
 
@@ -543,9 +521,9 @@ class QState(ctypes.Structure):
         Obserbable class (Observable.py)
 
         """
-        qstate_evolve(self, observable=observable, time=time, iter=iter)
+        qstate_evolve(self, observable=observable, time=time, iteration=iteration)
         return self
-    
+
     def expect(self, observable=None):
         """
         get the expectation value for observable under the quantum state.
@@ -567,7 +545,7 @@ class QState(ctypes.Structure):
         """
         expect = qstate_expect_value(self, observable=observable)
         return expect
-    
+
     def apply(self, matrix=None, qid=None):
         """
         apply matrix.
@@ -592,25 +570,30 @@ class QState(ctypes.Structure):
         qstate_apply_matrix(self, matrix=matrix, qid=qid)
         return self
 
-    def __schmidt_decomp(self, qid_0=[], qid_1=[]):
+    def __schmidt_decomp(self, qid_0=None, qid_1=None):
+
+        if qid_0 is None:
+            qid_0 = []
+        if qid_1 is None:
+            qid_1 = []
 
         vec = self.get_amp(qid=qid_0+qid_1)
 
         row = 2**len(qid_0)
         col = 2**len(qid_1)
         mat = np.zeros((row, col), dtype=complex)
-        for idx,comp in enumerate(vec):
+        for idx, comp in enumerate(vec):
             mat[idx//col][idx%col] = comp
-    
-        U,D,V = np.linalg.svd(mat, full_matrices=False)
-        coef = np.array([d for d in D if d > EPS])
-        
-        vec_0 = [v for i,v in enumerate(U.T) if i < len(coef)]
-        vec_1 = [v for i,v in enumerate(V) if i < len(coef)]
-    
+
+        U, D, V = np.linalg.svd(mat, full_matrices=False)
+        coef = np.array([d for d in D if d > cfg.EPS])
+
+        vec_0 = [v for i, v in enumerate(U.T) if i < len(coef)]
+        vec_1 = [v for i, v in enumerate(V) if i < len(coef)]
+
         return (coef, vec_0, vec_1)
 
-    def schmidt_decomp(self, qid_0=[], qid_1=[]):
+    def schmidt_decomp(self, qid_0=None, qid_1=None):
         """
         schmidt decomposition.
 
@@ -632,12 +615,12 @@ class QState(ctypes.Structure):
 
         """
         coef, vec_0, vec_1 = self.__schmidt_decomp(qid_0=qid_0, qid_1=qid_1)
-        qs_0 = [__class__(vector=v) for i,v in enumerate(vec_0) if i < len(coef)]
-        qs_1 = [__class__(vector=v) for i,v in enumerate(vec_1) if i < len(coef)]
-    
+        qs_0 = [self.__class__(vector=v) for i, v in enumerate(vec_0) if i < len(coef)]
+        qs_1 = [self.__class__(vector=v) for i, v in enumerate(vec_1) if i < len(coef)]
+
         return (coef, qs_0, qs_1)
 
-    def schmidt_coef(self, qid_0=[], qid_1=[]):
+    def schmidt_coef(self, qid_0=None, qid_1=None):
         """
         get schmidt coefficients.
 
@@ -654,7 +637,7 @@ class QState(ctypes.Structure):
             schmidt coefficients.
 
         """
-        coef, vec_0, vec_1 = self.__schmidt_decomp(qid_0=qid_0, qid_1=qid_1)
+        coef = self.__schmidt_decomp(qid_0=qid_0, qid_1=qid_1)[0]
         return coef
 
     # 1-qubit gate
@@ -673,7 +656,7 @@ class QState(ctypes.Structure):
         self : instance of QState
 
         """
-        qstate_operate_qgate(self, kind=PAULI_X, phase=DEF_PHASE, qid=[q0])
+        qstate_operate_qgate(self, kind=cfg.PAULI_X, phase=cfg.DEF_PHASE, qid=[q0])
         return self
 
     def y(self, q0):
@@ -690,7 +673,7 @@ class QState(ctypes.Structure):
         self : instance of QState
 
         """
-        qstate_operate_qgate(self, kind=PAULI_Y, phase=DEF_PHASE, qid=[q0])
+        qstate_operate_qgate(self, kind=cfg.PAULI_Y, phase=cfg.DEF_PHASE, qid=[q0])
         return self
 
     def z(self, q0):
@@ -707,7 +690,7 @@ class QState(ctypes.Structure):
         self : instance of QState
 
         """
-        qstate_operate_qgate(self, kind=PAULI_Z, phase=DEF_PHASE, qid=[q0])
+        qstate_operate_qgate(self, kind=cfg.PAULI_Z, phase=cfg.DEF_PHASE, qid=[q0])
         return self
 
     def xr(self, q0):
@@ -724,12 +707,12 @@ class QState(ctypes.Structure):
         self : instance of QState
 
         """
-        qstate_operate_qgate(self, kind=ROOT_PAULI_X, phase=DEF_PHASE, qid=[q0])
+        qstate_operate_qgate(self, kind=cfg.ROOT_PAULI_X, phase=cfg.DEF_PHASE, qid=[q0])
         return self
 
     def xr_dg(self, q0):
         """
-        operate root X dagger gate 
+        operate root X dagger gate
         (hermmitian conjugate of root X gate).
 
         Parameters
@@ -742,7 +725,7 @@ class QState(ctypes.Structure):
         self : instance of QState
 
         """
-        qstate_operate_qgate(self, kind=ROOT_PAULI_X_, phase=DEF_PHASE, qid=[q0])
+        qstate_operate_qgate(self, kind=cfg.ROOT_PAULI_X_, phase=cfg.DEF_PHASE, qid=[q0])
         return self
 
     def h(self, q0):
@@ -759,7 +742,7 @@ class QState(ctypes.Structure):
         self : instance of QState
 
         """
-        qstate_operate_qgate(self, kind=HADAMARD, phase=DEF_PHASE, qid=[q0])
+        qstate_operate_qgate(self, kind=cfg.HADAMARD, phase=cfg.DEF_PHASE, qid=[q0])
         return self
 
     def s(self, q0):
@@ -776,7 +759,7 @@ class QState(ctypes.Structure):
         self : instance of QState
 
         """
-        qstate_operate_qgate(self, kind=PHASE_SHIFT_S, phase=DEF_PHASE, qid=[q0])
+        qstate_operate_qgate(self, kind=cfg.PHASE_SHIFT_S, phase=cfg.DEF_PHASE, qid=[q0])
         return self
 
     def s_dg(self, q0):
@@ -793,7 +776,7 @@ class QState(ctypes.Structure):
         self : instance of QState
 
         """
-        qstate_operate_qgate(self, kind=PHASE_SHIFT_S_, phase=DEF_PHASE, qid=[q0])
+        qstate_operate_qgate(self, kind=cfg.PHASE_SHIFT_S_, phase=cfg.DEF_PHASE, qid=[q0])
         return self
 
     def t(self, q0):
@@ -810,7 +793,7 @@ class QState(ctypes.Structure):
         self : instance of QState
 
         """
-        qstate_operate_qgate(self, kind=PHASE_SHIFT_T, phase=DEF_PHASE, qid=[q0])
+        qstate_operate_qgate(self, kind=cfg.PHASE_SHIFT_T, phase=cfg.DEF_PHASE, qid=[q0])
         return self
 
     def t_dg(self, q0):
@@ -827,10 +810,10 @@ class QState(ctypes.Structure):
         self : instance of QState
 
         """
-        qstate_operate_qgate(self, kind=PHASE_SHIFT_T_, phase=DEF_PHASE, qid=[q0])
+        qstate_operate_qgate(self, kind=cfg.PHASE_SHIFT_T_, phase=cfg.DEF_PHASE, qid=[q0])
         return self
 
-    def rx(self, q0, phase=DEF_PHASE):
+    def rx(self, q0, phase=cfg.DEF_PHASE):
         """
         operate RX gate (rotation around X-axis).
 
@@ -846,10 +829,10 @@ class QState(ctypes.Structure):
         self : instance of QState
 
         """
-        qstate_operate_qgate(self, kind=ROTATION_X, phase=phase, qid=[q0])
+        qstate_operate_qgate(self, kind=cfg.ROTATION_X, phase=phase, qid=[q0])
         return self
 
-    def ry(self, q0, phase=DEF_PHASE):
+    def ry(self, q0, phase=cfg.DEF_PHASE):
         """
         operate RY gate (rotation around Y-axis).
 
@@ -865,10 +848,10 @@ class QState(ctypes.Structure):
         self : instance of QState
 
         """
-        qstate_operate_qgate(self, kind=ROTATION_Y, phase=phase, qid=[q0])
+        qstate_operate_qgate(self, kind=cfg.ROTATION_Y, phase=phase, qid=[q0])
         return self
 
-    def rz(self, q0, phase=DEF_PHASE):
+    def rz(self, q0, phase=cfg.DEF_PHASE):
         """
         operate RZ gate (rotation around Z-axis).
 
@@ -884,10 +867,10 @@ class QState(ctypes.Structure):
         self : instance of QState
 
         """
-        qstate_operate_qgate(self, kind=ROTATION_Z, phase=phase, qid=[q0])
+        qstate_operate_qgate(self, kind=cfg.ROTATION_Z, phase=phase, qid=[q0])
         return self
 
-    def p(self, q0, phase=DEF_PHASE):
+    def p(self, q0, phase=cfg.DEF_PHASE):
         """
         operate P gate (phase shift gate).
 
@@ -909,89 +892,8 @@ class QState(ctypes.Structure):
         | 0.0 exp(i*phase*PI) |
 
         """
-        qstate_operate_qgate(self, kind=PHASE_SHIFT, phase=phase, qid=[q0])
+        qstate_operate_qgate(self, kind=cfg.PHASE_SHIFT, phase=phase, qid=[q0])
         return self
-
-    # def u1(self, q0, alpha=DEF_PHASE):
-    #     """
-    #     operate U1 gate (by IBM).
-    # 
-    #     Parameters
-    #     ----------
-    #     q0 : int
-    #         qubit id.
-    #     alpha : float
-    #         rotation angle (unit of angle is PI radian).
-    # 
-    #     Returns
-    #     -------
-    #     self : instance of QState
-    # 
-    #     Notes
-    #     -----
-    #     this opration is equal to P gate (phase shift gate)
-    # 
-    #     """
-    #     qstate_operate_qgate(self, kind=ROTATION_U1, phase=alpha, qid=[q0])
-    #     return self
-    # 
-    # def u2(self, q0, alpha=DEF_PHASE, beta=DEF_PHASE):
-    #     """
-    #     operate U2 gate (by IBM).
-    # 
-    #     Parameters
-    #     ----------
-    #     q0 : int
-    #         qubit id.
-    #     alpha : float
-    #         rotation angle (unit of angle is pi radian).
-    #     beta : float
-    #         rotation angle (unit of angle is pi radian).
-    # 
-    #     Returns
-    #     -------
-    #     self : instance of QState
-    # 
-    #     Notes
-    #     -----
-    #     matrix experssion is following...
-    #     | 1/sqrt(2)              -exp(i*alpha*PI)/sqrt(2)       |
-    #     | exp(i*beta*PI)/sqrt(2) exp(i*(alpha+beta)*PI)/sqrt(2) |
-    # 
-    #     """
-    #     qstate_operate_qgate(self, kind=ROTATION_U2, phase=alpha, phase1=beta, qid=[q0])
-    #     return self
-    # 
-    # def u3(self, q0, alpha=DEF_PHASE, beta=DEF_PHASE, gamma=DEF_PHASE):
-    #     """
-    #     operate U3 gate (by IBM).
-    # 
-    #     Parameters
-    #     ----------
-    #     q0 : int
-    #         qubit id.
-    #     alpha : float
-    #         rotation angle (unit of angle is pi radian).
-    #     beta : float
-    #         rotation angle (unit of angle is pi radian).
-    #     gamma : float
-    #         rotation angle (unit of angle is pi radian).
-    # 
-    #     Returns
-    #     -------
-    #     self : instance of QState
-    # 
-    #     Notes
-    #     -----
-    #     matrix expression is following...
-    #     | cos(gamma/2)                -exp(i*alpha*PI)*sin(gamma/2)       |
-    #     | exp(i*beta*PI)*sin(gamma/2) exp(i*(alpha+beta)*PI)*cos(gamma/2) |
-    # 
-    # 
-    #     """
-    #     qstate_operate_qgate(self, kind=ROTATION_U3, phase=alpha, phase1=beta,
-    #                          phase2=gamma, qid=[q0])
-    #     return self
 
     # 2-qubit gate
 
@@ -1011,7 +913,7 @@ class QState(ctypes.Structure):
         self : instance of QState
 
         """
-        qstate_operate_qgate(self, kind=CONTROLLED_X, phase=DEF_PHASE, qid=[q0,q1])
+        qstate_operate_qgate(self, kind=cfg.CONTROLLED_X, phase=cfg.DEF_PHASE, qid=[q0, q1])
         return self
 
     def cy(self, q0, q1):
@@ -1030,7 +932,7 @@ class QState(ctypes.Structure):
         self : instance of QState
 
         """
-        qstate_operate_qgate(self, kind=CONTROLLED_Y, phase=DEF_PHASE, qid=[q0,q1])
+        qstate_operate_qgate(self, kind=cfg.CONTROLLED_Y, phase=cfg.DEF_PHASE, qid=[q0, q1])
         return self
 
     def cz(self, q0, q1):
@@ -1049,7 +951,7 @@ class QState(ctypes.Structure):
         self : instance of QState
 
         """
-        qstate_operate_qgate(self, kind=CONTROLLED_Z, phase=DEF_PHASE, qid=[q0,q1])
+        qstate_operate_qgate(self, kind=cfg.CONTROLLED_Z, phase=cfg.DEF_PHASE, qid=[q0, q1])
         return self
 
     def cxr(self, q0, q1):
@@ -1068,7 +970,7 @@ class QState(ctypes.Structure):
         self : instance of QState
 
         """
-        qstate_operate_qgate(self, kind=CONTROLLED_XR, phase=DEF_PHASE, qid=[q0,q1])
+        qstate_operate_qgate(self, kind=cfg.CONTROLLED_XR, phase=cfg.DEF_PHASE, qid=[q0, q1])
         return self
 
     def cxr_dg(self, q0, q1):
@@ -1087,7 +989,7 @@ class QState(ctypes.Structure):
         self : instance of QState
 
         """
-        qstate_operate_qgate(self, kind=CONTROLLED_XR_, phase=DEF_PHASE, qid=[q0,q1])
+        qstate_operate_qgate(self, kind=cfg.CONTROLLED_XR_, phase=cfg.DEF_PHASE, qid=[q0, q1])
         return self
 
     def ch(self, q0, q1):
@@ -1106,7 +1008,7 @@ class QState(ctypes.Structure):
         self : instance of QState
 
         """
-        qstate_operate_qgate(self, kind=CONTROLLED_H, phase=DEF_PHASE, qid=[q0,q1])
+        qstate_operate_qgate(self, kind=cfg.CONTROLLED_H, phase=cfg.DEF_PHASE, qid=[q0, q1])
         return self
 
     def cs(self, q0, q1):
@@ -1125,7 +1027,7 @@ class QState(ctypes.Structure):
         self : instance of QState
 
         """
-        qstate_operate_qgate(self, kind=CONTROLLED_S, phase=DEF_PHASE, qid=[q0,q1])
+        qstate_operate_qgate(self, kind=cfg.CONTROLLED_S, phase=cfg.DEF_PHASE, qid=[q0, q1])
         return self
 
     def cs_dg(self, q0, q1):
@@ -1144,7 +1046,7 @@ class QState(ctypes.Structure):
         self : instance of QState
 
         """
-        qstate_operate_qgate(self, kind=CONTROLLED_S_, phase=DEF_PHASE, qid=[q0,q1])
+        qstate_operate_qgate(self, kind=cfg.CONTROLLED_S_, phase=cfg.DEF_PHASE, qid=[q0, q1])
         return self
 
     def ct(self, q0, q1):
@@ -1163,7 +1065,7 @@ class QState(ctypes.Structure):
         self : instance of QState
 
         """
-        qstate_operate_qgate(self, kind=CONTROLLED_T, phase=DEF_PHASE, qid=[q0,q1])
+        qstate_operate_qgate(self, kind=cfg.CONTROLLED_T, phase=cfg.DEF_PHASE, qid=[q0, q1])
         return self
 
     def ct_dg(self, q0, q1):
@@ -1182,7 +1084,7 @@ class QState(ctypes.Structure):
         self : instance of QState
 
         """
-        qstate_operate_qgate(self, kind=CONTROLLED_T_, phase=DEF_PHASE, qid=[q0,q1])
+        qstate_operate_qgate(self, kind=cfg.CONTROLLED_T_, phase=cfg.DEF_PHASE, qid=[q0, q1])
         return self
 
     def sw(self, q0, q1):
@@ -1201,10 +1103,10 @@ class QState(ctypes.Structure):
         self : instance of QState
 
         """
-        qstate_operate_qgate(self, kind=SWAP_QUBITS, phase=DEF_PHASE, qid=[q0,q1])
+        qstate_operate_qgate(self, kind=cfg.SWAP_QUBITS, phase=cfg.DEF_PHASE, qid=[q0, q1])
         return self
 
-    def cp(self, q0, q1, phase=DEF_PHASE):
+    def cp(self, q0, q1, phase=cfg.DEF_PHASE):
         """
         operate CP gate (controlled P gate).
 
@@ -1220,10 +1122,10 @@ class QState(ctypes.Structure):
         self : instance of QState
 
         """
-        qstate_operate_qgate(self, kind=CONTROLLED_P, phase=phase, qid=[q0,q1])
+        qstate_operate_qgate(self, kind=cfg.CONTROLLED_P, phase=phase, qid=[q0, q1])
         return self
 
-    def crx(self, q0, q1, phase=DEF_PHASE):
+    def crx(self, q0, q1, phase=cfg.DEF_PHASE):
         """
         operate CRX gate (controlled RX gate).
 
@@ -1241,10 +1143,10 @@ class QState(ctypes.Structure):
         self : instance of QState
 
         """
-        qstate_operate_qgate(self, kind=CONTROLLED_RX, phase=phase, qid=[q0,q1])
+        qstate_operate_qgate(self, kind=cfg.CONTROLLED_RX, phase=phase, qid=[q0, q1])
         return self
 
-    def cry(self, q0, q1, phase=DEF_PHASE):
+    def cry(self, q0, q1, phase=cfg.DEF_PHASE):
         """
         operate CRY gate (controlled RY gate).
 
@@ -1262,10 +1164,10 @@ class QState(ctypes.Structure):
         self : instance of QState
 
         """
-        qstate_operate_qgate(self, kind=CONTROLLED_RY, phase=phase, qid=[q0,q1])
+        qstate_operate_qgate(self, kind=cfg.CONTROLLED_RY, phase=phase, qid=[q0, q1])
         return self
 
-    def crz(self, q0, q1, phase=DEF_PHASE):
+    def crz(self, q0, q1, phase=cfg.DEF_PHASE):
         """
         operate CRZ gate (controlled RZ gate).
 
@@ -1283,82 +1185,11 @@ class QState(ctypes.Structure):
         self : instance of QState
 
         """
-        qstate_operate_qgate(self, kind=CONTROLLED_RZ, phase=phase, qid=[q0,q1])
+        qstate_operate_qgate(self, kind=cfg.CONTROLLED_RZ, phase=phase, qid=[q0, q1])
         return self
 
-    # def cu1(self, q0, q1, alpha=DEF_PHASE):
-    #     """
-    #     operate CU1 gate (controlled U1 gate).
-    # 
-    #     Parameters
-    #     ----------
-    #     q0 : int
-    #         qubit id (control qubit).
-    #     q1 : int
-    #         qubit id (target qubit).
-    #     alpha : float
-    #         rotation angle (unit of angle is PI radian).
-    # 
-    #     Returns
-    #     -------
-    #     self : instance of QState
-    # 
-    #     """
-    #     qstate_operate_qgate(self, kind=CONTROLLED_U1, phase=alpha, qid=[q0,q1])
-    #     return self
-    # 
-    # def cu2(self, q0, q1, alpha=DEF_PHASE, beta=DEF_PHASE):
-    #     """
-    #     operate CU2 gate (controlled U2 gate).
-    # 
-    #     Parameters
-    #     ----------
-    #     q0 : int
-    #         qubit id (control qubit).
-    #     q1 : int
-    #         qubit id (target qubit).
-    #     alpha : float
-    #         rotation angle (unit of angle is PI radian).
-    #     beta : float
-    #         rotation angle (unit of angle is PI radian).
-    # 
-    #     Returns
-    #     -------
-    #     self : instance of QState
-    # 
-    #     """
-    #     qstate_operate_qgate(self, kind=CONTROLLED_U2, phase=alpha, phase1=beta,
-    #                          qid=[q0,q1])
-    #     return self
-    # 
-    # def cu3(self, q0, q1, alpha=DEF_PHASE, beta=DEF_PHASE, gamma=DEF_PHASE):
-    #     """
-    #     operate CU3 gate (controlled U3 gate).
-    # 
-    #     Parameters
-    #     ----------
-    #     q0 : int
-    #         qubit id (control qubit).
-    #     q1 : int
-    #         qubit id (target qubit).
-    #     alpha : float
-    #         rotation angle (unit of angle is PI radian).
-    #     beta : float
-    #         rotation angle (unit of angle is PI radian).
-    #     gamma : float
-    #         rotation angle (unit of angle is PI radian).
-    # 
-    #     Returns
-    #     -------
-    #     self : instance of QState
-    # 
-    #     """
-    #     qstate_operate_qgate(self, kind=CONTROLLED_U3, phase=alpha, phase1=beta,
-    #                          phase2=gamma, qid=[q0,q1])
-    #     return self
-
     # 3-qubit gate
-    
+
     def ccx(self, q0, q1, q2):
         """
         operate CCX gate (toffoli gate, controlled controlled X gate).
@@ -1377,7 +1208,7 @@ class QState(ctypes.Structure):
         self : instance of QState
 
         """
-        self.cxr(q1,q2).cx(q0,q1).cxr_dg(q1,q2).cx(q0,q1).cxr(q0,q2)
+        self.cxr(q1, q2).cx(q0, q1).cxr_dg(q1, q2).cx(q0, q1).cxr(q0, q2)
         return self
 
     def csw(self, q0, q1, q2):
@@ -1398,28 +1229,28 @@ class QState(ctypes.Structure):
         self : instance of QState
 
         """
-        self.cx(q2,q1).ccx(q0,q1,q2).cx(q2,q1)
+        self.cx(q2, q1).ccx(q0, q1, q2).cx(q2, q1)
         return self
 
     # other gate
 
-    def mcx(self,qid=[]):
+    def mcx(self, qid=None):
         """
         operate MCX gate (multi-controlled X gate).
-    
+
         Parameters
         ----------
         qid : list of int
             qubit id list [control, control, ... , control, target]
-    
+
         Returns
         -------
         self : instance of QState
-    
+
         """
         qstate_mcx(self, qid)
         return self
-    
+
     # measurement
 
     def measure(self, qid=None):
@@ -1455,8 +1286,8 @@ class QState(ctypes.Structure):
         """
         mval = qstate_measure(self, qid=qid, angle=0.0, phase=0.0)
         return mval
-    
-    def m(self, qid=None, shots=DEF_SHOTS, angle=0.0, phase=0.0):
+
+    def m(self, qid=None, shots=cfg.DEF_SHOTS, angle=0.0, phase=0.0):
         """
         measurement in any direction (default: Z-axis).
 
@@ -1494,8 +1325,8 @@ class QState(ctypes.Structure):
         md = qstate_measure_stats(self, qid=qid, shots=shots,
                                   angle=angle, phase=phase)
         return md
-        
-    def mx(self, qid=None, shots=DEF_SHOTS):
+
+    def mx(self, qid=None, shots=cfg.DEF_SHOTS):
         """
         X-axis measurement.
 
@@ -1519,8 +1350,8 @@ class QState(ctypes.Structure):
         md = qstate_measure_stats(self, qid=qid, shots=shots,
                                   angle=0.5, phase=0.0)
         return md
-        
-    def my(self, qid=None, shots=DEF_SHOTS):
+
+    def my(self, qid=None, shots=cfg.DEF_SHOTS):
         """
         Y-axis measurement.
 
@@ -1541,11 +1372,11 @@ class QState(ctypes.Structure):
         MData class (MData.py)
 
         """
-        md =  qstate_measure_stats(self, qid=qid, shots=shots,
-                                   angle=0.5, phase=0.5)
+        md = qstate_measure_stats(self, qid=qid, shots=shots,
+                                  angle=0.5, phase=0.5)
         return md
-        
-    def mz(self, qid=None, shots=DEF_SHOTS):
+
+    def mz(self, qid=None, shots=cfg.DEF_SHOTS):
         """
         Z-axis measurement.
 
@@ -1566,13 +1397,14 @@ class QState(ctypes.Structure):
         MData class (MData.py)
 
         """
-        md =  qstate_measure_stats(self, qid=qid, shots=shots,
-                                   angle=0.0, phase=0.0)
+        md = qstate_measure_stats(self, qid=qid, shots=shots,
+                                  angle=0.0, phase=0.0)
         return md
 
-    def mb(self, qid=None, shots=DEF_SHOTS):
+    def mb(self, qid=None, shots=cfg.DEF_SHOTS):
+        """ bell measurement """
         return qstate_measure_bell_stats(self, qid=qid, shots=shots)
-        
+
     def operate(self, pp=None, ctrl=None):
         """
         operate unitary operator to quantum state.
@@ -1592,7 +1424,7 @@ class QState(ctypes.Structure):
         """
         pauli_list = pp.pauli_list
         qid = pp.qid
-    
+
         if ctrl is None:
             for q, pauli in zip(qid, pauli_list):
                 if pauli == 'X':
@@ -1606,7 +1438,7 @@ class QState(ctypes.Structure):
         else:
             if ctrl in qid:
                 raise ValueError("controll and target qubit id conflict")
-        
+
             for q, pauli in zip(qid, pauli_list):
                 if pauli == 'X':
                     self.cx(ctrl, q)
@@ -1616,27 +1448,17 @@ class QState(ctypes.Structure):
                     self.cz(ctrl, q)
                 else:
                     continue
-    
+
         return self
-
-    def free(self):
-        """
-        free memory of quantum state.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-
-        """
-        warnings.warn("No need to call 'free' method because free automatically, or you can use 'del' to free memory explicitly.")
 
     def __del__(self):
 
         qstate_free(self)
 
 # c-library for qstate
-from qlazy.lib.qstate_c import *
+from qlazy.lib.qstate_c import (qstate_init, qstate_init_with_vector, qstate_reset,
+                                qstate_print, qstate_copy, qstate_bloch,
+                                qstate_inner_product, qstate_get_camp,
+                                qstate_tensor_product, qstate_evolve, qstate_expect_value,
+                                qstate_apply_matrix, qstate_operate_qgate, qstate_measure,
+                                qstate_measure_stats, qstate_measure_bell_stats, qstate_free)

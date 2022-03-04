@@ -8,7 +8,8 @@ from qlazy.QState import *
 from qlazy.Result import *
 from qlazy.lib.qstate_c import *
 
-def run(qcirc=None, shots=1, cid=[], backend=None):
+# def run(qcirc=None, shots=1, cid=[], backend=None):
+def run(qcirc=None, shots=1, cid=None, backend=None):
 
     if qcirc is None:
         raise ValueError("quantum circuit must be specified.")
@@ -21,11 +22,11 @@ def run(qcirc=None, shots=1, cid=[], backend=None):
     else:
         cmem = None
 
+    if cid is None:
+        cid = [i for i in range(cmem_num)]
+
     if cmem_num < len(cid):
         raise ValueError("length of cid must be less than classical resister size of qcirc")
-
-    if cid == []:
-        cid = [i for i in range(cmem_num)]
 
     qcirc_unitary, qcirc_non_unitary = qcirc.split_unitary_non_unitary()
 

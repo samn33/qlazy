@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
-from collections import Counter
-
-from qlazy.config import *
-from qlazy.error import *
+""" Result of quantum circuit execution """
 
 class Result:
     """ Result of quantum circuit execution
@@ -11,12 +8,12 @@ class Result:
     ----------
     cid : list
         classical register id list to get frequencys.
-    freqency : Counter
+    freqency : instance of Counter
         frequencies of measured value.
     backend : instance of Backend
         backend device of quantum computing
     info : dict
-        result information relating to the backend device
+        result informations relating to the backend device
 
     """
     def __init__(self, cid=None, frequency=None, backend=None, info=None):

@@ -1,15 +1,29 @@
 # -*- coding: utf-8 -*-
+""" Mesured data """
 import ctypes
-from ctypes.util import find_library
-import pathlib
 from collections import Counter
 
-from qlazy.config import *
-from qlazy.error import *
-from qlazy.util import *
-
 class MData(ctypes.Structure):
+    """ Measured data
 
+    Attributes
+    ----------
+    qubit_num : int
+        number of qubits
+    shot_num : int
+        number of measureings
+    angle : float
+        angle
+    phase : float
+        phase
+    qubit_id : list of int
+        list of qubit ids
+    freq : list of float
+        list of frequencies
+    last_val : int
+        last measurement value
+
+    """
     _fields_ = [
         ('qubit_num', ctypes.c_int),
         ('shot_num', ctypes.c_int),
@@ -20,7 +34,7 @@ class MData(ctypes.Structure):
         ('last_val', ctypes.c_int),
     ]
 
-    def __new__(cls, qubit_num=None, shots=1, angle=0.0, phase=0.0, qid=[], **kwargs):
+    def __new__(cls, qubit_num=None, shots=1, angle=0.0, phase=0.0, qid=None, **kwargs):
         """
         Parameters
         ----------
@@ -43,9 +57,9 @@ class MData(ctypes.Structure):
         s += "frequency: {}\n".format(self.frequency)
         s += "last state: {}".format(self.last)
         return s
-    
-    def show(self):
 
+    def show(self):
+        """ show the measured data"""
         mdata_print(self)
 
     @property
@@ -54,12 +68,12 @@ class MData(ctypes.Structure):
         mval = self.last_val
         digits = self.qubit_num
         return '{:0{digits}b}'.format(mval, digits=digits)
-            
+
     @property
     def lst(self):
         """ last measured value (integer) """
         return self.last_val
-            
+
     @property
     def frequency(self):
         """ frequencies of measured value (Counter) """
@@ -67,9 +81,9 @@ class MData(ctypes.Structure):
         frq = [self.freq[i] for i in range(state_num)]
         digits = self.qubit_num
         res = {"{:0{digits}b}".format(k, digits=digits):v
-               for k,v in enumerate(frq) if v > 0}
+               for k, v in enumerate(frq) if v > 0}
         return Counter(res)
-            
+
     @property
     def frq(self):
         """ frequencies of measured value (list) """
@@ -82,11 +96,12 @@ class MData(ctypes.Structure):
 
     @property
     def state_num(self):
+        """ number of states """
         return 2**self.qubit_num
-        
+
     def __del__(self):
 
         mdata_free(self)
-        
+
 # c-library for qstate
-from qlazy.lib.mdata_c import *
+from qlazy.lib.mdata_c import mdata_init, mdata_print, mdata_free

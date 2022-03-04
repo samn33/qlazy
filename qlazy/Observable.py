@@ -1,14 +1,10 @@
 # -*- coding: utf-8 -*-
+""" Obserbavle for quantum many-body spin system. """
 import ctypes
-import warnings
-import ctypes
-
-from qlazy.config import *
-from qlazy.error import *
 
 class Observable(ctypes.Structure):
     """ Obserbavle for quantum many-body spin system. """
-    
+
     _fields_ = [
         ('spin_num', ctypes.c_int),
         ('array_num', ctypes.c_int),
@@ -38,28 +34,11 @@ class Observable(ctypes.Structure):
         cls.spro_array = None
         obj = observable_init(string)
         ob = ctypes.cast(obj.value, ctypes.POINTER(cls)).contents
-        # ob = observable_init(string)
         return ob
 
-    def free(ob):
-        """
-        free memory of observable.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        None
-
-        """
-        # observable_free(ob)
-        warnings.warn("No need to call 'free' method because free automatically, or you can use 'del' to free memory explicitly.")
-
     def __del__(self):
-        
+
         observable_free(self)
 
 # c-library for observable
-from qlazy.lib.observable_c import *
+from qlazy.lib.observable_c import observable_init, observable_free
