@@ -36,6 +36,11 @@ def run(qcirc=None, shots=1, cid=None, backend=None):
 
     info = {'stabilizer': stab, 'cmem': cmem}
 
-    result = Result(cid=cid, frequency=frequency, backend=backend, info=info)
+    # result = Result(cid=cid, frequency=frequency, backend=backend, info=info)
+    result = Result()
+    result.cid = cid
+    result.frequency = frequency
+    result.backend = backend
+    result.info = info
     
     return result

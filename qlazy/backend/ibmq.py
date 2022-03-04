@@ -102,7 +102,12 @@ def run(qcirc=None, shots=1, cid=None, backend=None):
     statevector = np.asarray(res_sv.get_statevector(qc))
 
     info = {'statevector': statevector, 'creg': cmem_reg, 'quantum_circuit': qc}
-    result = Result(cid=cid, frequency=frequency, backend=backend, info=info)
+    # result = Result(cid=cid, frequency=frequency, backend=backend, info=info)
+    result = Result()
+    result.backend = backend
+    result.cid = cid
+    result.frequency = frequency
+    result.info = info
 
     return result
 

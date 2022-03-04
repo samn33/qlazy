@@ -8,7 +8,6 @@ from qlazy.QState import *
 from qlazy.Result import *
 from qlazy.lib.qstate_c import *
 
-# def run(qcirc=None, shots=1, cid=[], backend=None):
 def run(qcirc=None, shots=1, cid=None, backend=None):
 
     if qcirc is None:
@@ -35,6 +34,11 @@ def run(qcirc=None, shots=1, cid=None, backend=None):
 
     info = {'qstate': qstate, 'cmem': cmem}
 
-    result = Result(cid=cid, frequency=frequency, backend=backend, info=info)
+    # result = Result(cid=cid, frequency=frequency, backend=backend, info=info)
+    result = Result()
+    result.backend = backend
+    result.cid = cid
+    result.frequency = frequency
+    result.info = info
 
     return result

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """ Backend device of quantum computing """
 
+import time
+
 BACKEND_DEVICES = {'qlazy': ['qstate_simulator', 'stabilizer_simulator'],
                    'qulacs': ['cpu_simulator', 'gpu_simulator'],
                    'ibmq': ['aer_simulator', 'qasm_simulator']}
@@ -44,6 +46,8 @@ class Backend:
             self.product = product
             if device in BACKEND_DEVICES[product]:
                 self.device = device
+            elif device is None:
+                self.device = BACKEND_DEVICES[product][0]
             elif product == 'ibmq':
                 self.device = device
             else:
@@ -147,6 +151,11 @@ class Backend:
 
         return device_list
 
+    def __str__(self):
+
+        backend_dict = {'product': self.product, 'device': self.device}
+        return str(backend_dict)
+
     def run(self, qcirc=None, shots=1, cid=None):
         """
         run the quantum circuit.
@@ -186,5 +195,10 @@ class Backend:
         Counter({'00': 100})
 
         """
+        start_time = time.time()
+
         result = self.__run(qcirc=qcirc, shots=shots, cid=cid, backend=self)
+
+        result.elapsed_time = time.time() - start_time
+
         return result

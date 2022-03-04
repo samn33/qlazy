@@ -121,7 +121,12 @@ def __run_all(qcirc=None, shots=1, cid=None, backend=None, proc='CPU'):
 
     if kind == None:
         info = {'quantumstate': qstate, 'cmem': cmem}
-        result = Result(cid=cid, frequency=None, backend=backend, info=info)
+        # result = Result(cid=cid, frequency=None, backend=backend, info=info)
+        result = Result()
+        result.cid = cid
+        result.frequency = None
+        result.backend = backend
+        result.info = info
         return result
     
     #
@@ -168,7 +173,12 @@ def __run_all(qcirc=None, shots=1, cid=None, backend=None, proc='CPU'):
         frequency = None
 
     info = {'quantumstate': qstate, 'cmem': cmem}
-    result = Result(cid=cid, frequency=frequency, backend=backend, info=info)
+    # result = Result(cid=cid, frequency=frequency, backend=backend, info=info)
+    result = Result()
+    result.cid = cid
+    result.frequency = frequency
+    result.backend = backend
+    result.info = info
     
     return result
         
