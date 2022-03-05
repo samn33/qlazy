@@ -1,5 +1,11 @@
 # Change Log
 
+## [0.2.5] - 2022-xx-xx
+### Added
+- show,save,load result of quantum circuit execution
+### Changed
+- refactoring
+
 ## [0.2.4] - 2022-02-23
 ### Added
 - get stats of quantum circuit (frequency of each gate etc)
