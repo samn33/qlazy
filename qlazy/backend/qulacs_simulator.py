@@ -1,19 +1,14 @@
 # -*- coding: utf-8 -*-
-import sys
-import random
-from collections import Counter
-import numpy as np
-import cmath
+""" run function for qulacs's cpu/gpu simulator """
 
-from qlazy.error import *
-from qlazy.config import *
-from qlazy.util import *
-from qlazy.Result import *
+from collections import Counter
+import cmath
+import numpy as np
 
 from qulacs import QuantumState
 from qulacs import QuantumCircuit
-from qulacs.gate import Identity, X, Y, Z
-from qulacs.gate import H, S, Sdag, T, Tdag, sqrtX, sqrtXdag, sqrtY, sqrtYdag
+from qulacs.gate import X, Y, Z
+from qulacs.gate import H, S, Sdag, T, Tdag, sqrtX, sqrtXdag
 from qulacs.gate import CNOT, CZ, SWAP
 from qulacs.gate import RX, RY, RZ
 from qulacs.gate import U1, U2, U3
@@ -21,58 +16,64 @@ from qulacs.gate import Measurement
 from qulacs.gate import DenseMatrix
 from qulacs.gate import to_matrix_gate
 
+import qlazy.config as cfg
+from qlazy.util import get_qgate_qubit_num, get_qgate_param_num
+from qlazy.Result import Result
+
 GateFunctionName = {
     # 1-qubit, 0-parameter gate
-    PAULI_X: 'X',
-    PAULI_Y: 'Y',
-    PAULI_Z: 'Z',
-    ROOT_PAULI_X:'sqrtX',
-    ROOT_PAULI_X_:'sqrtXdag',
-    HADAMARD:'H',
-    PHASE_SHIFT_S:'S',
-    PHASE_SHIFT_S_:'Sdag',
-    PHASE_SHIFT_T:'T',
-    PHASE_SHIFT_T_:'Tdag',
-    IDENTITY:'Identity',
+    cfg.PAULI_X: 'X',
+    cfg.PAULI_Y: 'Y',
+    cfg.PAULI_Z: 'Z',
+    cfg.ROOT_PAULI_X:'sqrtX',
+    cfg.ROOT_PAULI_X_:'sqrtXdag',
+    cfg.HADAMARD:'H',
+    cfg.PHASE_SHIFT_S:'S',
+    cfg.PHASE_SHIFT_S_:'Sdag',
+    cfg.PHASE_SHIFT_T:'T',
+    cfg.PHASE_SHIFT_T_:'Tdag',
+    cfg.IDENTITY:'Identity',
     # 1-qubit, 1-parameter gate
-    ROTATION_X:'RX',
-    ROTATION_Y:'RY',
-    ROTATION_Z:'RZ',
-    PHASE_SHIFT:'__get_P',
-    ROTATION_U1:'U1',
+    cfg.ROTATION_X:'RX',
+    cfg.ROTATION_Y:'RY',
+    cfg.ROTATION_Z:'RZ',
+    cfg.PHASE_SHIFT:'__get_P',
+    cfg.ROTATION_U1:'U1',
     # 1-qubit, 2-parameter gate
-    ROTATION_U2:'U2',
+    cfg.ROTATION_U2:'U2',
     # 1-qubit, 3-parameter gate
-    ROTATION_U3:'U3',
+    cfg.ROTATION_U3:'U3',
     # 2-qubit, 0-parameters gate
-    CONTROLLED_X:'CNOT',
-    CONTROLLED_Y:'__get_CY',
-    CONTROLLED_Z:'CZ',
-    CONTROLLED_XR:'__get_CXR',
-    CONTROLLED_XR_:'__get_CXR_dg',
-    CONTROLLED_H:'__get_CH',
-    CONTROLLED_S:'__get_CS',
-    CONTROLLED_S_:'__get_CS_dg',
-    CONTROLLED_T:'__get_CT',
-    CONTROLLED_T_:'__get_CT_dg',
-    CONTROLLED_P:'__get_CP',
-    SWAP_QUBITS:'SWAP',
+    cfg.CONTROLLED_X:'CNOT',
+    cfg.CONTROLLED_Y:'__get_CY',
+    cfg.CONTROLLED_Z:'CZ',
+    cfg.CONTROLLED_XR:'__get_CXR',
+    cfg.CONTROLLED_XR_:'__get_CXR_dg',
+    cfg.CONTROLLED_H:'__get_CH',
+    cfg.CONTROLLED_S:'__get_CS',
+    cfg.CONTROLLED_S_:'__get_CS_dg',
+    cfg.CONTROLLED_T:'__get_CT',
+    cfg.CONTROLLED_T_:'__get_CT_dg',
+    cfg.CONTROLLED_P:'__get_CP',
+    cfg.SWAP_QUBITS:'SWAP',
     # 2-qubit, 1-parameters gate
-    CONTROLLED_RX:'__get_CRX',
-    CONTROLLED_RY:'__get_CRY',
-    CONTROLLED_RZ:'__get_CRZ',
-    CONTROLLED_U1:'__get_CU1',
+    cfg.CONTROLLED_RX:'__get_CRX',
+    cfg.CONTROLLED_RY:'__get_CRY',
+    cfg.CONTROLLED_RZ:'__get_CRZ',
+    cfg.CONTROLLED_U1:'__get_CU1',
     # 2-qubit, 2-parameters gate
-    CONTROLLED_U2:'__get_CU2',
+    cfg.CONTROLLED_U2:'__get_CU2',
     # 2-qubit, 3-parameters gate
-    CONTROLLED_U3:'__get_CU3',
+    cfg.CONTROLLED_U3:'__get_CU3',
 }
 
-def run_cpu(qcirc=[], shots=1, cid=None, backend=None):
+def run_cpu(qcirc=None, shots=1, cid=None, backend=None):
+    """ run the quantum circuit (CPU) """
 
     return __run_all(qcirc=qcirc, shots=shots, cid=cid, backend=backend, proc='CPU')
 
-def run_gpu(qcirc=[], shots=1, cid=None, backend=None):
+def run_gpu(qcirc=None, shots=1, cid=None, backend=None):
+    """ run the quantum circuit (GPU) """
 
     return __run_all(qcirc=qcirc, shots=shots, cid=cid, backend=backend, proc='GPU')
 
@@ -85,7 +86,7 @@ def __run_all(qcirc=None, shots=1, cid=None, backend=None, proc='CPU'):
     cmem_num = qcirc.cmem_num
 
     if cid is None:
-        cid = [i for i in range(cmem_num)]
+        cid = list(range(cmem_num))
 
     if cmem_num < len(cid):
         raise ValueError("length of cid must be less than classical resister size of qcirc")
@@ -106,16 +107,15 @@ def __run_all(qcirc=None, shots=1, cid=None, backend=None, proc='CPU'):
 
     while True:
         kind = qcirc.kind_first()
-        if kind is None or kind is MEASURE or kind is RESET:
+        if kind is None or kind is cfg.MEASURE or kind is cfg.RESET:
             break
 
-        else:
-            (kind, qid, para, c, ctrl) = qcirc.pop_gate()
-            if ctrl == None or (ctrl != None and cmem[ctrl] == 1):
-                __qulacs_operate_qgate(qstate, qubit_num, kind=kind, qid=qid,
-                                       phase=para[0], phase1=para[1], phase2=para[2])
+        (kind, qid, para, c, ctrl) = qcirc.pop_gate()
+        if ctrl is None or (ctrl is not None and cmem[ctrl] == 1):
+            __qulacs_operate_qgate(qstate, qubit_num, kind=kind, qid=qid,
+                                   phase=para[0], phase1=para[1], phase2=para[2])
 
-    if kind == None:
+    if kind is None:
         info = {'quantumstate': qstate, 'cmem': cmem}
 
         result = Result()
@@ -127,14 +127,14 @@ def __run_all(qcirc=None, shots=1, cid=None, backend=None, proc='CPU'):
         result.backend = backend
         result.info = info
         return result
-    
+
     #
     # after measurement gate
     #
 
     frequency = Counter()
     qstate_tmp = None
-    for cnt in range(shots):
+    for _ in range(shots):
 
         qstate_tmp = qstate.copy()
         qcirc_tmp = qcirc.clone()
@@ -142,29 +142,30 @@ def __run_all(qcirc=None, shots=1, cid=None, backend=None, proc='CPU'):
         while True:
 
             kind = qcirc_tmp.kind_first()
-            if kind == None:
+            if kind is None:
                 break
 
-            elif kind == MEASURE:
+            # elif kind == cfg.MEASURE:
+            if kind == cfg.MEASURE:
                 (kind, qid, para, c, ctrl) = qcirc_tmp.pop_gate()
                 mval = __qulacs_measure(qstate_tmp, qubit_num, qid[0])
-                if c != None:
+                if c is not None:
                     cmem[c] = mval
-                        
-            elif kind == RESET:
+
+            elif kind == cfg.RESET:
                 (kind, qid, para, c, ctrl) = qcirc_tmp.pop_gate()
                 __qulacs_reset(qstate_tmp, qubit_num, qid[0])
 
             else:
                 (kind, qid, para, c, ctrl) = qcirc_tmp.pop_gate()
-                if (ctrl == None or (ctrl != None and cmem[ctrl] == 1)):
+                if (ctrl is None or (ctrl is not None and cmem[ctrl] == 1)):
                     __qulacs_operate_qgate(qstate_tmp, qubit_num, kind=kind, qid=qid,
                                            phase=para[0], phase1=para[1], phase2=para[2])
 
         if len(cmem) > 0:
             mval = ''.join(map(str, [cmem[i] for i in cid]))
             frequency[mval] += 1
-    
+
     if qstate_tmp is not None:
         qstate.load(qstate_tmp.get_vector())
 
@@ -181,15 +182,12 @@ def __run_all(qcirc=None, shots=1, cid=None, backend=None, proc='CPU'):
     result.frequency = frequency
     result.backend = backend
     result.info = info
-    
+
     return result
-        
+
 def __is_supported_qgate(kind):
 
-    if kind in GateFunctionName.keys():
-        return True
-    else:
-        return False
+    return kind in GateFunctionName.keys()
 
 # not supported as pre-defined gates
 
@@ -292,7 +290,7 @@ def __get_CU3(q0, q1, phase, phase1, phase2):
 
 def __qulacs_operate_qgate(qstate, qubit_num, kind, qid, phase, phase1, phase2):
 
-    if __is_supported_qgate(kind) == False:
+    if __is_supported_qgate(kind) is False:
         raise ValueError("not supported quantum gate")
 
     circ = QuantumCircuit(qubit_num)
@@ -305,17 +303,17 @@ def __qulacs_operate_qgate(qstate, qubit_num, kind, qid, phase, phase1, phase2):
     phase1 = phase1 * np.pi
     phase2 = phase2 * np.pi
 
-    # the sign-definition of rotation gate on qulacs 
-    if (kind == ROTATION_X or kind == ROTATION_Y or kind == ROTATION_Z or
-        kind == CONTROLLED_RX or kind == CONTROLLED_RY or kind == CONTROLLED_RZ):
+    # the sign-definition of rotation gate on qulacs
+    if (kind in (cfg.ROTATION_X, cfg.ROTATION_Y, cfg.ROTATION_Z,
+                 cfg.CONTROLLED_RX, cfg.CONTROLLED_RY, cfg.CONTROLLED_RZ)):
         phase = -phase
-    # the argument-order-definition of U2 gate on qulacs 
-    elif kind == ROTATION_U2 or kind == CONTROLLED_U2:
+    # the argument-order-definition of U2 gate on qulacs
+    elif kind in (cfg.ROTATION_U2, cfg.CONTROLLED_U2):
         phase1, phase = phase, phase1
-    # the argument-order-definition of U3 gate on qulacs 
-    elif kind == ROTATION_U3 or kind == CONTROLLED_U3:
+    # the argument-order-definition of U3 gate on qulacs
+    elif kind in (cfg.ROTATION_U3, cfg.CONTROLLED_U3):
         phase2, phase = phase, phase2
-        
+
     if term_num == 1 and para_num == 0:
         circ.add_gate(eval(gate_function_name)(qid[0]))
     elif term_num == 1 and para_num == 1:
@@ -334,7 +332,7 @@ def __qulacs_operate_qgate(qstate, qubit_num, kind, qid, phase, phase1, phase2):
         circ.add_gate(eval(gate_function_name)(qid[0], qid[1], phase, phase1, phase2))
     else:
         raise ValueError("not supported terminal or parameter-number")
-    
+
     circ.update_quantum_state(qstate)
 
 def __qulacs_reset(qstate, qubit_num, q):

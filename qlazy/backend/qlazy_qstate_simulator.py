@@ -1,18 +1,17 @@
 # -*- coding: utf-8 -*-
-from collections import Counter
+""" run function for qlazy's qstate simulator """
 
-from qlazy.error import *
-from qlazy.config import *
-from qlazy.util import *
-from qlazy.QState import *
-from qlazy.Result import *
-from qlazy.lib.qstate_c import *
+from qlazy.QState import QState
+from qlazy.CMem import CMem
+from qlazy.Result import Result
+from qlazy.lib.qstate_c import qstate_operate_qcirc
 
 def run(qcirc=None, shots=1, cid=None, backend=None):
+    """ run the quantum circuit """
 
     if qcirc is None:
         raise ValueError("quantum circuit must be specified.")
-    
+
     qubit_num = qcirc.qubit_num
     cmem_num = qcirc.cmem_num
     qstate = QState(qubit_num=qubit_num)
@@ -22,7 +21,7 @@ def run(qcirc=None, shots=1, cid=None, backend=None):
         cmem = None
 
     if cid is None:
-        cid = [i for i in range(cmem_num)]
+        cid = list(range(cmem_num))
 
     if cmem_num < len(cid):
         raise ValueError("length of cid must be less than classical resister size of qcirc")

@@ -1,18 +1,17 @@
 # -*- coding: utf-8 -*-
-from collections import Counter
+""" run function for qlazy's stabilizer simulator """
 
-from qlazy.error import *
-from qlazy.config import *
-from qlazy.util import *
-from qlazy.Stabilizer import *
-from qlazy.Result import *
-from qlazy.lib.stabilizer_c import *
+from qlazy.Stabilizer import Stabilizer
+from qlazy.CMem import CMem
+from qlazy.Result import Result
+from qlazy.lib.stabilizer_c import stabilizer_operate_qcirc
 
 def run(qcirc=None, shots=1, cid=None, backend=None):
+    """ run the quantum circuit """
 
     if qcirc is None:
         raise ValueError("quantum circuit must be specified.")
-    
+
     qubit_num = qcirc.qubit_num
     cmem_num = qcirc.cmem_num
     stab = Stabilizer(qubit_num)
@@ -21,10 +20,10 @@ def run(qcirc=None, shots=1, cid=None, backend=None):
         cmem = CMem(cmem_num)
     else:
         cmem = None
-    
+
     if cid is None:
-        cid = [i for i in range(cmem_num)]
-        
+        cid = list(range(cmem_num))
+
     if cmem_num < len(cid):
         raise ValueError("length of cid must be less than classical resister size of qcirc")
 
@@ -35,7 +34,6 @@ def run(qcirc=None, shots=1, cid=None, backend=None):
 
     info = {'stabilizer': stab, 'cmem': cmem}
 
-    # result = Result(cid=cid, frequency=frequency, backend=backend, info=info)
     result = Result()
     result.qubit_num = qubit_num
     result.cmem_num = cmem_num
@@ -44,5 +42,5 @@ def run(qcirc=None, shots=1, cid=None, backend=None):
     result.frequency = frequency
     result.backend = backend
     result.info = info
-    
+
     return result
