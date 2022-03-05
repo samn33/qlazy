@@ -653,7 +653,7 @@ class QCirc(ctypes.Structure):
             self.append_gate(kind, qid, para, c, ctrl)
         return self
 
-    def dump(self, file_path=None):
+    def dump(self, file_path):
         """
         dump the circuit
 
@@ -671,8 +671,24 @@ class QCirc(ctypes.Structure):
         with open(file_path, mode='wb') as f:
             pickle.dump(gates, f)
 
+    def save(self, file_path):
+        """
+        save the circuit
+
+        Parameters
+        ----------
+        file_path: str
+            file path of dump file
+
+        Returns
+        -------
+        None
+
+        """
+        self.dump(file_path)
+
     @classmethod
-    def load(cls, file_path=None):
+    def load(cls, file_path):
         """
         load the circuit
 

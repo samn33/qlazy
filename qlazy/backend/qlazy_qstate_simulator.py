@@ -34,10 +34,12 @@ def run(qcirc=None, shots=1, cid=None, backend=None):
 
     info = {'qstate': qstate, 'cmem': cmem}
 
-    # result = Result(cid=cid, frequency=frequency, backend=backend, info=info)
     result = Result()
     result.backend = backend
+    result.qubit_num = qubit_num
+    result.cmem_num = cmem_num
     result.cid = cid
+    result.shots = shots
     result.frequency = frequency
     result.info = info
 

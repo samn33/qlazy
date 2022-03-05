@@ -8,7 +8,6 @@ from qlazy.Stabilizer import *
 from qlazy.Result import *
 from qlazy.lib.stabilizer_c import *
 
-# def run(qcirc=None, shots=1, cid=[], backend=None):
 def run(qcirc=None, shots=1, cid=None, backend=None):
 
     if qcirc is None:
@@ -38,7 +37,10 @@ def run(qcirc=None, shots=1, cid=None, backend=None):
 
     # result = Result(cid=cid, frequency=frequency, backend=backend, info=info)
     result = Result()
+    result.qubit_num = qubit_num
+    result.cmem_num = cmem_num
     result.cid = cid
+    result.shots = shots
     result.frequency = frequency
     result.backend = backend
     result.info = info

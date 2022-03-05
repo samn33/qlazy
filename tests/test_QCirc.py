@@ -866,7 +866,7 @@ class TestQCirc_get_stats(unittest.TestCase):
         self.assertEqual(stats['gatetype_freq']['non-clifford'], 2)
 
 class TestQCirc_dump_load(unittest.TestCase):
-    """ test 'QCirc' : dump, load
+    """ test 'QCirc' : dump, save, load
     """
 
     def test_dump_load(self):
@@ -874,6 +874,14 @@ class TestQCirc_dump_load(unittest.TestCase):
         """
         qc_A = QCirc().x(0).z(2).h(0).h(0).cx(0,1).h(0).h(1).crz(1,0, phase=0.1).rx(1, phase=0.2)
         qc_A.dump("tmp/foo.qc")
+        qc_B = QCirc.load("tmp/foo.qc")
+        self.assertEqual(qc_A, qc_B)
+
+    def test_save_load(self):
+        """test save, load
+        """
+        qc_A = QCirc().x(0).z(2).h(0).h(0).cx(0,1).h(0).h(1).crz(1,0, phase=0.1).rx(1, phase=0.2)
+        qc_A.save("tmp/foo.qc")
         qc_B = QCirc.load("tmp/foo.qc")
         self.assertEqual(qc_A, qc_B)
 

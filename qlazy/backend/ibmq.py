@@ -16,7 +16,6 @@ from qiskit.qasm import pi
 from qiskit.providers.ibmq import least_busy
 from qiskit.circuit.library.standard_gates import SXdgGate
 
-# def run(qcirc=None, shots=1, cid=[], backend=None):
 def run(qcirc=None, shots=1, cid=None, backend=None):
             
     if qcirc is None:
@@ -102,10 +101,12 @@ def run(qcirc=None, shots=1, cid=None, backend=None):
     statevector = np.asarray(res_sv.get_statevector(qc))
 
     info = {'statevector': statevector, 'creg': cmem_reg, 'quantum_circuit': qc}
-    # result = Result(cid=cid, frequency=frequency, backend=backend, info=info)
     result = Result()
     result.backend = backend
+    result.qubit_num = qubit_num
+    result.cmem_num = cmem_num
     result.cid = cid
+    result.shots = shots
     result.frequency = frequency
     result.info = info
 

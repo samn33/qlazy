@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """ Backend device of quantum computing """
 
-import time
+import datetime
 
 BACKEND_DEVICES = {'qlazy': ['qstate_simulator', 'stabilizer_simulator'],
                    'qulacs': ['cpu_simulator', 'gpu_simulator'],
@@ -195,10 +195,12 @@ class Backend:
         Counter({'00': 100})
 
         """
-        start_time = time.time()
-
+        start_time = datetime.datetime.now()
         result = self.__run(qcirc=qcirc, shots=shots, cid=cid, backend=self)
+        end_time = datetime.datetime.now()
 
-        result.elapsed_time = time.time() - start_time
+        result.start_time = start_time
+        result.end_time = end_time
+        result.elapsed_time = (end_time - start_time).total_seconds()
 
         return result

@@ -191,10 +191,65 @@ resultにはcidとfrequencyという2つのプロパティが定義されてい�
     print(result.cid)
 	>>> [0]
     print(result.frequency)
-    >>> Counter({'0': 51, '1': 49})
+    >>> Counter({'0': 52, '1': 48})
 
 という結果を得ることができます(いわゆる周辺化ですね)。cidを省略した場
 合、全古典レジスタにわたり頻度が計算されます。
+
+その他、バックエンド情報、量子ビット数、古典ビット数、測定した回数、計
+算開始時刻、計算終了時刻、計算時間は以下のように取得することができます。
+
+    print(result.backend)
+    >>> {'product': 'qlazy', 'device': 'qstate_simulator'}
+    print(result.qubit_num)
+    >>> 2
+    print(result.cmem_num)
+    >>> 2
+    print(result.shots)
+    >>> 100
+    print(result.start_time)
+    >>> 2022-03-05 13:32:33.837965
+    print(result.end_time)
+    >>> 2022-03-05 13:32:33.842534
+    print(result.elapsed_time)
+    >>> 0.004569
+
+すべてを一度に表示したい場合はshowメソッドを使って、
+
+    result.show()
+
+とすれば、
+
+    [backend]
+    - product      = qlazy
+    - device       = qstate_simulator
+    [qubit & cmem]
+    - qubit_num    = 2
+    - cmem_num     = 2
+    [measurement]
+    - cid          = [0, 1]
+    - shots        = 100
+    [time]
+    - start_time   = 2022-03-05 13:32:33.837965
+    - end_time     = 2022-03-05 13:32:33.842534
+    - elapsed_time = 0.004569
+    [histogram]
+    - freq[11] = 48 (0.4800) |+++++++++++++++
+    - freq[00] = 52 (0.5200) |++++++++++++++++
+
+のように表示させることができます。
+
+この結果をファイルとして保存したり、保存したものを読み出すこともできます。
+saveメソッドを使って、
+
+    result.save("hoge.res")
+
+としてファイルhoge.resに保存しておいて、loadメソッド(classmethod)を使って、
+
+    from qlazy import Result
+    result_load = Result.load("hoge.res")
+	
+とすれば、保存しておいた計算結果をロードして結果データを再度取得することができます。
 
 
 ### 量子状態の取得(qlazyの場合のみ)
@@ -405,7 +460,7 @@ get_statsメソッドを使えば、一気に取得することができます�
 
 量子計算の性能評価とか量子回路最適化の研究等でランダムな量子回路を作り
 たくなることがあります。そんなときはget_random_gatesメソッド
-(staticmethod)が使えます。例えば、以下のようにします。
+(classmethod)が使えます。例えば、以下のようにします。
 
     qc = QCirc.generate_random_gates(qubit_num=5, gate_num=100, phase=(0.0, 0.25, 0.5),
                                      prob={'h':7, 'cx':5, 'rx':3, 'crz':3})
@@ -424,7 +479,7 @@ x,z,h,s,s_dg,t,t_dg,rx,rz,cx,cz,ch,crzの13種類です。
 非ユニタリゲート(measure, reset)は指定できません。
 
 phaseは回転系のゲートがある場合に有効になります(回転系がない場合、指定は無視されます)。
-rxとかcrzなどの位相をどのようにバラけさせたいかをタプルで指定します。
+rxとかcrzなどの位相をどのようにバラけさせたいかをタプルで指定します(何個指定しても良いです)。
 
     phase=(0.0, 0.25, 0.5)
 
@@ -453,14 +508,14 @@ rxとかcrzなどの位相をどのようにバラけさせたいかをタプル
 
 作成した量子回路をファイルに書き出したり、書き出されたファイルを読み込むことができます。
 
-まず、書き出す場合はdumpメソッドを使って、
+まず、書き出す場合はsaveメソッドを使って、
 
     qc_A = QCirc().h(0).cx(1,0).measure(qid=[0,1], cid=[0,1])
-	qc_A.dump("hoge.qc")
+	qc_A.save("hoge.qc")
 	
 のようにします。これでhoge.qcというファイルにqcの内容が書き出されます(内部でpickle使ってます)。
 
-読み込む場合は、loadメソッド(staticmethod)を使って、
+読み込む場合は、loadメソッド(classmethod)を使って、
 
     qc_B = QCirc.load("hoge.qc")
 

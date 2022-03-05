@@ -68,17 +68,14 @@ GateFunctionName = {
     CONTROLLED_U3:'__get_CU3',
 }
 
-# def run_cpu(qcirc=[], shots=1, cid=[], backend=None):
 def run_cpu(qcirc=[], shots=1, cid=None, backend=None):
 
     return __run_all(qcirc=qcirc, shots=shots, cid=cid, backend=backend, proc='CPU')
 
-# def run_gpu(qcirc=[], shots=1, cid=[], backend=None):
 def run_gpu(qcirc=[], shots=1, cid=None, backend=None):
 
     return __run_all(qcirc=qcirc, shots=shots, cid=cid, backend=backend, proc='GPU')
 
-# def __run_all(qcirc=None, shots=1, cid=[], backend=None, proc='CPU'):
 def __run_all(qcirc=None, shots=1, cid=None, backend=None, proc='CPU'):
 
     if qcirc is None:
@@ -109,7 +106,6 @@ def __run_all(qcirc=None, shots=1, cid=None, backend=None, proc='CPU'):
 
     while True:
         kind = qcirc.kind_first()
-        # if kind == None or kind == MEASURE or kind == RESET:
         if kind is None or kind is MEASURE or kind is RESET:
             break
 
@@ -121,9 +117,12 @@ def __run_all(qcirc=None, shots=1, cid=None, backend=None, proc='CPU'):
 
     if kind == None:
         info = {'quantumstate': qstate, 'cmem': cmem}
-        # result = Result(cid=cid, frequency=None, backend=backend, info=info)
+
         result = Result()
+        result.qubit_num = qubit_num
+        result.cmem_num = cmem_num
         result.cid = cid
+        result.shots = shots
         result.frequency = None
         result.backend = backend
         result.info = info
@@ -173,9 +172,12 @@ def __run_all(qcirc=None, shots=1, cid=None, backend=None, proc='CPU'):
         frequency = None
 
     info = {'quantumstate': qstate, 'cmem': cmem}
-    # result = Result(cid=cid, frequency=frequency, backend=backend, info=info)
+
     result = Result()
+    result.qubit_num = qubit_num
+    result.cmem_num = cmem_num
     result.cid = cid
+    result.shots = shots
     result.frequency = frequency
     result.backend = backend
     result.info = info
