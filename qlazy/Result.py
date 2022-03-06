@@ -57,7 +57,7 @@ class Result:
     @backend.setter
     def backend(self, backend):
         """ setter of backend """
-        if isinstance(backend, Backend) is not True:
+        if isinstance(backend, Backend) is False:
             raise TypeError("type of backend must be Backend.")
         self.__backend = backend
 
@@ -71,7 +71,7 @@ class Result:
     @qubit_num.setter
     def qubit_num(self, qubit_num):
         """ setter of qubit_num """
-        if isinstance(qubit_num, int) is not True:
+        if isinstance(qubit_num, int) is False:
             raise TypeError("type of qubit_num must be int.")
         self.__qubit_num = qubit_num
 
@@ -85,7 +85,7 @@ class Result:
     @cmem_num.setter
     def cmem_num(self, cmem_num):
         """ getter of cmem_nem """
-        if isinstance(cmem_num, int) is not True:
+        if isinstance(cmem_num, int) is False:
             raise TypeError("type of cmem_num must be int.")
         self.__cmem_num = cmem_num
 
@@ -99,7 +99,7 @@ class Result:
     @cid.setter
     def cid(self, cid):
         """ setter of cid """
-        if isinstance(cid, list) is not True:
+        if isinstance(cid, list) is False:
             raise TypeError("type of cid must be list.")
         self.__cid = cid
 
@@ -113,7 +113,7 @@ class Result:
     @shots.setter
     def shots(self, shots):
         """ setter of shots """
-        if isinstance(shots, int) is not True:
+        if isinstance(shots, int) is False:
             raise TypeError("type of shots must be int.")
         self.__shots = shots
 
@@ -127,7 +127,7 @@ class Result:
     @frequency.setter
     def frequency(self, frequency):
         """ setter of frequency """
-        if isinstance(frequency, Counter) is not True and frequency is not None:
+        if isinstance(frequency, Counter) is False and frequency is not None:
             raise TypeError("type of frequency must be Counter.")
         self.__frequency = frequency
 
@@ -141,7 +141,7 @@ class Result:
     @start_time.setter
     def start_time(self, start_time):
         """ setter of start_time """
-        if isinstance(start_time, datetime.datetime) is not True:
+        if isinstance(start_time, datetime.datetime) is False:
             raise TypeError("type of sart_time must be datetime.datetime.")
         self.__start_time = start_time
 
@@ -155,7 +155,7 @@ class Result:
     @end_time.setter
     def end_time(self, end_time):
         """ setter of end_time """
-        if isinstance(end_time, datetime.datetime) is not True:
+        if isinstance(end_time, datetime.datetime) is False:
             raise TypeError("type of end_time must be datetime.datetime.")
         self.__end_time = end_time
 
@@ -169,7 +169,7 @@ class Result:
     @elapsed_time.setter
     def elapsed_time(self, elapsed_time):
         """ setter of elapsed_time """
-        if isinstance(elapsed_time, float) is not True:
+        if isinstance(elapsed_time, float) is False:
             raise TypeError("type of elaased_time must be float.")
         self.__elapsed_time = elapsed_time
 
@@ -185,7 +185,7 @@ class Result:
     @info.setter
     def info(self, info):
         """ setter of info """
-        if isinstance(info, dict) is not True:
+        if isinstance(info, dict) is False and info is not None:
             raise TypeError("type of info must be dict.")
         self.__info = info
 
@@ -231,17 +231,20 @@ class Result:
         s += "- elapsed_time = {:.6f}\n".format(self.__elapsed_time)
         s += "[histogram]\n"
 
-        digits = len(str(max(self.__frequency.values())))
+        if self.__frequency is None:
+            s += "None\n"
+        else:
+            digits = len(str(max(self.__frequency.values())))
 
-        for k, v in self.__frequency.items():
-            prob = v / self.__shots
-            if v > 0:
-                bar_graph = '+'
-            bar_graph += '+' * int(prob * 30)
-            s += ("- freq[{0:}] = {1:{digits}d} ({2:1.4f}) |{3:}\n"
-                  .format(k, v, prob, bar_graph, digits=digits))
+            for k, v in self.__frequency.items():
+                prob = v / self.__shots
+                if v > 0:
+                    bar_graph = '+'
+                bar_graph += '+' * int(prob * 30)
+                s += ("- freq[{0:}] = {1:{digits}d} ({2:1.4f}) |{3:}\n"
+                      .format(k, v, prob, bar_graph, digits=digits))
 
-        print(s)
+        print(s.rstrip())
 
     def save(self, file_path):
         """
