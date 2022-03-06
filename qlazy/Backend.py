@@ -5,7 +5,7 @@ import datetime
 
 BACKEND_DEVICES = {'qlazy': ['qstate_simulator', 'stabilizer_simulator'],
                    'qulacs': ['cpu_simulator', 'gpu_simulator'],
-                   'ibmq': ['aer_simulator', 'qasm_simulator']}
+                   'ibmq': ['aer_simulator', 'qasm_simulator', 'statevector_simulator']}
 
 class Backend:
     """ Backend device of quantum computing

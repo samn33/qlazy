@@ -51,7 +51,7 @@ class TestBackend_1_qubit_ibmq_qasm_simulator(unittest.TestCase):
     def test_x(self):
         """test 'x' gate
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().x(0)
         res = bk.run(qcirc=qc)
         actual = res.info['statevector']
@@ -62,7 +62,7 @@ class TestBackend_1_qubit_ibmq_qasm_simulator(unittest.TestCase):
     def test_h_x(self):
         """test 'x' gate (following 'h' gate)
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().h(0).x(0)
         res = bk.run(qcirc=qc)
         actual = res.info['statevector']
@@ -73,7 +73,7 @@ class TestBackend_1_qubit_ibmq_qasm_simulator(unittest.TestCase):
     def test_y(self):
         """test 'y' gate
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().y(0)
         res = bk.run(qcirc=qc)
         actual = res.info['statevector']
@@ -84,7 +84,7 @@ class TestBackend_1_qubit_ibmq_qasm_simulator(unittest.TestCase):
     def test_h_y(self):
         """test 'y' gate (following 'h' gate)
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().h(0).y(0)
         res = bk.run(qcirc=qc)
         actual = res.info['statevector']
@@ -95,7 +95,7 @@ class TestBackend_1_qubit_ibmq_qasm_simulator(unittest.TestCase):
     def test_z(self):
         """test 'z' gate
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().z(0)
         res = bk.run(qcirc=qc)
         actual = res.info['statevector']
@@ -106,7 +106,7 @@ class TestBackend_1_qubit_ibmq_qasm_simulator(unittest.TestCase):
     def test_h_z(self):
         """test 'z' gate (following 'h' gate)
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().h(0).z(0)
         res = bk.run(qcirc=qc)
         actual = res.info['statevector']
@@ -117,7 +117,7 @@ class TestBackend_1_qubit_ibmq_qasm_simulator(unittest.TestCase):
     def test_xr(self):
         """test 'xr' gate
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().xr(0)
         res = bk.run(qcirc=qc)
         actual = res.info['statevector']
@@ -128,7 +128,7 @@ class TestBackend_1_qubit_ibmq_qasm_simulator(unittest.TestCase):
     def test_h_xr(self):
         """test 'xr' gate (following 'h' gate)
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().h(0).xr(0)
         res = bk.run(qcirc=qc)
         actual = res.info['statevector']
@@ -139,7 +139,7 @@ class TestBackend_1_qubit_ibmq_qasm_simulator(unittest.TestCase):
     def test_xr_dg(self):
         """test 'xr_dg' gate
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().xr_dg(0)
         res = bk.run(qcirc=qc)
         actual = res.info['statevector']
@@ -150,7 +150,7 @@ class TestBackend_1_qubit_ibmq_qasm_simulator(unittest.TestCase):
     def test_h_xr_dg(self):
         """test 'xr_dg' gate (following 'h' gate)
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().h(0).xr_dg(0)
         res = bk.run(qcirc=qc)
         actual = res.info['statevector']
@@ -161,7 +161,7 @@ class TestBackend_1_qubit_ibmq_qasm_simulator(unittest.TestCase):
     def test_h(self):
         """test 'h' gate
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().h(0)
         res = bk.run(qcirc=qc)
         actual = res.info['statevector']
@@ -172,7 +172,7 @@ class TestBackend_1_qubit_ibmq_qasm_simulator(unittest.TestCase):
     def test_s(self):
         """test 's' gate
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().s(0)
         res = bk.run(qcirc=qc)
         actual = res.info['statevector']
@@ -183,7 +183,7 @@ class TestBackend_1_qubit_ibmq_qasm_simulator(unittest.TestCase):
     def test_h_s(self):
         """test 's' gate (following 'h' gate)
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().h(0).s(0)
         res = bk.run(qcirc=qc)
         actual = res.info['statevector']
@@ -194,7 +194,7 @@ class TestBackend_1_qubit_ibmq_qasm_simulator(unittest.TestCase):
     def test_s_dg(self):
         """test 's_dg' gate
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().s_dg(0)
         res = bk.run(qcirc=qc)
         actual = res.info['statevector']
@@ -205,7 +205,7 @@ class TestBackend_1_qubit_ibmq_qasm_simulator(unittest.TestCase):
     def test_h_s_dg(self):
         """test 's_dg' gate (following 'h' gate)
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().h(0).s_dg(0)
         res = bk.run(qcirc=qc)
         actual = res.info['statevector']
@@ -217,7 +217,7 @@ class TestBackend_1_qubit_ibmq_qasm_simulator(unittest.TestCase):
     def test_t(self):
         """test 't' gate
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().t(0)
         res = bk.run(qcirc=qc)
         actual = res.info['statevector']
@@ -228,7 +228,7 @@ class TestBackend_1_qubit_ibmq_qasm_simulator(unittest.TestCase):
     def test_h_t(self):
         """test 't' gate (following 'h' gate)
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().h(0).t(0)
         res = bk.run(qcirc=qc)
         actual = res.info['statevector']
@@ -239,7 +239,7 @@ class TestBackend_1_qubit_ibmq_qasm_simulator(unittest.TestCase):
     def test_t_dg(self):
         """test 't_dg' gate
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().t_dg(0)
         res = bk.run(qcirc=qc)
         actual = res.info['statevector']
@@ -250,7 +250,7 @@ class TestBackend_1_qubit_ibmq_qasm_simulator(unittest.TestCase):
     def test_h_t_dg(self):
         """test 't_dg' gate (following 'h' gate)
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().h(0).t_dg(0)
         res = bk.run(qcirc=qc)
         actual = res.info['statevector']
@@ -261,7 +261,7 @@ class TestBackend_1_qubit_ibmq_qasm_simulator(unittest.TestCase):
     def test_rx(self):
         """test 'rx' gate
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().rx(0, phase=0.25)
         res = bk.run(qcirc=qc)
         actual = res.info['statevector']
@@ -272,7 +272,7 @@ class TestBackend_1_qubit_ibmq_qasm_simulator(unittest.TestCase):
     def test_h_rx(self):
         """test 'rx' gate (following 'h' gate)
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().h(0).rx(0, phase=0.25)
         res = bk.run(qcirc=qc)
         actual = res.info['statevector']
@@ -283,7 +283,7 @@ class TestBackend_1_qubit_ibmq_qasm_simulator(unittest.TestCase):
     def test_ry(self):
         """test 'ry' gate
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().ry(0, phase=0.25)
         res = bk.run(qcirc=qc)
         actual = res.info['statevector']
@@ -294,7 +294,7 @@ class TestBackend_1_qubit_ibmq_qasm_simulator(unittest.TestCase):
     def test_h_ry(self):
         """test 'ry' gate (following 'h' gate)
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().h(0).ry(0, phase=0.25)
         res = bk.run(qcirc=qc)
         actual = res.info['statevector']
@@ -305,7 +305,7 @@ class TestBackend_1_qubit_ibmq_qasm_simulator(unittest.TestCase):
     def test_rz(self):
         """test 'rz' gate
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().rz(0, phase=0.25)
         res = bk.run(qcirc=qc)
         actual = res.info['statevector']
@@ -316,7 +316,7 @@ class TestBackend_1_qubit_ibmq_qasm_simulator(unittest.TestCase):
     def test_h_rz(self):
         """test 'rz' gate (following 'h' gate)
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().h(0).rz(0, phase=0.25)
         res = bk.run(qcirc=qc)
         actual = res.info['statevector']
@@ -327,7 +327,7 @@ class TestBackend_1_qubit_ibmq_qasm_simulator(unittest.TestCase):
     def test_p(self):
         """test 'p' gate
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().p(0, phase=0.25)
         res = bk.run(qcirc=qc)
         actual = res.info['statevector']
@@ -338,7 +338,7 @@ class TestBackend_1_qubit_ibmq_qasm_simulator(unittest.TestCase):
     def test_h_p(self):
         """test 'p' gate (following 'h' gate)
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().h(0).p(0, phase=0.25)
         res = bk.run(qcirc=qc)
         actual = res.info['statevector']
@@ -349,7 +349,7 @@ class TestBackend_1_qubit_ibmq_qasm_simulator(unittest.TestCase):
 #     def test_u1(self):
 #         """test 'u1' gate
 #         """
-#         bk = Backend(product='ibmq', device='aer_simulator')
+#         bk = Backend(product='ibmq', device='statevector_simulator')
 #         qc = QCirc().u1(0, alpha=0.1)
 #         res = bk.run(qcirc=qc)
 #         actual = res.info['statevector']
@@ -360,7 +360,7 @@ class TestBackend_1_qubit_ibmq_qasm_simulator(unittest.TestCase):
 #     def test_h_u1(self):
 #         """test 'u1' gate (following 'h' gate)
 #         """
-#         bk = Backend(product='ibmq', device='aer_simulator')
+#         bk = Backend(product='ibmq', device='statevector_simulator')
 #         qc = QCirc().h(0).u1(0, alpha=0.1)
 #         res = bk.run(qcirc=qc)
 #         actual = res.info['statevector']
@@ -371,7 +371,7 @@ class TestBackend_1_qubit_ibmq_qasm_simulator(unittest.TestCase):
 #     def test_u2(self):
 #         """test 'u2' gate
 #         """
-#         bk = Backend(product='ibmq', device='aer_simulator')
+#         bk = Backend(product='ibmq', device='statevector_simulator')
 #         qc = QCirc().u2(0, alpha=0.1, beta=0.2)
 #         res = bk.run(qcirc=qc)
 #         actual = res.info['statevector']
@@ -382,7 +382,7 @@ class TestBackend_1_qubit_ibmq_qasm_simulator(unittest.TestCase):
 #     def test_h_u2(self):
 #         """test 'u2' gate (following 'h' gate)
 #         """
-#         bk = Backend(product='ibmq', device='aer_simulator')
+#         bk = Backend(product='ibmq', device='statevector_simulator')
 #         qc = QCirc().h(0).u2(0, alpha=0.1, beta=0.2)
 #         res = bk.run(qcirc=qc)
 #         actual = res.info['statevector']
@@ -393,7 +393,7 @@ class TestBackend_1_qubit_ibmq_qasm_simulator(unittest.TestCase):
 #     def test_u3(self):
 #         """test 'u3' gate
 #         """
-#         bk = Backend(product='ibmq', device='aer_simulator')
+#         bk = Backend(product='ibmq', device='statevector_simulator')
 #         qc = QCirc().u3(0, alpha=0.1, beta=0.2, gamma=0.3)
 #         res = bk.run(qcirc=qc)
 #         actual = res.info['statevector']
@@ -404,7 +404,7 @@ class TestBackend_1_qubit_ibmq_qasm_simulator(unittest.TestCase):
 #     def test_h_u3(self):
 #         """test 'u3' gate (following 'h' gate)
 #         """
-#         bk = Backend(product='ibmq', device='aer_simulator')
+#         bk = Backend(product='ibmq', device='statevector_simulator')
 #         qc = QCirc().h(0).u3(0, alpha=0.1, beta=0.2, gamma=0.3)
 #         res = bk.run(qcirc=qc)
 #         actual = res.info['statevector']
@@ -423,7 +423,7 @@ class TestBackend_2_qubit_ibmq_qasm_simulator(unittest.TestCase):
     def test_cx(self):
         """test 'cx' gate
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().h(0).h(1).cx(0,1)
         res = bk.run(qcirc=qc)
         actual = res.info['statevector']
@@ -434,7 +434,7 @@ class TestBackend_2_qubit_ibmq_qasm_simulator(unittest.TestCase):
     def test_cy(self):
         """test 'cy' gate
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().h(0).h(1).cy(0,1)
         res = bk.run(qcirc=qc)
         actual = res.info['statevector']
@@ -445,7 +445,7 @@ class TestBackend_2_qubit_ibmq_qasm_simulator(unittest.TestCase):
     def test_cz(self):
         """test 'cz' gate
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().h(0).h(1).cz(0,1)
         res = bk.run(qcirc=qc)
         actual = res.info['statevector']
@@ -456,7 +456,7 @@ class TestBackend_2_qubit_ibmq_qasm_simulator(unittest.TestCase):
     def test_cxr(self):
         """test 'cxr' gate
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().h(0).h(1).cxr(0,1)
         res = bk.run(qcirc=qc)
         actual = res.info['statevector']
@@ -467,7 +467,7 @@ class TestBackend_2_qubit_ibmq_qasm_simulator(unittest.TestCase):
     def test_cxr_dg(self):
         """test 'cxr_dg' gate
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().h(0).h(1).cxr_dg(0,1)
         res = bk.run(qcirc=qc)
         actual = res.info['statevector']
@@ -478,7 +478,7 @@ class TestBackend_2_qubit_ibmq_qasm_simulator(unittest.TestCase):
     def test_ch(self):
         """test 'ch' gate
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().h(0).h(1).ch(0,1)
         res = bk.run(qcirc=qc)
         actual = res.info['statevector']
@@ -489,7 +489,7 @@ class TestBackend_2_qubit_ibmq_qasm_simulator(unittest.TestCase):
     def test_cs(self):
         """test 'cs' gate
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().h(0).h(1).cs(0,1)
         res = bk.run(qcirc=qc)
         actual = res.info['statevector']
@@ -500,7 +500,7 @@ class TestBackend_2_qubit_ibmq_qasm_simulator(unittest.TestCase):
     def test_cs_dg(self):
         """test 'cs_dg' gate
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().h(0).h(1).cs_dg(0,1)
         res = bk.run(qcirc=qc)
         actual = res.info['statevector']
@@ -511,7 +511,7 @@ class TestBackend_2_qubit_ibmq_qasm_simulator(unittest.TestCase):
     def test_ct(self):
         """test 'ct' gate
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().h(0).h(1).ct(0,1)
         res = bk.run(qcirc=qc)
         actual = res.info['statevector']
@@ -523,7 +523,7 @@ class TestBackend_2_qubit_ibmq_qasm_simulator(unittest.TestCase):
     def test_ct_dg(self):
         """test 'ct_dg' gate
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().h(0).h(1).ct_dg(0,1)
         res = bk.run(qcirc=qc)
         actual = res.info['statevector']
@@ -535,7 +535,7 @@ class TestBackend_2_qubit_ibmq_qasm_simulator(unittest.TestCase):
     def test_sw(self):
         """test 'sw' gate
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().h(0).h(1).sw(0,1)
         res = bk.run(qcirc=qc)
         actual = res.info['statevector']
@@ -546,7 +546,7 @@ class TestBackend_2_qubit_ibmq_qasm_simulator(unittest.TestCase):
     def test_x_sw(self):
         """test 'sw' gate (following 'x' gate, not 'h' gates)
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().x(0).sw(0,1)
         res = bk.run(qcirc=qc)
         actual = res.info['statevector']
@@ -557,7 +557,7 @@ class TestBackend_2_qubit_ibmq_qasm_simulator(unittest.TestCase):
     def test_cp(self):
         """test 'cp'gate
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().h(0).h(1).cp(0,1, phase=0.25)
         res = bk.run(qcirc=qc)
         actual = res.info['statevector']
@@ -569,7 +569,7 @@ class TestBackend_2_qubit_ibmq_qasm_simulator(unittest.TestCase):
     def test_crx(self):
         """test 'crx' gate
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().h(0).h(1).crx(0,1, phase=0.25)
         res = bk.run(qcirc=qc)
         actual = res.info['statevector']
@@ -581,7 +581,7 @@ class TestBackend_2_qubit_ibmq_qasm_simulator(unittest.TestCase):
     def test_cry(self):
         """test 'cry' gate
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().h(0).h(1).cry(0,1, phase=0.25)
         res = bk.run(qcirc=qc)
         actual = res.info['statevector']
@@ -593,7 +593,7 @@ class TestBackend_2_qubit_ibmq_qasm_simulator(unittest.TestCase):
     def test_crz(self):
         """test 'crz' gate
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().h(0).h(1).crz(0,1, phase=0.25)
         res = bk.run(qcirc=qc)
         actual = res.info['statevector']
@@ -605,7 +605,7 @@ class TestBackend_2_qubit_ibmq_qasm_simulator(unittest.TestCase):
 #     def test_cu1(self):
 #         """test 'cu1' gate
 #         """
-#         bk = Backend(product='ibmq', device='aer_simulator')
+#         bk = Backend(product='ibmq', device='statevector_simulator')
 #         qc = QCirc().h(0).h(1).cu1(0,1, alpha=0.1)
 #         res = bk.run(qcirc=qc)
 #         actual = res.info['statevector']
@@ -617,7 +617,7 @@ class TestBackend_2_qubit_ibmq_qasm_simulator(unittest.TestCase):
 #     def test_cu2(self):
 #         """test 'cu2' gate
 #         """
-#         bk = Backend(product='ibmq', device='aer_simulator')
+#         bk = Backend(product='ibmq', device='statevector_simulator')
 #         qc = QCirc().h(0).h(1).cu2(0,1, alpha=0.1, beta=0.2)
 #         res = bk.run(qcirc=qc)
 #         actual = res.info['statevector']
@@ -629,7 +629,7 @@ class TestBackend_2_qubit_ibmq_qasm_simulator(unittest.TestCase):
 #     def test_cu3(self):
 #         """test 'cu3' gate
 #         """
-#         bk = Backend(product='ibmq', device='aer_simulator')
+#         bk = Backend(product='ibmq', device='statevector_simulator')
 #         qc = QCirc().h(0).h(1).cu3(0,1, alpha=0.1, beta=0.2, gamma=0.3)
 #         res = bk.run(qcirc=qc)
 #         actual = res.info['statevector']
@@ -649,7 +649,7 @@ class TestBackend_3_qubit_ibmq_qasm_simulator(unittest.TestCase):
     def test_ccx(self):
         """test 'ccx' gate
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().x(0).x(1).ccx(0,1,2)
         res = bk.run(qcirc=qc)
         actual = res.info['statevector']
@@ -660,7 +660,7 @@ class TestBackend_3_qubit_ibmq_qasm_simulator(unittest.TestCase):
     def test_x_x_csw(self):
         """test 'csw' gate
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().x(0).x(1).csw(0,1,2)
         res = bk.run(qcirc=qc)
         actual = res.info['statevector']
@@ -679,7 +679,7 @@ class TestBackend_operate_ibmq_qasm_simulator(unittest.TestCase):
     def test_operate_x(self):
         """test 'operate' (x)
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().x(0)
         res = bk.run(qcirc=qc)
         expect = res.info['statevector']
@@ -693,7 +693,7 @@ class TestBackend_operate_ibmq_qasm_simulator(unittest.TestCase):
     def test_operate_h_x(self):
         """test 'operate' (x followed by h)
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().h(0).x(0)
         res = bk.run(qcirc=qc)
         expect = res.info['statevector']
@@ -707,7 +707,7 @@ class TestBackend_operate_ibmq_qasm_simulator(unittest.TestCase):
     def test_operate_h_y(self):
         """test 'operate' (Y followed by h)
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().h(0).y(0)
         res = bk.run(qcirc=qc)
         expect = res.info['statevector']
@@ -721,7 +721,7 @@ class TestBackend_operate_ibmq_qasm_simulator(unittest.TestCase):
     def test_operate_h_z(self):
         """test 'operate' (Z followed by h)
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().h(0).z(0)
         res = bk.run(qcirc=qc)
         expect = res.info['statevector']
@@ -735,7 +735,7 @@ class TestBackend_operate_ibmq_qasm_simulator(unittest.TestCase):
     def test_operate_xyz(self):
         """test 'operate' (xyz)
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().x(2).y(0).z(1)
         res = bk.run(qcirc=qc)
         expect = res.info['statevector']
@@ -749,7 +749,7 @@ class TestBackend_operate_ibmq_qasm_simulator(unittest.TestCase):
     def test_operate_controlled_xyz(self):
         """test 'operate' (controlled_xyz)
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
+        bk = Backend(product='ibmq', device='statevector_simulator')
         qc = QCirc().cx(3,2).cy(3,0).cz(3,1)
         res = bk.run(qcirc=qc)
         expect = res.info['statevector']
@@ -804,13 +804,15 @@ class TestBackend_measure_qasm_simulator(unittest.TestCase):
     def test_measure_mesurement_unitary(self):
         """test 'measure' (measurement-unitary)
         """
-        bk = Backend(product='ibmq', device='aer_simulator')
         qc = QCirc().measure(qid=[0,1], cid=[1,2]).h(0).cx(0,1)
-        res = bk.run(qcirc=qc, shots=10, cid=[1,2])
-        freq = res.frequency
-        cid = res.cid
+        bk_sv = Backend(product='ibmq', device='statevector_simulator')
+        res_sv = bk_sv.run(qcirc=qc, shots=10, cid=[1,2])
+        bk_aer = Backend(product='ibmq', device='aer_simulator')
+        res_aer = bk_aer.run(qcirc=qc, shots=10, cid=[1,2])
+        freq = res_aer.frequency
+        cid = res_aer.cid
         expect = reverse_bit_order(np.array([(0.7071067811865476+0j), 0j, 0j, (0.7071067811865476+0j)]))
-        actual = res.info['statevector']
+        actual = res_sv.info['statevector']
         ans = equal_vectors(actual, expect)
         self.assertEqual(freq['00'], 10)
         self.assertEqual(ans, True)
