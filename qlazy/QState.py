@@ -240,7 +240,7 @@ class QState(ctypes.Structure):
 
         Returns
         -------
-        ret : list of complex
+        ret : numpy.ndarray (complex)
             elements of the quantum state vector.
 
         Notes

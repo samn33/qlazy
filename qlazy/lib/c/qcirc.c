@@ -252,7 +252,10 @@ void qcirc_free(QCirc* qcirc)
     }
     else {
       qgate = qgate->next;
-      free(qgate->prev); qgate->prev = NULL;
+      if (qgate->prev != NULL) {
+	free(qgate->prev);
+	qgate->prev = NULL;
+      }
     }
   }
 
