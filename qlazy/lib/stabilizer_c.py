@@ -190,11 +190,11 @@ def stabilizer_operate_qcirc(sb, cmem, qcirc, shots, cid):
                 cmem_tmp = cmem.clone()
                 ret = lib.stabilizer_operate_qcirc(ctypes.byref(sb_tmp),
                                                    ctypes.byref(cmem_tmp), ctypes.byref(qcirc))
-                bit_array = ctypes.cast(cmem_tmp.bit_array, ctypes.POINTER(ctypes.c_int*cmem_num))
+                bit_array = ctypes.cast(cmem_tmp.bit_array, ctypes.POINTER(ctypes.c_ubyte*cmem_num))
             else:
                 ret = lib.stabilizer_operate_qcirc(ctypes.byref(sb),
                                                    ctypes.byref(cmem), ctypes.byref(qcirc))
-                bit_array = ctypes.cast(cmem.bit_array, ctypes.POINTER(ctypes.c_int*cmem_num))
+                bit_array = ctypes.cast(cmem.bit_array, ctypes.POINTER(ctypes.c_ubyte*cmem_num))
 
             if ret == cfg.FALSE:
                 raise ValueError("can't operate quantum circuit to the Stabilizer object.")

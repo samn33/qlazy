@@ -532,11 +532,11 @@ def qstate_operate_qcirc(qstate, cmem, qcirc, shots, cid):
                 cmem_tmp = cmem.clone()
                 ret = lib.qstate_operate_qcirc(ctypes.byref(qstate_tmp),
                                                ctypes.byref(cmem_tmp), ctypes.byref(qcirc))
-                bit_array = ctypes.cast(cmem_tmp.bit_array, ctypes.POINTER(ctypes.c_int*cmem_num))
+                bit_array = ctypes.cast(cmem_tmp.bit_array, ctypes.POINTER(ctypes.c_ubyte*cmem_num))
             else:
                 ret = lib.qstate_operate_qcirc(ctypes.byref(qstate), ctypes.byref(cmem),
                                                ctypes.byref(qcirc))
-                bit_array = ctypes.cast(cmem.bit_array, ctypes.POINTER(ctypes.c_int*cmem_num))
+                bit_array = ctypes.cast(cmem.bit_array, ctypes.POINTER(ctypes.c_ubyte*cmem_num))
 
             if ret == cfg.FALSE:
                 raise ValueError("can't operate the quantum circuit.")

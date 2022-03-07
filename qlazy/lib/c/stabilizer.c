@@ -34,7 +34,6 @@ static ComplexAxis _mul_complex_axis(ComplexAxis a, ComplexAxis b)
   return out;
 }
 
-//bool stabilizer_init(int gene_num, int qubit_num, int seed, void** stab_out)
 bool stabilizer_init(int gene_num, int qubit_num, unsigned int seed, void** stab_out)
 {
   Stabilizer*	stab	    = NULL;
@@ -651,7 +650,6 @@ bool stabilizer_measure(Stabilizer* stab, int q, double* prob_out, int* mval_out
 
   int rank = 0;
   stabilizer_get_rank(stab, &rank);
-  //if ((rank != stab->gene_num) || (rank != stab->qubit_num))
   if (rank != stab->qubit_num)
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
@@ -761,8 +759,10 @@ bool stabilizer_measure(Stabilizer* stab, int q, double* prob_out, int* mval_out
 
 bool stabilizer_operate_qcirc(Stabilizer* stab, CMem* cmem, QCirc* qcirc)
 {
-  QGate*        qgate                   = NULL;   /* quantum gate in quantum circuit */
-  MData*	mdata			= NULL;   /* output measurement data */
+  QGate*        qgate = NULL;   /* quantum gate in quantum circuit */
+  MData*	mdata = NULL;   /* output measurement data */
+  int		m;
+  double	prob_out[2];
 
   /* error check */
   if ((stab == NULL || qcirc == NULL) ||
@@ -777,8 +777,6 @@ bool stabilizer_operate_qcirc(Stabilizer* stab, CMem* cmem, QCirc* qcirc)
     if ((qgate->ctrl == -1) ||
 	((qgate->ctrl != -1) && (cmem->bit_array[qgate->ctrl] == 1))) {
     
-      int m;
-      double prob_out[2];
       if (kind_is_unitary(qgate->kind) == true) {
 	if (!(stabilizer_operate_qgate(stab, qgate->kind, qgate->qid[0], qgate->qid[1])))
 	  ERR_RETURN(ERROR_STABILIZER_OPERATE_QGATE, false);
@@ -786,6 +784,7 @@ bool stabilizer_operate_qcirc(Stabilizer* stab, CMem* cmem, QCirc* qcirc)
       else if (kind_is_reset(qgate->kind) == true) {
 	if (!(stabilizer_measure(stab, qgate->qid[0], prob_out, &m)))
 	  ERR_RETURN(ERROR_STABILIZER_MEASURE, false);
+	if (m < 0 || m > 1) ERR_RETURN(ERROR_STABILIZER_MEASURE, false);
 	if (m == 1) {
 	  if (!(stabilizer_operate_qgate(stab, PAULI_X, qgate->qid[0], qgate->qid[1])))
 	    ERR_RETURN(ERROR_STABILIZER_OPERATE_QGATE, false);
@@ -794,7 +793,8 @@ bool stabilizer_operate_qcirc(Stabilizer* stab, CMem* cmem, QCirc* qcirc)
       else if (kind_is_measurement(qgate->kind) == true) {
 	if (!(stabilizer_measure(stab, qgate->qid[0], prob_out, &m)))
 	  ERR_RETURN(ERROR_STABILIZER_MEASURE, false);
-	if (qgate->c != -1) cmem->bit_array[qgate->c] = m;  /* measured value is stored to classical register */
+	if (m < 0 || m > 1) ERR_RETURN(ERROR_STABILIZER_MEASURE, false);
+	if (qgate->c != -1) cmem->bit_array[qgate->c] = (BYTE)m;  /* measured value is stored to classical register */
 	mdata_free(mdata); mdata = NULL;
       }
       else {

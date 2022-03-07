@@ -1427,8 +1427,9 @@ bool qstate_operate_qcirc(QState* qstate, CMem* cmem, QCirc* qcirc)
 	else { angle = phase = 0.0; }
 	qubit_id[0] = qgate->qid[0];
 	if (!(qstate_measure(qstate, angle, phase, 1, qubit_id, &mes_id)))
-	  ERR_RETURN(ERROR_QSTATE_MEASURE,false);
-	if (qgate->c != -1) cmem->bit_array[qgate->c] = mes_id;  /* measured value is stored to classical register */
+	  ERR_RETURN(ERROR_QSTATE_MEASURE, false);
+	if (mes_id < 0 || mes_id > 1) ERR_RETURN(ERROR_QSTATE_MEASURE, false);
+	if (qgate->c != -1) cmem->bit_array[qgate->c] = (BYTE)mes_id; /* measured value is stored to classical register */
       }
       else {
 	ERR_RETURN(ERROR_QSTATE_OPERATE_QCIRC, false);
