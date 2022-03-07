@@ -90,6 +90,8 @@
 /*  Structures                                                        */
 /*====================================================================*/
 
+typedef unsigned char BYTE;
+
 typedef enum _ErrCode {
   SUCCESS,
   ERROR_INVALID_ARGUMENT,
@@ -340,7 +342,7 @@ typedef struct _QCirc {
 
 typedef struct _CMem {
   int	        cmem_num;
-  int*	        bit_array;
+  BYTE*	        bit_array;
 } CMem;
 
 typedef struct _QState {
@@ -522,7 +524,7 @@ bool     densop_init_with_matrix(double* real, double* imag, int row, int col,
 				 void** densop_out);
 bool	 densop_reset(DensOp* densop, int qubit_num, int* qubit_id);
 bool	 densop_copy(DensOp* densop_in, void** densop_out);
-bool     densop_get_elm(DensOp* densop, void** densop_out);
+bool     densop_get_elm(DensOp* densop, void** elm_out);
 bool     densop_print(DensOp* densop, bool nonzero);
 bool     densop_add(DensOp* densop, DensOp* densop_add);
 bool     densop_mul(DensOp* densop, double factor);
@@ -566,6 +568,7 @@ void qcirc_free(QCirc* qcirc);
 /* cmem.c */
 bool cmem_init(int cmem_num, void** cmem_out);
 bool cmem_copy(CMem* cmem_in, void** cmem_out);
+bool cmem_get_bits(CMem* cmem, void** bits_out);
 void cmem_free(CMem* cmem);
 
 #endif

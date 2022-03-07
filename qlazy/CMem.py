@@ -34,6 +34,15 @@ class CMem(ctypes.Structure):
         cmem = ctypes.cast(obj.value, ctypes.POINTER(cls)).contents
         return cmem
 
+    def __str__(self):
+
+        return str(self.get_bits())
+
+    @property
+    def bits(self):
+        """ bit list of classical memory. """
+        return self.get_bits()
+
     def clone(self):
         """
         get the copy of the classical memory.
@@ -52,9 +61,26 @@ class CMem(ctypes.Structure):
         cmem = ctypes.cast(obj.value, ctypes.POINTER(self.__class__)).contents
         return cmem
 
+    def get_bits(self):
+        """
+        get bit list of the classical memory.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        bits : numpy.ndarray (int)
+            bits array of the classical memory
+
+        """
+        bits = cmem_get_bits(self)
+        return bits
+
     def __del__(self):
 
         cmem_free(self)
 
 # c-library for qstate
-from qlazy.lib.cmem_c import cmem_init, cmem_copy, cmem_free
+from qlazy.lib.cmem_c import cmem_init, cmem_copy, cmem_get_bits, cmem_free
