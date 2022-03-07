@@ -3,6 +3,7 @@
 ## [0.2.5] - 2022-xx-xx
 ### Added
 - show,save,load result of quantum circuit execution
+- get_bits method to CMem class
 ### Changed
 - refactoring
 
