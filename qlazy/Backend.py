@@ -5,7 +5,8 @@ import datetime
 
 BACKEND_DEVICES = {'qlazy': ['qstate_simulator', 'stabilizer_simulator'],
                    'qulacs': ['cpu_simulator', 'gpu_simulator'],
-                   'ibmq': ['aer_simulator', 'qasm_simulator', 'statevector_simulator']}
+                   'ibmq': ['aer_simulator', 'qasm_simulator', 'statevector_simulator'],
+                   'aws': ['braket_sv']}
 
 class Backend:
     """ Backend device of quantum computing
@@ -99,6 +100,11 @@ class Backend:
         elif self.product == 'ibmq':
             from qlazy.backend.ibmq import run
             self.__run = run
+
+        # aws
+        elif self.product == 'aws':
+            from qlazy.backend.aws import run_braket_sv
+            self.__run = run_braket_sv
 
         else:
             raise ValueError("device:'{}' is unknown for product:'{}'."
