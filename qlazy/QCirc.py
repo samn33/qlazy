@@ -1880,32 +1880,31 @@ class QCirc(ctypes.Structure):
                 self.append_gate(cfg.PHASE_SHIFT_S, qid, para, c, ctrl)
             elif kind == cfg.CONTROLLED_XR:
                 para[0] = 0.5
-                self.append_gate(cfg.CONTROLLED_H, qid, para, c, ctrl)
+                self.append_gate(cfg.HADAMARD, [qid[1], -1], para, c, ctrl)
                 self.append_gate(cfg.CONTROLLED_RZ, qid, para, c, ctrl)
-                self.append_gate(cfg.CONTROLLED_H, qid, para, c, ctrl)
+                self.append_gate(cfg.HADAMARD, [qid[1], -1], para, c, ctrl)
                 para[0] = 0.25
                 self.append_gate(cfg.ROTATION_Z, qid, para, c, ctrl)
             elif kind == cfg.CONTROLLED_XR_:
                 para[0] = -0.5
-                self.append_gate(cfg.CONTROLLED_H, qid, para, c, ctrl)
+                self.append_gate(cfg.HADAMARD, [qid[1], -1], para, c, ctrl)
                 self.append_gate(cfg.CONTROLLED_RZ, qid, para, c, ctrl)
-                self.append_gate(cfg.CONTROLLED_H, qid, para, c, ctrl)
+                self.append_gate(cfg.HADAMARD, [qid[1], -1], para, c, ctrl)
                 para[0] = -0.25
                 self.append_gate(cfg.ROTATION_Z, qid, para, c, ctrl)
             elif kind == cfg.CONTROLLED_RX:
-                self.append_gate(cfg.CONTROLLED_H, qid, para, c, ctrl)
+                self.append_gate(cfg.HADAMARD, [qid[1], -1], para, c, ctrl)
                 self.append_gate(cfg.CONTROLLED_RZ, qid, para, c, ctrl)
-                self.append_gate(cfg.CONTROLLED_H, qid, para, c, ctrl)
+                self.append_gate(cfg.HADAMARD, [qid[1], -1], para, c, ctrl)
             elif kind == cfg.CONTROLLED_RY:
                 # cs_dg gate
                 phase = [-0.5, 0.0, 0.0]
                 self.append_gate(cfg.CONTROLLED_RZ, qid, phase, c, ctrl)
                 phase[0] = -0.25
                 self.append_gate(cfg.ROTATION_Z, qid, phase, c, ctrl)
-
-                self.append_gate(cfg.CONTROLLED_H, qid, para, c, ctrl)
+                self.append_gate(cfg.HADAMARD, [qid[1], -1], para, c, ctrl)
                 self.append_gate(cfg.CONTROLLED_RZ, qid, para, c, ctrl)
-                self.append_gate(cfg.CONTROLLED_H, qid, para, c, ctrl)
+                self.append_gate(cfg.HADAMARD, [qid[1], -1], para, c, ctrl)
 
                 # cs gate
                 phase[0] = 0.5
