@@ -156,7 +156,7 @@ def run_braket_sv(qcirc=None, shots=1, cid=None, backend=None):
             mstr_new = "".join(mlist_new)
             frequency[mstr_new] += freq
 
-    info = {'response':result}
+    info = {'aws':result}
 
     result = Result()
     result.backend = backend

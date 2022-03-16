@@ -106,8 +106,8 @@ def run(qcirc=None, shots=1, cid=None, backend=None):
         statevector = None
         res = None
 
-    info = {'statevector': statevector, 'creg': cmem_reg,
-            'quantum_circuit': qc, 'result':res}
+    info = {'statevector': statevector, 'creg': cmem_reg, 'ibmq':res}
+
     result = Result()
     result.backend = backend
     result.qubit_num = qubit_num
