@@ -200,15 +200,18 @@ class Result:
         s += "start_time: {}\n".format(self.__start_time)
         s += "end_time: {}\n".format(self.__end_time)
         s += "elapsed_time: {}\n".format(self.__elapsed_time)
+        s += "info: {}\n".format(self.__info)
 
         return s
 
-    def show(self):
+    def show(self, verbose=False):
         """
         show the result.
 
         Parameters
         ----------
+        verbose: bool
+            verbose output or not
         None
 
         Returns
@@ -216,20 +219,22 @@ class Result:
         None
 
         """
-        s = "[backend]\n"
-        s += "- product      = {}\n".format(self.__backend.product)
-        s += "- device       = {}\n".format(self.__backend.device)
-        s += "[qubit & cmem]\n"
-        s += "- qubit_num    = {}\n".format(self.__qubit_num)
-        s += "- cmem_num     = {}\n".format(self.__cmem_num)
-        s += "[measurement]\n"
-        s += "- cid          = {}\n".format(self.__cid)
-        s += "- shots        = {}\n".format(self.__shots)
-        s += "[time]\n"
-        s += "- start_time   = {}\n".format(self.__start_time)
-        s += "- end_time     = {}\n".format(self.__end_time)
-        s += "- elapsed_time = {:.6f}\n".format(self.__elapsed_time)
-        s += "[histogram]\n"
+        s = ""
+        if verbose is True:
+            s += "[backend]\n"
+            s += "- product      = {}\n".format(self.__backend.product)
+            s += "- device       = {}\n".format(self.__backend.device)
+            s += "[qubit & cmem]\n"
+            s += "- qubit_num    = {}\n".format(self.__qubit_num)
+            s += "- cmem_num     = {}\n".format(self.__cmem_num)
+            s += "[measurement]\n"
+            s += "- cid          = {}\n".format(self.__cid)
+            s += "- shots        = {}\n".format(self.__shots)
+            s += "[time]\n"
+            s += "- start_time   = {}\n".format(self.__start_time)
+            s += "- end_time     = {}\n".format(self.__end_time)
+            s += "- elassed time = {:.6f} [sec]\n".format(self.__elapsed_time)
+            s += "[histogram]\n"
 
         if self.__frequency is None:
             s += "None\n"
@@ -241,9 +246,13 @@ class Result:
                 if v > 0:
                     bar_graph = '+'
                 bar_graph += '+' * int(prob * 30)
-                s += ("- freq[{0:}] = {1:{digits}d} ({2:1.4f}) |{3:}\n"
+                if verbose is True:
+                    bp = "- "
+                else:
+                    bp = ""
+                s += (bp + "freq[{0:}] = {1:{digits}d} ({2:1.4f}) |{3:}\n"
                       .format(k, v, prob, bar_graph, digits=digits))
-
+            
         print(s.rstrip())
 
     def save(self, file_path):
