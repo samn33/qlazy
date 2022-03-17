@@ -252,7 +252,7 @@ class Result:
                     bp = ""
                 s += (bp + "freq[{0:}] = {1:{digits}d} ({2:1.4f}) |{3:}\n"
                       .format(k, v, prob, bar_graph, digits=digits))
-            
+
         print(s.rstrip())
 
     def save(self, file_path):
