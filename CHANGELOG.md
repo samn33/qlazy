@@ -2,6 +2,7 @@
 
 ## [0.2.5] - 2022-xx-xx
 ### Added
+- QState,DensOp,QCirc class (rxx,ryy,rzz gate method)
 - Result class (show, save, load method)
 - CMem class (get_bits method)
 ### Changed
