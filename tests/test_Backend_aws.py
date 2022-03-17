@@ -6,7 +6,6 @@ import math
 from collections import Counter
 
 from qlazy import QCirc, Backend, QState, PauliProduct
-#from qlazy.util import *
 
 EPS = 0.01
 
@@ -34,13 +33,7 @@ def evaluate(qc, qs, verbose=False):
         prob_aws[k] = v / shots
 
     # qlazy (qstate)
-    amp = qs.get_amp()
-    prob_list = [abs(c) * abs(c) for c in amp]
-    prob_qlz = Counter()
-    digits = qs.qubit_num
-    for i, p in enumerate(prob_list):
-        bits = "{:0{digits}b}".format(i, digits=digits)
-        prob_qlz[bits] += p
+    prob_qlz = qs.get_prob()
 
     if verbose is True:
         print("prob_qlz =", prob_qlz)

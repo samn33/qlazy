@@ -255,6 +255,32 @@ class QState(ctypes.Structure):
         ret = qstate_get_camp(self, qid)
         return ret
 
+    def get_prob(self, qid=None):
+        """
+        get the probability list of quantum state vector.
+
+        Parameters
+        ----------
+        qid : list of int, default - list of all of the qubit id
+            qubit id's list.
+
+        Returns
+        -------
+        prob : dict
+            key - bits string
+            value - probability
+            ex) {'00': 0.52, '11': 0.48}
+
+        """
+        amp = qstate_get_camp(self, qid)
+        if qid is None:
+            digits = self.qubit_num
+        else:
+            digits = len(qid)
+        prob = {"{:0{digits}b}".format(i, digits=digits): abs(c) * abs(c)
+                for i, c in enumerate(amp) if abs(c) > cfg.EPS}
+        return prob
+
     def partial(self, qid=None):
         """
         get the partial quantum state.
