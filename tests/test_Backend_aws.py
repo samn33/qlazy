@@ -431,6 +431,29 @@ class TestBackend_2_qubit(unittest.TestCase):
         value = evaluate(qc, qs)
         self.assertEqual(value < EPS, True)
 
+    def test_rxx(self):
+        """test 'rxx' gate
+        """
+        qc = QCirc().h(0).h(1).rxx(0, 1, phase=0.1).measure(qid=[0, 1], cid=[0, 1])
+        qs = QState(qubit_num=2).h(0).h(1).rxx(0, 1, phase=0.1)
+        value = evaluate(qc, qs)
+        self.assertEqual(value < EPS, True)
+
+    def test_ryy(self):
+        """test 'ryy' gate
+        """
+        qc = QCirc().h(0).h(1).ryy(0, 1, phase=0.1).measure(qid=[0, 1], cid=[0, 1])
+        qs = QState(qubit_num=2).h(0).h(1).ryy(0, 1, phase=0.1)
+        value = evaluate(qc, qs)
+        self.assertEqual(value < EPS, True)
+
+    def test_rzz(self):
+        """test 'rzz' gate
+        """
+        qc = QCirc().h(0).h(1).rzz(0, 1, phase=0.1).measure(qid=[0, 1], cid=[0, 1])
+        qs = QState(qubit_num=2).h(0).h(1).rzz(0, 1, phase=0.1)
+        value = evaluate(qc, qs)
+        self.assertEqual(value < EPS, True)
 
 #
 # 3-qubit gate

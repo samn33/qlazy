@@ -621,6 +621,42 @@ class TestBackend_2_qubit_qulacs_gpu_simulator(unittest.TestCase):
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
+    def test_rxx(self):
+        """test 'rxx' gate
+        """
+        bk = Backend(product='qulacs', device='gpu_simulator')
+        qc = QCirc().h(0).h(1).rxx(0, 1, phase=0.25)
+        res = bk.run(qcirc=qc)
+        actual = res.info['quantumstate'].get_vector()
+        expect = reverse_bit_order(np.array([(0.46193977-0.19134172j), (0.46193977-0.19134172j),
+                                             (0.46193977-0.19134172j), (0.46193977-0.19134172j)]))
+        ans = equal_vectors(actual, expect)
+        self.assertEqual(ans,True)
+        
+    def test_ryy(self):
+        """test 'ryy' gate
+        """
+        bk = Backend(product='qulacs', device='gpu_simulator')
+        qc = QCirc().h(0).h(1).ryy(0, 1, phase=0.25)
+        res = bk.run(qcirc=qc)
+        actual = res.info['quantumstate'].get_vector()
+        expect = reverse_bit_order(np.array([(0.46193977+0.19134172j), (0.46193977-0.19134172j),
+                                             (0.46193977-0.19134172j), (0.46193977+0.19134172j)]))
+        ans = equal_vectors(actual, expect)
+        self.assertEqual(ans,True)
+        
+    def test_rzz(self):
+        """test 'rzz' gate
+        """
+        bk = Backend(product='qulacs', device='gpu_simulator')
+        qc = QCirc().h(0).h(1).rzz(0, 1, phase=0.25)
+        res = bk.run(qcirc=qc)
+        actual = res.info['quantumstate'].get_vector()
+        expect = reverse_bit_order(np.array([(0.46193977-0.19134172j), (0.46193977+0.19134172j),
+                                             (0.46193977+0.19134172j), (0.46193977-0.19134172j)]))
+        ans = equal_vectors(actual, expect)
+        self.assertEqual(ans,True)
+
 #     def test_cu1(self):
 #         """test 'cu1' gate
 #         """

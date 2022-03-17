@@ -18,7 +18,7 @@ static void _help_print_outline() {
 * help:                     ?,help \n\
 [quantum gates]\n\
 * 1-qubit gates:            x,y,z,xr,xr_dg,h,s,s_dg,t,t_dg,p,rx,ry,rz\n\
-* 2-qubit gates:            cx,cy,cz,cxr,cxr_dg,ch,cs,cs_dg,ct,ct_dg,cp,crx,cry,crz,sw\n\
+* 2-qubit gates:            cx,cy,cz,cxr,cxr_dg,ch,cs,cs_dg,ct,ct_dg,cp,crx,cry,crz,sw,rxx,ryy,rzz\n\
 * measurement:              m,mx,my,mz,mb\n\
 * reset:                    reset\n\
 [notes] \n\
@@ -643,6 +643,54 @@ static void _help_print_crz() {
 ");
 }
 
+static void _help_print_rotation_xx() {
+  printf("\
+== Rxx gate ==\n\
+[description] \n\
+  Rxx gate is 2-qubit gate called \'Ising coupling gate for 2-qubit XX interaction\'.\n\
+  or rotaion operation through theta/2 around XX axis, Rxx(theta) = exp[-i*(theta/2)*XX].\n\
+  - matrix expression:\n\
+    | cos(theta/2)  0               0               -i*sin(theta/2) | \n\
+    | 0             cos(theta/2)    -i*sin(theta/2) 0               | \n\
+    | 0             -i*sin(theta/2) cos(theta/2)    0               | \n\
+    | -i*sin(theta) 0               0               cos(theta/2)    | \n\
+[usage] \n\
+  >> rxx(<phase>) <qubit_id> <qubit_id>\n\
+");
+}
+
+static void _help_print_rotation_yy() {
+  printf("\
+== Ryy gate ==\n\
+[description] \n\
+  Ryy gate is 2-qubit gate called \'Ising coupling gate for 2-qubit YY interaction\'.\n\
+  or rotaion operation through theta/2 around YY axis, Ryy(theta) = exp[-i*(theta/2)*YY].\n\
+  - matrix expression:\n\
+    | cos(theta/2)  0               0               i*sin(theta/2) | \n\
+    | 0             cos(theta/2)    -i*sin(theta/2) 0              | \n\
+    | 0             -i*sin(theta/2) cos(theta/2)    0              | \n\
+    | i*sin(theta)  0               0               cos(theta/2)   | \n\
+[usage] \n\
+  >> ryy(<phase>) <qubit_id> <qubit_id>\n\
+");
+}
+
+static void _help_print_rotation_zz() {
+  printf("\
+== Rzz gate ==\n\
+[description] \n\
+  Rzz gate is 2-qubit gate called \'Ising coupling gate for 2-qubit ZZ interaction\'.\n\
+  or rotaion operation through theta/2 around ZZ axis, Rzz(theta) = exp[-i (theta/2) ZZ].\n\
+  - matrix expression:\n\
+    | exp(-i*theta/2)  0              0              0               | \n\
+    | 0                exp(i*theta/2) 0 0            0               | \n\
+    | 0                0              exp(i*theta/2) 0               | \n\
+    | 0                0              0              exp(-i*theta\2) | \n\
+[usage] \n\
+  >> rzz(<phase>) <qubit_id> <qubit_id>\n\
+");
+}
+
 /*
 static void _help_print_cu1() {
   printf("\
@@ -858,11 +906,20 @@ bool help_print(char* item)
   case SWAP_QUBITS:
     _help_print_sw();
     break;
+  case ROTATION_XX:
+    _help_print_rotation_xx();
+    break;
+  case ROTATION_YY:
+    _help_print_rotation_yy();
+    break;
+  case ROTATION_ZZ:
+    _help_print_rotation_zz();
+    break;
   case RESET:
     _help_print_reset();
     break;
   default:
-    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+    ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
   }
 
   SUC_RETURN(true);

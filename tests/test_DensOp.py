@@ -1410,6 +1410,39 @@ class TestQState_2_qubit(unittest.TestCase):
         ans = equal_densops(actual, expect)
         self.assertEqual(ans,True)
 
+    def test_rxx(self):
+        """test 'rxx'gate
+        """
+        mat = make_densop_matrix(VECTORS_4, PROBS_4)
+        actual = DensOp(matrix=mat).rxx(0,1, phase=0.25)
+        qstate = [QState(vector=vec) for vec in VECTORS_4]
+        [qs.rxx(0,1, phase=0.25) for qs in qstate]
+        expect = DensOp(qstate=qstate, prob=PROBS_4)
+        ans = equal_densops(actual, expect)
+        self.assertEqual(ans,True)
+
+    def test_ryy(self):
+        """test 'ryy'gate
+        """
+        mat = make_densop_matrix(VECTORS_4, PROBS_4)
+        actual = DensOp(matrix=mat).ryy(0,1, phase=0.25)
+        qstate = [QState(vector=vec) for vec in VECTORS_4]
+        [qs.ryy(0,1, phase=0.25) for qs in qstate]
+        expect = DensOp(qstate=qstate, prob=PROBS_4)
+        ans = equal_densops(actual, expect)
+        self.assertEqual(ans,True)
+
+    def test_rzz(self):
+        """test 'rzz'gate
+        """
+        mat = make_densop_matrix(VECTORS_4, PROBS_4)
+        actual = DensOp(matrix=mat).rzz(0,1, phase=0.25)
+        qstate = [QState(vector=vec) for vec in VECTORS_4]
+        [qs.rzz(0,1, phase=0.25) for qs in qstate]
+        expect = DensOp(qstate=qstate, prob=PROBS_4)
+        ans = equal_densops(actual, expect)
+        self.assertEqual(ans,True)
+
 #     def test_cu1(self):
 #         """test 'cu1' gate
 #         """

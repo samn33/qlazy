@@ -1667,6 +1667,69 @@ class DensOp(ctypes.Structure):
         densop_operate_qgate(self, kind=cfg.CONTROLLED_RZ, phase=phase, qid=[q0, q1])
         return self
 
+    def rxx(self, q0, q1, phase=cfg.DEF_PHASE):
+        """
+        operate Rxx gate.
+
+        Parameters
+        ----------
+        q0 : int
+            qubit id (control qubit).
+        q1 : int
+            qubit id (target qubit).
+        phase : float
+            rotation angle (unit of angle is PI radian).
+
+        Returns
+        -------
+        self : instance of DensOp
+
+        """
+        densop_operate_qgate(self, kind=cfg.ROTATION_XX, phase=phase, qid=[q0, q1])
+        return self
+
+    def ryy(self, q0, q1, phase=cfg.DEF_PHASE):
+        """
+        operate Rxx gate.
+
+        Parameters
+        ----------
+        q0 : int
+            qubit id (control qubit).
+        q1 : int
+            qubit id (target qubit).
+        phase : float
+            rotation angle (unit of angle is PI radian).
+
+        Returns
+        -------
+        self : instance of DensOp
+
+        """
+        densop_operate_qgate(self, kind=cfg.ROTATION_YY, phase=phase, qid=[q0, q1])
+        return self
+
+    def rzz(self, q0, q1, phase=cfg.DEF_PHASE):
+        """
+        operate Rzz gate.
+
+        Parameters
+        ----------
+        q0 : int
+            qubit id (control qubit).
+        q1 : int
+            qubit id (target qubit).
+        phase : float
+            rotation angle (unit of angle is PI radian).
+
+        Returns
+        -------
+        self : instance of DensOp
+
+        """
+        densop_operate_qgate(self, kind=cfg.ROTATION_ZZ, phase=phase, qid=[q0, q1])
+        return self
+
     # 3-qubit gate
 
     def ccx(self, q0, q1, q2):

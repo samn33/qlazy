@@ -130,7 +130,8 @@ def get_qgate_qubit_num(kind=None):
                  cfg.CONTROLLED_XR_, cfg.CONTROLLED_H, cfg.CONTROLLED_S, cfg.CONTROLLED_S_,
                  cfg.CONTROLLED_T, cfg.CONTROLLED_T_, cfg.SWAP_QUBITS, cfg.CONTROLLED_P,
                  cfg.CONTROLLED_RX, cfg.CONTROLLED_RY, cfg.CONTROLLED_RZ, cfg.CONTROLLED_U1,
-                 cfg.CONTROLLED_U2, cfg.CONTROLLED_U3, cfg.MEASURE_BELL)):
+                 cfg.CONTROLLED_U2, cfg.CONTROLLED_U3, cfg.MEASURE_BELL,
+                 cfg.ROTATION_XX, cfg.ROTATION_YY, cfg.ROTATION_ZZ)):
         return 2
 
     raise ValueError("unknown quantum gate.")
@@ -149,7 +150,8 @@ def get_qgate_param_num(kind=None):
         return 0
     if (kind in (cfg.PHASE_SHIFT, cfg.ROTATION_X, cfg.ROTATION_Y, cfg.ROTATION_Z,
                  cfg.ROTATION_U1, cfg.CONTROLLED_P, cfg.CONTROLLED_RX, cfg.CONTROLLED_RY,
-                 cfg.CONTROLLED_RZ, cfg.CONTROLLED_U1)):
+                 cfg.CONTROLLED_RZ, cfg.CONTROLLED_U1,
+                 cfg.ROTATION_XX, cfg.ROTATION_YY, cfg.ROTATION_ZZ)):
         return 1
     if kind in (cfg.ROTATION_U2, cfg.CONTROLLED_U2):
         return 2

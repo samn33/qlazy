@@ -94,8 +94,7 @@ frq[xx]は、測定の結果、|xx>だった回数を表しています。測定
     * help:                     ?,help
     [quantum gates]
     * 1-qubit gates:            x,y,z,xr,xr_dg,h,s,s_dg,t,t_dg,p,rx,ry,rz
-    * 2-qubit gates:            cx,cy,cz,cxr,cxr_dg,ch,cs,cs_dg,cp,crx,cry,crz,sw
-    * 3-qubit gates:            ccx
+    * 2-qubit gates:            cx,cy,cz,cxr,cxr_dg,ch,cs,cs_dg,cp,crx,cry,crz,sw,rxx,ryy,rzz
     * measurement:              m,mx,my,mz,mb
     * reset:                    reset
     [notes]

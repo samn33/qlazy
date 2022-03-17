@@ -322,6 +322,7 @@ qlazyの状態ベクトルシミュレータまたはスタビライザーシミ
 - sw: swap gate
 - cp: controlled P gate
 - crx,cry,crz: controlled RX/RY/RZ gate
+- rxx,ryy,rzz: Ising coupling gate
 
 #### 3量子ビットゲート(ユニタリゲート)
 

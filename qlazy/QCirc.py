@@ -1743,6 +1743,78 @@ class QCirc(ctypes.Structure):
         self.__add_quantum_gate(kind=cfg.CONTROLLED_RZ, qid=[q0, q1], phase=phase, ctrl=ctrl)
         return self
 
+    def rxx(self, q0, q1, phase=cfg.DEF_PHASE, ctrl=None):
+        """
+        add Rxx gate (controlled RZ gate).
+
+        Parameters
+        ----------
+        q0 : int
+            qubit id (control qubit).
+        q1 : int
+            qubit id (target qubit).
+        phase : float
+            rotation angle (unit of angle is PI radian).
+        ctrl : int
+            address of classical memory to control gate operation.
+
+        Returns
+        -------
+        self : instance of QCirc
+            quantum circuit after adding
+
+        """
+        self.__add_quantum_gate(kind=cfg.ROTATION_XX, qid=[q0, q1], phase=phase, ctrl=ctrl)
+        return self
+
+    def ryy(self, q0, q1, phase=cfg.DEF_PHASE, ctrl=None):
+        """
+        add Ryy gate (controlled RZ gate).
+
+        Parameters
+        ----------
+        q0 : int
+            qubit id (control qubit).
+        q1 : int
+            qubit id (target qubit).
+        phase : float
+            rotation angle (unit of angle is PI radian).
+        ctrl : int
+            address of classical memory to control gate operation.
+
+        Returns
+        -------
+        self : instance of QCirc
+            quantum circuit after adding
+
+        """
+        self.__add_quantum_gate(kind=cfg.ROTATION_YY, qid=[q0, q1], phase=phase, ctrl=ctrl)
+        return self
+
+    def rzz(self, q0, q1, phase=cfg.DEF_PHASE, ctrl=None):
+        """
+        add Rzz gate (controlled RZ gate).
+
+        Parameters
+        ----------
+        q0 : int
+            qubit id (control qubit).
+        q1 : int
+            qubit id (target qubit).
+        phase : float
+            rotation angle (unit of angle is PI radian).
+        ctrl : int
+            address of classical memory to control gate operation.
+
+        Returns
+        -------
+        self : instance of QCirc
+            quantum circuit after adding
+
+        """
+        self.__add_quantum_gate(kind=cfg.ROTATION_ZZ, qid=[q0, q1], phase=phase, ctrl=ctrl)
+        return self
+
     # 3-qubit gate
 
     def ccx(self, q0, q1, q2, ctrl=None):
@@ -1940,6 +2012,26 @@ class QCirc(ctypes.Structure):
                 qid_inv[0], qid_inv[1] = qid[1], qid[0]
                 self.append_gate(cfg.CONTROLLED_X, qid, para, c, ctrl)
                 self.append_gate(cfg.CONTROLLED_X, qid_inv, para, c, ctrl)
+                self.append_gate(cfg.CONTROLLED_X, qid, para, c, ctrl)
+            elif kind == cfg.ROTATION_XX:
+                self.append_gate(cfg.HADAMARD, qid, para, c, ctrl)
+                self.append_gate(cfg.HADAMARD, [qid[1], -1], para, c, ctrl)
+                self.append_gate(cfg.CONTROLLED_X, qid, para, c, ctrl)
+                self.append_gate(cfg.ROTATION_Z, [qid[1], -1], para, c, ctrl)
+                self.append_gate(cfg.CONTROLLED_X, qid, para, c, ctrl)
+                self.append_gate(cfg.HADAMARD, qid, para, c, ctrl)
+                self.append_gate(cfg.HADAMARD, [qid[1], -1], para, c, ctrl)
+            elif kind == cfg.ROTATION_YY:
+                self.append_gate(cfg.ROTATION_X, qid, [0.5, 0.0, 0.0], c, ctrl)
+                self.append_gate(cfg.ROTATION_X, [qid[1], -1], [0.5, 0.0, 0.0], c, ctrl)
+                self.append_gate(cfg.CONTROLLED_X, qid, para, c, ctrl)
+                self.append_gate(cfg.ROTATION_Z, [qid[1], -1], para, c, ctrl)
+                self.append_gate(cfg.CONTROLLED_X, qid, para, c, ctrl)
+                self.append_gate(cfg.ROTATION_X, qid, [-0.5, 0.0, 0.0], c, ctrl)
+                self.append_gate(cfg.ROTATION_X, [qid[1], -1], [-0.5, 0.0, 0.0], c, ctrl)
+            elif kind == cfg.ROTATION_ZZ:
+                self.append_gate(cfg.CONTROLLED_X, qid, para, c, ctrl)
+                self.append_gate(cfg.ROTATION_Z, [qid[1], -1], para, c, ctrl)
                 self.append_gate(cfg.CONTROLLED_X, qid, para, c, ctrl)
             else:
                 self.append_gate(kind, qid, para, c, ctrl)

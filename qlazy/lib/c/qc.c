@@ -11,14 +11,14 @@ static bool _cimage_init(int qubit_num, int step_num, void** cimage_out)
   int     i,j;
 
   if (!(cimage = (CImage*)malloc(sizeof(CImage))))
-    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
+    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY, false);
   
   cimage->qubit_num = qubit_num;
-  if (!(cimage->ch = (char**)malloc(sizeof(char*)*qubit_num)))
+  if (!(cimage->ch = (char**)malloc(sizeof(char*) * qubit_num)))
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
   
-  for (i=0; i<qubit_num; i++) {
-    if (!(cimage->ch[i] = (char*)malloc(sizeof(char)*step_num*glen)))
+  for (i = 0; i < qubit_num; i++) {
+    if (!(cimage->ch[i] = (char*)malloc(sizeof(char) * step_num*glen)))
       ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
     for (j=0; j<step_num*glen; j++) cimage->ch[i][j] = '-';
     cimage->ch[i][step_num*glen] = '\0';
@@ -50,15 +50,15 @@ static QC* _qc_alloc(int buf_length)
   QC* qc = NULL;
 
   if (!(qc = (QC*)malloc(sizeof(QC))))
-    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,NULL);
+    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY, NULL);
 
   qc->step_num = 0;
   qc->qubit_num = 0;
   qc->buf_length = buf_length;
 
-  if (!(qc->qgate = (QG*)malloc(sizeof(QG)*buf_length))) {
+  if (!(qc->qgate = (QG*)malloc(sizeof(QG) * buf_length))) {
     qc_free(qc); qc = NULL;
-    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,NULL);
+    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY, NULL);
   }
   qc->cimage = NULL;
 
@@ -69,12 +69,12 @@ static bool _qc_realloc(QC* qc)
 {
   QG* qgate = NULL;
   
-  if (qc == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+  if (qc == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
 
   qc->buf_length *= 2;
 
   qgate = (QG*)realloc(qc->qgate, sizeof(QG)*qc->buf_length);
-  if (qgate == NULL) ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
+  if (qgate == NULL) ERR_RETURN(ERROR_CANT_ALLOC_MEMORY, false);
   if (qgate != qc->qgate) qc->qgate = qgate;
 
   SUC_RETURN(true);
@@ -85,10 +85,10 @@ bool qc_init(int qubit_num, int buf_length, void** qc_out)
   QC* qc = NULL;
 
   if ((qubit_num < 1) || (qubit_num > MAX_QUBIT_NUM))
-    ERR_RETURN(ERROR_OUT_OF_BOUND,false);
+    ERR_RETURN(ERROR_OUT_OF_BOUND, false);
 
   if (!(qc = _qc_alloc(buf_length)))
-    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
+    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY, false);
   qc->qubit_num = qubit_num;
 
   *qc_out = qc;
@@ -102,12 +102,12 @@ bool qc_append_qgate(QC* qc, Kind kind, int terminal_num,
   if (qc == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
   if (qc->step_num >= qc->buf_length) {
-    if (!(_qc_realloc(qc))) ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
+    if (!(_qc_realloc(qc))) ERR_RETURN(ERROR_CANT_ALLOC_MEMORY, false);
   }
 
   qc->qgate[qc->step_num].kind = kind;
   qc->qgate[qc->step_num].terminal_num = terminal_num;
-  memcpy(qc->qgate[qc->step_num].qubit_id, qubit_id, sizeof(int)*MAX_QUBIT_NUM);
+  memcpy(qc->qgate[qc->step_num].qubit_id, qubit_id, sizeof(int) * MAX_QUBIT_NUM);
 
   switch (kind) {
   case MEASURE:
@@ -133,6 +133,9 @@ bool qc_append_qgate(QC* qc, Kind kind, int terminal_num,
   case CONTROLLED_U2:
   case CONTROLLED_U3:
   case CONTROLLED_P:
+  case ROTATION_XX:
+  case ROTATION_YY:
+  case ROTATION_ZZ:
     qc->qgate[qc->step_num].para.phase.alpha = para->phase.alpha;
     qc->qgate[qc->step_num].para.phase.beta = para->phase.beta;
     qc->qgate[qc->step_num].para.phase.gamma = para->phase.gamma;
@@ -154,7 +157,7 @@ bool qc_set_cimage(QC* qc)
   int	p;
   int   i,j;
 
-  if (qc == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+  if (qc == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
 
   /* free previous cimage */
   if (qc->cimage != NULL) {
@@ -168,7 +171,7 @@ bool qc_set_cimage(QC* qc)
   /* set gate charactor */
   for (i=0; i<qc->step_num; i++) {
     if (!(qg_get_symbol(qc->qgate[i].kind, symbol)))
-      ERR_RETURN(ERROR_QG_GET_SYMBOL,false);
+      ERR_RETURN(ERROR_QG_GET_SYMBOL, false);
     p = 0;
 
     switch (qc->qgate[i].kind) {
@@ -282,7 +285,7 @@ bool qc_print_qc(QC* qc)
 {
   int i;
   
-  if (qc == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+  if (qc == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
 
   for (i=0; i<qc->qubit_num; i++) {
     printf("q%02d %s\n", i, qc->cimage->ch[i]);
@@ -294,7 +297,7 @@ bool qc_print_qc(QC* qc)
 bool qc_print_qgates(QC* qc)
 {
   if (!(qc_write_file(qc, NULL)))
-    ERR_RETURN(ERROR_QC_WRITE_FILE,false);
+    ERR_RETURN(ERROR_QC_WRITE_FILE, false);
   
   SUC_RETURN(true);
 }
@@ -309,11 +312,11 @@ bool qc_write_file(QC* qc, char* fname)
   int*  qubit_id;
   int   i,k;
 
-  if (qc == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+  if (qc == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
 
   if (fname == NULL) fp = stdout;
   else if (!(fp = fopen(fname, "w")))
-    ERR_RETURN(ERROR_CANT_OPEN_FILE,false);
+    ERR_RETURN(ERROR_CANT_OPEN_FILE, false);
 
   for (i=0; i<qc->step_num; i++) {
     kind = qc->qgate[i].kind;
@@ -321,7 +324,7 @@ bool qc_write_file(QC* qc, char* fname)
     para = &(qc->qgate[i].para);
     qubit_id = qc->qgate[i].qubit_id;
     if (!(qg_get_symbol(kind, symbol)))
-      ERR_RETURN(ERROR_QG_GET_SYMBOL,false);
+      ERR_RETURN(ERROR_QG_GET_SYMBOL, false);
 
     switch (kind) {
     case INIT:
@@ -418,26 +421,26 @@ bool qc_read_file(char* fname, void** qc_out)
 
   if (fname != NULL) {
     if (!(fp = fopen(fname,"r")))
-      ERR_RETURN(ERROR_CANT_OPEN_FILE,false);
+      ERR_RETURN(ERROR_CANT_OPEN_FILE, false);
   }
   else fp = stdin;
 
   /* read lines */
 
-  if (!(line = (char*)malloc(sizeof(char)*LINE_STRLEN)))
-    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
+  if (!(line = (char*)malloc(sizeof(char) * LINE_STRLEN)))
+    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY, false);
 
   /* read lines */
 
   while (fgets(line, LINE_STRLEN, fp) != NULL) {
 
-    if (!line_check_length(line)) ERR_RETURN(ERROR_CANT_READ_LINE,false);
-    if (!line_chomp(line)) ERR_RETURN(ERROR_CANT_READ_LINE,false);
+    if (!line_check_length(line)) ERR_RETURN(ERROR_CANT_READ_LINE, false);
+    if (!line_chomp(line)) ERR_RETURN(ERROR_CANT_READ_LINE, false);
 
     if (line_is_blank(line) || line_is_comment(line)) continue;
 
-    if (!line_split(line, " ", token, &tnum)) ERR_RETURN(ERROR_CANT_READ_LINE,false);
-    if (!line_getargs(token[0], args, &anum)) ERR_RETURN(ERROR_CANT_READ_LINE,false);
+    if (!line_split(line, " ", token, &tnum)) ERR_RETURN(ERROR_CANT_READ_LINE, false);
+    if (!line_getargs(token[0], args, &anum)) ERR_RETURN(ERROR_CANT_READ_LINE, false);
 
     qg_get_kind(args[0], &kind);
 
@@ -451,8 +454,8 @@ bool qc_read_file(char* fname, void** qc_out)
       break;
     case MEASURE:
       /* measurement */
-      if (qc == NULL) ERR_RETURN(ERROR_CANT_READ_LINE,false);
-      if (tnum > qubit_num + 1) ERR_RETURN(ERROR_CANT_READ_LINE,false);
+      if (qc == NULL) ERR_RETURN(ERROR_CANT_READ_LINE, false);
+      if (tnum > qubit_num + 1) ERR_RETURN(ERROR_CANT_READ_LINE, false);
       terminal_num = tnum - 1;  /* number of qubits to measure */
       if (anum == 1) {
 	para.mes.shots = DEF_SHOTS;
@@ -477,7 +480,7 @@ bool qc_read_file(char* fname, void** qc_out)
       else ERR_RETURN(ERROR_CANT_READ_LINE,false);
       for (i=0; i<terminal_num; i++) {
 	qubit_id[i] = strtol(token[1+i], NULL, 10);
-	if (qubit_num < qubit_id[i] + 1) ERR_RETURN(ERROR_CANT_READ_LINE,false);
+	if (qubit_num < qubit_id[i] + 1) ERR_RETURN(ERROR_CANT_READ_LINE, false);
       }
       if (terminal_num == 0) {  /* measure all qubits in order */
 	terminal_num = qubit_num;
@@ -490,8 +493,8 @@ bool qc_read_file(char* fname, void** qc_out)
     case MEASURE_Y:
     case MEASURE_Z:
       /* measurement */
-      if (qc == NULL) ERR_RETURN(ERROR_CANT_READ_LINE,false);
-      if (tnum > qubit_num + 1) ERR_RETURN(ERROR_CANT_READ_LINE,false);
+      if (qc == NULL) ERR_RETURN(ERROR_CANT_READ_LINE, false);
+      if (tnum > qubit_num + 1) ERR_RETURN(ERROR_CANT_READ_LINE, false);
       terminal_num = tnum - 1;  /* number of qubits to measure */
       if (anum == 1) {
 	para.mes.shots = DEF_SHOTS;
@@ -499,7 +502,7 @@ bool qc_read_file(char* fname, void** qc_out)
       else if (anum == 2) {
 	para.mes.shots = strtol(args[1], NULL, 10);
       }
-      else ERR_RETURN(ERROR_CANT_READ_LINE,false);
+      else ERR_RETURN(ERROR_CANT_READ_LINE, false);
 
       if (kind == MEASURE_X) {
 	para.mes.angle = 0.5;
@@ -513,11 +516,11 @@ bool qc_read_file(char* fname, void** qc_out)
 	para.mes.angle = 0.0;
 	para.mes.phase = 0.0;
       }
-      else ERR_RETURN(ERROR_CANT_READ_LINE,false);;
+      else ERR_RETURN(ERROR_CANT_READ_LINE, false);;
 
       for (i=0; i<terminal_num; i++) {
 	qubit_id[i] = strtol(token[1+i], NULL, 10);
-	if (qubit_num < qubit_id[i] + 1) ERR_RETURN(ERROR_CANT_READ_LINE,false);
+	if (qubit_num < qubit_id[i] + 1) ERR_RETURN(ERROR_CANT_READ_LINE, false);
       }
       if (terminal_num == 0) {  /* measure all qubits in order */
 	terminal_num = qubit_num;
@@ -528,9 +531,9 @@ bool qc_read_file(char* fname, void** qc_out)
       break;
     case MEASURE_BELL:
       /* measurement */
-      if (qc == NULL) ERR_RETURN(ERROR_CANT_READ_LINE,false);
-      if (tnum < 3) ERR_RETURN(ERROR_CANT_READ_LINE,false);
-      if (tnum > 3) ERR_RETURN(ERROR_CANT_READ_LINE,false);
+      if (qc == NULL) ERR_RETURN(ERROR_CANT_READ_LINE, false);
+      if (tnum < 3) ERR_RETURN(ERROR_CANT_READ_LINE, false);
+      if (tnum > 3) ERR_RETURN(ERROR_CANT_READ_LINE, false);
       terminal_num = 2;  /* number of qubits to measure */
       if (anum == 1) {
 	para.mes.shots = DEF_SHOTS;
@@ -538,11 +541,11 @@ bool qc_read_file(char* fname, void** qc_out)
       else if (anum == 2) {
 	para.mes.shots = strtol(args[1], NULL, 10);
       }
-      else ERR_RETURN(ERROR_CANT_READ_LINE,false);
+      else ERR_RETURN(ERROR_CANT_READ_LINE, false);
 
       for (i=0; i<terminal_num; i++) {
 	qubit_id[i] = strtol(token[1+i], NULL, 10);
-	if (qubit_num < qubit_id[i] + 1) ERR_RETURN(ERROR_CANT_READ_LINE,false);
+	if (qubit_num < qubit_id[i] + 1) ERR_RETURN(ERROR_CANT_READ_LINE, false);
       }
       break;
     case PAULI_X:
@@ -558,7 +561,7 @@ bool qc_read_file(char* fname, void** qc_out)
       /* 1-qubit gate */
       terminal_num = 1;
       qubit_id[0] = strtol(token[1], NULL, 10);
-      if (qubit_num < qubit_id[0] + 1) ERR_RETURN(ERROR_CANT_READ_LINE,false);
+      if (qubit_num < qubit_id[0] + 1) ERR_RETURN(ERROR_CANT_READ_LINE, false);
       break;
     case ROTATION_X:
     case ROTATION_Y:
@@ -577,9 +580,9 @@ bool qc_read_file(char* fname, void** qc_out)
 	para.phase.beta = DEF_PHASE;
 	para.phase.gamma = DEF_PHASE;
       }
-      else ERR_RETURN(ERROR_CANT_READ_LINE,false);
+      else ERR_RETURN(ERROR_CANT_READ_LINE, false);
       qubit_id[0] = strtol(token[1], NULL, 10);
-      if (qubit_num < qubit_id[0] + 1) ERR_RETURN(ERROR_CANT_READ_LINE,false);
+      if (qubit_num < qubit_id[0] + 1) ERR_RETURN(ERROR_CANT_READ_LINE, false);
       break;
     case ROTATION_U2:
       /* 1-qubit 2-parameter gate */
@@ -599,9 +602,9 @@ bool qc_read_file(char* fname, void** qc_out)
 	para.phase.beta = strtod(args[2], NULL);
 	para.phase.gamma = DEF_PHASE;
       }
-      else ERR_RETURN(ERROR_CANT_READ_LINE,false);
+      else ERR_RETURN(ERROR_CANT_READ_LINE, false);
       qubit_id[0] = strtol(token[1], NULL, 10);
-      if (qubit_num < qubit_id[0] + 1) ERR_RETURN(ERROR_CANT_READ_LINE,false);
+      if (qubit_num < qubit_id[0] + 1) ERR_RETURN(ERROR_CANT_READ_LINE, false);
       break;
     case ROTATION_U3:
       /* 1-qubit 3-parameter gate */
@@ -626,9 +629,9 @@ bool qc_read_file(char* fname, void** qc_out)
 	para.phase.beta = strtod(args[2], NULL);
 	para.phase.gamma = strtod(args[3], NULL);
       }
-      else ERR_RETURN(ERROR_CANT_READ_LINE,false);
+      else ERR_RETURN(ERROR_CANT_READ_LINE, false);
       qubit_id[0] = strtol(token[1], NULL, 10);
-      if (qubit_num < qubit_id[0] + 1) ERR_RETURN(ERROR_CANT_READ_LINE,false);
+      if (qubit_num < qubit_id[0] + 1) ERR_RETURN(ERROR_CANT_READ_LINE, false);
       break;
     case CONTROLLED_X:
     case CONTROLLED_Y:
@@ -645,11 +648,11 @@ bool qc_read_file(char* fname, void** qc_out)
       terminal_num = 2;
       qubit_id[0] = strtol(token[1], NULL, 10);
       qubit_id[1] = strtol(token[2], NULL, 10);
-      if (qubit_num < qubit_id[0] + 1) ERR_RETURN(ERROR_CANT_READ_LINE,false);
-      if (qubit_num < qubit_id[1] + 1) ERR_RETURN(ERROR_CANT_READ_LINE,false);
-      if (qubit_id[0] < 0) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
-      if (qubit_id[1] < 0) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
-      if (qubit_id[0] == qubit_id[1]) ERR_RETURN(ERROR_SAME_QUBIT_ID,false);
+      if (qubit_num < qubit_id[0] + 1) ERR_RETURN(ERROR_CANT_READ_LINE, false);
+      if (qubit_num < qubit_id[1] + 1) ERR_RETURN(ERROR_CANT_READ_LINE, false);
+      if (qubit_id[0] < 0) ERR_RETURN(ERROR_OUT_OF_BOUND, false);
+      if (qubit_id[1] < 0) ERR_RETURN(ERROR_OUT_OF_BOUND, false);
+      if (qubit_id[0] == qubit_id[1]) ERR_RETURN(ERROR_SAME_QUBIT_ID, false);
       break;
     case CONTROLLED_RX:
     case CONTROLLED_RY:
@@ -668,14 +671,14 @@ bool qc_read_file(char* fname, void** qc_out)
 	para.phase.beta = DEF_PHASE;
 	para.phase.gamma = DEF_PHASE;
       }
-      else ERR_RETURN(ERROR_CANT_READ_LINE,false);
+      else ERR_RETURN(ERROR_CANT_READ_LINE, false);
       qubit_id[0] = strtol(token[1], NULL, 10);
       qubit_id[1] = strtol(token[2], NULL, 10);
-      if (qubit_num < qubit_id[0] + 1) ERR_RETURN(ERROR_CANT_READ_LINE,false);
-      if (qubit_num < qubit_id[1] + 1) ERR_RETURN(ERROR_CANT_READ_LINE,false);
-      if (qubit_id[0] < 0) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
-      if (qubit_id[1] < 0) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
-      if (qubit_id[0] == qubit_id[1]) ERR_RETURN(ERROR_SAME_QUBIT_ID,false);
+      if (qubit_num < qubit_id[0] + 1) ERR_RETURN(ERROR_CANT_READ_LINE, false);
+      if (qubit_num < qubit_id[1] + 1) ERR_RETURN(ERROR_CANT_READ_LINE, false);
+      if (qubit_id[0] < 0) ERR_RETURN(ERROR_OUT_OF_BOUND, false);
+      if (qubit_id[1] < 0) ERR_RETURN(ERROR_OUT_OF_BOUND, false);
+      if (qubit_id[0] == qubit_id[1]) ERR_RETURN(ERROR_SAME_QUBIT_ID, false);
       break;
     case CONTROLLED_U2:
       /* 2-qubit, 2-parameter gate */
@@ -695,14 +698,14 @@ bool qc_read_file(char* fname, void** qc_out)
 	para.phase.beta = strtod(args[2], NULL);
 	para.phase.gamma = DEF_PHASE;
       }
-      else ERR_RETURN(ERROR_CANT_READ_LINE,false);
+      else ERR_RETURN(ERROR_CANT_READ_LINE, false);
       qubit_id[0] = strtol(token[1], NULL, 10);
       qubit_id[1] = strtol(token[2], NULL, 10);
-      if (qubit_num < qubit_id[0] + 1) ERR_RETURN(ERROR_CANT_READ_LINE,false);
-      if (qubit_num < qubit_id[1] + 1) ERR_RETURN(ERROR_CANT_READ_LINE,false);
-      if (qubit_id[0] < 0) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
-      if (qubit_id[1] < 0) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
-      if (qubit_id[0] == qubit_id[1]) ERR_RETURN(ERROR_SAME_QUBIT_ID,false);
+      if (qubit_num < qubit_id[0] + 1) ERR_RETURN(ERROR_CANT_READ_LINE, false);
+      if (qubit_num < qubit_id[1] + 1) ERR_RETURN(ERROR_CANT_READ_LINE, false);
+      if (qubit_id[0] < 0) ERR_RETURN(ERROR_OUT_OF_BOUND, false);
+      if (qubit_id[1] < 0) ERR_RETURN(ERROR_OUT_OF_BOUND, false);
+      if (qubit_id[0] == qubit_id[1]) ERR_RETURN(ERROR_SAME_QUBIT_ID, false);
       break;
     case CONTROLLED_U3:
       /* 2-qubit, 3-parameter gate */
@@ -727,26 +730,26 @@ bool qc_read_file(char* fname, void** qc_out)
 	para.phase.beta = strtod(args[2], NULL);
 	para.phase.gamma = strtod(args[3], NULL);
       }
-      else ERR_RETURN(ERROR_CANT_READ_LINE,false);
+      else ERR_RETURN(ERROR_CANT_READ_LINE, false);
       qubit_id[0] = strtol(token[1], NULL, 10);
       qubit_id[1] = strtol(token[2], NULL, 10);
-      if (qubit_num < qubit_id[0] + 1) ERR_RETURN(ERROR_CANT_READ_LINE,false);
-      if (qubit_num < qubit_id[1] + 1) ERR_RETURN(ERROR_CANT_READ_LINE,false);
-      if (qubit_id[0] < 0) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
-      if (qubit_id[1] < 0) ERR_RETURN(ERROR_OUT_OF_BOUND,false);
-      if (qubit_id[0] == qubit_id[1]) ERR_RETURN(ERROR_SAME_QUBIT_ID,false);
+      if (qubit_num < qubit_id[0] + 1) ERR_RETURN(ERROR_CANT_READ_LINE, false);
+      if (qubit_num < qubit_id[1] + 1) ERR_RETURN(ERROR_CANT_READ_LINE, false);
+      if (qubit_id[0] < 0) ERR_RETURN(ERROR_OUT_OF_BOUND, false);
+      if (qubit_id[1] < 0) ERR_RETURN(ERROR_OUT_OF_BOUND, false);
+      if (qubit_id[0] == qubit_id[1]) ERR_RETURN(ERROR_SAME_QUBIT_ID, false);
       break;
     default:
       break;
     }
 
     if (!(qc_append_qgate(qc, kind, terminal_num, &para, qubit_id)))
-      ERR_RETURN(ERROR_QC_APPEND_QGATE,false);
+      ERR_RETURN(ERROR_QC_APPEND_QGATE, false);
   }
 
   /* set cimage */
   if (!(qc_set_cimage(qc)))
-    ERR_RETURN(ERROR_QC_SET_CIMAGE,false);
+    ERR_RETURN(ERROR_QC_SET_CIMAGE, false);
   
   free(line); line = NULL;
   fclose(fp);

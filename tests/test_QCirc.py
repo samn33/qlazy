@@ -481,6 +481,36 @@ class TestQCirc_to_qasm(unittest.TestCase):
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
         self.assertEqual(valid_or_not(qc), True)
     
+    def test_rxx(self):
+        """test rxx
+        """
+        qc = QCirc().rxx(0,1, phase=0.1)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_B = QState(qubit_num=qc.qubit_num).rxx(0,1, phase=0.1)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+    
+    def test_ryy(self):
+        """test ryy
+        """
+        qc = QCirc().ryy(0,1, phase=0.1)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_B = QState(qubit_num=qc.qubit_num).ryy(0,1, phase=0.1)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+    
+    def test_rzz(self):
+        """test rzz
+        """
+        qc = QCirc().rzz(0,1, phase=0.1)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_B = QState(qubit_num=qc.qubit_num).rzz(0,1, phase=0.1)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+    
     def test_sw(self):
         """test sw
         """

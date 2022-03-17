@@ -170,6 +170,14 @@ phase（実数値）が指定されなければ0ラジアンとみなされま�
 	qs.cry(q0,q1, phase=xxx)  # 制御Y軸回転ゲート
 	qs.crz(q0,q1, phase=xxx)  # 制御Z軸回転ゲート
 
+### イジング結合ゲート（Ising coupling gate） 翻訳適当？
+
+イオントラップ方式の量子コンピュータで基本となる2量子ビットゲートです。
+
+	qs.rxx(q0,q1, phase=xxx)  # XX演算子に対するイジング結合ゲート
+	qs.ryy(q0,q1, phase=xxx)  # YY演算子に対するイジング結合ゲート
+	qs.rzz(q0,q1, phase=xxx)  # ZZ演算子に対するイジング結合ゲート
+
 #### 交換ゲート（スワップゲート）
 
     qs.sw(q0,q1)  # q0とq1を入れ替え
