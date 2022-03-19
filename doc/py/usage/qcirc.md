@@ -1,4 +1,4 @@
-g量子回路実行(QCircクラス, Backendクラス)
+量子回路実行(QCircクラス, Backendクラス)
 ========================================
 
 ## 量子回路実行の基本
@@ -660,78 +660,6 @@ pyzxのCircuitを入出力する機能も用意しました。
 
 ## 少し高度な技
 
-### レジスタの設定
-
-大規模な量子回路を相手に量子プログラミングしたい場合、レジスタ関連ツー
-ルを使うと便利です。
-
-まず、
-
-    from qlazy.tools.Register import CreateRegister,InitRegister
-
-という具合に、CreateRegister関数とInitRegister関数をインポートします。
-典型的な使い方は以下の通りです。
-
-    dat = CreateRegister(3)
-    anc = CreateRegister(2)
-    qubit_num = InitRegister(dat, anc)
-
-これは、3つのデータ量子ビットと2つの補助量子ビットを用意する例です。
-
-    print(dat)
-    >>> [0,1,2]
-	print(anc)
-    >>> [3,4]
-    print(qubit_num)
-    >>> 5
-
-という具合にdatやancに量子ビット番号が順番に重ならないようにリストとし
-て設定され、InitRegister関数の結果、合計のビット数がリターンされます。
-レジスタを1次元配列としてではなく、多次元配列にして管理したい場合もあ
-るかと思います。その場合は、
-
-    qid = CreateRegister(3,3)
-	qubit_num = InitRegister(qid)
-
-とすると、3X3の2次元配列として、
-
-    print(qid)
-    >>> [[0,1,2],[3,4,5],[6,7,8]]
-    print(qubit_num)
-    >>> 9
-
-のようにレジスタがセットされます。3次元以上の配列も同じように、
-
-    qid = CreateRegister(2,3,4)
-    qubit_num = InitRegister(qid)
-
-    print(qid)
-    >>> [[[0,1,2,3],[4,5,6,7],[8,9,10,11]],[[12,13,14,15],[16,17,18,19],[20,21,22,23]]]
-    print(qubit_num)
-    >>> 24
-
-とできます。量子レジスタと古典レジスタの両方をセットする場合は、
-
-    # 量子レジスタ
-    qid = CreateRegister(2)
-    qubit_num = InitRegister(qid)
-
-    # 古典レジスタ
-    cid = CreateRegister(2)
-    cmem_num = InitRegister(cid)
-
-    # 量子コンピュータ(バックエンド)の用意
-    bk = Backend('qlazy_stabilizer_simulator')
-
-    # 量子回路の設定と実行
-    qc = QCirc().h(qid[0]).cx(qid[0],qid[1]).measure(qid=qid[0], cid=cid[0])
-    ...
-    result = bk.run(qcirc=qc, shots=10)
-    ...
-
-とします。量子レジスタと古典レジスタの番号は別々に割り振りたいので、各々
-でCreateRegisterとInitRegisterを実行しています。
-
 ### カスタムゲートの追加
 
 QCircクラスを継承することで、自分専用の量子ゲートを簡単に作成・追加す
@@ -753,7 +681,6 @@ QCircクラスを継承することで、自分専用の量子ゲートを簡単
 な量子回路を繰り返し使いたい場合など、便利に使える場面は多いと思います。
 
 
-
 ## 対応しているバックエンド
 
 現在のバージョンで対応しているバックエンドは[qulacs](https://github.com/qulacs/qulacs)と
@@ -772,7 +699,7 @@ GPUを利用した高速計算を実行したい場合、このバックエン�
 #### 準備
 
 まず、[Installation - Qulacs ドキュメント](http://docs.qulacs.org/ja/latest/intro/1_install.html)
-あたりを参照しながらインストールしてください。
+あたりを参照しながらインストールしてください（v0.3.0で動作確認しています）。
 
 ### 使用法
 
@@ -807,7 +734,7 @@ GPUを利用したシミュレータで計算させたい場合、
 
 IBMQやローカルシミュレータをPythonから利用するためのライブラリである
 [qiskit](https://qiskit.org/)をインストールして、量子計算を実行できる
-環境を整えてください。例えば、[Quantum Native
+環境を整えてください（v0.34.2で動作確認しています）。例えば、[Quantum Native
 Dojo!](https://dojo.qulacs.org/ja/latest/)の[3-2. QiskitとIBM Q
 Experienceの使い
 方](https://dojo.qulacs.org/ja/latest/notebooks/3.2_Qiskit_IBMQ.html)

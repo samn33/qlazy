@@ -6,6 +6,7 @@ import math
 from collections import Counter
 
 from qlazy import QCirc, Backend, QState, PauliProduct
+from qlazy.tools.Probability import freq2prob, kl_divergence
 
 EPS = 0.01
 
@@ -28,9 +29,10 @@ def evaluate(qc, qs, verbose=False):
     shots = 1000
     bk = Backend(product='aws', device='braket_sv')
     res = bk.run(qcirc=qc, shots=shots)
-    prob_aws = res.frequency
-    for k, v in prob_aws.items():
-        prob_aws[k] = v / shots
+    prob_aws = freq2prob(res.frequency)
+    # prob_aws = res.frequency
+    # for k, v in prob_aws.items():
+    #     prob_aws[k] = v / shots
 
     # qlazy (qstate)
     prob_qlz = qs.get_prob()
@@ -39,14 +41,16 @@ def evaluate(qc, qs, verbose=False):
         print("prob_qlz =", prob_qlz)
         print("prob_aws =", prob_aws)
 
-    value = 0.0
-    for k, v in prob_qlz.items():
-        if v > 0.0 and prob_aws[k] == 0.0:
-            value = float('inf')
-            break
-        if v == 0.0:
-            continue
-        value += (v * math.log2(v / prob_aws[k]))
+    value = kl_divergence(prob_qlz, prob_aws)
+
+    # value = 0.0
+    # for k, v in prob_qlz.items():
+    #     if v > 0.0 and prob_aws[k] == 0.0:
+    #         value = float('inf')
+    #         break
+    #     if v == 0.0:
+    #         continue
+    #     value += (v * math.log2(v / prob_aws[k]))
 
     if verbose is True:
         print("value =", value)

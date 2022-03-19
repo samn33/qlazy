@@ -9,6 +9,7 @@ Python Package
 - [オブザーバブル(Observableクラス)](usage/observable.md)
 - [スタビライザー(Stabilizerクラス)](usage/stabilizer.md)
 - [量子回路実行(QCircクラス, Backendクラス)](usage/qcirc.md)
+- [便利なツール](usage/tools.md)
 
 ## 使用例
 

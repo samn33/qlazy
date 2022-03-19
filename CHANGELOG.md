@@ -5,6 +5,7 @@
 - QState,DensOp,QCirc class (rxx,ryy,rzz gate method)
 - Result class (show, save, load method)
 - CMem class (get_bits method)
+- tools for Probability (freq2prob, entropy, kl_divergence, cross_entropy)
 ### Changed
 - refactoring
 
