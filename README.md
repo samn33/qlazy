@@ -11,6 +11,7 @@ Quantum Computing Simulator
 - Other quantum computing services or simulators can be uesd as backend (followings are supported).
     - [qulacs](https://github.com/qulacs/qulacs)
     - [IBM Quantum(IBMQ)](https://quantum-computing.ibm.com/)
+    - [Amazon Braket(LocalSimulator,AWS,IonQ,Rigetti,OQC)](https://aws.amazon.com/braket/?nc1=h_ls)
 
 ## Install
 
