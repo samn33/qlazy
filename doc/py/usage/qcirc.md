@@ -32,21 +32,16 @@ qstate_simulator(状態ベクトルシミュレータ)というdeviceで計算�
 されます。
 
 その他、現在のバージョンで対応しているバックエンドは、
-[qulacs](https://github.com/qulacs/qulacs)と[IBM Quantum(IBMQ)](https://quantum-computing.ibm.com/)です。
+[qulacs](https://github.com/qulacs/qulacs)と[IBM Quantum(IBMQ)](https://quantum-computing.ibm.com/)
+と[Amazon Braket(LocalSimulator,AWS,IonQ,Rigetti,OQC)](https://aws.amazon.com/braket/?nc1=h_ls)です。
 使用法などの詳細は「対応しているバックエンド」(後述)をご参照ください。
 
 対応しているproductは、
 
     print(Backend.products())
-    >>> ['qlazy', 'qulacs', 'ibmq']
+    >>> ['qlazy', 'qulacs', 'ibmq', 'braket_local', 'braket_aws', 'braket_ionq', 'braket_rigetti', 'braket_oqc']
 
-とすれば確認できます。各々のproductで使えるdeviceは、
-
-    print(Backend.devices('qulacs'))
-    >>> ['qstate_simulator', 'stabilizer_simulator']
-
-    print(Backend.devices('qulacs'))
-	>>> ['cpu_simulator', 'gpu_simulator']
+とすれば確認できます。各々のproductで使えるdeviceは、例えば、
 
 	print(Backend.devices('ibmq'))
     >>> ['aer_simulator', 'qasm_simulator', 'least_busy', 'ibmq_armonk', 'ibmq_bogota', 'ibmq_lima', 'ibmq_belem', 'ibmq_quito', 'ibmq_manila']
@@ -226,11 +221,6 @@ showメソッドを使って、
     freq[11] = 46 (0.4600) |++++++++++++++
 
 と棒グラフで頻度を可視化して見ることができます。
-
-（余談）matplotlib使って棒グラフを可視化している例をよく見かけますが、
-大抵の場合この程度の可視化で十分じゃないかなと個人的には思います。
-あと、縦に立っている棒グラフよりも横に寝ている棒グラフの方が見やすいですね。
-
 棒グラフだけでなく、すべてを一度に表示したい場合は、
 verboseオプションをTrueにして、
 
@@ -268,6 +258,10 @@ saveメソッドを使って、
     result_load = Result.load("hoge.res")
 	
 とすれば、保存しておいた計算結果をロードして結果データを再度取得することができます。
+
+Pythonワンライナーで、以下のように結果データを見ることもできます。
+
+    $ python -c "from qlazy import Result; Result.load('hoge.res').show(verbose=True)"
 
 
 ### 量子状態の取得(qlazyの場合のみ)
@@ -658,8 +652,6 @@ pyzxのCircuitを入出力する機能も用意しました。
 でCircuitインスタンスをqlazyのQCircインスタンスに変換できます。
 
 
-## 少し高度な技
-
 ### カスタムゲートの追加
 
 QCircクラスを継承することで、自分専用の量子ゲートを簡単に作成・追加す
@@ -684,7 +676,8 @@ QCircクラスを継承することで、自分専用の量子ゲートを簡単
 ## 対応しているバックエンド
 
 現在のバージョンで対応しているバックエンドは[qulacs](https://github.com/qulacs/qulacs)と
-[IBM Quantum](https://quantum-computing.ibm.com/)です。
+[IBM Quantum](https://quantum-computing.ibm.com/)と
+[Amazon Braket](https://aws.amazon.com/braket/?nc1=h_ls)です。
 各々の使い方について、以下で説明します。
 
 ### qulacs
@@ -726,10 +719,6 @@ GPUを利用したシミュレータで計算させたい場合、
 [IBM](https://www.ibm.com/jp-ja)が開発した量子コンピュータ（およびシミュ
 レータ）を利用するためのクラウドサービスです。
 
-[qlazy](https://quantum-computing.ibm.com/)の簡単なインターフェースで
-本物の量子コンピュータを利用した計算を実行したい場合、このバックエンドが
-おすすめです。
-
 #### 準備
 
 IBMQやローカルシミュレータをPythonから利用するためのライブラリである
@@ -769,6 +758,127 @@ Experienceの使い
 	result = bk.run(qcic=qc, shots=100)
 
 のようにすれば、IBMQを使った計算ができます。
+
+
+### Amazon Braket
+
+[Amazon Braket](https://aws.amazon.com/braket/?nc1=h_ls)は、
+[IonQ](https://ionq.com/)、[Rigetti](https://www.rigetti.com/)、
+[Oxford Quantum Circuits](https://oxfordquantumcircuits.com/https://oxfordquantumcircuits.com/)
+などの量子コンピュータ（およびシミュレータ）を利用するためのクラウドサービスです。
+
+#### 準備
+
+[AWS](https://aws.amazon.com/jp/console/)のアカウントがまず必要です。
+その上で、
+
+- [amazon-braket-sdk-python](https://github.com/aws/amazon-braket-sdk-python)
+
+などを参考にしながら、[Amazon Braket](https://aws.amazon.com/braket/?nc1=h_ls)
+が利用できるようにします。以下の日本語の記事も参考になります。
+
+- [Amazon Braketで量子コンピュータをはじめよう！](https://qiita.com/snuffkin/items/29bc6ee24bc2bff55df3)
+- [Amazon Braket を利用して手軽に量子コンピュータを動かす](https://note.com/navitime_tech/n/n497cebbeccf3)
+
+以下のようなコードが問題なく動くようになったら[Amazon Braket](https://aws.amazon.com/braket/?nc1=h_ls)
+の利用環境が整ったと思って良いです（多分）。
+
+    import boto3
+    from braket.aws import AwsDevice
+    from braket.circuits import Circuit
+    
+    device = AwsDevice("arn:aws:braket:::device/quantum-simulator/amazon/sv1")
+    s3_folder = ("amazon-braket-xxxx", "sv1") # Use the S3 bucket you created during onboarding
+    
+    bell = Circuit().h(0).cnot(0, 1)
+    task = device.run(bell, s3_folder, shots=100)
+    result = task.result()
+    print(result.measurement_counts)
+
+さらに、qlazyから[Amazon Braket](https://aws.amazon.com/braket/?nc1=h_ls)を利用できるようにするため、
+ホームディレクトリに"~/.qlazy/"というディレクトリを作成して、その配下にconfig.iniというファイルを作り、
+以下のように記述しておきます。'amazon-braket-xxxx'の部分はamazon braketを利用するために作成した
+S3のbacket nameを書いておきます。
+
+    $ cat ~/.qlazy/config.ini
+    [backend_braket]
+    backet_name = amazon-braket-xxxx
+
+また、poll_timeout_secondsをデフォルト値(5日)から変えたい場合、
+例えば1日にしたい場合、
+
+    [backend_braket]
+    backet_name = amazon-braket-xxxx
+	poll_timeout_seconds = 86400
+
+のように指定します。
+
+ちなみに動作確認している[amazon-braket-sdk-python](https://github.com/aws/amazon-braket-sdk-python)
+のバージョンはv1.18.0です。
+
+
+#### 使用法
+
+Backendのインスタンスを生成する際にproductとdeviceを指定します。
+braket関連のproductは、braket_local(ローカルシミュレータ)、
+braket_aws(AWS上で動作するシミュレータ)、braket_ionq(IonQの量子コンピュータ)、
+braket_rigetti(Rigettiの量子コンピュータ)、
+braket_oqc(Oxford Quantum Circuits)の5種類です。
+各々で利用できるdeviceは以下の通りです。
+
+- braket_local
+    - braket_sv (状態ベクトルシミュレータ)
+- braket_aws
+    - sv1 (状態ベクトルシミュレータ)
+    - tn1 (テンソルネットワークシミュレータ)
+    - dm1 (密度行列シミュレータ)
+- braket_ionq
+    - ionq (IonQ)
+- braket_rigetti
+    - aspen_11 (Aspen-11)
+    - aspen_m_1 (Aspen-M-1)
+- braket_oqc
+    - lucy (Lucy)
+
+例えば、ローカルな状態ベクトルシミュレータを使う場合、
+
+    bk = Backend(product='braket_local', device='braket_sv')
+
+AWSの状態ベクトルシミュレータを使う場合、
+
+    bk = Backend(product='braket_aws', device='sv1')
+
+IonQの量子コンピュータを使う場合、
+
+    bk = Backend(product='braket_ionq', device='ionq')
+
+RigettiのAspen-M-1を使う場合、
+
+    bk = Backend(product='braket_rigetti', device='aspnen_m_1')
+
+OQCのLucyを使う場合、
+
+    bk = Backend(product='braket_oqc', device='lucy')
+
+のように指定します。あとは、
+
+    qc = QCirc().h(0).cx(0,1).measure(qid=[0,1], cid=[0,1])
+
+のように量子回路を作成して、
+
+    result = bk.run(qcic=qc, shots=100)
+
+のようにすれば、Amazon Braketを使った計算ができます。
+
+#### 注意事項
+
+測定が最後にある量子回路しか受け付けません。
+したがって測定値に応じてオンオフするオプション(ctrl)も使えません。
+
+また、braket_local以外のproductは有料になります。
+以下のページに料金表がありますので参考にしてください。
+
+[Amazon Braket Pricing](https://aws.amazon.com/jp/braket/pricing/)
 
 
 以上

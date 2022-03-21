@@ -1917,12 +1917,16 @@ class QCirc(ctypes.Structure):
                            phase2=cfg.DEF_PHASE, ctrl=None):
 
         if qid is None:
-            raise ValueError("qid must be specified")
+            raise ValueError("qid must be specified.")
 
         para = [phase, phase1, phase2]
         if is_measurement_gate(kind) is True:
+            if qid is None:
+                raise ValueError("qid must be specified.")
             if cid is None:
-                raise ValueError("cid must be specified")
+                raise ValueError("cid must be specified.")
+            if len(qid) != len(cid):
+                raise ValueError("length of qid and cid must be same.")
             for q, c in zip(qid, cid):
                 qid = [q]
                 self.append_gate(kind, qid, para, c, ctrl)

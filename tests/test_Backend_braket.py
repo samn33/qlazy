@@ -2,8 +2,6 @@
 """ unittest of aws backend """
 import unittest
 import random
-import math
-from collections import Counter
 
 from qlazy import QCirc, Backend, QState, PauliProduct
 from qlazy.tools.Probability import freq2prob, kl_divergence
@@ -27,14 +25,11 @@ def evaluate(qc, qs, verbose=False):
 
     # backend
     shots = 1000
-    bk = Backend(product='aws', device='braket_sv')
+    bk = Backend(product='braket_local', device='braket_sv')
     res = bk.run(qcirc=qc, shots=shots)
     prob_aws = freq2prob(res.frequency)
-    # prob_aws = res.frequency
-    # for k, v in prob_aws.items():
-    #     prob_aws[k] = v / shots
 
-    # qlazy (qstate)
+    # qlazy
     prob_qlz = qs.get_prob()
 
     if verbose is True:
@@ -42,15 +37,6 @@ def evaluate(qc, qs, verbose=False):
         print("prob_aws =", prob_aws)
 
     value = kl_divergence(prob_qlz, prob_aws)
-
-    # value = 0.0
-    # for k, v in prob_qlz.items():
-    #     if v > 0.0 and prob_aws[k] == 0.0:
-    #         value = float('inf')
-    #         break
-    #     if v == 0.0:
-    #         continue
-    #     value += (v * math.log2(v / prob_aws[k]))
 
     if verbose is True:
         print("value =", value)

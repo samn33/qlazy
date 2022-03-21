@@ -1,12 +1,19 @@
 # -*- coding: utf-8 -*-
 """ Backend device of quantum computing """
 
+import os
+import errno
 import datetime
+import configparser
 
 BACKEND_DEVICES = {'qlazy': ['qstate_simulator', 'stabilizer_simulator'],
                    'qulacs': ['cpu_simulator', 'gpu_simulator'],
                    'ibmq': ['aer_simulator', 'qasm_simulator', 'statevector_simulator'],
-                   'aws': ['braket_sv']}
+                   'braket_local': ['braket_sv'],
+                   'braket_aws': ['sv1', 'tn1', 'dm1'],
+                   'braket_ionq': ['ionq'],
+                   'braket_rigetti': ['aspen_11', 'aspen_m_1'],
+                   'braket_oqc': ['lucy']}
 
 class Backend:
     """ Backend device of quantum computing
@@ -18,16 +25,36 @@ class Backend:
         ('qlazy' or 'qulacs' or 'ibmq')
     device : str
         device name of the product
+    config_braket : dict
+        config for amazon braket
+        {'backet_name': 'amazon-braket-xxxx', 'poll_timeout_seconds': 86400}
 
     Example
     -------
     >>> bk = Backend(product='qlazy', device='stabilizer_simulator')
     >>> bk = Backend(product='qulacs', device='gpu_simulator')
     >>> bk = Backend(product='ibmq', device='least_busy')
+    >>> bk = Backend(product='braket_rigetti', device='aspen_11')
 
     """
-
     def __init__(self, product=None, device=None):
+
+        #
+        # config
+        #
+
+        config_ini = configparser.ConfigParser()
+        config_ini_path = os.environ['HOME'] + '/.qlazy/config.ini'
+        if not os.path.exists(config_ini_path):
+            raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), config_ini_path)
+        config_ini.read(config_ini_path, encoding='utf-8')
+
+        # braket
+        backend_braket = config_ini['backend_braket']
+        backet_name = backend_braket.get('backet_name')
+        poll_timeout_seconds = backend_braket.get('poll_timeout_seconds')
+        self.config_braket = {'backet_name': backet_name,
+                              'poll_timeout_seconds': poll_timeout_seconds}
 
         #
         # set attributes (procuct, device)
@@ -101,10 +128,11 @@ class Backend:
             from qlazy.backend.ibmq import run
             self.__run = run
 
-        # aws
-        elif self.product == 'aws':
-            from qlazy.backend.aws import run_braket_sv
-            self.__run = run_braket_sv
+        # braket
+        elif self.product in ('braket_local', 'braket_aws',
+                              'braket_ionq', 'braket_rigetti', 'braket_oqc'):
+            from qlazy.backend.amazon_braket import run
+            self.__run = run
 
         else:
             raise ValueError("device:'{}' is unknown for product:'{}'."
@@ -114,16 +142,6 @@ class Backend:
     def products(cls):
         """ get products list """
         return list(BACKEND_DEVICES)
-
-    @classmethod
-    def qlazy_devices(cls):
-        """ get qlazy's devices list """
-        return BACKEND_DEVICES['qlazy']
-
-    @classmethod
-    def qulacs_devices(cls):
-        """ get qulacs's devices list """
-        return BACKEND_DEVICES['qulacs']
 
     @classmethod
     def ibmq_devices(cls):
@@ -146,10 +164,9 @@ class Backend:
     def devices(cls, product):
         """ get devices list for the product """
 
-        if product == 'qlazy':
-            device_list = Backend.qlazy_devices()
-        elif product == 'qulacs':
-            device_list = Backend.qulacs_devices()
+        if product in ('qlazy', 'qulacs', 'braket_local', 'braket_aws',
+                       'braket_ionq', 'braket_rigetti', 'braket_oqc'):
+            device_list = BACKEND_DEVICES[product]
         elif product == 'ibmq':
             device_list = Backend.ibmq_devices()
         else:
