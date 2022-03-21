@@ -233,7 +233,7 @@ class Result:
             s += "[time]\n"
             s += "- start_time   = {}\n".format(self.__start_time)
             s += "- end_time     = {}\n".format(self.__end_time)
-            s += "- elassed time = {:.6f} [sec]\n".format(self.__elapsed_time)
+            s += "- elapsed_time = {:.6f} [sec]\n".format(self.__elapsed_time)
             s += "[histogram]\n"
 
         if self.__frequency is None:
