@@ -1,14 +1,14 @@
 # Change Log
 
-## [0.2.5] - 2022-xx-xx
+## [0.2.5] - 2022-03-26
 ### Added
-- Amazon Braket backend (LocalSimulator, AWS, IonQ, Rigetti, OQC)
-- QState,DensOp,QCirc class (rxx,ryy,rzz gate method)
-- Result class (show, save, load method)
-- CMem class (get_bits method)
+- Amazon Braket backend (LocalSimulator, AWS, IonQ, Rigetti, OQC are availale)
+- rxx, ryy, rzz gate method of QState,DensOp,QCirc class
+- show, save, load method of Result class
+- get_bits method CMem class
 - Probability tools (freq2prob, entropy, kl_divergence, cross_entropy)
-### Changed
-- refactoring
+### Fixed
+- qulacs_gpu backend
 
 ## [0.2.4] - 2022-02-23
 ### Added

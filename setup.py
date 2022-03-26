@@ -53,6 +53,9 @@ setup(
     install_requires=[
         'numpy>=1.22.0',
         'pyzx>=0.7.0',
+        'Qulacs>=0.3.0',
+        'qiskit>=0.34.2',
+        'amazon-braket-sdk>=0.34.2',
     ],
     license='Apache Software License',
     classifiers=[
