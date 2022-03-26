@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """ run function for AWS """
-import sys
 from collections import Counter
 import numpy as np
 
@@ -191,7 +190,7 @@ def run(qcirc=None, shots=1, cid=None, backend=None):
 
     if cmem_num < len(cid):
         raise ValueError("length of cid must be less than classical resister size of qcirc")
-    
+
     for i, m in enumerate(measured_info):
         if m == -1:
             continue
