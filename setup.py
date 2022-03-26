@@ -51,7 +51,7 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
-        'numpy>=1.22.0',
+        'numpy>=1.21.0',
         'pyzx>=0.7.0',
         'Qulacs>=0.3.0',
         'qiskit>=0.34.2',
