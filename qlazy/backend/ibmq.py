@@ -58,10 +58,6 @@ def run(qcirc=None, shots=1, cid=None, backend=None):
     # set backend
     if backend.device == 'aer_simulator':
         ibmq_backend = Aer.get_backend("aer_simulator")
-    elif backend.device == 'qasm_simulator':
-        ibmq_backend = Aer.get_backend("qasm_simulator")
-    elif backend.device == 'statevector_simulator':
-        ibmq_backend = Aer.get_backend("statevector_simulator")
     else:
         provider = IBMQ.load_account()
         if backend.device == 'least_busy':
@@ -75,13 +71,7 @@ def run(qcirc=None, shots=1, cid=None, backend=None):
                 raise ValueError("unknown device")
 
     # execute the circuit
-    if backend.device == 'statevector_simulator':
-
-        res = execute(qc, ibmq_backend).result()
-        statevector = np.asarray(res.get_statevector(qc))
-        frequency = None
-
-    elif exist_measurement is True:
+    if exist_measurement is True:
 
         res = execute(qc, ibmq_backend, shots=shots).result()
         frq = res.get_counts(qc)
@@ -98,16 +88,12 @@ def run(qcirc=None, shots=1, cid=None, backend=None):
                 frequency = None
                 break
 
-        statevector = None
-
     else:  # no measurement gates included
         cid = []
         frequency = None
-        statevector = None
         res = None
 
-    info = {'statevector': statevector, 'creg': cmem_reg,
-            'quantum_circuit':qc, 'ibmq':res}
+    info = {'quantum_circuit':qc, 'ibmq':res}
 
     result = Result()
     result.backend = backend
