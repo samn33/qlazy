@@ -98,6 +98,7 @@ def __run_all(qcirc=None, shots=1, cid=None, backend=None, proc='CPU'):
     if proc == 'CPU':
         qstate = QuantumState(qubit_num)
     else:
+        from qulacs import QuantumStateGpu
         qstate = QuantumStateGpu(qubit_num)
     cmem = [0] * cmem_num
 
