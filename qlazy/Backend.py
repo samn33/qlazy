@@ -8,7 +8,7 @@ import configparser
 
 BACKEND_DEVICES = {'qlazy': ['qstate_simulator', 'stabilizer_simulator'],
                    'qulacs': ['cpu_simulator', 'gpu_simulator'],
-                   'ibmq': ['aer_simulator', 'qasm_simulator', 'statevector_simulator'],
+                   'ibmq': ['aer_simulator'],
                    'braket_local': ['braket_sv'],
                    'braket_aws': ['sv1', 'tn1', 'dm1'],
                    'braket_ionq': ['ionq'],
@@ -25,9 +25,13 @@ class Backend:
         ('qlazy' or 'qulacs' or 'ibmq')
     device : str
         device name of the product
-    config_braket : dict
-        config for amazon braket
-        {'backet_name': 'amazon-braket-xxxx', 'poll_timeout_seconds': 86400}
+
+    Notes
+    -----
+    If you use amazon braket backend (braket_local, braket_aws,
+    braket_ionq, braket_rigetti, braket_oqc), you must have
+    config.ini file in your '~/.qlazy' directory,
+    and discribe like following example ...
 
     Example
     -------
@@ -35,6 +39,15 @@ class Backend:
     >>> bk = Backend(product='qulacs', device='gpu_simulator')
     >>> bk = Backend(product='ibmq', device='least_busy')
     >>> bk = Backend(product='braket_rigetti', device='aspen_11')
+    ...
+    $ cat ~/.qlazy/config.ini
+    [backend_braket]
+    backet_name = amazon-braket-your-S3-baket-name
+    ...
+    $ cat ~/.qlazy/config.ini
+    [backend_braket]
+    backet_name = amazon-braket-your-S3-baket-name
+    poll_timeout_seconds = 86400  # set 1-day (default: 5-days)
 
     """
     def __init__(self, product=None, device=None):
