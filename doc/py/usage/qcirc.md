@@ -764,7 +764,7 @@ Experienceの使い
 
 [Amazon Braket](https://aws.amazon.com/braket/?nc1=h_ls)は、
 [IonQ](https://ionq.com/)、[Rigetti](https://www.rigetti.com/)、
-[Oxford Quantum Circuits](https://oxfordquantumcircuits.com/https://oxfordquantumcircuits.com/)
+[Oxford Quantum Circuits](https://oxfordquantumcircuits.com/)
 などの量子コンピュータ（およびシミュレータ）を利用するためのクラウドサービスです。
 
 #### 準備
