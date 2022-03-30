@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 """ Backend device of quantum computing """
 
-import os
-import errno
 import datetime
-import configparser
+
+from qlazy.util import read_config_ini
 
 BACKEND_DEVICES = {'qlazy': ['qstate_simulator', 'stabilizer_simulator'],
                    'qulacs': ['cpu_simulator', 'gpu_simulator'],
@@ -25,12 +24,15 @@ class Backend:
         ('qlazy' or 'qulacs' or 'ibmq')
     device : str
         device name of the product
+    config_braket : dict
+        config for amazon braket backend
+        {'backet_name': str, 'poll_timeout_seconds': int}
 
     Notes
     -----
     If you use amazon braket backend (braket_local, braket_aws,
     braket_ionq, braket_rigetti, braket_oqc), you must have
-    config.ini file in your '~/.qlazy' directory,
+    config.ini file in your '~/.qlazy/' directory,
     and discribe like following example ...
 
     Example
@@ -38,36 +40,19 @@ class Backend:
     >>> bk = Backend(product='qlazy', device='stabilizer_simulator')
     >>> bk = Backend(product='qulacs', device='gpu_simulator')
     >>> bk = Backend(product='ibmq', device='least_busy')
-    >>> bk = Backend(product='braket_rigetti', device='aspen_11')
+    >>> bk = Backend(product='braket_rigetti', device='aspen_11') # read ~/.qlazy/config.ini
     ...
     $ cat ~/.qlazy/config.ini
     [backend_braket]
-    backet_name = amazon-braket-your-S3-baket-name
+    backet_name = amazon-braket-xxxx # set your s3 backet name
     ...
     $ cat ~/.qlazy/config.ini
     [backend_braket]
-    backet_name = amazon-braket-your-S3-baket-name
+    backet_name = amazon-braket-xxxx # set your s3 backet name
     poll_timeout_seconds = 86400  # set 1-day (default: 5-days)
 
     """
     def __init__(self, product=None, device=None):
-
-        #
-        # config
-        #
-
-        config_ini = configparser.ConfigParser()
-        config_ini_path = os.environ['HOME'] + '/.qlazy/config.ini'
-        if not os.path.exists(config_ini_path):
-            raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), config_ini_path)
-        config_ini.read(config_ini_path, encoding='utf-8')
-
-        # braket
-        backend_braket = config_ini['backend_braket']
-        backet_name = backend_braket.get('backet_name')
-        poll_timeout_seconds = backend_braket.get('poll_timeout_seconds')
-        self.config_braket = {'backet_name': backet_name,
-                              'poll_timeout_seconds': poll_timeout_seconds}
 
         #
         # set attributes (procuct, device)
@@ -97,6 +82,8 @@ class Backend:
 
         else:
             raise ValueError("product:{} is unknown.".format(product))
+
+        self.config_braket = None
 
         #
         # set method (__run)
@@ -145,6 +132,17 @@ class Backend:
         elif self.product in ('braket_local', 'braket_aws',
                               'braket_ionq', 'braket_rigetti', 'braket_oqc'):
             from qlazy.backend.amazon_braket import run
+
+            if self.product != 'braket_local' and self.config_braket is None:
+                config_ini = read_config_ini()
+                backet_name = config_ini['backend_braket'].get('backet_name')
+                poll_timeout_seconds = config_ini['backend_braket'].get('poll_timeout_seconds')
+                if poll_timeout_seconds is not None:
+                    poll_timeout_seconds = int(poll_timeout_seconds)
+
+                self.config_braket = {'backet_name': backet_name,
+                                      'poll_timeout_seconds': poll_timeout_seconds}
+
             self.__run = run
 
         else:
