@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """ various kind of utilities """
+import os
 import math
+import configparser
 import numpy as np
 
 import qlazy.config as cfg
@@ -200,3 +202,40 @@ def reverse_bit_order(vec_in):
         vec_out[idx_rev] = val
 
     return vec_out
+
+def read_config_ini(config_ini_path=None):
+    """ read config.ini file """
+
+    if config_ini_path is None:
+        config_ini_path = os.environ['HOME'] + '/.qlazy/config.ini'
+
+    if os.path.exists(config_ini_path) is False:
+        raise FileNotFoundError("config.ini is not found.")
+
+    # read config.ini
+    config_ini = configparser.ConfigParser()
+    config_ini.read(config_ini_path, encoding='utf-8')
+
+    # check sections of config_ini
+    sections = ('DEFAULT', 'backend_braket')
+    for cs in config_ini.keys():
+        if not cs in sections:
+            raise ValueError("config.ini> [{}] is not supported.".format(cs))
+
+    # check keys of backend_braket
+    keys = ('backet_name', 'poll_timeout_seconds')
+    for k in config_ini['backend_braket'].keys(): # raise exception if invalid keys are defined.
+        if not k in keys:
+            raise ValueError("config.ini> [backend_braket]> {} is not supported.".format(k))
+        if ((k == 'poll_timeout_seconds' and
+             config_ini['backend_braket'].get('poll_timeout_seconds').isdecimal() is False)):
+            raise ValueError(("config.ini> [backend_braket]> poll_timeout_seconds({}) "
+                              "must be decimal number."
+                              .format(config_ini['backend_braket'].get('poll_timeout_seconds'))))
+
+    keys_required = ('backet_name',)
+    for k in keys_required: # raise exception if required keys are not defined.
+        if k not in config_ini['backend_braket'].keys():
+            raise ValueError("config.ini> [backend_braket]> {} is not defined.".format(k))
+
+    return config_ini
