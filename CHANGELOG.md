@@ -1,5 +1,10 @@
 # Change Log
 
+## [0.2.6] - 2022-03-31
+### Fixed
+- config.ini not found error when creating Backend instance (#3)
+- 'poll_timeout_seconds' of config.ini setting is not enable
+
 ## [0.2.5] - 2022-03-26
 ### Added
 - Amazon Braket backend (LocalSimulator, AWS, IonQ, Rigetti, OQC are availale)
