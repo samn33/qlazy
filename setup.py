@@ -55,7 +55,7 @@ setup(
         'pyzx>=0.7.0',
         'Qulacs>=0.3.0',
         'qiskit>=0.34.2',
-        'amazon-braket-sdk>=0.34.2',
+        'amazon-braket-sdk>=1.18.0',
     ],
     license='Apache Software License',
     classifiers=[
