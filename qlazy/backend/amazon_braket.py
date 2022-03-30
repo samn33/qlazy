@@ -144,7 +144,12 @@ def run(qcirc=None, shots=1, cid=None, backend=None):
         else:
             raise ValueError("device:'{}' is unknown for product:'{}'."
                              .format(backend.device, backend.product))
-        task = device.run(qc, s3_folder, shots=shots)
+
+        if poll_timeout_seconds is None:
+            task = device.run(qc, s3_folder, shots=shots)
+        else:
+            task = device.run(qc, s3_folder, shots=shots,
+                              poll_timeout_seconds=backend.config_braket['poll_timeout_seconds'])
 
     elif backend.product == 'braket_ionq':
         if backend.device == 'ionq':
@@ -153,7 +158,12 @@ def run(qcirc=None, shots=1, cid=None, backend=None):
         else:
             raise ValueError("device:'{}' is unknown for product:'{}'."
                              .format(backend.device, backend.product))
-        task = device.run(qc, s3_folder, shots=shots)
+
+        if poll_timeout_seconds is None:
+            task = device.run(qc, s3_folder, shots=shots)
+        else:
+            task = device.run(qc, s3_folder, shots=shots,
+                              poll_timeout_seconds=backend.config_braket['poll_timeout_seconds'])
 
     elif backend.product == 'braket_rigetti':
         if backend.device == 'aspen_11':
@@ -165,7 +175,12 @@ def run(qcirc=None, shots=1, cid=None, backend=None):
         else:
             raise ValueError("device:'{}' is unknown for product:'{}'."
                              .format(backend.device, backend.product))
-        task = device.run(qc, s3_folder, shots=shots)
+
+        if poll_timeout_seconds is None:
+            task = device.run(qc, s3_folder, shots=shots)
+        else:
+            task = device.run(qc, s3_folder, shots=shots,
+                              poll_timeout_seconds=backend.config_braket['poll_timeout_seconds'])
 
     elif backend.product == 'braket_oqc':
         if backend.device == 'lucy':
@@ -174,7 +189,12 @@ def run(qcirc=None, shots=1, cid=None, backend=None):
         else:
             raise ValueError("device:'{}' is unknown for product:'{}'."
                              .format(backend.device, backend.product))
-        task = device.run(qc, s3_folder, shots=shots)
+
+        if poll_timeout_seconds is None:
+            task = device.run(qc, s3_folder, shots=shots)
+        else:
+            task = device.run(qc, s3_folder, shots=shots,
+                              poll_timeout_seconds=backend.config_braket['poll_timeout_seconds'])
 
     result = task.result()
     frequency_org = result.measurement_counts
