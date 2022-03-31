@@ -1,6 +1,6 @@
 # Change Log
 
-## [0.2.6] - 2022-03-31
+## [0.2.7] - 2022-03-31
 ### Fixed
 - config.ini not found error when creating Backend instance (#3)
 - 'poll_timeout_seconds' of config.ini setting is not enable
