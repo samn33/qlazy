@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """ various kind of utilities """
 import os
+import subprocess
+import shutil
 import math
 import configparser
 import numpy as np
@@ -239,3 +241,14 @@ def read_config_ini(config_ini_path=None):
             raise ValueError("config.ini> [backend_braket]> {} is not defined.".format(k))
 
     return config_ini
+
+def check_gpu():
+    """ NVIDIA GPU is available or not """
+
+    if shutil.which('nvidia-smi') is None:
+        return False
+    try:
+        res = subprocess.check_output(["nvidia-smi"], shell=True)
+        return True
+    except:
+        return False

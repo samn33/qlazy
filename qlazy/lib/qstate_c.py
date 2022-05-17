@@ -17,7 +17,7 @@ from qlazy.CMem import CMem
 lib = ctypes.CDLL(str(pathlib.Path(__file__).with_name('libqlz.'+get_lib_ext())))
 libc = ctypes.CDLL(find_library("c"), mode=ctypes.RTLD_GLOBAL)
 
-def qstate_init(qubit_num=None, seed=None):
+def qstate_init(qubit_num=None, seed=None, use_gpu=False):
     """ initialize QState object """
 
     libc.srand(ctypes.c_int(seed))
@@ -26,15 +26,15 @@ def qstate_init(qubit_num=None, seed=None):
     c_qstate = ctypes.c_void_p(qstate)
 
     lib.qstate_init.restype = ctypes.c_int
-    lib.qstate_init.argtypes = [ctypes.c_int, ctypes.POINTER(ctypes.c_void_p)]
-    ret = lib.qstate_init(ctypes.c_int(qubit_num), c_qstate)
+    lib.qstate_init.argtypes = [ctypes.c_int, ctypes.POINTER(ctypes.c_void_p), ctypes.c_bool]
+    ret = lib.qstate_init(ctypes.c_int(qubit_num), c_qstate, ctypes.c_bool(use_gpu))
 
     if ret == cfg.FALSE:
         raise ValueError("can't initialize QState object.")
 
     return c_qstate
 
-def qstate_init_with_vector(vector=None, seed=None):
+def qstate_init_with_vector(vector=None, seed=None, use_gpu=False):
     """ initialize QState object with vector """
 
     libc.srand(ctypes.c_int(seed))
@@ -55,9 +55,9 @@ def qstate_init_with_vector(vector=None, seed=None):
 
     lib.qstate_init_with_vector.restype = ctypes.c_int
     lib.qstate_init_with_vector.argtypes = [DoubleArray, DoubleArray, ctypes.c_int,
-                                            ctypes.POINTER(ctypes.c_void_p)]
+                                            ctypes.POINTER(ctypes.c_void_p), ctypes.c_bool]
     ret = lib.qstate_init_with_vector(c_vec_real, c_vec_imag, ctypes.c_int(dim),
-                                      c_qstate)
+                                      c_qstate, ctypes.c_bool(use_gpu))
 
     if ret == cfg.FALSE:
         raise ValueError("can't initialize QState object.")
@@ -254,7 +254,7 @@ def qstate_get_camp(qs, qid=None):
 
 
 def qstate_tensor_product(qs, qstate):
-    """ get tensor procuct of 2 quantum state vectors """
+    """ get tensor product of 2 quantum state vectors """
 
     try:
         qstate_out = None
@@ -503,7 +503,6 @@ def qstate_measure_bell_stats(qs, qid=None, shots=cfg.DEF_SHOTS):
     lib.qstate_measure_bell_stats.argtypes = [ctypes.POINTER(QState), ctypes.c_int,
                                               ctypes.c_int, IntArray,
                                               ctypes.POINTER(ctypes.c_void_p)]
-
     ret = lib.qstate_measure_bell_stats(ctypes.byref(qs), ctypes.c_int(shots),
                                         ctypes.c_int(qubit_num), qid_array, c_mdata)
 

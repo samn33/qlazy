@@ -15,9 +15,14 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
-#define VERSION "0.2.7"
+#ifdef USE_GPU
+#include <cuda.h>
+#include <cuda_runtime.h>
+#include <cuda_runtime_api.h>
+#include <cuComplex.h>
+#endif
 
-//#define TEST_NEW_VERSION
+#define VERSION "0.2.8"
 
 /*====================================================================*/
 /*  Definitions & Macros                                              */
@@ -53,11 +58,7 @@
 #define REMOVE_PHASE_FACTOR
 //#define SHOW_PHASE_FACTOR
 
-#ifndef S_SPLINT_S
-#define COMP_I 1.0i
-#else
-#define COMP_I 1.0
-#endif
+#define COMP_I _Complex_I
 
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
@@ -85,6 +86,16 @@
   } while(0)
 
 #endif
+
+#define checkCudaErrors(call)                                 \
+  do {                                                        \
+    cudaError_t err = call;                                   \
+    if (err != cudaSuccess) {                                 \
+      printf("CUDA error at %s %d: %s\n", __FILE__, __LINE__, \
+	      cudaGetErrorString(err));                       \
+      exit(EXIT_FAILURE);                                     \
+    }                                                         \
+  } while (0)
 
 /*====================================================================*/
 /*  Structures                                                        */
@@ -122,12 +133,15 @@ typedef enum _ErrCode {
   ERROR_QSTATE_MEASURE,
   ERROR_QSTATE_MEASURE_STATS,
   ERROR_QSTATE_MEASURE_BELL_STATS,
+  ERROR_QSTATE_OPERATE_UNITARY,
   ERROR_QSTATE_OPERATE_QGATE,
   ERROR_QSTATE_EVOLVE,
   ERROR_QSTATE_INNER_PRODUCT,
   ERROR_QSTATE_EXPECT_VALUE,
   ERROR_QSTATE_APPLY_MATRIX,
   ERROR_QSTATE_OPERATE_QCIRC,
+  ERROR_QSTATE_UPDATE_HOST_MEMORY,
+  ERROR_QSTATE_UPDATE_DEVICE_MEMORY,
   ERROR_MDATA_INIT,
   ERROR_MDATA_PRINT,
   ERROR_MDATA_PRINT_BELL,
@@ -158,6 +172,7 @@ typedef enum _ErrCode {
   ERROR_STABILIZER_OPERATE_QGATE,
   ERROR_STABILIZER_MEASURE,
   ERROR_STABILIZER_OPERATE_QCIRC,
+  ERROR_QGATE_GET_NEXT_UNITARY,
   ERROR_QCIRC_INIT,
   ERROR_QCIRC_APPEND_GATE,
   ERROR_CMEM_INIT,
@@ -355,7 +370,14 @@ typedef struct _QState {
   COMPLEX*	camp;           /* complex amplitude of the quantum state (pointer to buffer #0 or #1) */
   COMPLEX*	buffer_0;       /* complex amplitude of the quantum state (buffer #0) */
   COMPLEX*	buffer_1;       /* complex amplitude of the quantum state (buffer #1) */
+#ifdef USE_GPU
+  int			d_buf_id;   /* official buffer id (0: buffer_0, 1: buffer_1)*/
+  cuDoubleComplex*	d_camp;     /* complex amplitude of the quantum state (pointer to buffer #0 or #1) */
+  cuDoubleComplex*	d_buffer_0; /* complex amplitude of the quantum state (buffer #0) */
+  cuDoubleComplex*	d_buffer_1; /* complex amplitude of the quantum state (buffer #1) */
+#endif
   GBank*        gbank;
+  bool          use_gpu;
 } QState;
 
 typedef struct _MData {
@@ -417,6 +439,11 @@ typedef struct _Stabilizer {
 /*  Functions                                                         */
 /*====================================================================*/
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#ifndef USE_GPU
 /* complex.h */
 double	 cabs(double _Complex);
 double	 carg(double _Complex);
@@ -424,6 +451,7 @@ double	 creal(double _Complex);
 double	 cimag(double _Complex);
 double _Complex conj(double _Complex);
 double _Complex cexp(double _Complex);
+#endif
 
 /* misc.c */
 bool	 line_check_length(char* str);
@@ -445,6 +473,8 @@ int      kind_get_para_size(Kind kind);
 bool     kind_is_measurement(Kind kind);
 bool     kind_is_reset(Kind kind);
 bool     kind_is_unitary(Kind kind);
+bool     is_gpu_supported_lib(void);
+bool     is_gpu_available(void);
 
 /* message.c */
 void	 error_msg(ErrCode err);
@@ -473,8 +503,8 @@ bool     gbank_get_unitary(GBank* gbank, Kind kind, double phase, double phase1,
 			   double phase2, int* dim_out, void** matrix_out);
 
 /* qstate.c */
-bool	 qstate_init(int qubit_num, void** qstate_out);
-bool	 qstate_init_with_vector(double* real, double* imag, int dim, void** qstate_out);
+bool	 qstate_init(int qubit_num, void** qstate_out, bool use_gpu);
+bool	 qstate_init_with_vector(double* real, double* imag, int dim, void** qstate_out, bool use_gpu);
 bool	 qstate_reset(QState* qstate, int qubit_num, int* qubit_id);
 bool	 qstate_copy(QState* qstate, void** qstate_out);
 bool     qstate_get_camp(QState* qstate, int qubit_num, int* qubit_id,
@@ -500,6 +530,12 @@ bool     qstate_apply_matrix(QState* qstate, int qnum, int* qid,
 bool     qstate_operate_qcirc(QState* qstate, CMem* cmem, QCirc* qcirc);
 void	 qstate_free(QState* qstate);
 
+/* qstate_gpu.c */
+bool qstate_operate_unitary2_gpu(COMPLEX* camp_out, COMPLEX* camp_in, COMPLEX* U2,
+				 int qubit_num, int state_num, int n);
+bool qstate_operate_unitary4_gpu(COMPLEX* camp_out, COMPLEX* camp_in, COMPLEX* U4,
+				 int qubit_num, int state_num, int m, int n);
+
 /* mdata.c */
 bool     mdata_init(int qubit_num, int shot_num,
 		    double angle, double phase, int* qubit_id, void** mdata_out);
@@ -509,8 +545,12 @@ void	 mdata_free(MData* mdata);
 
 /* qsystem.c */
 bool     qsystem_init(void** qsystem_out);
-bool	 qsystem_execute(QSystem* qsystem, char* fname);
-bool	 qsystem_intmode(QSystem* qsystem, char* fnmae_ini);
+//bool	 qsystem_execute(QSystem* qsystem, char* fname);
+//bool	 qsystem_execute(QSystem* qsystem, char* fname, Proc proc);
+bool	 qsystem_execute(QSystem* qsystem, char* fname, bool use_gpu);
+//bool	 qsystem_intmode(QSystem* qsystem, char* fnmae_ini);
+//bool	 qsystem_intmode(QSystem* qsystem, char* fnmae_ini, Proc proc);
+bool	 qsystem_intmode(QSystem* qsystem, char* fnmae_ini, bool use_gpu);
 void	 qsystem_free(QSystem* qsystem);
 
 /* spro.c */
@@ -558,6 +598,10 @@ bool	stabilizer_measure(Stabilizer* stab, int q, double* prob_out, int* mval_out
 bool    stabilizer_operate_qcirc(Stabilizer* stab, CMem* cmem, QCirc* qcirc);
 void	stabilizer_free(Stabilizer* stab);
 
+/* qgate.c */
+bool qgate_get_next_unitary(void** qgate_inout, GBank* gbank, int* dim, int* q0, int* q1,
+			    void** matrix_out, bool compo);
+
 /* qcirc.c */
 bool qcirc_init(void** qcirc_out);
 bool qcirc_copy(QCirc* qcirc, void** qcirc_out);
@@ -573,5 +617,24 @@ bool cmem_init(int cmem_num, void** cmem_out);
 bool cmem_copy(CMem* cmem_in, void** cmem_out);
 bool cmem_get_bits(CMem* cmem, void** bits_out);
 void cmem_free(CMem* cmem);
+
+#ifdef USE_GPU
+
+/* gpu.cu */
+bool gpu_preparation(void);
+
+/* qstate_gpu.cu */
+bool qstate_init_gpu(int qubit_num, void** qstate_out);
+bool qstate_operate_unitary_gpu(QState* qstate, COMPLEX* U, int dim, int m, int n);
+bool qstate_operate_qcirc_gpu(QState* qstate, CMem* cmem, QCirc* qcirc);
+bool qstate_update_host_memory(QState* qstate);
+bool qstate_update_device_memory(QState* qstate);
+void qstate_free_gpu(QState* qstate);
+
+#endif
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

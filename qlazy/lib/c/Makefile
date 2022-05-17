@@ -6,14 +6,24 @@ INC = qlazy.h
 
 LIB = libqlz.so
 LIB_OBJ_BASE = qsystem.o qg.o qc.o qstate.o mdata.o gbank.o spro.o \
-        observable.o densop.o stabilizer.o misc.o message.o help.o cmem.o qcirc.o
+        observable.o densop.o stabilizer.o misc.o message.o help.o cmem.o qgate.o qcirc.o
 LIB_SRC_BASE = qsystem.c qg.c qc.c qstate.c mdata.c gbank.c spro.c \
-        observable.c densop.c stabilizer.c misc.c message.c help.c cmem.c qcirc.c
+        observable.c densop.c stabilizer.c misc.c message.c help.c cmem.c qgate.c qcirc.c
+LIB_OBJ_GPU = qstate_gpu.o gpu.o
+LIB_SRC_GPU = qstate_gpu.cu gpu.cu
 
 # install directory (edit here to your environment)
 INSTALL_BIN_DIR = ~/bin
 INSTALL_LIB_DIR = ~/lib
 INSTALL_INC_DIR = ~/include
+
+# defalut: GPU is not available
+GPU = no
+
+#===============================================================================
+# GPU available or not
+
+ifeq ($(GPU),no)  # GPU not available
 
 LIB_OBJ = $(LIB_OBJ_BASE)
 LIB_SRC = $(LIB_SRC_BASE)
@@ -22,12 +32,41 @@ CC = gcc
 CC_LINK = gcc
 
 CFLAG_CC = -fPIC -fopenmp -Wall -O2 -DDEV
-# CFLAG_CC = -fPIC -Wall -O2 -DDEV
 CFLAG_LINK = $(CFLAG_CC)
 
 IFLAG = -I.
 LFLAG = -L.
 LIB_OPTION =  -lm -lreadline
+
+else  # GPU available
+
+# CUDA include directory (edit here to your CUDA environment)
+CUDA_INC_DIR = /usr/local/cuda/include
+
+# LIB_OBJ = $(LIB_OBJ_BASE) qstate_gpu.o
+# LIB_SRC = $(LIB_SRC_BASE) qstate_gpu.cu
+LIB_OBJ = $(LIB_OBJ_BASE) $(LIB_OBJ_GPU)
+LIB_SRC = $(LIB_SRC_BASE) $(LIB_SRC_GPU)
+
+CC = g++
+CC_LINK = nvcc
+
+CFLAG_CC = -fPIC -fopenmp -Wall -O2 -DDEV
+# CFLAG_LINK = -Xcompiler '-fPIC -fopenmp -Wall -O2 -DUSE_GPU --std=c++03' -ccbin g++
+CFLAG_LINK = --default-stream per-thread -Xcompiler '-fPIC -fopenmp -Wall -O2 -DUSE_GPU --std=c++03' -ccbin g++
+
+IFLAG = -I. -I$(CUDA_INC_DIR)
+LFLAG = -L.
+
+LIB_OPTION =  -lm -lreadline
+
+.SUFFIXES: .cu
+.cu.o:
+	$(CC_LINK) --std=c++03 $(CFLAG_LINK) $(IFLAG) -c $<
+
+endif
+
+#===============================================================================
 
 $(PROG): $(PROG_OBJ) $(LIB)
 	$(CC_LINK) -o $@ $(CFLAG_LINK) $(LFLAG) $(IFLAG) $(PROG_OBJ) $(LIB_OPTION) -lqlz
@@ -39,11 +78,17 @@ $(PROG_OBJ): $(INC) $(PROG_SRC)
 
 $(LIB_OBJ): $(INC) $(LIB_SRC)
 
+cpu:
+	make GPU=no
+
+gpu:
+	make GPU=yes
+
 tags:
 	etags *.[ch]
 
 clean:
-	rm -f $(PROG_OBJ) $(LIB_OBJ) $(LIB) $(PROG) TAGS; \
+	rm -f $(PROG_OBJ) $(LIB_OBJ_BASE) $(LIB_OBJ_GPU) $(LIB) $(PROG) TAGS; \
 	find ../../ | grep -E "(__pycache__|\.pyc|\.pyo)" | xargs rm -rf
 
 install:

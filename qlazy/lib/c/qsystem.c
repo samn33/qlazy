@@ -31,7 +31,7 @@ static bool _operate_qgate(QState* qstate, QG* qgate)
       ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
   if (!(qstate_operate_qgate(qstate, kind, para->phase.alpha, para->phase.beta,
-			     para->phase.gamma,qubit_id)))
+  			     para->phase.gamma,qubit_id)))
     ERR_RETURN(ERROR_QSTATE_OPERATE_QGATE,false);
 
   switch (kind) {
@@ -43,7 +43,7 @@ static bool _operate_qgate(QState* qstate, QG* qgate)
   case MEASURE_Z:
     if (!(qstate_measure_stats(qstate, para->mes.shots,
 			       para->mes.angle, para->mes.phase, terminal_num,
-			 qubit_id, (void**)&mdata)))
+			       qubit_id, (void**)&mdata)))
       ERR_RETURN(ERROR_QSTATE_MEASURE_STATS, false);
     mdata_print(mdata);
     mdata_free(mdata); mdata = NULL;
@@ -66,7 +66,9 @@ static bool _operate_qgate(QState* qstate, QG* qgate)
   SUC_RETURN(true);
 }
 
-static bool _qsystem_execute_one_line(QSystem* qsystem, char* line)
+//static bool _qsystem_execute_one_line(QSystem* qsystem, char* line)
+//static bool _qsystem_execute_one_line(QSystem* qsystem, char* line, Proc proc)
+static bool _qsystem_execute_one_line(QSystem* qsystem, char* line, bool use_gpu)
 {
   char*		token[TOKEN_NUM];
   char*		args[TOKEN_NUM];
@@ -182,7 +184,9 @@ static bool _qsystem_execute_one_line(QSystem* qsystem, char* line)
     if (qc != NULL) { qc_free(qc); qc = NULL; }
     if (!(qc_init(qubit_num, DEF_QC_STEPS, (void**)&qc)))
       ERR_RETURN(ERROR_CANT_INITIALIZE,false);
-    if (!(qstate_init(qubit_num, (void**)&qstate)))
+    //if (!(qstate_init(qubit_num, (void**)&qstate)))
+    //    if (!(qstate_init(qubit_num, (void**)&qstate, proc)))
+    if (!(qstate_init(qubit_num, (void**)&qstate, use_gpu)))
       ERR_RETURN(ERROR_CANT_INITIALIZE,false);
     break;
   case MEASURE:
@@ -420,7 +424,9 @@ static bool _qsystem_execute_one_line(QSystem* qsystem, char* line)
   SUC_RETURN(true);
 }
 
-bool qsystem_execute(QSystem* qsystem, char* fname)
+//bool qsystem_execute(QSystem* qsystem, char* fname)
+//bool qsystem_execute(QSystem* qsystem, char* fname, Proc proc)
+bool qsystem_execute(QSystem* qsystem, char* fname, bool use_gpu)
 {
   FILE*         fp = NULL;
   char*		line;
@@ -438,7 +444,9 @@ bool qsystem_execute(QSystem* qsystem, char* fname)
   /* read lines and execute */
 
   while (fgets(line, LINE_STRLEN, fp) != NULL) {
-    if (!(_qsystem_execute_one_line(qsystem, line))) {
+    //    if (!(_qsystem_execute_one_line(qsystem, line))) {
+    //    if (!(_qsystem_execute_one_line(qsystem, line, proc))) {
+    if (!(_qsystem_execute_one_line(qsystem, line, use_gpu))) {
       ERR_RETURN(ERROR_CANT_READ_LINE, false);
     }
   }
@@ -449,14 +457,18 @@ bool qsystem_execute(QSystem* qsystem, char* fname)
   SUC_RETURN(true);
 }
 
-bool qsystem_intmode(QSystem* qsystem, char* fname_ini)
+//bool qsystem_intmode(QSystem* qsystem, char* fname_ini)
+//bool qsystem_intmode(QSystem* qsystem, char* fname_ini, Proc proc)
+bool qsystem_intmode(QSystem* qsystem, char* fname_ini, bool use_gpu)
 {
   char*		line	     = NULL;
 
   if (qsystem == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
   if (fname_ini != NULL) {
-    if (!(qsystem_execute(qsystem, fname_ini))) {
+    //    if (!(qsystem_execute(qsystem, fname_ini))) {
+    //    if (!(qsystem_execute(qsystem, fname_ini, proc))) {
+    if (!(qsystem_execute(qsystem, fname_ini, use_gpu))) {
       ERR_RETURN(ERROR_QSYSTEM_EXECUTE, false);
     }
   }
@@ -464,7 +476,9 @@ bool qsystem_intmode(QSystem* qsystem, char* fname_ini)
   while (1) {
     line = readline(">> ");
     add_history(line);
-    _qsystem_execute_one_line(qsystem, line);
+    //    _qsystem_execute_one_line(qsystem, line);
+    //    _qsystem_execute_one_line(qsystem, line, proc);
+    _qsystem_execute_one_line(qsystem, line, use_gpu);
   }
 
   free(line); line = NULL;

@@ -38,12 +38,21 @@ static void _qlazy_print_help()
 
 static void _qlazy_print_version()
 {
+  char cuda_str[16];
+
+  if (is_gpu_supported_lib() == true) {
+    strcpy(cuda_str, "-cuda");
+  }
+  else {
+    strcpy(cuda_str, "");
+  }
+
 #ifdef DEV
   const char date[] = __DATE__;
   const char time[] = __TIME__;
-  fprintf(stderr,"* Version: %s (build: %s - %s)\n", VERSION,date,time);
+  fprintf(stderr,"* Version: %s%s (build: %s - %s)\n", VERSION, cuda_str, date, time);
 #else
-  fprintf(stderr,"* Version: %s\n", VERSION);
+  fprintf(stderr,"* Version: %s%s\n", VERSION, cuda_str);
 #endif  
 }
 
@@ -67,6 +76,9 @@ int main(int argc, char** argv)
   double          elapsed_time       = 0.0;
   int		  sec, nsec;
   struct timespec e_start, e_end;
+
+  //  Proc            proc = CPU;
+  bool            use_gpu = false;
   
   /* get command line arguments */
 
@@ -121,13 +133,17 @@ int main(int argc, char** argv)
   }
   else if (interactive == ON) {  /* execute in interactive mode */
     printf("interactive mode\n");
-    if (!(qsystem_intmode(qsystem, fname_ini)))
+    //if (!(qsystem_intmode(qsystem, fname_ini)))
+    //    if (!(qsystem_intmode(qsystem, fname_ini, proc)))
+    if (!(qsystem_intmode(qsystem, fname_ini, use_gpu)))
       ERR_RETURN(ERROR_QSYSTEM_INTMODE,1);
   }
   else {  /* execute quantum circuit file */
     c_start = clock();
     clock_gettime(CLOCK_REALTIME, &e_start);
-    if (!(qsystem_execute(qsystem, fname_qc)))
+    //    if (!(qsystem_execute(qsystem, fname_qc)))
+    //    if (!(qsystem_execute(qsystem, fname_qc, proc)))
+    if (!(qsystem_execute(qsystem, fname_qc, use_gpu)))
       ERR_RETURN(ERROR_QSYSTEM_EXECUTE,1);
     c_end = clock();
     clock_gettime(CLOCK_REALTIME, &e_end);

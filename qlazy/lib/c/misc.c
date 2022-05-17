@@ -477,3 +477,26 @@ bool kind_is_unitary(Kind kind)
   
   return is_unitary;
 }
+
+bool is_gpu_supported_lib(void)
+{
+#ifdef USE_GPU
+  return true;
+#else
+  return false;
+#endif
+}
+
+bool is_gpu_available(void)
+{
+  const char* command = "nvidia-smi > /dev/null 2>&1";
+  int res;
+
+  res = system(command);
+  if ((WIFEXITED(res) == true) && (WEXITSTATUS(res) == 0)){
+    return true;
+  }
+  else {
+    return false;
+  }
+}

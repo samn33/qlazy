@@ -148,7 +148,8 @@ static QState* _qstate_pickup(QState* qstate_in, int qubit_num, int* qubit_id)
     ERR_RETURN(ERROR_INVALID_ARGUMENT,NULL);
 
   /* selected qubits state (qstate) */
-  if (!(qstate_init(qubit_num, (void**)&qstate)))
+  //  if (!(qstate_init(qubit_num, (void**)&qstate, qstate_in->proc)))
+  if (!(qstate_init(qubit_num, (void**)&qstate, qstate_in->use_gpu)))
     ERR_RETURN(ERROR_QSTATE_INIT,NULL);
   _qstate_set_none(qstate);
   for (i=0; i<mask_qstate->state_num; i++) {
@@ -233,7 +234,8 @@ static bool _bloch_get_angle(COMPLEX alpha, COMPLEX beta, double* theta, double*
   beta	= b_tmp;
   
   /* normailzation */
-  norm = sqrt(1.0 + beta * conj(beta));
+  //  norm = sqrt(1.0 + beta * conj(beta));
+  norm = sqrt(1.0 + creal(beta * conj(beta)));
   alpha /= norm;      /* alpha -> positive real, 0.0 <= alpha <= 1.0 */
   beta /= norm;       /* beta  -> complex */
 
@@ -250,7 +252,7 @@ static bool _bloch_get_angle(COMPLEX alpha, COMPLEX beta, double* theta, double*
   SUC_RETURN(true);
 }
 
-bool qstate_init(int qubit_num, void** qstate_out)
+bool _qstate_init_cpu(int qubit_num, void** qstate_out)
 {
   QState	*qstate = NULL;
   int		 state_num;
@@ -278,6 +280,9 @@ bool qstate_init(int qubit_num, void** qstate_out)
   if (!(gbank_init((void**)&(qstate->gbank))))
       ERR_RETURN(ERROR_GBANK_INIT,false);
 
+  //  qstate->proc = CPU;
+  qstate->use_gpu = false;
+
   _qstate_set_0(qstate);
 
   *qstate_out = qstate;
@@ -285,7 +290,37 @@ bool qstate_init(int qubit_num, void** qstate_out)
   SUC_RETURN(true);
 }
 
-bool qstate_init_with_vector(double* real, double* imag, int dim, void** qstate_out)
+//bool qstate_init(int qubit_num, void** qstate_out, Proc proc)
+bool qstate_init(int qubit_num, void** qstate_out, bool use_gpu)
+{
+  QState	*qstate = NULL;
+
+  if (qubit_num < 1) ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
+
+  //  if (proc == CPU) {
+  if (use_gpu == false) {
+    if (!(_qstate_init_cpu(qubit_num, (void**)&qstate)))
+      ERR_RETURN(ERROR_QSTATE_INIT, false);
+  }
+
+#ifdef USE_GPU
+  else if (use_gpu == true) {
+    if (!(qstate_init_gpu(qubit_num, (void**)&qstate)))
+      ERR_RETURN(ERROR_QSTATE_INIT, false);
+  }
+#endif
+
+  else {
+    ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
+  }
+
+  *qstate_out = qstate;
+
+  SUC_RETURN(true);
+}
+
+//bool qstate_init_with_vector(double* real, double* imag, int dim, void** qstate_out, Proc proc)
+bool qstate_init_with_vector(double* real, double* imag, int dim, void** qstate_out, bool use_gpu)
 {
   QState	*qstate	   = NULL;
   int            state_num = dim;
@@ -296,14 +331,63 @@ bool qstate_init_with_vector(double* real, double* imag, int dim, void** qstate_
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
   qubit_num = (int)log2((double)dim);
-  if (!(qstate_init(qubit_num, (void**)&qstate)))
-    ERR_RETURN(ERROR_QSTATE_INIT,false);
+  //  if (!(qstate_init(qubit_num, (void**)&qstate, proc)))
+  if (!(qstate_init(qubit_num, (void**)&qstate, use_gpu)))
+    ERR_RETURN(ERROR_QSTATE_INIT, false);
 
-  for (i=0; i<state_num; i++)
+  for (i=0; i<state_num; i++) {
     qstate->camp[i] = real[i] + 1.0 * COMP_I * imag[i];
+  }
+
+#ifdef USE_GPU
+  if (!(qstate_update_device_memory(qstate)))
+    ERR_RETURN(ERROR_QSTATE_UPDATE_DEVICE_MEMORY, false);
+#endif
 
   *qstate_out = qstate;
   
+  SUC_RETURN(true);
+}
+
+static bool _qstate_copy_host_memory(QState* qstate_in, void** qstate_out)
+{
+  QState* qstate = NULL;
+
+  if (qstate_in == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+
+  //  if (!(qstate_init(qstate_in->qubit_num, (void**)&qstate, qstate_in->proc)))
+  if (!(qstate_init(qstate_in->qubit_num, (void**)&qstate, qstate_in->use_gpu)))
+    ERR_RETURN(ERROR_QSTATE_INIT,false);
+
+  memcpy(qstate->camp, qstate_in->camp, sizeof(COMPLEX)*qstate_in->state_num);
+
+  *qstate_out = qstate;
+
+  SUC_RETURN(true);
+}
+
+bool qstate_copy(QState* qstate_in, void** qstate_out)
+{
+  QState* qstate = NULL;
+
+  if (qstate_in == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+
+#ifdef USE_GPU
+  if (!(qstate_update_host_memory(qstate_in)))
+    ERR_RETURN(ERROR_QSTATE_UPDATE_HOST_MEMORY, false);
+#endif
+
+  if (!(_qstate_copy_host_memory(qstate_in, (void**)&qstate)))
+    ERR_RETURN(ERROR_QSTATE_COPY,false);
+
+  
+#ifdef USE_GPU
+  if (!(qstate_update_device_memory(qstate)))
+    ERR_RETURN(ERROR_QSTATE_UPDATE_DEVICE_MEMORY, false);
+#endif
+
+  *qstate_out = qstate;
+
   SUC_RETURN(true);
 }
 
@@ -317,8 +401,13 @@ bool qstate_reset(QState* qstate_in, int qubit_num, int* qubit_id)
   
   if (qstate_in == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
+#ifdef USE_GPU
+  if (!(qstate_update_host_memory(qstate_in)))
+    ERR_RETURN(ERROR_QSTATE_UPDATE_HOST_MEMORY,false);
+#endif
+
   /* copy to temporary qstate */
-  if (!(qstate_copy(qstate_in, (void**)&qstate)))
+  if (!(_qstate_copy_host_memory(qstate_in, (void**)&qstate)))
     ERR_RETURN(ERROR_QSTATE_COPY,false);
 
   /* make mask */
@@ -346,25 +435,14 @@ bool qstate_reset(QState* qstate_in, int qubit_num, int* qubit_id)
   if (!(_qstate_normalize(qstate_in)))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,NULL);
 
+#ifdef USE_GPU
+  if (!(qstate_update_device_memory(qstate_in)))
+    ERR_RETURN(ERROR_QSTATE_UPDATE_DEVICE_MEMORY,false);
+#endif
+  
   /* free temporary qstate */
   qstate_free(qstate); qstate = NULL;
   
-  SUC_RETURN(true);
-}
-
-bool qstate_copy(QState* qstate_in, void** qstate_out)
-{
-  QState* qstate = NULL;
-
-  if (qstate_in == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
-
-  if (!(qstate_init(qstate_in->qubit_num, (void**)&qstate)))
-    ERR_RETURN(ERROR_QSTATE_INIT,false);
-
-  memcpy(qstate->camp, qstate_in->camp, sizeof(COMPLEX)*qstate_in->state_num);
-
-  *qstate_out = qstate;
-
   SUC_RETURN(true);
 }
 
@@ -376,6 +454,11 @@ bool qstate_get_camp(QState* qstate, int qubit_num, int* qubit_id,
   int		i;
 
   if (qstate == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+
+#ifdef USE_GPU
+  if (!(qstate_update_host_memory(qstate)))
+    ERR_RETURN(ERROR_QSTATE_UPDATE_HOST_MEMORY, false);
+#endif
 
   if (!(mask_qstate = _qstate_pickup(qstate, qubit_num, qubit_id)))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
@@ -412,6 +495,11 @@ bool qstate_print(QState* qstate_in, int qubit_num, int* qubit_id, bool nonzero)
   MData*        mdata	    = NULL;	/* temporary in this function */
 
   if (qstate_in == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+
+#ifdef USE_GPU
+  if (!(qstate_update_host_memory(qstate_in)))
+    ERR_RETURN(ERROR_QSTATE_UPDATE_HOST_MEMORY, false);
+#endif
 
   if (!(qstate = _qstate_pickup(qstate_in, qubit_num, qubit_id)))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
@@ -469,6 +557,11 @@ bool qstate_bloch(QState* qstate, int qid, double* theta, double* phi)
   if ((qstate == NULL) || (qid < 0))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
+#ifdef USE_GPU
+  if (!(qstate_update_host_memory(qstate)))
+    ERR_RETURN(ERROR_QSTATE_UPDATE_HOST_MEMORY, false);
+#endif
+
   /* qstate of qid-th qubit -> qstate_mask */
   qubit_num = 1;
   qubit_id[0] = qid;
@@ -494,6 +587,11 @@ bool qstate_print_bloch(QState* qstate, int qid)
   double theta, phi;
   
   if (qstate == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+
+#ifdef USE_GPU
+  if (!(qstate_update_host_memory(qstate)))
+    ERR_RETURN(ERROR_QSTATE_UPDATE_HOST_MEMORY, false);
+#endif
 
   if (!(qstate_bloch(qstate, qid, &theta, &phi)))
     ERR_RETURN(ERROR_QSTATE_BLOCH,false);
@@ -743,24 +841,26 @@ static bool _qstate_operate_unitary4(COMPLEX* camp_out, COMPLEX* camp_in, COMPLE
 
 #endif
 
-static bool _qstate_operate_unitary(QState* qstate, COMPLEX* U, int dim, int m, int n)
+static bool _qstate_operate_unitary_cpu(QState* qstate, COMPLEX* U, int dim, int m, int n)
 {
-  if ((qstate == NULL) || (dim < 0))
+  if (qstate == NULL)
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
   if (dim == 2) {
 
     if (qstate->buf_id == 0) {
       if (!(_qstate_operate_unitary2(qstate->buffer_1, qstate->buffer_0, U,
-				     qstate->qubit_num, qstate->state_num, m)))
-	ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+                                     qstate->qubit_num, qstate->state_num, m))) {
+      	ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+      }
       qstate->buf_id = 1;
       qstate->camp = qstate->buffer_1;
     }
     else {
       if (!(_qstate_operate_unitary2(qstate->buffer_0, qstate->buffer_1, U,
-				     qstate->qubit_num, qstate->state_num, m)))
-	ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+				     qstate->qubit_num, qstate->state_num, m))) {
+      	ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+      }
       qstate->buf_id = 0;
       qstate->camp = qstate->buffer_0;
     }
@@ -770,15 +870,17 @@ static bool _qstate_operate_unitary(QState* qstate, COMPLEX* U, int dim, int m, 
 
     if (qstate->buf_id == 0) {
       if (!(_qstate_operate_unitary4(qstate->buffer_1, qstate->buffer_0, U,
-				     qstate->qubit_num, qstate->state_num, m, n)))
+				     qstate->qubit_num, qstate->state_num, m, n))) {
 	ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+      }
       qstate->buf_id = 1;
       qstate->camp = qstate->buffer_1;
     }
     else {
       if (!(_qstate_operate_unitary4(qstate->buffer_0, qstate->buffer_1, U,
-				     qstate->qubit_num, qstate->state_num, m, n)))
+				     qstate->qubit_num, qstate->state_num, m, n))) {
 	ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+      }
       qstate->buf_id = 0;
       qstate->camp = qstate->buffer_0;
     }
@@ -787,6 +889,28 @@ static bool _qstate_operate_unitary(QState* qstate, COMPLEX* U, int dim, int m, 
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
   }
 
+  SUC_RETURN(true);
+}
+
+static bool _qstate_operate_unitary(QState* qstate, COMPLEX* U, int dim, int m, int n)
+{
+  //  if (qstate->proc == CPU) {
+  if (qstate->use_gpu == false) {
+    if (!(_qstate_operate_unitary_cpu(qstate, U, dim, m, n)))
+      ERR_RETURN(ERROR_QSTATE_OPERATE_UNITARY, false);
+  }
+
+#ifdef USE_GPU
+  else if (qstate->use_gpu == true) {
+    if (!(qstate_operate_unitary_gpu(qstate, U, dim, m, n)))
+      ERR_RETURN(ERROR_QSTATE_OPERATE_UNITARY, false);
+  }
+#endif
+
+  else {
+    ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
+  }
+  
   SUC_RETURN(true);
 }
 
@@ -814,6 +938,11 @@ static bool _qstate_transform_basis(QState* qstate, double angle, double phase, 
   if (!(qstate_operate_qgate(qstate, HADAMARD, 0.0, 0.0, 0.0, qubit_id)))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
+#ifdef USE_GPU
+  if (!(qstate_update_host_memory(qstate)))
+    ERR_RETURN(ERROR_QSTATE_UPDATE_HOST_MEMORY, false);
+#endif
+
   SUC_RETURN(true);
 }
 
@@ -840,6 +969,11 @@ static bool _qstate_transform_basis_inv(QState* qstate, double angle, double pha
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
   if (!(qstate_operate_qgate(qstate, ROTATION_Z, phs, 0.0, 0.0, qubit_id)))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+
+#ifdef USE_GPU
+  if (!(qstate_update_host_memory(qstate)))
+    ERR_RETURN(ERROR_QSTATE_UPDATE_HOST_MEMORY, false);
+#endif
 
   SUC_RETURN(true);
 }
@@ -935,10 +1069,21 @@ bool qstate_measure(QState* qstate, double angle, double phase,
   int state_id = 0;
   int mes_id = 0;
   
+#ifdef USE_GPU
+  if (!(qstate_update_host_memory(qstate)))
+    ERR_RETURN(ERROR_QSTATE_UPDATE_HOST_MEMORY, false);
+#endif
+
   state_id= _qstate_measure_one_time(qstate, angle, phase, qubit_num, qubit_id);
   if (!(_select_bits(&mes_id, state_id, qubit_num, qstate->qubit_num, qubit_id)))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
   *mval_out = mes_id;
+
+#ifdef USE_GPU
+  if (!(qstate_update_device_memory(qstate)))
+    ERR_RETURN(ERROR_QSTATE_UPDATE_DEVICE_MEMORY, false);
+#endif
+
   
   SUC_RETURN(true);
 }
@@ -955,6 +1100,11 @@ bool qstate_measure_stats(QState* qstate, int shot_num, double angle, double pha
       (shot_num < 1) || (qubit_num < 0) ||
       (qubit_num > qstate->qubit_num))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+
+#ifdef USE_GPU
+  if (!(qstate_update_host_memory(qstate)))
+    ERR_RETURN(ERROR_QSTATE_UPDATE_HOST_MEMORY, false);
+#endif
 
   /* measure all bits, if no parameter set */
   if (qubit_num == 0) {
@@ -977,13 +1127,18 @@ bool qstate_measure_stats(QState* qstate, int shot_num, double angle, double pha
     }
     else {  /* if not last measurement -> not change state */
       state_id = _qstate_measure_one_time_without_change_state(qstate, angle, phase,
-							       qubit_num, qubit_id);
+      							       qubit_num, qubit_id);
     }
     if (!(_select_bits(&mes_id, state_id, qubit_num, qstate->qubit_num, qubit_id)))
       ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
     mdata->freq[mes_id]++;
   }
   mdata->last_val = mes_id;
+
+#ifdef USE_GPU
+  if (!(qstate_update_device_memory(qstate)))
+    ERR_RETURN(ERROR_QSTATE_UPDATE_DEVICE_MEMORY, false);
+#endif
 
   *mdata_out = mdata;
   SUC_RETURN(true);
@@ -1023,6 +1178,11 @@ bool qstate_measure_bell_stats(QState* qstate, int shot_num, int qubit_num,
   if (!(qstate_operate_qgate(qstate, CONTROLLED_X, 0.0, 0.0, 0.0, qubit_id)))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
+#ifdef USE_GPU
+  if (!(qstate_update_device_memory(qstate)))
+    ERR_RETURN(ERROR_QSTATE_UPDATE_DEVICE_MEMORY, false);
+#endif
+
   *mdata_out = mdata;
   SUC_RETURN(true);
 }
@@ -1037,7 +1197,7 @@ bool qstate_operate_qgate(QState* qstate, Kind kind, double alpha, double beta,
 
   if (qstate == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
-  if ((kind == INIT) || (kind ==MEASURE) || (kind ==MEASURE_X) ||
+  if ((kind == INIT) || (kind == MEASURE) || (kind ==MEASURE_X) ||
       (kind == MEASURE_Y) || (kind == MEASURE_Z) || (kind == MEASURE_BELL) ||
       (kind == RESET)) {
     SUC_RETURN(true);
@@ -1045,13 +1205,9 @@ bool qstate_operate_qgate(QState* qstate, Kind kind, double alpha, double beta,
   else {
     if (!(gbank_get_unitary(qstate->gbank, kind, alpha, beta, gamma, &dim, (void**)&U)))
       ERR_RETURN(ERROR_GBANK_GET_UNITARY,false);
-#ifdef TEST_NEW_VERSION
-    if (!(_qstate_operate_unitary_new(qstate, U, dim, q0, q1)))
-      ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
-#else
     if (!(_qstate_operate_unitary(qstate, U, dim, q0, q1)))
       ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
-#endif
+    
     free(U); U = NULL;
     SUC_RETURN(true);
   }
@@ -1170,6 +1326,7 @@ bool qstate_evolve(QState* qstate, Observable* observ, double time, int iter)
 static bool _qstate_add(QState* qstate, QState* qstate_add)
 {
   int i;
+
   if ((qstate == NULL) || (qstate_add == NULL))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
@@ -1237,11 +1394,17 @@ static QState* _qstate_apply_spro(QState* qstate, SPro* spro)
     }
   }
 
+#ifdef USE_GPU
+  if (!(qstate_update_host_memory(qstate_ob)))
+    ERR_RETURN(ERROR_QSTATE_UPDATE_HOST_MEMORY, NULL);
+#endif
+
   if (!(_qstate_mul(qstate_ob, spro->coef))) {
     qstate_free(qstate_ob); qstate_ob = NULL;
     ERR_RETURN(ERROR_INVALID_ARGUMENT,NULL);
   }
   
+
   SUC_RETURN(qstate_ob);
 }
 
@@ -1251,22 +1414,28 @@ static QState* _qstate_apply_observable(QState* qstate, Observable* observ)
   QState*	qstate_tmp = NULL;
   int		i;
 
-  if (qstate == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT,NULL);
+  if (qstate == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT, NULL);
   
   for (i=0; i<observ->array_num; i++) {
     if (!(qstate_tmp = _qstate_apply_spro(qstate, observ->spro_array[i])))
-      ERR_RETURN(ERROR_INVALID_ARGUMENT,NULL);
+      ERR_RETURN(ERROR_INVALID_ARGUMENT, NULL);
     if (qstate_ob == NULL) {
-      if (!(qstate_init(qstate_tmp->qubit_num, (void**)&qstate_ob)))
-	ERR_RETURN(ERROR_QSTATE_INIT,NULL);
+      //      if (!(qstate_init(qstate_tmp->qubit_num, (void**)&qstate_ob, qstate->proc)))
+      if (!(qstate_init(qstate_tmp->qubit_num, (void**)&qstate_ob, qstate->use_gpu)))
+	ERR_RETURN(ERROR_QSTATE_INIT, NULL);
       _qstate_set_none(qstate_ob);
     }
     if (!(_qstate_add(qstate_ob, qstate_tmp)))
-      ERR_RETURN(ERROR_INVALID_ARGUMENT,NULL);
+      ERR_RETURN(ERROR_INVALID_ARGUMENT, NULL);
 
     qstate_free(qstate_tmp);
     qstate_tmp = NULL;
   }
+
+#ifdef USE_GPU
+  if (!(qstate_update_device_memory(qstate_ob)))
+    ERR_RETURN(ERROR_QSTATE_UPDATE_DEVICE_MEMORY, NULL);
+#endif
 
   SUC_RETURN(qstate_ob);
 }
@@ -1282,6 +1451,13 @@ bool qstate_inner_product(QState* qstate_0, QState* qstate_1,
       (qstate_0->state_num != qstate_1->state_num))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
   
+#ifdef USE_GPU
+  if (!(qstate_update_host_memory(qstate_0)))
+    ERR_RETURN(ERROR_QSTATE_UPDATE_HOST_MEMORY,false);
+  if (!(qstate_update_host_memory(qstate_1)))
+    ERR_RETURN(ERROR_QSTATE_UPDATE_HOST_MEMORY,false);
+#endif
+
   for (i=0; i<qstate_0->state_num; i++) {
     out = out + conj(qstate_0->camp[i]) * qstate_1->camp[i];
   }
@@ -1298,11 +1474,23 @@ bool qstate_tensor_product(QState* qstate_0, QState* qstate_1, void** qstate_out
   int		i,j;
 
   if ((qstate_0 == NULL) || (qstate_1 == NULL))
-    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+    ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
+
+  //  if (qstate_0->proc != qstate_1->proc)
+  if (qstate_0->use_gpu != qstate_1->use_gpu)
+    ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
+
+#ifdef USE_GPU
+  if (!(qstate_update_host_memory(qstate_0)))
+    ERR_RETURN(ERROR_QSTATE_UPDATE_HOST_MEMORY, false);
+  if (!(qstate_update_host_memory(qstate_1)))
+    ERR_RETURN(ERROR_QSTATE_UPDATE_HOST_MEMORY, false);
+#endif
 
   qubit_num = qstate_0->qubit_num + qstate_1->qubit_num;
-  if (!(qstate_init(qubit_num, (void**)&qstate)))
-    ERR_RETURN(ERROR_QSTATE_INIT,false);
+  //  if (!(qstate_init(qubit_num, (void**)&qstate, qstate_0->proc)))
+  if (!(qstate_init(qubit_num, (void**)&qstate, qstate_0->use_gpu)))
+    ERR_RETURN(ERROR_QSTATE_INIT, false);
 
   int cnt = 0;
   for (i=0; i<qstate_0->state_num; i++) {
@@ -1310,6 +1498,11 @@ bool qstate_tensor_product(QState* qstate_0, QState* qstate_1, void** qstate_out
       qstate->camp[cnt++] = qstate_0->camp[i] * qstate_1->camp[j];
     }
   }
+
+#ifdef USE_GPU
+  if (!(qstate_update_device_memory(qstate)))
+    ERR_RETURN(ERROR_QSTATE_UPDATE_DEVICE_MEMORY, false);
+#endif
 
   *qstate_out = qstate;
 
@@ -1324,10 +1517,20 @@ bool qstate_expect_value(QState* qstate, Observable* observ, double* value)
 
   if ((qstate == NULL) || (observ == NULL))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+
+#ifdef USE_GPU
+  if (!(qstate_update_host_memory(qstate)))
+    ERR_RETURN(ERROR_QSTATE_UPDATE_HOST_MEMORY, false);
+#endif
   
   if (!(qstate_ob = _qstate_apply_observable(qstate, observ)))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
       
+#ifdef USE_GPU
+  if (!(qstate_update_host_memory(qstate_ob)))
+    ERR_RETURN(ERROR_QSTATE_UPDATE_HOST_MEMORY, false);
+#endif
+
   if (!(qstate_inner_product(qstate, qstate_ob, &real, &imag)))
     ERR_RETURN(ERROR_QSTATE_INNER_PRODUCT,false);
   
@@ -1357,7 +1560,12 @@ bool qstate_apply_matrix(QState* qstate, int qnum_part, int* qid,
       (qstate->state_num < row) || (1<<qnum_part != row) || (row != col))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
-  if (!(qstate_copy(qstate, (void**)&qstate_tmp)))
+#ifdef USE_GPU
+  if (!(qstate_update_host_memory(qstate)))
+    ERR_RETURN(ERROR_QSTATE_UPDATE_HOST_MEMORY,false);
+#endif
+
+  if (!(_qstate_copy_host_memory(qstate, (void**)&qstate_tmp)))
     ERR_RETURN(ERROR_QSTATE_COPY,false);
 
   index = bit_permutation_array(qstate->state_num, qstate->qubit_num, qnum_part, qid);
@@ -1383,6 +1591,11 @@ bool qstate_apply_matrix(QState* qstate, int qnum_part, int* qid,
     }
   }
 
+#ifdef USE_GPU
+  if (!(qstate_update_device_memory(qstate)))
+    ERR_RETURN(ERROR_QSTATE_UPDATE_DEVICE_MEMORY,false);
+#endif
+
   free(index); index = NULL;
   free(inv_index); inv_index = NULL;
   qstate_free(qstate_tmp); qstate_tmp = NULL;
@@ -1390,14 +1603,18 @@ bool qstate_apply_matrix(QState* qstate, int qnum_part, int* qid,
   SUC_RETURN(true);
 }
 
-bool qstate_operate_qcirc(QState* qstate, CMem* cmem, QCirc* qcirc)
+static bool _qstate_operate_qcirc_cpu(QState* qstate, CMem* cmem, QCirc* qcirc)
 {
   QGate*        qgate                   = NULL;   /* quantum gate in quantum circuit */
   double        angle                   = 0.0;    /* measurement angle */
   double        phase                   = 0.0;    /* measurement phase */
   int           qubit_id[MAX_QUBIT_NUM];
   int           mes_id;
-  
+  int		dim = 0;
+  int           q0	 = -1;
+  int           q1	 = -1;
+  COMPLEX*	U   = NULL;
+
   /* error check */
   if ((qstate == NULL || qcirc == NULL) ||
       (qstate->qubit_num < qcirc->qubit_num) ||
@@ -1412,37 +1629,68 @@ bool qstate_operate_qcirc(QState* qstate, CMem* cmem, QCirc* qcirc)
 
       /* unitary gate */
       if (kind_is_unitary(qgate->kind) == true) {
-	if (!(qstate_operate_qgate(qstate, qgate->kind, qgate->para[0], qgate->para[1], qgate->para[2], qgate->qid)))
-	  ERR_RETURN(ERROR_QSTATE_OPERATE_QGATE, false);
+
+	if (!(qgate_get_next_unitary((void**)&qgate, qstate->gbank, &dim, &q0, &q1, (void**)&U, true))) {
+	  ERR_RETURN(ERROR_QGATE_GET_NEXT_UNITARY, false);
+	}
+
+	/* operate unitary matrix */
+	if (!(_qstate_operate_unitary(qstate, U, dim, q0, q1))) {
+	  ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
+	}
+	free(U); U = NULL;
+	
+	qgate = qgate->next;
       }
       /* reset */
       else if (kind_is_reset(qgate->kind) == true) {
-	if (!(qstate_reset(qstate, 1, qgate->qid)))
-	  ERR_RETURN(ERROR_CANT_RESET, false);
-      }
+      	if (!(qstate_reset(qstate, 1, qgate->qid)))
+      	  ERR_RETURN(ERROR_CANT_RESET, false);
+ 	qgate = qgate->next;
+     }
       /* measurement */
-      else if ((kind_is_measurement(qgate->kind) == true) || (kind_is_reset(qgate->kind) == true)) {
-	if (qgate->kind == MEASURE_X) { angle = 0.5; phase = 0.0; }
-	else if (qgate->kind == MEASURE_Y) { angle = 0.5; phase = 0.5; }
-	else { angle = phase = 0.0; }
-	qubit_id[0] = qgate->qid[0];
-	if (!(qstate_measure(qstate, angle, phase, 1, qubit_id, &mes_id)))
-	  ERR_RETURN(ERROR_QSTATE_MEASURE, false);
-	if (mes_id < 0 || mes_id > 1) ERR_RETURN(ERROR_QSTATE_MEASURE, false);
-	if (qgate->c != -1) cmem->bit_array[qgate->c] = (BYTE)mes_id; /* measured value is stored to classical register */
+      else if (kind_is_measurement(qgate->kind) == true) {
+      	qubit_id[0] = qgate->qid[0];
+      	if (!(qstate_measure(qstate, angle, phase, 1, qubit_id, &mes_id)))
+      	  ERR_RETURN(ERROR_QSTATE_MEASURE, false);
+      	if (mes_id < 0 || mes_id > 1) ERR_RETURN(ERROR_QSTATE_MEASURE, false);
+      	if (qgate->c != -1) cmem->bit_array[qgate->c] = (BYTE)mes_id; /* measured value is stored to classical register */
+	qgate = qgate->next;
       }
       else {
-	ERR_RETURN(ERROR_QSTATE_OPERATE_QCIRC, false);
+      	ERR_RETURN(ERROR_QSTATE_OPERATE_QCIRC, false);
       }
     }
-    
-    qgate = qgate->next;
+    else {
+      qgate = qgate->next;
+    }
   }
 
   SUC_RETURN(true);
 }
 
-void qstate_free(QState* qstate)
+bool qstate_operate_qcirc(QState* qstate, CMem* cmem, QCirc* qcirc)
+{
+  //  if (qstate->proc == CPU) {
+  if (qstate->use_gpu == false) {
+    if (!(_qstate_operate_qcirc_cpu(qstate, cmem, qcirc)))
+      ERR_RETURN(ERROR_QSTATE_OPERATE_QCIRC, false);
+  }
+
+#ifdef USE_GPU
+  else if (qstate->use_gpu == true) {
+    if (!(qstate_operate_qcirc_gpu(qstate, cmem, qcirc)))
+      ERR_RETURN(ERROR_QSTATE_OPERATE_QCIRC, false);
+  }
+#endif
+  else {
+    ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
+  }
+    
+  SUC_RETURN(true);
+}
+
+static void _qstate_free_cpu(QState* qstate)
 {
   if (qstate == NULL) return;
   
@@ -1456,4 +1704,23 @@ void qstate_free(QState* qstate)
     free(qstate->gbank); qstate->gbank = NULL;
   }
   free(qstate);
+}
+
+void qstate_free(QState* qstate)
+{
+  //  if (qstate->proc == CPU) {
+  if (qstate->use_gpu == false) {
+    _qstate_free_cpu(qstate);
+  }
+
+#ifdef USE_GPU
+  //  else if (qstate->proc == GPU) {
+  else if (qstate->use_gpu == true) {
+    qstate_free_gpu(qstate);
+  }
+#endif
+
+  else {
+    return;
+  }
 }

@@ -11,6 +11,7 @@ from .Result import Result
 from . import config
 from . import error
 from . import util
+from . import gpu
 
 __all__ = ["QState", "Observable", "DensOp", "Stabilizer", "Backend", "QCirc", "CMem",
-           "PauliProduct", "Result", "config", "error", "util"]
+           "PauliProduct", "Result", "config", "error", "util", "gpu"]

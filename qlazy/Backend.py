@@ -4,15 +4,26 @@
 import datetime
 
 from qlazy.util import read_config_ini
+from qlazy.gpu import is_gpu_available, is_gpu_supported_lib, gpu_preparation
 
 BACKEND_DEVICES = {'qlazy': ['qstate_simulator', 'stabilizer_simulator'],
-                   'qulacs': ['cpu_simulator', 'gpu_simulator'],
+                   'qulacs': ['cpu_simulator'],
                    'ibmq': ['aer_simulator'],
                    'braket_local': ['braket_sv'],
                    'braket_aws': ['sv1', 'tn1', 'dm1'],
                    'braket_ionq': ['ionq'],
                    'braket_rigetti': ['aspen_11', 'aspen_m_1'],
                    'braket_oqc': ['lucy']}
+
+BACKEND_DEVICES_GPU = {'qlazy': ['qstate_gpu_simulator'],
+                       'qulacs': ['gpu_simulator']}
+
+if is_gpu_available() is True:
+    gpu_preparation()
+    USE_GPU = True
+else:
+    USE_GPU = False
+
 
 class Backend:
     """ Backend device of quantum computing
@@ -55,30 +66,19 @@ class Backend:
     def __init__(self, product=None, device=None):
 
         #
-        # set attributes (procuct, device)
+        # set attributes (product, device)
         #
 
         if product is None:
             self.product = 'qlazy'
             if device is None:
                 self.device = 'qstate_simulator'
-            elif device in BACKEND_DEVICES[product]:
-                self.device = device
             else:
-                raise ValueError("device:'{}' is unknown for product:'{}'."
-                                 .format(device, self.product))
+                self.device = device
 
         elif product in BACKEND_DEVICES.keys():
             self.product = product
-            if device in BACKEND_DEVICES[product]:
-                self.device = device
-            elif device is None:
-                self.device = BACKEND_DEVICES[product][0]
-            elif product == 'ibmq':
-                self.device = device
-            else:
-                raise ValueError("device:'{}' is unknown for product:'{}'."
-                                 .format(device, self.product))
+            self.device = device
 
         else:
             raise ValueError("product:{} is unknown.".format(product))
@@ -94,8 +94,15 @@ class Backend:
 
             # qstate simulator
             if self.device == 'qstate_simulator':
-                from qlazy.backend.qlazy_qstate_simulator import run
-                self.__run = run
+                from qlazy.backend.qlazy_qstate_simulator import run_cpu
+                self.__run = run_cpu
+
+            # qstate simulator
+            elif self.device == 'qstate_gpu_simulator':
+                from qlazy.backend.qlazy_qstate_simulator import run_gpu
+                if USE_GPU is False:
+                    raise ValueError("Your environment not support GPU.")
+                self.__run = run_gpu
 
             # stabilizer simulator
             elif self.device == 'stabilizer_simulator':
@@ -117,6 +124,8 @@ class Backend:
             # gpu_simulator
             elif self.device == 'gpu_simulator':
                 from qlazy.backend.qulacs_simulator import run_gpu
+                if USE_GPU is False:
+                    raise ValueError("Your environment not support GPU.")
                 self.__run = run_gpu
 
             else:
@@ -155,6 +164,22 @@ class Backend:
         return list(BACKEND_DEVICES)
 
     @classmethod
+    def qlazy_devices(cls):
+        """ get qlazy's devices list """
+        devices = BACKEND_DEVICES['qlazy']
+        if is_gpu_supported_lib() is True and is_gpu_available() is True:
+            devices += BACKEND_DEVICES_GPU['qlazy']
+        return devices
+        
+    @classmethod
+    def qulacs_devices(cls):
+        """ get qulacs's devices list """
+        devices = BACKEND_DEVICES['qulacs']
+        if is_gpu_available() is True:
+            devices += BACKEND_DEVICES_GPU['qulacs']
+        return devices
+        
+    @classmethod
     def ibmq_devices(cls):
         """ get ibmq's devices list """
         devices = BACKEND_DEVICES['ibmq']
@@ -178,6 +203,10 @@ class Backend:
         if product in ('qlazy', 'qulacs', 'braket_local', 'braket_aws',
                        'braket_ionq', 'braket_rigetti', 'braket_oqc'):
             device_list = BACKEND_DEVICES[product]
+        elif product == 'qlazy':
+            device_list = Backend.qlazy_devices()
+        elif product == 'qulacs':
+            device_list = Backend.qulacs_devices()
         elif product == 'ibmq':
             device_list = Backend.ibmq_devices()
         else:

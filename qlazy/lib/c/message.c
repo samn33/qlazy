@@ -94,6 +94,9 @@ void error_msg(ErrCode err)
   case ERROR_QSTATE_MEASURE_BELL_STATS:
     fprintf(stderr, "ERROR: qstate measure bell stats failure !\n");
     break;
+  case ERROR_QSTATE_OPERATE_UNITARY:
+    fprintf(stderr, "ERROR: qstate operate unitary failure !\n");
+    break;
   case ERROR_QSTATE_OPERATE_QGATE:
     fprintf(stderr, "ERROR: qstate operate qgate failure !\n");
     break;
@@ -111,6 +114,12 @@ void error_msg(ErrCode err)
     break;
   case ERROR_QSTATE_OPERATE_QCIRC:
     fprintf(stderr, "ERROR: qstate operate qcirc failure !\n");
+    break;
+  case ERROR_QSTATE_UPDATE_HOST_MEMORY:
+    fprintf(stderr, "ERROR: qstate update host memory failure !\n");
+    break;
+  case ERROR_QSTATE_UPDATE_DEVICE_MEMORY:
+    fprintf(stderr, "ERROR: qstate update device memory failure !\n");
     break;
 
   case ERROR_MDATA_INIT:
@@ -208,6 +217,10 @@ void error_msg(ErrCode err)
     fprintf(stderr, "ERROR: stabilizer operate qcirc failure !\n");
     break;
 
+  case ERROR_QGATE_GET_NEXT_UNITARY:
+    fprintf(stderr, "ERROR: qgate get next unitary failure !\n");
+    break;
+    
   case ERROR_QCIRC_INIT:
     fprintf(stderr, "ERROR: qcirc init failure !\n");
     break;

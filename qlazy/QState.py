@@ -6,6 +6,7 @@ import numpy as np
 
 import qlazy.config as cfg
 from qlazy.lib.qstate_mcx import qstate_mcx
+from qlazy.gpu import is_gpu_supported_lib
 
 class QState(ctypes.Structure):
     """ Quantum State
@@ -21,17 +22,34 @@ class QState(ctypes.Structure):
 
     """
 
-    _fields_ = [
-        ('qubit_num', ctypes.c_int),
-        ('state_num', ctypes.c_int),
-        ('buf_id', ctypes.c_int),
-        ('camp', ctypes.c_void_p),
-        ('buffer_0', ctypes.c_void_p),
-        ('buffer_1', ctypes.c_void_p),
-        ('gbank', ctypes.c_void_p),
-    ]
+    if is_gpu_supported_lib() is True:
+        _fields_ = [
+            ('qubit_num', ctypes.c_int),
+            ('state_num', ctypes.c_int),
+            ('buf_id', ctypes.c_int),
+            ('camp', ctypes.c_void_p),
+            ('buffer_0', ctypes.c_void_p),
+            ('buffer_1', ctypes.c_void_p),
+            ('d_buf_id', ctypes.c_int),
+            ('d_camp', ctypes.c_void_p),
+            ('d_buffer_0', ctypes.c_void_p),
+            ('d_buffer_1', ctypes.c_void_p),
+            ('gbank', ctypes.c_void_p),
+            ('use_gpu', ctypes.c_bool),
+        ]
+    else:
+        _fields_ = [
+            ('qubit_num', ctypes.c_int),
+            ('state_num', ctypes.c_int),
+            ('buf_id', ctypes.c_int),
+            ('camp', ctypes.c_void_p),
+            ('buffer_0', ctypes.c_void_p),
+            ('buffer_1', ctypes.c_void_p),
+            ('gbank', ctypes.c_void_p),
+            ('use_gpu', ctypes.c_bool),
+        ]
 
-    def __new__(cls, qubit_num=None, vector=None, seed=None, **kwargs):
+    def __new__(cls, qubit_num=0, vector=None, seed=None, use_gpu=False, **kwargs):
         """
         Parameters
         ----------
@@ -41,6 +59,8 @@ class QState(ctypes.Structure):
             elements of the quantum state vector.
         seed : int, default - set randomly
             seed for random generation for meaurement.
+        use_gpu : bool
+            calcurate with GPU(cuda) or not.
 
         Notes
         -----
@@ -50,14 +70,15 @@ class QState(ctypes.Structure):
         if seed is None:
             seed = random.randint(0, 1000000)
 
-        if qubit_num is not None:
+        # if qubit_num is not None:
+        if qubit_num > 0:
             if qubit_num > cfg.MAX_QUBIT_NUM:
                 raise ValueError("qubit number must be {0:d} or less.".format(cfg.MAX_QUBIT_NUM))
-
-            obj = qstate_init(qubit_num, seed)
-
+            obj = qstate_init(qubit_num, seed, use_gpu)
+        elif qubit_num == 0:
+            obj = qstate_init_with_vector(vector, seed, use_gpu)
         else:
-            obj = qstate_init_with_vector(vector, seed)
+            raise ValueError("qubit number must be positive.")
 
         self = ctypes.cast(obj.value, ctypes.POINTER(cls)).contents
         return self
