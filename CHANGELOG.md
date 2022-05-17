@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.2.8] - 2022-xx-xx
+### Added
+- GPU suport for quantum circuit execution with state vector simulator
+
 ## [0.2.7] - 2022-03-31
 ### Fixed
 - config.ini not found error when creating Backend instance (#3)
