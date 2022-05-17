@@ -374,60 +374,6 @@ class TestQState_1_qubit(unittest.TestCase):
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
-#     def test_u1(self):
-#         """test 'u1' gate
-#         """
-#         qs = QState(qubit_num=1).u1(0, alpha=0.1)
-#         actual = qs.amp
-#         expect = np.array([1.0, 0.0])
-#         ans = equal_vectors(actual, expect)
-#         self.assertEqual(ans,True)
-# 
-#     def test_h_u1(self):
-#         """test 'u1' gate (following 'h' gate)
-#         """
-#         qs = QState(qubit_num=1).h(0).u1(0, alpha=0.1)
-#         actual = qs.amp
-#         expect = np.array([0.70710678+0.j, 0.67249851+0.21850801j])
-#         ans = equal_vectors(actual, expect)
-#         self.assertEqual(ans,True)
-# 
-#     def test_u2(self):
-#         """test 'u2' gate
-#         """
-#         qs = QState(qubit_num=1).u2(0, alpha=0.1, beta=0.2)
-#         actual = qs.amp
-#         expect = np.array([0.70710678+0.j, 0.5720614 +0.41562694j])
-#         ans = equal_vectors(actual, expect)
-#         self.assertEqual(ans,True)
-# 
-#     def test_h_u2(self):
-#         """test 'u2' gate (following 'h' gate)
-#         """
-#         qs = QState(qubit_num=1).h(0).u2(0, alpha=0.1, beta=0.2)
-#         actual = qs.amp
-#         expect = np.array([0.02447174-0.1545085j,0.69840112+0.69840112j])
-#         ans = equal_vectors(actual, expect)
-#         self.assertEqual(ans,True)
-# 
-#     def test_u3(self):
-#         """test 'u3' gate
-#         """
-#         qs = QState(qubit_num=1).u3(0, alpha=0.1, beta=0.2, gamma=0.3)
-#         actual = qs.amp
-#         expect = np.array([0.89100652+0.j, 0.36728603+0.26684892j])
-#         ans = equal_vectors(actual, expect)
-#         self.assertEqual(ans,True)
-# 
-#     def test_h_u3(self):
-#         """test 'u3' gate (following 'h' gate)
-#         """
-#         qs = QState(qubit_num=1).h(0).u3(0, alpha=0.1, beta=0.2, gamma=0.3)
-#         actual = qs.amp
-#         expect = np.array([0.32472882-0.09920056j, 0.63003676+0.69840112j])
-#         ans = equal_vectors(actual, expect)
-#         self.assertEqual(ans,True)
-
 class TestQState_1_qubit_in_3_reg(unittest.TestCase):
     """ test 'QState' : 1-qubit gate in 3-register circuit
     """

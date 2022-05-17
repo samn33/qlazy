@@ -224,7 +224,6 @@ class QCirc(ctypes.Structure):
         # line #2 (#3)
         args = string_to_args(line_list[line_count])
         if args[0] == 'qreg' and re.match('q', args[1]).group() == 'q':
-            # qubit_num = int(re.sub(r"q\[|\];", "", args[1]))
             line_count += 1
         else:
             raise ValueError("""line #2 must be 'qreg q[<int>];"' """)
@@ -370,7 +369,6 @@ class QCirc(ctypes.Structure):
         with open(file_path, mode='r') as f:
             s = f.read()
 
-        # qcirc = __class__.from_qasm(s)
         qcirc = cls.from_qasm(s)
         return qcirc
 
@@ -794,12 +792,10 @@ class QCirc(ctypes.Structure):
         * Phase parameters of rotation gates are selected randomly in the element of 'phase'.
 
         """
-        # if type(qubit_num) != int or type(gate_num) != int or qubit_num < 1 or gate_num < 1:
         if ((isinstance(qubit_num, int) is not True or
              isinstance(gate_num, int) is not True or qubit_num < 1 or gate_num < 1)):
             raise ValueError("qubit_num and/or gate_num must be positive integer.")
         if phase is not None:
-            # if type(phase) != float and type(phase) != int and type(phase) != tuple:
             if ((isinstance(phase, float) is not True and
                  isinstance(phase, int) is not True and
                  isinstance(phase, tuple) is not True)):
@@ -827,7 +823,6 @@ class QCirc(ctypes.Structure):
         qcirc = cls()
 
         TRY_MAX = 10  # for random generation
-        # for n in range(gate_num):
         for _ in range(gate_num):
             r = random.random()
             kind = None
@@ -845,7 +840,6 @@ class QCirc(ctypes.Structure):
                 q0 = random.randint(0, qubit_num - 1)
                 if phase is None:
                     p = 0.0
-                # elif type(phase) == float or type(phase) == int:
                 elif isinstance(phase, (float, int)):
                     p = phase
                 else:
@@ -874,7 +868,6 @@ class QCirc(ctypes.Structure):
                                       .format(cfg.GATE_STRING[kind])))
                 if phase is None:
                     p = 0.0
-                # elif type(phase) == float or type(phase) == int:
                 elif isinstance(phase, (float, int)):
                     p = phase
                 else:
@@ -904,7 +897,6 @@ class QCirc(ctypes.Structure):
         Non-unitary gates: measure, reset are not supported.
 
         """
-        # import pyzx as zx
         from pyzx import Circuit
 
         zxqc = Circuit.from_qasm(self.to_qasm())
