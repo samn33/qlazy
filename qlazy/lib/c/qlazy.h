@@ -545,11 +545,7 @@ void	 mdata_free(MData* mdata);
 
 /* qsystem.c */
 bool     qsystem_init(void** qsystem_out);
-//bool	 qsystem_execute(QSystem* qsystem, char* fname);
-//bool	 qsystem_execute(QSystem* qsystem, char* fname, Proc proc);
 bool	 qsystem_execute(QSystem* qsystem, char* fname, bool use_gpu);
-//bool	 qsystem_intmode(QSystem* qsystem, char* fnmae_ini);
-//bool	 qsystem_intmode(QSystem* qsystem, char* fnmae_ini, Proc proc);
 bool	 qsystem_intmode(QSystem* qsystem, char* fnmae_ini, bool use_gpu);
 void	 qsystem_free(QSystem* qsystem);
 
