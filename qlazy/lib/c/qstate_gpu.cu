@@ -9,24 +9,19 @@ extern "C" {
 
 #include "qlazy.h"
 
-//#define BLOCKSIZE 32
-#define BLOCKSIZE 1024
+#define BLOCKSIZE 32
 
 __constant__ cuDoubleComplex d_U[16];
 
 __global__ void cuda_qstate_operate_unitary2(cuDoubleComplex* d_camp_out, cuDoubleComplex* d_camp_in,
 					     int qubit_num, int state_num, int n)
 {
-  unsigned int	ix, iy, nx;
   int		nn, i, p, pp, sign, off;
   cuDoubleComplex	camp;
 
   nn = qubit_num - n - 1;
   
-  ix = blockIdx.x * blockDim.x + threadIdx.x;
-  iy = blockIdx.y * blockDim.y + threadIdx.y;
-  nx = gridDim.x * blockDim.x;
-  i = (int)(iy * nx + ix);
+  i = blockIdx.x * blockDim.x + threadIdx.x;
 
   if (i < state_num) {
     
@@ -43,7 +38,6 @@ __global__ void cuda_qstate_operate_unitary2(cuDoubleComplex* d_camp_out, cuDoub
 __global__ void cuda_qstate_operate_unitary4(cuDoubleComplex* d_camp_out, cuDoubleComplex* d_camp_in,
 					     int qubit_num, int state_num, int m, int n)
 {
-  unsigned int		ix, iy, nx;
   int			mm, nn, i, p, pp, q, qq;
   int			l, sign_p, sign_q, off_p, off_q;
   cuDoubleComplex	camp;
@@ -51,13 +45,10 @@ __global__ void cuda_qstate_operate_unitary4(cuDoubleComplex* d_camp_out, cuDoub
   mm = qubit_num - m - 1;
   nn = qubit_num - n - 1;
 
-  ix = blockIdx.x * blockDim.x + threadIdx.x;
-  iy = blockIdx.y * blockDim.y + threadIdx.y;
-  nx = gridDim.x * blockDim.x;
-  i = (int)(iy * nx + ix);
+  i = blockIdx.x * blockDim.x + threadIdx.x;
 
   if (i < state_num) {
-    
+
     p = (i >> mm) % 2;
     pp = p ^ 1;
     q = (i >> nn) % 2;
@@ -75,6 +66,34 @@ __global__ void cuda_qstate_operate_unitary4(cuDoubleComplex* d_camp_out, cuDoub
     camp = cuCadd(camp, cuCmul(d_U[IDX4(l, (l^1))], d_camp_in[i + off_q]));
     camp = cuCadd(camp, cuCmul(d_U[IDX4(l, (l^2))], d_camp_in[i + off_p]));
     d_camp_out[i] = cuCadd(camp, cuCmul(d_U[IDX4(l, (l^3))], d_camp_in[i + off_q + off_p]));
+  }
+}
+
+__global__ void cuda_qstate_operate_controlled_gate(cuDoubleComplex* d_camp_out, cuDoubleComplex* d_camp_in,
+						    int qubit_num, int state_num, int m, int n)
+{
+  int			mm, nn, i, p, q, qq;
+  int			l, sign_q, off_q;
+  cuDoubleComplex	camp;
+  
+  mm = qubit_num - m - 1;
+  nn = qubit_num - n - 1;
+
+  i = blockIdx.x * blockDim.x + threadIdx.x;
+
+  if (i < state_num) {
+
+    p = (i >> mm) % 2;
+    q = (i >> nn) % 2;
+    qq = q ^ 1;
+
+    l = (p << 1) + q;
+
+    sign_q = (qq << 1) - 1;
+    off_q = sign_q * (1 << nn);
+
+    camp = cuCmul(d_U[IDX4(l, l)], d_camp_in[i]);
+    d_camp_out[i] = cuCadd(camp, cuCmul(d_U[IDX4(l, (l^1))], d_camp_in[i + off_q]));
   }
 }
 
@@ -130,6 +149,59 @@ static bool _qstate_operate_unitary_gpu_static(QState* qstate, int dim, int m, i
   SUC_RETURN(true);
 }
 
+static bool _qstate_operate_controlled_gate_gpu_static(QState* qstate, int m, int n)
+{
+  int			qubit_num  = qstate->qubit_num;
+  int			state_num  = qstate->state_num;
+  cuDoubleComplex*	d_buffer_0 = qstate->d_buffer_0;
+  cuDoubleComplex*	d_buffer_1 = qstate->d_buffer_1;
+  int			blocksize  = BLOCKSIZE;
+  dim3			block (blocksize, 1, 1);
+  dim3			grid ((state_num + block.x - 1) / block.x, 1, 1);
+
+  if ((qstate == NULL) || (qstate->use_gpu == false))
+    ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
+
+  /* 0 -> 1 */
+  if (qstate->d_buf_id == 0) {
+    cuda_qstate_operate_controlled_gate<<< grid, block >>>(d_buffer_1, d_buffer_0,
+							   qubit_num, state_num, m, n);
+    qstate->d_buf_id = 1;
+    qstate->d_camp = qstate->d_buffer_1;
+  }
+  /* 1 -> 0 */
+  else {
+    cuda_qstate_operate_controlled_gate<<< grid, block >>>(d_buffer_0, d_buffer_1,
+							   qubit_num, state_num, m, n);
+    qstate->d_buf_id = 0;
+    qstate->d_camp = qstate->d_buffer_0;
+  }
+
+  SUC_RETURN(true);
+}
+
+bool qstate_operate_controlled_gate_gpu(QState* qstate, COMPLEX* U, int m, int n)
+{
+  int			i;
+  cuDoubleComplex*	h_U = NULL;
+
+  if ((qstate == NULL) || (qstate->use_gpu == false) || (U == NULL))
+    ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
+
+  checkCudaErrors(cudaMallocHost((void**)&h_U, sizeof(cuDoubleComplex) * 16));
+
+  for (i=0; i<16; i++) {
+    h_U[i] = make_cuDoubleComplex(creal(U[i]), cimag(U[i]));
+  }
+  checkCudaErrors(cudaMemcpyToSymbol(d_U, h_U, sizeof(cuDoubleComplex) * 16));
+
+  _qstate_operate_controlled_gate_gpu_static(qstate, m, n);
+
+  checkCudaErrors(cudaFreeHost(h_U));
+
+  SUC_RETURN(true);
+}
+
 bool qstate_operate_unitary_gpu(QState* qstate, COMPLEX* U, int dim, int m, int n)
 {
   int			i;
@@ -165,6 +237,7 @@ bool qstate_operate_qcirc_gpu(QState* qstate, CMem* cmem, QCirc* qcirc)
   cuDoubleComplex*	h_U   = NULL;
   int                   q0 = -1;
   int                   q1 = -1;
+  bool                  compo = false;  /* U is composite or not */
 
   /* error check */
   if ((qstate == NULL || qcirc == NULL) ||
@@ -183,7 +256,7 @@ bool qstate_operate_qcirc_gpu(QState* qstate, CMem* cmem, QCirc* qcirc)
       /* unitary gate */
       if (kind_is_unitary(qgate->kind) == true) {
 
-	if (!(qgate_get_next_unitary((void**)&qgate, qstate->gbank, &dim, &q0, &q1, (void**)&U, true))) {
+	if (!(qgate_get_next_unitary((void**)&qgate, qstate->gbank, &dim, &q0, &q1, (void**)&U, &compo))) {
 	  ERR_RETURN(ERROR_GBANK_GET_UNITARY,false);
 	}
 	
@@ -192,8 +265,15 @@ bool qstate_operate_qcirc_gpu(QState* qstate, CMem* cmem, QCirc* qcirc)
 	}
 	checkCudaErrors(cudaMemcpyToSymbol(d_U, h_U, sizeof(cuDoubleComplex) * dim * dim));
 
-	if (!(_qstate_operate_unitary_gpu_static(qstate, dim, q0, q1))) {
-	  ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+	if (compo == false && kind_is_controlled(qgate->kind) == true) {
+	  if (!(_qstate_operate_controlled_gate_gpu_static(qstate, q0, q1))) {
+	    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+	  }
+	}
+	else {
+	  if (!(_qstate_operate_unitary_gpu_static(qstate, dim, q0, q1))) {
+	    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+	  }
 	}
 	free(U); U = NULL;
 	

@@ -148,7 +148,6 @@ static QState* _qstate_pickup(QState* qstate_in, int qubit_num, int* qubit_id)
     ERR_RETURN(ERROR_INVALID_ARGUMENT,NULL);
 
   /* selected qubits state (qstate) */
-  //  if (!(qstate_init(qubit_num, (void**)&qstate, qstate_in->proc)))
   if (!(qstate_init(qubit_num, (void**)&qstate, qstate_in->use_gpu)))
     ERR_RETURN(ERROR_QSTATE_INIT,NULL);
   _qstate_set_none(qstate);
@@ -280,7 +279,6 @@ bool _qstate_init_cpu(int qubit_num, void** qstate_out)
   if (!(gbank_init((void**)&(qstate->gbank))))
       ERR_RETURN(ERROR_GBANK_INIT,false);
 
-  //  qstate->proc = CPU;
   qstate->use_gpu = false;
 
   _qstate_set_0(qstate);
@@ -290,14 +288,12 @@ bool _qstate_init_cpu(int qubit_num, void** qstate_out)
   SUC_RETURN(true);
 }
 
-//bool qstate_init(int qubit_num, void** qstate_out, Proc proc)
 bool qstate_init(int qubit_num, void** qstate_out, bool use_gpu)
 {
   QState	*qstate = NULL;
 
   if (qubit_num < 1) ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
 
-  //  if (proc == CPU) {
   if (use_gpu == false) {
     if (!(_qstate_init_cpu(qubit_num, (void**)&qstate)))
       ERR_RETURN(ERROR_QSTATE_INIT, false);
@@ -319,7 +315,6 @@ bool qstate_init(int qubit_num, void** qstate_out, bool use_gpu)
   SUC_RETURN(true);
 }
 
-//bool qstate_init_with_vector(double* real, double* imag, int dim, void** qstate_out, Proc proc)
 bool qstate_init_with_vector(double* real, double* imag, int dim, void** qstate_out, bool use_gpu)
 {
   QState	*qstate	   = NULL;
@@ -331,7 +326,6 @@ bool qstate_init_with_vector(double* real, double* imag, int dim, void** qstate_
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
   qubit_num = (int)log2((double)dim);
-  //  if (!(qstate_init(qubit_num, (void**)&qstate, proc)))
   if (!(qstate_init(qubit_num, (void**)&qstate, use_gpu)))
     ERR_RETURN(ERROR_QSTATE_INIT, false);
 
@@ -355,7 +349,6 @@ static bool _qstate_copy_host_memory(QState* qstate_in, void** qstate_out)
 
   if (qstate_in == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
-  //  if (!(qstate_init(qstate_in->qubit_num, (void**)&qstate, qstate_in->proc)))
   if (!(qstate_init(qstate_in->qubit_num, (void**)&qstate, qstate_in->use_gpu)))
     ERR_RETURN(ERROR_QSTATE_INIT,false);
 
@@ -841,6 +834,67 @@ static bool _qstate_operate_unitary4(COMPLEX* camp_out, COMPLEX* camp_in, COMPLE
 
 #endif
 
+static bool _qstate_operate_controlled_gate_core(COMPLEX* camp_out, COMPLEX* camp_in, COMPLEX* U,
+						 int qubit_num, int state_num, int m, int n)
+{
+  int		mm   = qubit_num - m - 1;
+  int		nn   = qubit_num - n - 1;
+  int		i;
+  COMPLEX	u_00 = U[IDX4(0,0)];
+  COMPLEX	u_11 = U[IDX4(1,1)];
+  COMPLEX	u_22 = U[IDX4(2,2)];
+  COMPLEX	u_23 = U[IDX4(2,3)];
+  COMPLEX	u_32 = U[IDX4(3,2)];
+  COMPLEX	u_33 = U[IDX4(3,3)];
+
+  # pragma omp parallel for
+  for (i=0; i<state_num; i++) {
+    if (((i >> mm) % 2 == 0) && ((i >> nn) % 2 == 0)) {
+      camp_out[i] = u_00 * camp_in[i];
+    }
+    else if (((i >> mm) % 2 == 0) && ((i >> nn) % 2 == 1)) {
+      camp_out[i] = u_11 * camp_in[i];
+    }
+    else if (((i >> mm) % 2 == 1) && ((i >> nn) % 2 == 0)) {
+      camp_out[i]
+	= u_22 * camp_in[i]
+	+ u_23 * camp_in[i + (1 << nn)];
+    }
+    else {
+      camp_out[i]
+	= u_32 * camp_in[i - (1 << nn)]
+	+ u_33 * camp_in[i];
+    }
+  }
+  
+  SUC_RETURN(true);
+}
+
+static bool _qstate_operate_controlled_gate_cpu(QState* qstate, COMPLEX* U, int m, int n)
+{
+  if (qstate == NULL)
+    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+
+  if (qstate->buf_id == 0) {
+    if (!(_qstate_operate_controlled_gate_core(qstate->buffer_1, qstate->buffer_0, U,
+					       qstate->qubit_num, qstate->state_num, m, n))) {
+      ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+    }
+    qstate->buf_id = 1;
+    qstate->camp = qstate->buffer_1;
+  }
+  else {
+    if (!(_qstate_operate_controlled_gate_core(qstate->buffer_0, qstate->buffer_1, U,
+					       qstate->qubit_num, qstate->state_num, m, n))) {
+      ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+    }
+    qstate->buf_id = 0;
+    qstate->camp = qstate->buffer_0;
+  }
+
+  SUC_RETURN(true);
+}
+
 static bool _qstate_operate_unitary_cpu(QState* qstate, COMPLEX* U, int dim, int m, int n)
 {
   if (qstate == NULL)
@@ -892,9 +946,29 @@ static bool _qstate_operate_unitary_cpu(QState* qstate, COMPLEX* U, int dim, int
   SUC_RETURN(true);
 }
 
+static bool _qstate_operate_controlled_gate(QState* qstate, COMPLEX* U, int m, int n)
+{
+  if (qstate->use_gpu == false) {
+    if (!(_qstate_operate_controlled_gate_cpu(qstate, U, m, n)))
+      ERR_RETURN(ERROR_QSTATE_OPERATE_UNITARY, false);
+  }
+
+#ifdef USE_GPU
+  else if (qstate->use_gpu == true) {
+    if (!(qstate_operate_controlled_gate_gpu(qstate, U, m, n)))
+      ERR_RETURN(ERROR_QSTATE_OPERATE_UNITARY, false);
+  }
+#endif
+
+  else {
+    ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
+  }
+  
+  SUC_RETURN(true);
+}
+
 static bool _qstate_operate_unitary(QState* qstate, COMPLEX* U, int dim, int m, int n)
 {
-  //  if (qstate->proc == CPU) {
   if (qstate->use_gpu == false) {
     if (!(_qstate_operate_unitary_cpu(qstate, U, dim, m, n)))
       ERR_RETURN(ERROR_QSTATE_OPERATE_UNITARY, false);
@@ -1202,16 +1276,56 @@ bool qstate_operate_qgate(QState* qstate, Kind kind, double alpha, double beta,
       (kind == RESET)) {
     SUC_RETURN(true);
   }
+
+  if (!(gbank_get_unitary(qstate->gbank, kind, alpha, beta, gamma, &dim, (void**)&U)))
+    ERR_RETURN(ERROR_GBANK_GET_UNITARY,false);
+  
+  if (kind_is_controlled(kind) == true) {
+    if (!(_qstate_operate_controlled_gate(qstate, U, q0, q1)))
+      ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+  }
   else {
-    if (!(gbank_get_unitary(qstate->gbank, kind, alpha, beta, gamma, &dim, (void**)&U)))
-      ERR_RETURN(ERROR_GBANK_GET_UNITARY,false);
     if (!(_qstate_operate_unitary(qstate, U, dim, q0, q1)))
       ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
-    
-    free(U); U = NULL;
-    SUC_RETURN(true);
   }
+
+  free(U); U = NULL;
+  SUC_RETURN(true);
 }
+
+//bool qstate_operate_qgate(QState* qstate, Kind kind, double alpha, double beta,
+//			  double gamma, int* qubit_id)
+//{
+//  int		q0  = qubit_id[0];
+//  int		q1  = qubit_id[1];
+//  int		dim = 0;
+//  COMPLEX*	U   = NULL;
+//
+//  if (qstate == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+//
+//  if ((kind == INIT) || (kind == MEASURE) || (kind ==MEASURE_X) ||
+//      (kind == MEASURE_Y) || (kind == MEASURE_Z) || (kind == MEASURE_BELL) ||
+//      (kind == RESET)) {
+//    SUC_RETURN(true);
+//  }
+//  else if (kind_is_controlled(kind) == true) {
+//    if (!(gbank_get_unitary(qstate->gbank, kind, alpha, beta, gamma, &dim, (void**)&U)))
+//      ERR_RETURN(ERROR_GBANK_GET_UNITARY,false);
+//    if (!(_qstate_operate_controlled_gate(qstate, U, q0, q1)))
+//      ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+//    free(U); U = NULL;
+//    SUC_RETURN(true);
+//  }
+//  else {
+//    if (!(gbank_get_unitary(qstate->gbank, kind, alpha, beta, gamma, &dim, (void**)&U)))
+//      ERR_RETURN(ERROR_GBANK_GET_UNITARY,false);
+//    if (!(_qstate_operate_unitary(qstate, U, dim, q0, q1)))
+//      ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+//    
+//    free(U); U = NULL;
+//    SUC_RETURN(true);
+//  }
+//}
 
 static bool _qstate_evolve_spro(QState* qstate, SPro* spro, double time)
 {
@@ -1420,7 +1534,6 @@ static QState* _qstate_apply_observable(QState* qstate, Observable* observ)
     if (!(qstate_tmp = _qstate_apply_spro(qstate, observ->spro_array[i])))
       ERR_RETURN(ERROR_INVALID_ARGUMENT, NULL);
     if (qstate_ob == NULL) {
-      //      if (!(qstate_init(qstate_tmp->qubit_num, (void**)&qstate_ob, qstate->proc)))
       if (!(qstate_init(qstate_tmp->qubit_num, (void**)&qstate_ob, qstate->use_gpu)))
 	ERR_RETURN(ERROR_QSTATE_INIT, NULL);
       _qstate_set_none(qstate_ob);
@@ -1476,7 +1589,6 @@ bool qstate_tensor_product(QState* qstate_0, QState* qstate_1, void** qstate_out
   if ((qstate_0 == NULL) || (qstate_1 == NULL))
     ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
 
-  //  if (qstate_0->proc != qstate_1->proc)
   if (qstate_0->use_gpu != qstate_1->use_gpu)
     ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
 
@@ -1488,7 +1600,6 @@ bool qstate_tensor_product(QState* qstate_0, QState* qstate_1, void** qstate_out
 #endif
 
   qubit_num = qstate_0->qubit_num + qstate_1->qubit_num;
-  //  if (!(qstate_init(qubit_num, (void**)&qstate, qstate_0->proc)))
   if (!(qstate_init(qubit_num, (void**)&qstate, qstate_0->use_gpu)))
     ERR_RETURN(ERROR_QSTATE_INIT, false);
 
@@ -1605,15 +1716,16 @@ bool qstate_apply_matrix(QState* qstate, int qnum_part, int* qid,
 
 static bool _qstate_operate_qcirc_cpu(QState* qstate, CMem* cmem, QCirc* qcirc)
 {
-  QGate*        qgate                   = NULL;   /* quantum gate in quantum circuit */
-  double        angle                   = 0.0;    /* measurement angle */
-  double        phase                   = 0.0;    /* measurement phase */
+  QGate*        qgate = NULL;   /* quantum gate in quantum circuit */
+  double        angle = 0.0;    /* measurement angle */
+  double        phase = 0.0;    /* measurement phase */
   int           qubit_id[MAX_QUBIT_NUM];
   int           mes_id;
-  int		dim = 0;
-  int           q0	 = -1;
-  int           q1	 = -1;
-  COMPLEX*	U   = NULL;
+  int		dim   = 0;
+  int           q0    = -1;
+  int           q1    = -1;
+  COMPLEX*	U     = NULL;
+  bool          compo = false;  /* U is composite or not */
 
   /* error check */
   if ((qstate == NULL || qcirc == NULL) ||
@@ -1630,13 +1742,20 @@ static bool _qstate_operate_qcirc_cpu(QState* qstate, CMem* cmem, QCirc* qcirc)
       /* unitary gate */
       if (kind_is_unitary(qgate->kind) == true) {
 
-	if (!(qgate_get_next_unitary((void**)&qgate, qstate->gbank, &dim, &q0, &q1, (void**)&U, true))) {
+	if (!(qgate_get_next_unitary((void**)&qgate, qstate->gbank, &dim, &q0, &q1, (void**)&U, &compo))) {
 	  ERR_RETURN(ERROR_QGATE_GET_NEXT_UNITARY, false);
 	}
 
 	/* operate unitary matrix */
-	if (!(_qstate_operate_unitary(qstate, U, dim, q0, q1))) {
-	  ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
+	if (compo == false && kind_is_controlled(qgate->kind) == true) {
+	  if (!(_qstate_operate_controlled_gate(qstate, U, q0, q1))) {
+	    ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
+	  }
+	}
+	else {
+	  if (!(_qstate_operate_unitary(qstate, U, dim, q0, q1))) {
+	    ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
+	  }
 	}
 	free(U); U = NULL;
 	
@@ -1671,7 +1790,6 @@ static bool _qstate_operate_qcirc_cpu(QState* qstate, CMem* cmem, QCirc* qcirc)
 
 bool qstate_operate_qcirc(QState* qstate, CMem* cmem, QCirc* qcirc)
 {
-  //  if (qstate->proc == CPU) {
   if (qstate->use_gpu == false) {
     if (!(_qstate_operate_qcirc_cpu(qstate, cmem, qcirc)))
       ERR_RETURN(ERROR_QSTATE_OPERATE_QCIRC, false);
