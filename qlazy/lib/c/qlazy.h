@@ -473,6 +473,7 @@ int      kind_get_para_size(Kind kind);
 bool     kind_is_measurement(Kind kind);
 bool     kind_is_reset(Kind kind);
 bool     kind_is_unitary(Kind kind);
+bool     kind_is_controlled(Kind kind);
 bool     is_gpu_supported_lib(void);
 bool     is_gpu_available(void);
 
@@ -596,7 +597,7 @@ void	stabilizer_free(Stabilizer* stab);
 
 /* qgate.c */
 bool qgate_get_next_unitary(void** qgate_inout, GBank* gbank, int* dim, int* q0, int* q1,
-			    void** matrix_out, bool compo);
+			    void** matrix_out, bool* compo);
 
 /* qcirc.c */
 bool qcirc_init(void** qcirc_out);
@@ -621,6 +622,7 @@ bool gpu_preparation(void);
 
 /* qstate_gpu.cu */
 bool qstate_init_gpu(int qubit_num, void** qstate_out);
+bool qstate_operate_controlled_gate_gpu(QState* qstate, COMPLEX* U, int m, int n);
 bool qstate_operate_unitary_gpu(QState* qstate, COMPLEX* U, int dim, int m, int n);
 bool qstate_operate_qcirc_gpu(QState* qstate, CMem* cmem, QCirc* qcirc);
 bool qstate_update_host_memory(QState* qstate);
