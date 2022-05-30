@@ -478,6 +478,38 @@ bool kind_is_unitary(Kind kind)
   return is_unitary;
 }
 
+bool kind_is_controlled(Kind kind)
+{
+  bool is_controlled;
+  
+  switch (kind) {
+  case CONTROLLED_X:
+  case CONTROLLED_Y:
+  case CONTROLLED_Z:
+  case CONTROLLED_XR:
+  case CONTROLLED_XR_:
+  case CONTROLLED_H:
+  case CONTROLLED_S:
+  case CONTROLLED_S_:
+  case CONTROLLED_T:
+  case CONTROLLED_T_:
+  case CONTROLLED_P:
+  case CONTROLLED_RX:
+  case CONTROLLED_RY:
+  case CONTROLLED_RZ:
+  case CONTROLLED_U1:
+  case CONTROLLED_U2:
+  case CONTROLLED_U3:
+    is_controlled = true;
+    break;
+  default:
+    is_controlled = false;
+    break;
+  }
+  
+  return is_controlled;
+}
+
 bool is_gpu_supported_lib(void)
 {
 #ifdef USE_GPU
