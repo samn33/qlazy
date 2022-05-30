@@ -210,7 +210,12 @@ static bool _composite_or_not(int dim, int q0, int q1, QGate* qgate_next, bool* 
   
   /* 1-qubit -> 1-qubit */
   if ((dim == 2) && (dim_next == 2)) {
-    *ans = true;
+    if (q0 == q0_next) {
+      *ans = true;
+    }
+    else {
+      *ans = false;
+    }
   }
   /* 1-qubit -> 2-qubit */
   else if ((dim == 2) && (dim_next == 4)) {
@@ -218,7 +223,7 @@ static bool _composite_or_not(int dim, int q0, int q1, QGate* qgate_next, bool* 
       *ans = false;
     }
     else {
-      *ans = true;
+      *ans = false;
     }
   }
   /* 2-qubit -> 1-qubit */
@@ -227,16 +232,16 @@ static bool _composite_or_not(int dim, int q0, int q1, QGate* qgate_next, bool* 
       *ans = false;
     }
     else {
-      *ans = true;
+      *ans = false;
     }
   }
   /* 2-qubit -> 2-qubit */
   else if ((dim == 4) && (dim_next == 4)) {
     if ((q0 == q0_next) && (q1 == q1_next)) {
-      *ans = true;
+      *ans = false;
     }
     else if ((q0 == q1_next) && (q1 == q0_next)) {
-      *ans = true;
+      *ans = false;
     }
     else {
       *ans = false;
@@ -250,7 +255,7 @@ static bool _composite_or_not(int dim, int q0, int q1, QGate* qgate_next, bool* 
 }
 
 bool qgate_get_next_unitary(void** qgate_inout, GBank* gbank, int* dim, int* q0, int* q1,
-			    void** matrix_out, bool compo)
+			    void** matrix_out, bool* compo)
 {
   COMPLEX*      U	= NULL;
   COMPLEX*	U_tmp	= NULL;
@@ -259,22 +264,17 @@ bool qgate_get_next_unitary(void** qgate_inout, GBank* gbank, int* dim, int* q0,
   int           q1_tmp	= -1;
   int           i;
   bool          ans	= false;
-  //  QGate*        qgate = *qgate_inout;
   QGate*        qgate = (QGate*)(*qgate_inout);
-
-  //  printf("== qgate_get_next_unitary ==\n");  // debug
 
   /* malloc for output unitary matrix */
   if (!(U = (COMPLEX*)malloc(sizeof(COMPLEX) * 16)))
-    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
+    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY, false);
 
   /* get 1st unitary matrix */
   if (!(gbank_get_unitary(gbank, qgate->kind, qgate->para[0], 0.0, 0.0,
 			  &dim_tmp, (void**)&U_tmp))) {
-    ERR_RETURN(ERROR_GBANK_GET_UNITARY,false);
+    ERR_RETURN(ERROR_GBANK_GET_UNITARY, false);
   }
-
-  //  printf("kind = %d\n", qgate->kind);  // debug
 
   /* set U, dim, q0, q1 */
   for (i=0; i<dim_tmp*dim_tmp; i++) {
@@ -285,29 +285,27 @@ bool qgate_get_next_unitary(void** qgate_inout, GBank* gbank, int* dim, int* q0,
   *q1 = qgate->qid[1];
   free(U_tmp); U_tmp = NULL;
 
-  if (compo == true) {
-    while ((qgate->next != NULL) && (kind_is_unitary(qgate->next->kind) == true)) {
+  *compo = false;
+  while ((qgate->next != NULL) && (kind_is_unitary(qgate->next->kind) == true)) {
 
-      //if (!(_composite_or_not(qgate, qgate->next, &ans)))
-      if (!(_composite_or_not(*dim, *q0, *q1, qgate->next, &ans)))
-	ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
-  
-      if (ans == false) break;
-  
-      qgate = qgate->next;
-      if (!(gbank_get_unitary(gbank, qgate->kind, qgate->para[0], 0.0, 0.0,
-			      &dim_tmp, (void**)&U_tmp))) {
-	ERR_RETURN(ERROR_GBANK_GET_UNITARY, false);
-      }
-      //      printf("kind = %d\n", qgate->kind);  // debug
+    if (!(_composite_or_not(*dim, *q0, *q1, qgate->next, &ans)))
+      ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
 
-      q0_tmp = qgate->qid[0];
-      q1_tmp = qgate->qid[1];
-      if (!(_composite_unitary(U, dim, q0, q1, U_tmp, dim_tmp, q0_tmp, q1_tmp))) {
-	ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
-      }
-      free(U_tmp); U_tmp = NULL;
+    if (ans == true) *compo = true;
+    else break;
+  
+    qgate = qgate->next;
+    if (!(gbank_get_unitary(gbank, qgate->kind, qgate->para[0], 0.0, 0.0,
+			    &dim_tmp, (void**)&U_tmp))) {
+      ERR_RETURN(ERROR_GBANK_GET_UNITARY, false);
     }
+
+    q0_tmp = qgate->qid[0];
+    q1_tmp = qgate->qid[1];
+    if (!(_composite_unitary(U, dim, q0, q1, U_tmp, dim_tmp, q0_tmp, q1_tmp))) {
+      ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
+    }
+    free(U_tmp); U_tmp = NULL;
   }
 
   *qgate_inout = qgate;
