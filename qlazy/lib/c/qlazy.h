@@ -39,12 +39,14 @@
 #define TOKEN_STRLEN	   1024     /* max token string length */
 #define TOKEN_NUM	   100      /* max token number of each line */
 #define MAX_ERR_MSG_LENGTH 1024	    /* max string length of err message  */
+#define KEY_STRLEN         1024     /* max string length of key of hash table (for measurement) */
 
-#define DEF_QUBIT_NUM      5
-#define DEF_QC_STEPS       100
-#define DEF_QCIRC_DEPTH    100
-#define MAX_QUBIT_NUM      30
-#define DEF_QLAZYINIT       "./.qlazyinit"
+#define DEF_QUBIT_NUM		5
+#define DEF_QC_STEPS		100
+#define DEF_QCIRC_DEPTH		100
+#define MAX_QUBIT_NUM		30	        /* max qubit number for state vector simulation */
+#define MAX_MEASUREMENT_NUM	KEY_STRLEN	/* max measurement qubit number */
+#define DEF_QLAZYINIT		"./.qlazyinit"
 
 #define DEF_SHOTS 100
 #define DEF_PHASE  0.0
@@ -370,6 +372,9 @@ typedef struct _QState {
   COMPLEX*	camp;           /* complex amplitude of the quantum state (pointer to buffer #0 or #1) */
   COMPLEX*	buffer_0;       /* complex amplitude of the quantum state (buffer #0) */
   COMPLEX*	buffer_1;       /* complex amplitude of the quantum state (buffer #1) */
+  //double*       prob_array;     /* |0> probability array for measuring each qubit */
+  //bool          prob_updated;   /* prob_array is updated or not */
+  //char*         measured_str;   /* measured string (ex. '0','1','0','1','\0') */
 #ifdef USE_GPU
   int			d_buf_id;   /* official buffer id (0: buffer_0, 1: buffer_1)*/
   cuDoubleComplex*	d_camp;     /* complex amplitude of the quantum state (pointer to buffer #0 or #1) */
@@ -380,6 +385,19 @@ typedef struct _QState {
   bool          use_gpu;
 } QState;
 
+typedef struct _Element {
+  bool                  active;
+  char			key[KEY_STRLEN];
+  int			value;
+  struct _Element*	next;
+} Element;
+
+typedef struct _HashTable {
+  int			table_size;
+  int			data_num;
+  struct _Element**	table;
+} HashTable;
+
 typedef struct _MData {
   int		qubit_num;
   int		shot_num;
@@ -389,6 +407,14 @@ typedef struct _MData {
   int*		freq;
   int		last_val;
 } MData;
+
+typedef struct _MDataHT {
+  int		qubit_num;
+  int		shot_num;
+  int*		qubit_id;
+  HashTable*	freq_table;
+  int		last_val;
+} MDataHT;
 
 typedef struct _QSystem {
   QC*	qc;
@@ -477,6 +503,16 @@ bool     kind_is_controlled(Kind kind);
 bool     is_gpu_supported_lib(void);
 bool     is_gpu_available(void);
 
+/* hash.c */
+bool hashtable_create(int table_size, void** ht_out);
+bool hashtable_set_value(HashTable* ht, char* key, int value);
+bool hashtable_add_value(HashTable* ht, char* key, int value);
+bool hashtable_get_value(HashTable* ht, char* key, int* value);
+bool hashtable_get_data(HashTable* ht, void** key_array_out, void** value_array_out);
+void hashtable_print_shape(HashTable* ht);
+void hashtable_print_data(HashTable* ht);
+void hashtable_free(HashTable* ht);
+
 /* message.c */
 void	 error_msg(ErrCode err);
 
@@ -513,8 +549,10 @@ bool     qstate_get_camp(QState* qstate, int qubit_num, int* qubit_id,
 bool	 qstate_print(QState* qstate, int qubit_num, int* qubit_id, bool nonzero);
 bool     qstate_bloch(QState* qstate, int qid, double* theta, double* phi);
 bool     qstate_print_bloch(QState* qstate, int qid);
-bool     qstate_measure(QState* qstate, double angle, double phase,
-			int qubit_num, int* qubit_id, int* mval_out);
+bool     qstate_measure(QState*	qstate, int mnum, int* qid, char* measured_str);
+//bool     qstate_measure(QState* qstate, int mnum, int* qid, char* mstr_all, char* mstr_qid);
+//bool     qstate_measure(QState* qstate, double angle, double phase,
+//			int qubit_num, int* qubit_id, int* mval_out);
 bool	 qstate_measure_stats(QState* qstate, int shot_num, double angle, double phase,
 			      int qubit_num, int* qubit_id, void** mdata_out);
 bool     qstate_measure_bell_stats(QState* qstate, int shot_num, int qubit_num,
@@ -598,6 +636,8 @@ void	stabilizer_free(Stabilizer* stab);
 /* qgate.c */
 bool qgate_get_next_unitary(void** qgate_inout, GBank* gbank, int* dim, int* q0, int* q1,
 			    void** matrix_out, bool* compo);
+bool qgate_get_measurement_attributes(void** qgate_inout, GBank* gbank,
+				      int* mnum_out, int* qid_out, int* cid_out, bool* last_out);
 
 /* qcirc.c */
 bool qcirc_init(void** qcirc_out);

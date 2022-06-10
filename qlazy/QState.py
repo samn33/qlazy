@@ -1394,7 +1394,7 @@ class QState(ctypes.Structure):
         c[11] = +0.0000+0.0000*i : 0.0000 |
 
         """
-        mval = qstate_measure(self, qid=qid, angle=0.0, phase=0.0)
+        mval = qstate_measure(self, qid=qid)
         return mval
 
     def m(self, qid=None, shots=cfg.DEF_SHOTS, angle=0.0, phase=0.0):

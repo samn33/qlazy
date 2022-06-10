@@ -313,3 +313,37 @@ bool qgate_get_next_unitary(void** qgate_inout, GBank* gbank, int* dim, int* q0,
 
   SUC_RETURN(true);
 }
+
+bool qgate_get_measurement_attributes(void** qgate_inout, GBank* gbank,
+				      int* mnum_out, int* qid_out, int* cid_out, bool* last_out)
+{
+  int		count = 0;
+  QGate*	qgate = (QGate*)(*qgate_inout);
+
+  *last_out = false;
+
+  qid_out[count] = qgate->qid[0];
+  cid_out[count] = qgate->c;
+  count++;
+
+  while (true) {
+    if (qgate->next == NULL) {
+      *last_out = true;
+      break;
+    }
+    else if (kind_is_measurement(qgate->next->kind) == true) {
+      qgate = qgate->next;
+      qid_out[count] = qgate->qid[0];
+      cid_out[count] = qgate->c;
+      count++;
+    }
+    else {
+      break;
+    }
+  }
+
+  *mnum_out = count;
+  *qgate_inout = qgate;
+
+  SUC_RETURN(true);
+}

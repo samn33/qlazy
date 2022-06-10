@@ -335,6 +335,13 @@ bool qstate_init_gpu(int qubit_num, void** qstate_out)
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
   qstate->camp = qstate->buffer_0;
 
+  /* for meaurement */
+  //if (!(qstate->prob_array = (double*)malloc(sizeof(double) * qubit_num)))
+  //  ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
+  //qstate->prob_updated = false;
+  //if (!(qstate->measured_str = (char*)malloc(sizeof(char) * (qubit_num + 1))))
+  //  ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
+  
   /* allocatie device memory */
   qstate->d_buf_id = 0;
   checkCudaErrors(cudaMalloc((void**)&(qstate->d_buffer_0), sizeof(cuDoubleComplex) * state_num));

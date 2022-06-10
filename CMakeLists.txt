@@ -11,7 +11,7 @@ set(LIB_SRC_BASE qlazy/lib/c/qsystem.c qlazy/lib/c/qg.c qlazy/lib/c/qc.c
   qlazy/lib/c/qstate.c qlazy/lib/c/mdata.c qlazy/lib/c/gbank.c qlazy/lib/c/spro.c
   qlazy/lib/c/observable.c qlazy/lib/c/densop.c qlazy/lib/c/stabilizer.c
   qlazy/lib/c/misc.c qlazy/lib/c/message.c qlazy/lib/c/help.c
-  qlazy/lib/c/cmem.c qlazy/lib/c/qgate.c qlazy/lib/c/qcirc.c)
+  qlazy/lib/c/cmem.c qlazy/lib/c/qgate.c qlazy/lib/c/qcirc.c qlazy/lib/c/hashtable.c)
 
 set(LIB_SRC_GPU qlazy/lib/c/gpu.cu qlazy/lib/c/qstate_gpu.cu)
 

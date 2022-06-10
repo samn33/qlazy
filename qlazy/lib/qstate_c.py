@@ -409,39 +409,73 @@ def qstate_operate_qgate(qs, kind=None, qid=None, phase=cfg.DEF_PHASE,
     if ret == cfg.FALSE:
         raise ValueError("can't operate quantum gate to the quantum state vector.")
 
-def qstate_measure(qs, qid=None, angle=0.0, phase=0.0):
+# bool     qstate_measure(QState*	qstate, int mnum, int* qid, char* measured_str);
+def qstate_measure(qs, qid=None):
     """ measurement of the qubits """
 
+    # qnum, mnum
+    qnum = qs.qubit_num
     if qid is None or qid == []:
-        qid = list(range(qs.qubit_num))
+        qid = list(range(qnum))
+    mnum = len(qid)
 
-    # operate
-    qubit_num = len(qid)
-    qubit_id = [0 for _ in range(qubit_num)]
+    # qid_array
+    qubit_id = [0 for _ in range(qnum)]
     for i, q in enumerate(qid):
         qubit_id[i] = q
-    IntArray = ctypes.c_int * qubit_num
+    IntArray = ctypes.c_int * qnum
     qid_array = IntArray(*qubit_id)
 
-    mval = 0
-    c_mval = ctypes.c_int(mval)
+    # mstr_all_array, mstr_qid_array
+    mstr = "0" * qnum
+    mstr_array = ctypes.create_string_buffer(mstr.encode())
 
     lib.qstate_measure.restype = ctypes.c_int
-    lib.qstate_measure.argtypes = [ctypes.POINTER(QState),
-                                   ctypes.c_double, ctypes.c_double,
-                                   ctypes.c_int, IntArray, ctypes.POINTER(ctypes.c_int)]
-    ret = lib.qstate_measure(ctypes.byref(qs),
-                             ctypes.c_double(angle), ctypes.c_double(phase),
-                             ctypes.c_int(qubit_num), qid_array, ctypes.byref(c_mval))
+    lib.qstate_measure.argtypes = [ctypes.POINTER(QState), ctypes.c_int,
+                                   IntArray, ctypes.c_char_p]
+    ret = lib.qstate_measure(ctypes.byref(qs), ctypes.c_int(mnum),
+                             qid_array, mstr_array)
 
     if ret == cfg.FALSE:
         raise ValueError("can't measure the qubits.")
 
-    mval = c_mval.value
-    digits = len(qid)
-    mval = '{:0{digits}b}'.format(mval, digits=digits)
+    measured_str = mstr_array.value.decode()
 
-    return mval
+    return measured_str
+
+# def qstate_measure(qs, qid=None, angle=0.0, phase=0.0):
+#     """ measurement of the qubits """
+# 
+#     if qid is None or qid == []:
+#         qid = list(range(qs.qubit_num))
+# 
+#     # operate
+#     qubit_num = len(qid)
+#     qubit_id = [0 for _ in range(qubit_num)]
+#     for i, q in enumerate(qid):
+#         qubit_id[i] = q
+#     IntArray = ctypes.c_int * qubit_num
+#     qid_array = IntArray(*qubit_id)
+# 
+#     mval = 0
+#     c_mval = ctypes.c_int(mval)
+# 
+#     lib.qstate_measure.restype = ctypes.c_int
+#     lib.qstate_measure.argtypes = [ctypes.POINTER(QState),
+#                                    ctypes.c_double, ctypes.c_double,
+#                                    ctypes.c_int, IntArray, ctypes.POINTER(ctypes.c_int)]
+#     ret = lib.qstate_measure(ctypes.byref(qs),
+#                              ctypes.c_double(angle), ctypes.c_double(phase),
+#                              ctypes.c_int(qubit_num), qid_array, ctypes.byref(c_mval))
+# 
+#     if ret == cfg.FALSE:
+#         raise ValueError("can't measure the qubits.")
+# 
+#     mval = c_mval.value
+#     digits = len(qid)
+#     mval = '{:0{digits}b}'.format(mval, digits=digits)
+# 
+#     return mval
 
 def qstate_measure_stats(qs, qid=None, shots=cfg.DEF_SHOTS, angle=0.0, phase=0.0):
     """ measurement of the qubits and get stats """
