@@ -1170,7 +1170,7 @@ static int _qstate_measure_one_time(QState* qstate, double angle, double phase,
 //  SUC_RETURN(true);
 //}
 
-static bool _qstate_get_measured_str(QState* qstate, int mnum, int* qid, char* measured_str)
+static bool _qstate_get_measured_char(QState* qstate, int mnum, int* qid, char* mchar)
 {
   int		i;
   double	r      = 0.0;
@@ -1191,27 +1191,21 @@ static bool _qstate_get_measured_str(QState* qstate, int mnum, int* qid, char* m
 
   for (i=0; i<mnum; i++) {
     bit = (value >> (qstate->qubit_num - qid[i] - 1)) % 2;
-    if (bit == 0) measured_str[i] = '0';
-    else measured_str[i] = '1';
+    if (bit == 0) mchar[i] = 0;
+    else mchar[i] = 1;
   }
-  measured_str[mnum] = '\0';
 
   SUC_RETURN(true);
 }
 
-//bool qstate_measure(QState* qstate, int mnum, int* qid, char* mstr_all, char* mstr_qid)
-bool qstate_measure(QState* qstate,      /* structure of quantum state vector */
-		    int	    mnum,	 /* number of measured qubits */
-		    int*    qid,	 /* array of measured qubit id (buffer size = qubit_num) */
-		    char*   measured_str /* string of measured value (ex. "0100101") 
-					    (buffer size = qubit_num)*/
-		    )
+bool qstate_measure(QState* qstate, int mnum, int* qid, char* measured_char,
+		    bool measure_update)
 {
   int	i, x;
   int   mval_qid = 0;
 
   if ((qstate == NULL) || (mnum < 1) ||
-      (qid == NULL) || (measured_str == NULL))
+      (qid == NULL) || (measured_char == NULL))
     ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
     
 #ifdef USE_GPU
@@ -1219,25 +1213,32 @@ bool qstate_measure(QState* qstate,      /* structure of quantum state vector */
     ERR_RETURN(ERROR_QSTATE_UPDATE_HOST_MEMORY, false);
 #endif
 
-  _qstate_get_measured_str(qstate, mnum, qid, measured_str);
+  _qstate_get_measured_char(qstate, mnum, qid, measured_char);
+
+  //// debug
+  //for (i=0; i<mnum; i++) {
+  //  printf("%d ", measured_char[i]);
+  //}
+  //printf("\n");
 
   /* get measured value for target qubits */
-  for (i=0; i<mnum; i++) {
-    mval_qid += ((int)(measured_str[i] - '0') << (mnum - 1 - i));
-  }
-
   /* update qstate (projection and normalize) */
-  for (i=0; i<qstate->state_num; i++) {
-    if (!(_select_bits(&x, i, mnum, qstate->qubit_num, qid)))
-      ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
-    if (x != mval_qid) qstate->camp[i] = 0.0;
-  }
-  if (!(_qstate_normalize(qstate))) ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
-  
+  if (measure_update == true) {
+    for (i=0; i<mnum; i++) {
+      mval_qid += ((int)measured_char[i] << (mnum - 1 - i));
+    }
+    for (i=0; i<qstate->state_num; i++) {
+      if (!(_select_bits(&x, i, mnum, qstate->qubit_num, qid)))
+	ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
+      if (x != mval_qid) qstate->camp[i] = 0.0;
+    }
+    if (!(_qstate_normalize(qstate))) ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
+
 #ifdef USE_GPU
-  if (!(qstate_update_device_memory(qstate)))
-    ERR_RETURN(ERROR_QSTATE_UPDATE_DEVICE_MEMORY, false);
+    if (!(qstate_update_device_memory(qstate)))
+      ERR_RETURN(ERROR_QSTATE_UPDATE_DEVICE_MEMORY, false);
 #endif
+  }
 
   SUC_RETURN(true);
 }
@@ -1886,7 +1887,8 @@ bool qstate_apply_matrix(QState* qstate, int qnum_part, int* qid,
   SUC_RETURN(true);
 }
 
-static bool _qstate_operate_qcirc_cpu(QState* qstate, CMem* cmem, QCirc* qcirc)
+static bool _qstate_operate_qcirc_cpu(QState* qstate, CMem* cmem, QCirc* qcirc,
+				      bool measure_update)
 {
   QGate*        qgate = NULL;   /* quantum gate in quantum circuit */
   int		dim   = 0;
@@ -1899,7 +1901,7 @@ static bool _qstate_operate_qcirc_cpu(QState* qstate, CMem* cmem, QCirc* qcirc)
   int*		qid   = NULL;
   int*		cid   = NULL;
   bool		last  = false;
-  char*		measured_str = NULL;
+  char*		measured_char = NULL;
   int i;
 
   /* error check */
@@ -1913,8 +1915,7 @@ static bool _qstate_operate_qcirc_cpu(QState* qstate, CMem* cmem, QCirc* qcirc)
     if (!(cid = (int*)malloc(sizeof(int) * qstate->qubit_num)))
       ERR_RETURN(ERROR_CANT_ALLOC_MEMORY, false);
 
-    // memo: サイズはqubit_num, cmem_numの大きい方にする
-    if (!(measured_str = (char*)malloc(sizeof(int) * (qstate->qubit_num + 1))))
+    if (!(measured_char = (char*)malloc(sizeof(int) * cmem->cmem_num)))
       ERR_RETURN(ERROR_CANT_ALLOC_MEMORY, false);
   }
   if (!(qid = (int*)malloc(sizeof(int) * qstate->qubit_num)))
@@ -1951,41 +1952,28 @@ static bool _qstate_operate_qcirc_cpu(QState* qstate, CMem* cmem, QCirc* qcirc)
       }
       /* reset */
       else if (kind_is_reset(qgate->kind) == true) {
-      	if (!(qstate_reset(qstate, 1, qgate->qid)))
-      	  ERR_RETURN(ERROR_CANT_RESET, false);
- 	qgate = qgate->next;
-     }
+	if (!(qstate_reset(qstate, 1, qgate->qid)))
+	  ERR_RETURN(ERROR_CANT_RESET, false);
+	qgate = qgate->next;
+      }
       /* measurement */
       else if (kind_is_measurement(qgate->kind) == true) {
 
 	if (!(qgate_get_measurement_attributes((void**)&qgate, qstate->gbank, &mnum, qid, cid, &last))) {
 	  ERR_RETURN(ERROR_QGATE_GET_NEXT_UNITARY, false);
 	}
-
-	// == next step ==
-	// last = trueの場合、qstate_measure_statsを実行してMDataHTを取得する
-	// last = falseの場合、qstate_measureを実行する
-	// == 別案(qstate_measureの仕様をさらに変更) ==
-	// last = trueの場合、qstate_measure(引数shots=N)を実行してMDataHTをoutput
-	// last = falseの場合、qstate_measure(引数shots=1)を実行してMDataHTはNULLにする
-	// 両方とも最後は状態更新
-      	//if (!(qstate_measure(qstate, mnum, qid, mstr_all, mstr_qid)))
-      	if (!(qstate_measure(qstate, mnum, qid, measured_str)))
-      	  ERR_RETURN(ERROR_QSTATE_MEASURE, false);
+	if (!(qstate_measure(qstate, mnum, qid, measured_char, measure_update)))
+	  ERR_RETURN(ERROR_QSTATE_MEASURE, false);
+	//printf("mnum = %d\n", mnum); // debug
 	for (i=0; i<mnum; i++) {
-	  cmem->bit_array[cid[i]] = measured_str[i] - '0';
+	  cmem->bit_array[cid[i]] = measured_char[i];
+	  //printf("%d ", measured_char[i]); // debug
 	}
+	//printf("\n"); // debug
 	qgate = qgate->next;
-
-	// qubit_id[0] = qgate->qid[0];
-      	// if (!(_qstate_measure_bk(qstate, angle, phase, 1, qubit_id, &mes_id)))
-      	//   ERR_RETURN(ERROR_QSTATE_MEASURE, false);
-      	// if (mes_id < 0 || mes_id > 1) ERR_RETURN(ERROR_QSTATE_MEASURE, false);
-      	// if (qgate->c != -1) cmem->bit_array[qgate->c] = (BYTE)mes_id; /* measured value is stored to classical register */
-	// qgate = qgate->next;
       }
       else {
-      	ERR_RETURN(ERROR_QSTATE_OPERATE_QCIRC, false);
+	ERR_RETURN(ERROR_QSTATE_OPERATE_QCIRC, false);
       }
     }
     else {
@@ -1996,18 +1984,75 @@ static bool _qstate_operate_qcirc_cpu(QState* qstate, CMem* cmem, QCirc* qcirc)
   /* free */
   if (cmem != NULL) {
     free(cid); cid = NULL;
-    free(measured_str); measured_str = NULL;
+    free(measured_char); measured_char = NULL;
   }
   free(qid); qid = NULL;
 
   SUC_RETURN(true);
 }
 
-bool qstate_operate_qcirc(QState* qstate, CMem* cmem, QCirc* qcirc)
+//bool qstate_operate_qcirc(QState* qstate, CMem* cmem, QCirc* qcirc)
+bool qstate_operate_qcirc(QState* qstate, CMem* cmem, QCirc* qcirc, int shots, char* mchar_shots)
 {
+  int		i, j;
+  QCirc*	qcirc_uonly    = NULL;
+  QCirc*	qcirc_mixed    = NULL;
+  QCirc*	qcirc_monly    = NULL;
+  QState*	qstate_tmp     = NULL;
+  bool		measure_update = true;
+
+  if (!(qcirc_decompose(qcirc, (void**)&qcirc_uonly, (void**)&qcirc_mixed, (void**)&qcirc_monly)))
+    ERR_RETURN(ERROR_QCIRC_DECOMPOSE, false);
+  
   if (qstate->use_gpu == false) {
-    if (!(_qstate_operate_qcirc_cpu(qstate, cmem, qcirc)))
-      ERR_RETURN(ERROR_QSTATE_OPERATE_QCIRC, false);
+
+    if (qcirc_uonly != NULL) { /* unitary only */
+      //printf("unitary only\n"); // debug
+      measure_update = true; /* not efficient because of including no measurements */
+      if (!(_qstate_operate_qcirc_cpu(qstate, cmem, qcirc_uonly, measure_update)))
+	ERR_RETURN(ERROR_QSTATE_OPERATE_QCIRC, false);
+      qcirc_free(qcirc_uonly); qcirc_uonly = NULL;
+    }
+    
+    if (qcirc_mixed != NULL) { /* unitary and non-unitary mixed */
+      //printf("mixed\n"); // debug
+      measure_update = true;
+      for (i=0; i<shots-1; i++) {
+	if (!(qstate_copy(qstate, (void**)&qstate_tmp)))
+	  ERR_RETURN(ERROR_QSTATE_COPY, false);
+	if (!(_qstate_operate_qcirc_cpu(qstate_tmp, cmem, qcirc_mixed, measure_update)))
+	  ERR_RETURN(ERROR_QSTATE_OPERATE_QCIRC, false);
+	for (j=0; j<cmem->cmem_num; j++) {
+	  mchar_shots[i * cmem->cmem_num + j] = cmem->bit_array[j];
+	}
+	qstate_free(qstate_tmp); qstate_tmp = NULL;
+      }
+      if (!(_qstate_operate_qcirc_cpu(qstate, cmem, qcirc_mixed, measure_update)))
+	ERR_RETURN(ERROR_QSTATE_OPERATE_QCIRC, false);
+      for (j=0; j<cmem->cmem_num; j++) {
+	mchar_shots[(shots - 1) * cmem->cmem_num + j] = cmem->bit_array[j];
+      }
+      qcirc_free(qcirc_mixed); qcirc_mixed = NULL;
+    }
+    
+    else if (qcirc_monly != NULL) { /* measurement only */
+      //printf("measurement only\n"); // debug
+      measure_update = false;
+      for (i=0; i<shots-1; i++) {
+	if (!(_qstate_operate_qcirc_cpu(qstate, cmem, qcirc_monly, measure_update)))
+	  ERR_RETURN(ERROR_QSTATE_OPERATE_QCIRC, false);
+	for (j=0; j<cmem->cmem_num; j++) {
+	  mchar_shots[i * cmem->cmem_num + j] = cmem->bit_array[j];
+	}
+      }
+      measure_update = true;
+      if (!(_qstate_operate_qcirc_cpu(qstate, cmem, qcirc_monly, measure_update)))
+	ERR_RETURN(ERROR_QSTATE_OPERATE_QCIRC, false);
+      for (j=0; j<cmem->cmem_num; j++) {
+	mchar_shots[(shots - 1) * cmem->cmem_num + j] = cmem->bit_array[j];
+      }
+      qcirc_free(qcirc_monly); qcirc_monly = NULL;
+    }
   }
 
 #ifdef USE_GPU
@@ -2055,3 +2100,124 @@ void qstate_free(QState* qstate)
     return;
   }
 }
+
+
+
+
+//static bool _qstate_operate_qcirc_cpu(QState* qstate, CMem* cmem, QCirc* qcirc)
+//{
+//  QGate*        qgate = NULL;   /* quantum gate in quantum circuit */
+//  int		dim   = 0;
+//  int           q0    = -1;
+//  int           q1    = -1;
+//  COMPLEX*	U     = NULL;
+//  bool          compo = false;  /* U is composite or not */
+//
+//  int		mnum  = 0;
+//  int*		qid   = NULL;
+//  int*		cid   = NULL;
+//  bool		last  = false;
+//  char*		measured_str = NULL;
+//  int i;
+//
+//  /* error check */
+//  if ((qstate == NULL || qcirc == NULL) ||
+//      (qstate->qubit_num < qcirc->qubit_num) ||
+//      (cmem != NULL && cmem->cmem_num < qcirc->cmem_num))
+//    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+//
+//  /* malloc */
+//  if (cmem != NULL) {
+//    if (!(cid = (int*)malloc(sizeof(int) * qstate->qubit_num)))
+//      ERR_RETURN(ERROR_CANT_ALLOC_MEMORY, false);
+//
+//    // memo: サイズはqubit_num, cmem_numの大きい方にする
+//    if (!(measured_str = (char*)malloc(sizeof(int) * (qstate->qubit_num + 1))))
+//      ERR_RETURN(ERROR_CANT_ALLOC_MEMORY, false);
+//  }
+//  if (!(qid = (int*)malloc(sizeof(int) * qstate->qubit_num)))
+//    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY, false);
+//
+//  /* execute quantum circuit */
+//  qgate = qcirc->first;
+//  while (qgate != NULL) {
+//
+//    if ((qgate->ctrl == -1) ||
+//	((qgate->ctrl != -1) && (cmem->bit_array[qgate->ctrl] == 1))) {
+//
+//      /* unitary gate */
+//      if (kind_is_unitary(qgate->kind) == true) {
+//
+//	if (!(qgate_get_next_unitary((void**)&qgate, qstate->gbank, &dim, &q0, &q1, (void**)&U, &compo))) {
+//	  ERR_RETURN(ERROR_QGATE_GET_NEXT_UNITARY, false);
+//	}
+//
+//	/* operate unitary matrix */
+//	if (compo == false && kind_is_controlled(qgate->kind) == true) {
+//	  if (!(_qstate_operate_controlled_gate(qstate, U, q0, q1))) {
+//	    ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
+//	  }
+//	}
+//	else {
+//	  if (!(_qstate_operate_unitary(qstate, U, dim, q0, q1))) {
+//	    ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
+//	  }
+//	}
+//	free(U); U = NULL;
+//	
+//	qgate = qgate->next;
+//      }
+//      /* reset */
+//      else if (kind_is_reset(qgate->kind) == true) {
+//      	if (!(qstate_reset(qstate, 1, qgate->qid)))
+//      	  ERR_RETURN(ERROR_CANT_RESET, false);
+// 	qgate = qgate->next;
+//     }
+//      /* measurement */
+//      else if (kind_is_measurement(qgate->kind) == true) {
+//
+//	if (!(qgate_get_measurement_attributes((void**)&qgate, qstate->gbank, &mnum, qid, cid, &last))) {
+//	  ERR_RETURN(ERROR_QGATE_GET_NEXT_UNITARY, false);
+//	}
+//
+//	// == next step ==
+//	// last = trueの場合、qstate_measure_statsを実行してMDataHTを取得する
+//	// last = falseの場合、qstate_measureを実行する
+//	// == 別案(qstate_measureの仕様をさらに変更) ==
+//	// last = trueの場合、qstate_measure(引数shots=N)を実行してMDataHTをoutput
+//	// last = falseの場合、qstate_measure(引数shots=1)を実行してMDataHTはNULLにする
+//	// 両方とも最後は状態更新
+//      	//if (!(qstate_measure(qstate, mnum, qid, mstr_all, mstr_qid)))
+//      	if (!(qstate_measure(qstate, mnum, qid, measured_str)))
+//      	  ERR_RETURN(ERROR_QSTATE_MEASURE, false);
+//	for (i=0; i<mnum; i++) {
+//	  cmem->bit_array[cid[i]] = measured_str[i] - '0';
+//	}
+//	qgate = qgate->next;
+//
+//	// qubit_id[0] = qgate->qid[0];
+//      	// if (!(_qstate_measure_bk(qstate, angle, phase, 1, qubit_id, &mes_id)))
+//      	//   ERR_RETURN(ERROR_QSTATE_MEASURE, false);
+//      	// if (mes_id < 0 || mes_id > 1) ERR_RETURN(ERROR_QSTATE_MEASURE, false);
+//      	// if (qgate->c != -1) cmem->bit_array[qgate->c] = (BYTE)mes_id; /* measured value is stored to classical register */
+//	// qgate = qgate->next;
+//      }
+//      else {
+//      	ERR_RETURN(ERROR_QSTATE_OPERATE_QCIRC, false);
+//      }
+//    }
+//    else {
+//      qgate = qgate->next;
+//    }
+//  }
+//
+//  /* free */
+//  if (cmem != NULL) {
+//    free(cid); cid = NULL;
+//    free(measured_str); measured_str = NULL;
+//  }
+//  free(qid); qid = NULL;
+//
+//  SUC_RETURN(true);
+//}
+

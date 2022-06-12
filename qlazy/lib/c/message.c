@@ -227,6 +227,9 @@ void error_msg(ErrCode err)
   case ERROR_QCIRC_APPEND_GATE:
     fprintf(stderr, "ERROR: qcirc append gate failure !\n");
     break;
+  case ERROR_QCIRC_DECOMPOSE:
+    fprintf(stderr, "ERROR: qcirc decompose failure !\n");
+    break;
 
   case ERROR_NEED_TO_INITIALIZE:
     fprintf(stderr, "ERROR: need to initialize !\n");

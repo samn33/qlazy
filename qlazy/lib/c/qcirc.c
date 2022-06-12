@@ -29,12 +29,12 @@ bool qcirc_copy(QCirc* qcirc_in, void** qcirc_out)
 
   if (qcirc_in == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
 
-  if (!(qcirc_init((void**)&qcirc))) ERR_RETURN(ERROR_QCIRC_INIT, NULL);
+  if (!(qcirc_init((void**)&qcirc))) ERR_RETURN(ERROR_QCIRC_INIT, false);
 
   gate = qcirc_in->first;
   while (gate != NULL) {
     if (!(qcirc_append_gate(qcirc, gate->kind, gate->qid, gate->para, gate->c, gate->ctrl)))
-      ERR_RETURN(ERROR_QCIRC_APPEND_GATE, NULL);
+      ERR_RETURN(ERROR_QCIRC_APPEND_GATE, false);
     gate = gate->next;
   }
 
@@ -116,6 +116,47 @@ bool qcirc_is_equal(QCirc* qcirc_L, QCirc* qcirc_R, bool* ans)
   *ans = true;
   SUC_RETURN(true);
 }
+
+
+//bool qcirc_is_unitary_only(QCirc* qcirc, bool* ans)
+//{
+//  QGate* gate = NULL;
+//
+//  if (qcirc == NULL)
+//    ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
+//
+//  *ans = true;
+//  gate = qcirc->first;
+//  while (gate != NULL) {
+//    if (kind_is_unitary(gate->kind) == false) {
+//      *ans = false;
+//      break;
+//    }
+//    gate = gate->next;
+//  }
+//
+//  SUC_RETURN(true);
+//}
+//
+//bool qcirc_is_measrement_only(QCirc* qcirc, bool* ans)
+//{
+//  QGate* gate = NULL;
+//
+//  if (qcirc == NULL)
+//    ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
+//
+//  *ans = true;
+//  gate = qcirc->first;
+//  while (gate != NULL) {
+//    if (kind_is_measurement(gate->kind) == false) {
+//      *ans = false;
+//      break;
+//    }
+//    gate = gate->next;
+//  }
+//
+//  SUC_RETURN(true);
+//}
 
 bool qcirc_append_gate(QCirc* qcirc, Kind kind, int* qid, double* para, int c, int ctrl)
 {
@@ -235,6 +276,74 @@ bool qcirc_pop_gate(QCirc* qcirc, Kind* kind, int* qid, double* para, int* c, in
   c_max = MAX(c_max, *ctrl);
   if ((q_max >= qcirc->qubit_num) || (c_max >= qcirc->cmem_num)) _qcirc_update(qcirc);
   else qcirc->gate_num -= 1;
+  
+  SUC_RETURN(true);
+}
+
+bool qcirc_decompose(QCirc* qcirc_in, void** qcirc_uonly_out, void** qcirc_mixed_out,
+		     void** qcirc_monly_out)
+{
+  QCirc*	qcirc_uonly = NULL; /* unitary only */
+  QCirc*	qcirc_monly = NULL; /* measurement only */
+  QGate*	qgate	    = NULL;
+  bool          uonly_flg;
+  bool          monly_flg;
+
+  if (qcirc_in == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
+
+  if (!(qcirc_init((void**)&qcirc_uonly))) ERR_RETURN(ERROR_QCIRC_INIT, false);
+  if (!(qcirc_init((void**)&qcirc_monly))) ERR_RETURN(ERROR_QCIRC_INIT, false);
+
+  /* qcirc_uonly */
+
+  uonly_flg = false;
+  qgate = qcirc_in->first;
+  while (qgate != NULL) {
+    if (kind_is_unitary(qgate->kind) == true) {
+      uonly_flg = true;
+      if (!(qcirc_append_gate(qcirc_uonly, qgate->kind, qgate->qid, qgate->para, qgate->c, qgate->ctrl)))
+	ERR_RETURN(ERROR_QCIRC_APPEND_GATE, false);
+      *qcirc_uonly_out = qcirc_uonly;
+    }
+    else {
+      if (uonly_flg == false) { /* 1st gate is non-uniary */
+	qcirc_free(qcirc_uonly); qcirc_uonly = NULL;
+	*qcirc_uonly_out = NULL;
+	break;
+      }
+      uonly_flg = false;
+      *qcirc_uonly_out = qcirc_uonly;
+      break;
+    }
+    qgate = qgate->next;
+  }
+
+  if (qgate == NULL) { /* include unitary gates only -> return */
+    qcirc_free(qcirc_monly); qcirc_monly = NULL;
+    *qcirc_mixed_out = NULL;
+    *qcirc_monly_out = NULL;
+    
+    SUC_RETURN(true);
+  }
+
+  /* qcirc_mixed, qcirc_monly */
+
+  monly_flg = true;
+  while (qgate != NULL) {
+    if (kind_is_measurement(qgate->kind) == false) monly_flg = false;
+    if (!(qcirc_append_gate(qcirc_monly, qgate->kind, qgate->qid, qgate->para, qgate->c, qgate->ctrl)))
+      ERR_RETURN(ERROR_QCIRC_APPEND_GATE, false);
+    qgate = qgate->next;
+  }
+
+  if (monly_flg == true) { /* measurement only */
+    *qcirc_mixed_out = NULL;
+    *qcirc_monly_out = qcirc_monly;
+  }
+  else { /* mixed */
+    *qcirc_mixed_out = qcirc_monly;
+    *qcirc_monly_out = NULL;
+  }
   
   SUC_RETURN(true);
 }

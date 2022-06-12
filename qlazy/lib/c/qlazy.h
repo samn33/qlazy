@@ -177,6 +177,7 @@ typedef enum _ErrCode {
   ERROR_QGATE_GET_NEXT_UNITARY,
   ERROR_QCIRC_INIT,
   ERROR_QCIRC_APPEND_GATE,
+  ERROR_QCIRC_DECOMPOSE,
   ERROR_CMEM_INIT,
   ERROR_CMEM_COPY,
 
@@ -549,7 +550,9 @@ bool     qstate_get_camp(QState* qstate, int qubit_num, int* qubit_id,
 bool	 qstate_print(QState* qstate, int qubit_num, int* qubit_id, bool nonzero);
 bool     qstate_bloch(QState* qstate, int qid, double* theta, double* phi);
 bool     qstate_print_bloch(QState* qstate, int qid);
-bool     qstate_measure(QState*	qstate, int mnum, int* qid, char* measured_str);
+bool     qstate_measure(QState* qstate, int mnum, int* qid, char* measured_char,
+			bool measure_update);
+//bool     qstate_measure(QState*	qstate, int mnum, int* qid, char* measured_char);
 //bool     qstate_measure(QState* qstate, int mnum, int* qid, char* mstr_all, char* mstr_qid);
 //bool     qstate_measure(QState* qstate, double angle, double phase,
 //			int qubit_num, int* qubit_id, int* mval_out);
@@ -566,7 +569,8 @@ bool     qstate_tensor_product(QState* qstate_0, QState* qstate_1, void** qstate
 bool     qstate_expect_value(QState* qstate, Observable* observ, double* value);
 bool     qstate_apply_matrix(QState* qstate, int qnum, int* qid,
 			     double* real, double *imag, int row, int col);
-bool     qstate_operate_qcirc(QState* qstate, CMem* cmem, QCirc* qcirc);
+//bool     qstate_operate_qcirc(QState* qstate, CMem* cmem, QCirc* qcirc);
+bool     qstate_operate_qcirc(QState* qstate, CMem* cmem, QCirc* qcirc, int shots, char* mchar_shots);
 void	 qstate_free(QState* qstate);
 
 /* qstate_gpu.c */
@@ -644,9 +648,13 @@ bool qcirc_init(void** qcirc_out);
 bool qcirc_copy(QCirc* qcirc, void** qcirc_out);
 bool qcirc_merge(QCirc* qcirc_L, QCirc* qcirc_R, void** qcirc_out);
 bool qcirc_is_equal(QCirc* qcirc_L, QCirc* qcirc_R, bool* ans);
+//bool qcirc_is_unitary_only(QCirc* qcirc, bool* ans);
+//bool qcirc_is_measrement_only(QCirc* qcirc, bool* ans);
 bool qcirc_kind_first(QCirc* qcirc, Kind* kind);
 bool qcirc_append_gate(QCirc* qcirc, Kind kind, int* qid, double* para, int c, int ctrl);
 bool qcirc_pop_gate(QCirc* qcirc, Kind* kind, int* qid, double* para, int* c, int* ctrl);
+bool qcirc_decompose(QCirc* qcirc_in, void** qcirc_uonly_out, void** qcirc_mixed_out,
+		     void** qcirc_monly_out);
 void qcirc_free(QCirc* qcirc);
 
 /* cmem.c */

@@ -37,13 +37,15 @@ def __run_all(qcirc=None, shots=1, cid=None, backend=None, use_gpu=False):
     if cmem_num < len(cid):
         raise ValueError("length of cid must be less than classical resister size of qcirc")
 
-    qcirc_unitary, qcirc_non_unitary = qcirc.split_unitary_non_unitary()
+    # qcirc_unitary, qcirc_non_unitary = qcirc.split_unitary_non_unitary()
 
     qstate = QState(qubit_num=qubit_num, use_gpu=use_gpu)
 
-    frequency = qstate_operate_qcirc(qstate, cmem, qcirc_unitary, 1, cid)
-    if qcirc_non_unitary.kind_first() is not None:
-        frequency = qstate_operate_qcirc(qstate, cmem, qcirc_non_unitary, shots, cid)
+    frequency = qstate_operate_qcirc(qstate, cmem, qcirc, shots, cid)
+
+    # frequency = qstate_operate_qcirc(qstate, cmem, qcirc_unitary, 1, cid)
+    # if qcirc_non_unitary.kind_first() is not None:
+    #     frequency = qstate_operate_qcirc(qstate, cmem, qcirc_non_unitary, shots, cid)
 
     info = {'qstate': qstate, 'cmem': cmem}
 
