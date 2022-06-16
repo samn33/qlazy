@@ -373,8 +373,8 @@ typedef struct _QState {
   COMPLEX*	camp;           /* complex amplitude of the quantum state (pointer to buffer #0 or #1) */
   COMPLEX*	buffer_0;       /* complex amplitude of the quantum state (buffer #0) */
   COMPLEX*	buffer_1;       /* complex amplitude of the quantum state (buffer #1) */
-  //double*       prob_array;     /* |0> probability array for measuring each qubit */
-  //bool          prob_updated;   /* prob_array is updated or not */
+  double*       prob_array;     /* |0> probability array for measuring each qubit */
+  bool          prob_updated;   /* prob_array is updated or not */
   //char*         measured_str;   /* measured string (ex. '0','1','0','1','\0') */
 #ifdef USE_GPU
   int			d_buf_id;   /* official buffer id (0: buffer_0, 1: buffer_1)*/

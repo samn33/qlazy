@@ -30,6 +30,8 @@ class QState(ctypes.Structure):
             ('camp', ctypes.c_void_p),
             ('buffer_0', ctypes.c_void_p),
             ('buffer_1', ctypes.c_void_p),
+            ('prob_array', ctypes.c_void_p),
+            ('prob_updated', ctypes.c_bool),
             ('d_buf_id', ctypes.c_int),
             ('d_camp', ctypes.c_void_p),
             ('d_buffer_0', ctypes.c_void_p),
@@ -45,6 +47,8 @@ class QState(ctypes.Structure):
             ('camp', ctypes.c_void_p),
             ('buffer_0', ctypes.c_void_p),
             ('buffer_1', ctypes.c_void_p),
+            ('prob_array', ctypes.c_void_p),
+            ('prob_updated', ctypes.c_bool),
             ('gbank', ctypes.c_void_p),
             ('use_gpu', ctypes.c_bool),
         ]

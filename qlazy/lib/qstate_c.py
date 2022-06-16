@@ -570,7 +570,7 @@ def qstate_operate_qcirc(qstate, cmem, qcirc, shots, cid):
         cmem_num = cmem.cmem_num
     else:
         cmem_num = 0
-    
+
     buf_size = cmem_num * shots
     mchar_array = bytearray([0x00 for _ in range(buf_size)])
     CharArray = ctypes.c_char * buf_size
@@ -584,14 +584,10 @@ def qstate_operate_qcirc(qstate, cmem, qcirc, shots, cid):
                                          ctypes.c_int, CharArray]
 
     if cmem is not None:
+
         ret = lib.qstate_operate_qcirc(ctypes.byref(qstate),
                                        ctypes.byref(cmem), ctypes.byref(qcirc),
                                        ctypes.c_int(shots), mchar_shots)
-
-        # print(list(mchar_shots))
-        # print(bytes(mchar_shots))
-        # print(int.from_bytes(mchar_shots[0], byteorder='big'))
-        # print([int.from_bytes(c, byteorder='big') for c in mchar_shots])
 
         frequency = Counter()
         for i in range(0, len(mchar_shots), cmem_num):
@@ -607,55 +603,7 @@ def qstate_operate_qcirc(qstate, cmem, qcirc, shots, cid):
 
         frequency = None
 
-    # import sys
-    # sys.exit()
-
     return frequency
-
-    # if ret == cfg.FALSE:
-    #     raise ValueError("can't operate the quantum circuit.")
-    # 
-    #     # # cmem_num = cmem.cmem_num
-    #     # frequency = Counter()
-    #     # for n in range(shots):
-    #     # 
-    #     #     if n < shots - 1:
-    #     #         qstate_tmp = qstate.clone()
-    #     #         cmem_tmp = cmem.clone()
-    #     #         # ret = lib.qstate_operate_qcirc(ctypes.byref(qstate_tmp),
-    #     #         #                                ctypes.byref(cmem_tmp), ctypes.byref(qcirc))
-    #     #         ret = lib.qstate_operate_qcirc(ctypes.byref(qstate_tmp),
-    #     #                                        ctypes.byref(cmem_tmp), ctypes.byref(qcirc),
-    #     #                                        ctypes.c_int(shots), mchar_shots)
-    #     #         bit_array = ctypes.cast(cmem_tmp.bit_array, ctypes.POINTER(ctypes.c_ubyte*cmem_num))
-    #     #     else:
-    #     #         # ret = lib.qstate_operate_qcirc(ctypes.byref(qstate), ctypes.byref(cmem),
-    #     #         #                                ctypes.byref(qcirc))
-    #     #         ret = lib.qstate_operate_qcirc(ctypes.byref(qstate),
-    #     #                                        ctypes.byref(cmem), ctypes.byref(qcirc),
-    #     #                                        ctypes.c_int(shots), mchar_shots)
-    #     #         bit_array = ctypes.cast(cmem.bit_array, ctypes.POINTER(ctypes.c_ubyte*cmem_num))
-    #     # 
-    #     #     if ret == cfg.FALSE:
-    #     #         raise ValueError("can't operate the quantum circuit.")
-    #     # 
-    #     #     cmem_list = [bit_array.contents[i] for i in range(cmem_num)]
-    #     #     cmem_list_part = [cmem_list[c] for c in cid]
-    #     #     mval = "".join(map(str, cmem_list_part))
-    #     # 
-    #     #     frequency[mval] += 1
-    #     # 
-    #     # return frequency
-    # 
-    # c_cmem = ctypes.POINTER(CMem)()
-    # # ret = lib.qstate_operate_qcirc(ctypes.byref(qstate), c_cmem, ctypes.byref(qcirc))
-    # ret = lib.qstate_operate_qcirc(ctypes.byref(qstate), c_cmem, ctypes.byref(qcirc),
-    #                                ctypes.c_int(shots), mchar_shots)
-    # 
-    # if ret == cfg.FALSE:
-    #     raise ValueError("can't operate the quantum circuit.")
-    # 
-    # return None
 
 def qstate_free(qs):
     """ free memory of the QState object """
