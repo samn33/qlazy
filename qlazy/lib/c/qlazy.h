@@ -39,7 +39,7 @@
 #define TOKEN_STRLEN	   1024     /* max token string length */
 #define TOKEN_NUM	   100      /* max token number of each line */
 #define MAX_ERR_MSG_LENGTH 1024	    /* max string length of err message  */
-#define KEY_STRLEN         1024     /* max string length of key of hash table (for measurement) */
+//#define KEY_STRLEN         1024     /* max string length of key of hash table (for measurement) */
 
 #define DEF_QUBIT_NUM		5
 #define DEF_QC_STEPS		100
@@ -142,6 +142,7 @@ typedef enum _ErrCode {
   ERROR_QSTATE_EXPECT_VALUE,
   ERROR_QSTATE_APPLY_MATRIX,
   ERROR_QSTATE_OPERATE_QCIRC,
+  ERROR_QSTATE_OPERATE_MEASURE,
   ERROR_QSTATE_UPDATE_HOST_MEMORY,
   ERROR_QSTATE_UPDATE_DEVICE_MEMORY,
   ERROR_MDATA_INIT,
@@ -375,29 +376,30 @@ typedef struct _QState {
   COMPLEX*	buffer_1;       /* complex amplitude of the quantum state (buffer #1) */
   double*       prob_array;     /* |0> probability array for measuring each qubit */
   bool          prob_updated;   /* prob_array is updated or not */
-  //char*         measured_str;   /* measured string (ex. '0','1','0','1','\0') */
 #ifdef USE_GPU
-  int			d_buf_id;   /* official buffer id (0: buffer_0, 1: buffer_1)*/
-  cuDoubleComplex*	d_camp;     /* complex amplitude of the quantum state (pointer to buffer #0 or #1) */
-  cuDoubleComplex*	d_buffer_0; /* complex amplitude of the quantum state (buffer #0) */
-  cuDoubleComplex*	d_buffer_1; /* complex amplitude of the quantum state (buffer #1) */
+  int			d_buf_id;       /* official buffer id (0: buffer_0, 1: buffer_1)*/
+  cuDoubleComplex*	d_camp;         /* complex amplitude of the quantum state (pointer to buffer #0 or #1) */
+  cuDoubleComplex*	d_buffer_0;     /* complex amplitude of the quantum state (buffer #0) */
+  cuDoubleComplex*	d_buffer_1;     /* complex amplitude of the quantum state (buffer #1) */
+  double*               d_prob_array;   /* |0> probability array for measuring each qubit */
+  bool                  d_prob_updated; /* prob_array is updated or not */
 #endif
   GBank*        gbank;
   bool          use_gpu;
 } QState;
 
-typedef struct _Element {
-  bool                  active;
-  char			key[KEY_STRLEN];
-  int			value;
-  struct _Element*	next;
-} Element;
-
-typedef struct _HashTable {
-  int			table_size;
-  int			data_num;
-  struct _Element**	table;
-} HashTable;
+//typedef struct _Element {
+//  bool                  active;
+//  char			key[KEY_STRLEN];
+//  int			value;
+//  struct _Element*	next;
+//} Element;
+//
+//typedef struct _HashTable {
+//  int			table_size;
+//  int			data_num;
+//  struct _Element**	table;
+//} HashTable;
 
 typedef struct _MData {
   int		qubit_num;
@@ -409,13 +411,13 @@ typedef struct _MData {
   int		last_val;
 } MData;
 
-typedef struct _MDataHT {
-  int		qubit_num;
-  int		shot_num;
-  int*		qubit_id;
-  HashTable*	freq_table;
-  int		last_val;
-} MDataHT;
+//typedef struct _MDataHT {
+//  int		qubit_num;
+//  int		shot_num;
+//  int*		qubit_id;
+//  HashTable*	freq_table;
+//  int		last_val;
+//} MDataHT;
 
 typedef struct _QSystem {
   QC*	qc;
@@ -494,6 +496,7 @@ bool     is_decimal(char* str);
 bool	 binstr_from_decimal(char* binstr, int qubit_num, int decimal, int zflag);
 int      bit_permutation(int bits_in, int qnum, int qnum_part, int* qid);
 int*     bit_permutation_array(int length, int qnum, int qnum_part, int* qid);
+bool     select_bits(int* bits_out, int bits_in, int digits_out, int digits_in, int* digit_array);
 bool     is_power_of_2(int n);
 int      kind_get_qid_size(Kind kind);
 int      kind_get_para_size(Kind kind);
@@ -504,15 +507,15 @@ bool     kind_is_controlled(Kind kind);
 bool     is_gpu_supported_lib(void);
 bool     is_gpu_available(void);
 
-/* hash.c */
-bool hashtable_create(int table_size, void** ht_out);
-bool hashtable_set_value(HashTable* ht, char* key, int value);
-bool hashtable_add_value(HashTable* ht, char* key, int value);
-bool hashtable_get_value(HashTable* ht, char* key, int* value);
-bool hashtable_get_data(HashTable* ht, void** key_array_out, void** value_array_out);
-void hashtable_print_shape(HashTable* ht);
-void hashtable_print_data(HashTable* ht);
-void hashtable_free(HashTable* ht);
+///* hash.c */
+//bool hashtable_create(int table_size, void** ht_out);
+//bool hashtable_set_value(HashTable* ht, char* key, int value);
+//bool hashtable_add_value(HashTable* ht, char* key, int value);
+//bool hashtable_get_value(HashTable* ht, char* key, int* value);
+//bool hashtable_get_data(HashTable* ht, void** key_array_out, void** value_array_out);
+//void hashtable_print_shape(HashTable* ht);
+//void hashtable_print_data(HashTable* ht);
+//void hashtable_free(HashTable* ht);
 
 /* message.c */
 void	 error_msg(ErrCode err);
@@ -543,6 +546,7 @@ bool     gbank_get_unitary(GBank* gbank, Kind kind, double phase, double phase1,
 /* qstate.c */
 bool	 qstate_init(int qubit_num, void** qstate_out, bool use_gpu);
 bool	 qstate_init_with_vector(double* real, double* imag, int dim, void** qstate_out, bool use_gpu);
+bool     qstate_normalize(QState* qstate);
 bool	 qstate_reset(QState* qstate, int qubit_num, int* qubit_id);
 bool	 qstate_copy(QState* qstate, void** qstate_out);
 bool     qstate_get_camp(QState* qstate, int qubit_num, int* qubit_id,
@@ -552,10 +556,6 @@ bool     qstate_bloch(QState* qstate, int qid, double* theta, double* phi);
 bool     qstate_print_bloch(QState* qstate, int qid);
 bool     qstate_measure(QState* qstate, int mnum, int* qid, char* measured_char,
 			bool measure_update);
-//bool     qstate_measure(QState*	qstate, int mnum, int* qid, char* measured_char);
-//bool     qstate_measure(QState* qstate, int mnum, int* qid, char* mstr_all, char* mstr_qid);
-//bool     qstate_measure(QState* qstate, double angle, double phase,
-//			int qubit_num, int* qubit_id, int* mval_out);
 bool	 qstate_measure_stats(QState* qstate, int shot_num, double angle, double phase,
 			      int qubit_num, int* qubit_id, void** mdata_out);
 bool     qstate_measure_bell_stats(QState* qstate, int shot_num, int qubit_num,
@@ -569,15 +569,8 @@ bool     qstate_tensor_product(QState* qstate_0, QState* qstate_1, void** qstate
 bool     qstate_expect_value(QState* qstate, Observable* observ, double* value);
 bool     qstate_apply_matrix(QState* qstate, int qnum, int* qid,
 			     double* real, double *imag, int row, int col);
-//bool     qstate_operate_qcirc(QState* qstate, CMem* cmem, QCirc* qcirc);
 bool     qstate_operate_qcirc(QState* qstate, CMem* cmem, QCirc* qcirc, int shots, char* mchar_shots);
 void	 qstate_free(QState* qstate);
-
-/* qstate_gpu.c */
-bool qstate_operate_unitary2_gpu(COMPLEX* camp_out, COMPLEX* camp_in, COMPLEX* U2,
-				 int qubit_num, int state_num, int n);
-bool qstate_operate_unitary4_gpu(COMPLEX* camp_out, COMPLEX* camp_in, COMPLEX* U4,
-				 int qubit_num, int state_num, int m, int n);
 
 /* mdata.c */
 bool     mdata_init(int qubit_num, int shot_num,
@@ -648,8 +641,8 @@ bool qcirc_init(void** qcirc_out);
 bool qcirc_copy(QCirc* qcirc, void** qcirc_out);
 bool qcirc_merge(QCirc* qcirc_L, QCirc* qcirc_R, void** qcirc_out);
 bool qcirc_is_equal(QCirc* qcirc_L, QCirc* qcirc_R, bool* ans);
-//bool qcirc_is_unitary_only(QCirc* qcirc, bool* ans);
-//bool qcirc_is_measrement_only(QCirc* qcirc, bool* ans);
+bool qcirc_is_unitary_only(QCirc* qcirc, bool* ans);
+bool qcirc_is_measurement_only(QCirc* qcirc, bool* ans);
 bool qcirc_kind_first(QCirc* qcirc, Kind* kind);
 bool qcirc_append_gate(QCirc* qcirc, Kind kind, int* qid, double* para, int c, int ctrl);
 bool qcirc_pop_gate(QCirc* qcirc, Kind* kind, int* qid, double* para, int* c, int* ctrl);
@@ -670,9 +663,14 @@ bool gpu_preparation(void);
 
 /* qstate_gpu.cu */
 bool qstate_init_gpu(int qubit_num, void** qstate_out);
+bool qstate_operate_unitary2_gpu(COMPLEX* camp_out, COMPLEX* camp_in, COMPLEX* U2,
+				 int qubit_num, int state_num, int n);
+bool qstate_operate_unitary4_gpu(COMPLEX* camp_out, COMPLEX* camp_in, COMPLEX* U4,
+				 int qubit_num, int state_num, int m, int n);
 bool qstate_operate_controlled_gate_gpu(QState* qstate, COMPLEX* U, int m, int n);
 bool qstate_operate_unitary_gpu(QState* qstate, COMPLEX* U, int dim, int m, int n);
-bool qstate_operate_qcirc_gpu(QState* qstate, CMem* cmem, QCirc* qcirc);
+bool qstate_operate_qcirc_gpu(QState* qstate, CMem* cmem, QCirc* qcirc, bool measure_update);
+bool qstate_operate_measure_gpu(QState* qstate, CMem* cmem, QCirc* qcirc, int shots, char* mchar_shots);
 bool qstate_update_host_memory(QState* qstate);
 bool qstate_update_device_memory(QState* qstate);
 void qstate_free_gpu(QState* qstate);

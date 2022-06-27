@@ -115,6 +115,9 @@ void error_msg(ErrCode err)
   case ERROR_QSTATE_OPERATE_QCIRC:
     fprintf(stderr, "ERROR: qstate operate qcirc failure !\n");
     break;
+  case ERROR_QSTATE_OPERATE_MEASURE:
+    fprintf(stderr, "ERROR: qstate operate measure failure !\n");
+    break;
   case ERROR_QSTATE_UPDATE_HOST_MEMORY:
     fprintf(stderr, "ERROR: qstate update host memory failure !\n");
     break;

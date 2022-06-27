@@ -258,6 +258,35 @@ int* bit_permutation_array(int length, int qnum, int qnum_part, int* qid)
   return index;
 }
 
+bool select_bits(int* bits_out, int bits_in, int digits_out, int digits_in, int* digit_array)
+{
+  /*
+    [description]
+    - bits_out:     after selecting bits (ex: '01') <- output of this function
+    - bits_in:      before selecting bits = whole bits (ex: '111010')
+    - digits_out:   number of output digits (ex: 2)
+    - digits_in:    number of whole digits (ex: 6)
+    - digits_array: qubits array you want to output (ex: {3,4})
+   */
+  int i;
+  
+  if ((digits_in < 1) || (digits_in > MAX_QUBIT_NUM) ||
+      (digits_out < 1) || (digits_out > MAX_QUBIT_NUM) || (bits_in < 0))
+    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+
+  int bits = 0;
+  int count = 0;
+  for (i=digits_out-1; i>=0; i--) {
+    if (digit_array[i] >= digits_in) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+    bits += (((bits_in>>(digits_in-1-digit_array[i]))%2) << count);
+    count++;
+  }
+  
+  *bits_out = bits;
+  
+  SUC_RETURN(true);
+}
+
 bool is_power_of_2(int n)
 {
   int log2_n;

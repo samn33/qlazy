@@ -7,10 +7,10 @@ INC = qlazy.h
 LIB = libqlz.so
 LIB_OBJ_BASE = qsystem.o qg.o qc.o qstate.o mdata.o gbank.o spro.o \
         observable.o densop.o stabilizer.o misc.o message.o help.o \
-	cmem.o qgate.o qcirc.o hashtable.o
+	cmem.o qgate.o qcirc.o
 LIB_SRC_BASE = qsystem.c qg.c qc.c qstate.c mdata.c gbank.c spro.c \
         observable.c densop.c stabilizer.c misc.c message.c help.c \
-	cmem.c qgate.c qcirc.c hashtable.c
+	cmem.c qgate.c qcirc.c
 LIB_OBJ_GPU = qstate_gpu.o gpu.o
 LIB_SRC_GPU = qstate_gpu.cu gpu.cu
 

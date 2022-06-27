@@ -7,35 +7,6 @@
 
 #define METHOD_0
 
-static bool _select_bits(int* bits_out, int bits_in, int digits_out, int digits_in, int* digit_array)
-{
-  /*
-    [description]
-    - bits_out:     after selecting bits (ex: '01') <- output of this function
-    - bits_in:      before selecting bits = whole bits (ex: '111010')
-    - digits_out:   number of output digits (ex: 2)
-    - digits_in:    number of whole digits (ex: 6)
-    - digits_array: qubits array you want to output (ex: {3,4})
-   */
-  int i;
-  
-  if ((digits_in < 1) || (digits_in > MAX_QUBIT_NUM) ||
-      (digits_out < 1) || (digits_out > MAX_QUBIT_NUM) || (bits_in < 0))
-    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
-
-  int bits = 0;
-  int count = 0;
-  for (i=digits_out-1; i>=0; i--) {
-    if (digit_array[i] >= digits_in) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
-    bits += (((bits_in>>(digits_in-1-digit_array[i]))%2) << count);
-    count++;
-  }
-  
-  *bits_out = bits;
-  
-  SUC_RETURN(true);
-}
-
 static void _qstate_set_none(QState* qstate)
 {
   int i;
@@ -58,7 +29,7 @@ static void _qstate_set_0(QState* qstate)
   qstate->camp[0] = 1.0 + 0.0 * COMP_I;
 }
 
-static bool _qstate_normalize(QState* qstate)
+bool qstate_normalize(QState* qstate)
 {
   double	norm = 0.0;
   int		i;
@@ -152,11 +123,11 @@ static QState* _qstate_pickup(QState* qstate_in, int qubit_num, int* qubit_id)
     ERR_RETURN(ERROR_QSTATE_INIT,NULL);
   _qstate_set_none(qstate);
   for (i=0; i<mask_qstate->state_num; i++) {
-    if (!(_select_bits(&x, i, qubit_num, qstate_in->qubit_num, qubit_id)))
+    if (!(select_bits(&x, i, qubit_num, qstate_in->qubit_num, qubit_id)))
       ERR_RETURN(ERROR_INVALID_ARGUMENT,NULL);
     qstate->camp[x] += mask_qstate->camp[i];
   }
-  if (!(_qstate_normalize(qstate)))
+  if (!(qstate_normalize(qstate)))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,NULL);
 
   qstate_free(mask_qstate); mask_qstate = NULL;
@@ -280,9 +251,6 @@ bool _qstate_init_cpu(int qubit_num, void** qstate_out)
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
   qstate->prob_updated = false;
 
-  //if (!(qstate->measured_str = (char*)malloc(sizeof(char) * (qubit_num + 1))))
-  //  ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
-  
   if (!(gbank_init((void**)&(qstate->gbank))))
       ERR_RETURN(ERROR_GBANK_INIT,false);
 
@@ -432,9 +400,11 @@ bool qstate_reset(QState* qstate_in, int qubit_num, int* qubit_id)
   }
 
   /* normalize the qstate */
-  if (!(_qstate_normalize(qstate_in)))
+  if (!(qstate_normalize(qstate_in)))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,NULL);
 
+  qstate->prob_updated = false;
+  
 #ifdef USE_GPU
   if (!(qstate_update_device_memory(qstate_in)))
     ERR_RETURN(ERROR_QSTATE_UPDATE_DEVICE_MEMORY,false);
@@ -1124,15 +1094,15 @@ static bool _qstate_transform_basis_inv(QState* qstate, double angle, double pha
 //  /* update quantum state by measurement (projection,normalize and change basis) */
 //
 //  /* projection*/
-//  if (!(_select_bits(&mes_id, value, qubit_num, qstate->qubit_num, qubit_id)))
+//  if (!(select_bits(&mes_id, value, qubit_num, qstate->qubit_num, qubit_id)))
 //    ERR_RETURN(ERROR_INVALID_ARGUMENT,-1);
 //  for (i=0; i<qstate->state_num; i++) {
-//    if (!(_select_bits(&x, i, qubit_num, qstate->qubit_num, qubit_id)))
+//    if (!(select_bits(&x, i, qubit_num, qstate->qubit_num, qubit_id)))
 //      ERR_RETURN(ERROR_INVALID_ARGUMENT,-1);
 //    if (x != mes_id) qstate->camp[i] = 0.0;
 //  }
 //  /* normalize */
-//  if (!(_qstate_normalize(qstate))) ERR_RETURN(ERROR_INVALID_ARGUMENT,-1);
+//  if (!(qstate_normalize(qstate))) ERR_RETURN(ERROR_INVALID_ARGUMENT,-1);
 //  /* change basis (inverse), if measurement axis isn't Z */
 //  if ((angle != 0.0) || (phase != 0.0)) {
 //    for (i=0; i<qubit_num; i++) {
@@ -1221,11 +1191,11 @@ bool qstate_measure(QState* qstate, int mnum, int* qid, char* measured_char,
       mval_qid += ((int)measured_char[i] << (mnum - 1 - i));
     }
     for (i=0; i<qstate->state_num; i++) {
-      if (!(_select_bits(&x, i, mnum, qstate->qubit_num, qid)))
+      if (!(select_bits(&x, i, mnum, qstate->qubit_num, qid)))
 	ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
       if (x != mval_qid) qstate->camp[i] = 0.0;
     }
-    if (!(_qstate_normalize(qstate))) ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
+    if (!(qstate_normalize(qstate))) ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
 
 #ifdef USE_GPU
     if (!(qstate_update_device_memory(qstate)))
@@ -1308,64 +1278,6 @@ bool qstate_measure_stats(QState* qstate, int shot_num, double angle, double pha
   *mdata_out = mdata;
   SUC_RETURN(true);
 }
-
-//bool qstate_measure_stats(QState* qstate, int shot_num, double angle, double phase,
-//			  int qubit_num, int* qubit_id, void** mdata_out)
-//{
-//  int		state_id;
-//  int		mes_id;
-//  MData*	mdata = NULL;
-//  int		i;
-//
-//  if ((qstate == NULL) ||
-//      (shot_num < 1) || (qubit_num < 0) ||
-//      (qubit_num > qstate->qubit_num))
-//    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
-//
-//#ifdef USE_GPU
-//  if (!(qstate_update_host_memory(qstate)))
-//    ERR_RETURN(ERROR_QSTATE_UPDATE_HOST_MEMORY, false);
-//#endif
-//
-//  /* measure all bits, if no parameter set */
-//  if (qubit_num == 0) {
-//    qubit_num = qstate->qubit_num;
-//    if (!(qubit_id = (int*)malloc(sizeof(int) * qubit_num)))
-//      ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
-//    for (i=0; i<qstate->qubit_num; i++) {
-//      qubit_id[i] = i;
-//    }
-//  }
-//
-//  /* initialize mdata */
-//  if (!(mdata_init(qubit_num, shot_num, angle, phase, qubit_id,
-//		   (void**)&mdata))) ERR_RETURN(ERROR_MDATA_INIT,false);
-//
-//  /* execute mesurement */
-//  for (i=0; i<shot_num; i++) {
-//    if (i == shot_num - 1) {  /* if last measurement -> change state */
-//      state_id = _qstate_measure_one_time(qstate, angle, phase, qubit_num, qubit_id);
-//    }
-//    else {  /* if not last measurement -> not change state */
-//      state_id = _qstate_measure_one_time_without_change_state(qstate, angle, phase,
-//      							       qubit_num, qubit_id);
-//    }
-//    if (!(_select_bits(&mes_id, state_id, qubit_num, qstate->qubit_num, qubit_id)))
-//      ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
-//    mdata->freq[mes_id]++;
-//  }
-//  mdata->last_val = mes_id;
-//
-//#ifdef USE_GPU
-//  if (!(qstate_update_device_memory(qstate)))
-//    ERR_RETURN(ERROR_QSTATE_UPDATE_DEVICE_MEMORY, false);
-//#endif
-//
-//  qstate->prob_updated = false;
-//
-//  *mdata_out = mdata;
-//  SUC_RETURN(true);
-//}
 
 bool qstate_measure_bell_stats(QState* qstate, int shot_num, int qubit_num,
 			       int* qubit_id, void** mdata_out)
@@ -1875,6 +1787,7 @@ bool qstate_apply_matrix(QState* qstate, int qnum_part, int* qid,
 
 static bool _qstate_operate_qcirc_cpu(QState* qstate, CMem* cmem, QCirc* qcirc,
 				      bool measure_update)
+/* one shot execution */
 {
   QGate*        qgate = NULL;   /* quantum gate in quantum circuit */
   int		dim   = 0;
@@ -1882,7 +1795,6 @@ static bool _qstate_operate_qcirc_cpu(QState* qstate, CMem* cmem, QCirc* qcirc,
   int           q1    = -1;
   COMPLEX*	U     = NULL;
   bool          compo = false;  /* U is composite or not */
-
   int		mnum  = 0;
   int*		qid   = NULL;
   int*		cid   = NULL;
@@ -1898,7 +1810,6 @@ static bool _qstate_operate_qcirc_cpu(QState* qstate, CMem* cmem, QCirc* qcirc,
 
   /* malloc */
   if (cmem != NULL) {
-    //    if (!(cid = (int*)malloc(sizeof(int) * qstate->qubit_num)))
     if (!(cid = (int*)malloc(sizeof(int) * cmem->cmem_num)))
       ERR_RETURN(ERROR_CANT_ALLOC_MEMORY, false);
 
@@ -1978,6 +1889,7 @@ static bool _qstate_operate_qcirc_cpu(QState* qstate, CMem* cmem, QCirc* qcirc,
 }
 
 bool qstate_operate_qcirc(QState* qstate, CMem* cmem, QCirc* qcirc, int shots, char* mchar_shots)
+/* shots times execution */
 {
   int		i, j, k;
   QCirc*	qcirc_uonly    = NULL;
@@ -2063,10 +1975,43 @@ bool qstate_operate_qcirc(QState* qstate, CMem* cmem, QCirc* qcirc, int shots, c
 
 #ifdef USE_GPU
   else if (qstate->use_gpu == true) {
-    if (!(qstate_operate_qcirc_gpu(qstate, cmem, qcirc)))
-      ERR_RETURN(ERROR_QSTATE_OPERATE_QCIRC, false);
+
+    if (qcirc_uonly != NULL) { /* unitary only */
+      measure_update = true; /* not efficient because of including no measurements */
+      if (!(qstate_operate_qcirc_gpu(qstate, cmem, qcirc_uonly, measure_update)))
+	ERR_RETURN(ERROR_QSTATE_OPERATE_QCIRC, false);
+      qcirc_free(qcirc_uonly); qcirc_uonly = NULL;
+    }
+
+    if (qcirc_mixed != NULL) { /* unitary and non-unitary mixed */
+      measure_update = true;
+      for (i=0; i<shots-1; i++) {
+	if (!(qstate_copy(qstate, (void**)&qstate_tmp)))
+	  ERR_RETURN(ERROR_QSTATE_COPY, false);
+	if (!(qstate_operate_qcirc_gpu(qstate_tmp, cmem, qcirc_mixed, measure_update)))
+	  ERR_RETURN(ERROR_QSTATE_OPERATE_QCIRC, false);
+	for (j=0; j<cmem->cmem_num; j++) {
+	  mchar_shots[i * cmem->cmem_num + j] = cmem->bit_array[j];
+	}
+	qstate_free(qstate_tmp); qstate_tmp = NULL;
+      }
+      if (!(qstate_operate_qcirc_gpu(qstate, cmem, qcirc_mixed, measure_update)))
+	ERR_RETURN(ERROR_QSTATE_OPERATE_QCIRC, false);
+      for (j=0; j<cmem->cmem_num; j++) {
+	mchar_shots[(shots - 1) * cmem->cmem_num + j] = cmem->bit_array[j];
+      }
+      qcirc_free(qcirc_mixed); qcirc_mixed = NULL;
+    }
+
+    else if (qcirc_monly != NULL) { /* measurement only */
+      /* shots times meaurements */
+      if (!(qstate_operate_measure_gpu(qstate, cmem, qcirc_monly, shots, mchar_shots)))
+	ERR_RETURN(ERROR_QSTATE_OPERATE_MEASURE, false);
+      qcirc_free(qcirc_monly); qcirc_monly = NULL;
+    }
   }
 #endif
+
   else {
     ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
   }

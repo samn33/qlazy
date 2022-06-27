@@ -36,6 +36,8 @@ class QState(ctypes.Structure):
             ('d_camp', ctypes.c_void_p),
             ('d_buffer_0', ctypes.c_void_p),
             ('d_buffer_1', ctypes.c_void_p),
+            ('d_prob_array', ctypes.c_void_p),
+            ('d_prob_updated', ctypes.c_bool),
             ('gbank', ctypes.c_void_p),
             ('use_gpu', ctypes.c_bool),
         ]
