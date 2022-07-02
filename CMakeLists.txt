@@ -18,6 +18,8 @@ set(LIB_SRC_GPU qlazy/lib/c/gpu.cu qlazy/lib/c/qstate_gpu.cu)
 if(USE_GPU)
 
   enable_language(CUDA)
+
+  find_package(CUDA REQUIRED)
   message("!!! USE_GPU !!!")
   message("Cuda version: " ${CUDA_VERSION})
   message("Cuda Compiler ID: " ${CMAKE_CUDA_COMPILER_ID})
@@ -35,8 +37,8 @@ if(USE_GPU)
   set_property(TARGET qlz PROPERTY CUDA_SEPARABLE_COMPILATION ON)
 
   include_directories(qlazy/lib/c/ /usr/local/include/cuda/)
-  
-  target_link_libraries(qlz m readline gomp)
+
+  target_link_libraries(qlz m readline gomp ${CUDA_curand_LIBRARY})
   target_link_libraries(qlazy qlz)
 
   list(APPEND CMAKE_CUDA_FLAGS "--default-stream per-thread")
@@ -46,7 +48,7 @@ if(USE_GPU)
   set(CMAKE_CXX_FLAGS ${CMAKE_C_FLAGS})
   
   set(CUDA_HOST_COMPILER g++)
-
+  
   # for OpenMP
   find_package(OpenMP REQUIRED)
   if(OpenMP_FOUND)

@@ -45,8 +45,6 @@ else  # GPU available
 # CUDA include directory (edit here to your CUDA environment)
 CUDA_INC_DIR = /usr/local/cuda/include
 
-# LIB_OBJ = $(LIB_OBJ_BASE) qstate_gpu.o
-# LIB_SRC = $(LIB_SRC_BASE) qstate_gpu.cu
 LIB_OBJ = $(LIB_OBJ_BASE) $(LIB_OBJ_GPU)
 LIB_SRC = $(LIB_SRC_BASE) $(LIB_SRC_GPU)
 
@@ -60,7 +58,7 @@ CFLAG_LINK = --default-stream per-thread -Xcompiler '-fPIC -fopenmp -Wall -O2 -D
 IFLAG = -I. -I$(CUDA_INC_DIR)
 LFLAG = -L.
 
-LIB_OPTION =  -lm -lreadline
+LIB_OPTION =  -lm -lreadline -lcurand
 
 .SUFFIXES: .cu
 .cu.o:

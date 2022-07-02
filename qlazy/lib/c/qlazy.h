@@ -20,9 +20,10 @@
 #include <cuda_runtime.h>
 #include <cuda_runtime_api.h>
 #include <cuComplex.h>
+#include <curand.h>
 #endif
 
-#define VERSION "0.2.8"
+#define VERSION "0.3.0"
 
 /*====================================================================*/
 /*  Definitions & Macros                                              */
@@ -39,13 +40,11 @@
 #define TOKEN_STRLEN	   1024     /* max token string length */
 #define TOKEN_NUM	   100      /* max token number of each line */
 #define MAX_ERR_MSG_LENGTH 1024	    /* max string length of err message  */
-//#define KEY_STRLEN         1024     /* max string length of key of hash table (for measurement) */
 
 #define DEF_QUBIT_NUM		5
 #define DEF_QC_STEPS		100
 #define DEF_QCIRC_DEPTH		100
 #define MAX_QUBIT_NUM		30	        /* max qubit number for state vector simulation */
-#define MAX_MEASUREMENT_NUM	KEY_STRLEN	/* max measurement qubit number */
 #define DEF_QLAZYINIT		"./.qlazyinit"
 
 #define DEF_SHOTS 100
@@ -388,19 +387,6 @@ typedef struct _QState {
   bool          use_gpu;
 } QState;
 
-//typedef struct _Element {
-//  bool                  active;
-//  char			key[KEY_STRLEN];
-//  int			value;
-//  struct _Element*	next;
-//} Element;
-//
-//typedef struct _HashTable {
-//  int			table_size;
-//  int			data_num;
-//  struct _Element**	table;
-//} HashTable;
-
 typedef struct _MData {
   int		qubit_num;
   int		shot_num;
@@ -410,14 +396,6 @@ typedef struct _MData {
   int*		freq;
   int		last_val;
 } MData;
-
-//typedef struct _MDataHT {
-//  int		qubit_num;
-//  int		shot_num;
-//  int*		qubit_id;
-//  HashTable*	freq_table;
-//  int		last_val;
-//} MDataHT;
 
 typedef struct _QSystem {
   QC*	qc;
@@ -506,16 +484,6 @@ bool     kind_is_unitary(Kind kind);
 bool     kind_is_controlled(Kind kind);
 bool     is_gpu_supported_lib(void);
 bool     is_gpu_available(void);
-
-///* hash.c */
-//bool hashtable_create(int table_size, void** ht_out);
-//bool hashtable_set_value(HashTable* ht, char* key, int value);
-//bool hashtable_add_value(HashTable* ht, char* key, int value);
-//bool hashtable_get_value(HashTable* ht, char* key, int* value);
-//bool hashtable_get_data(HashTable* ht, void** key_array_out, void** value_array_out);
-//void hashtable_print_shape(HashTable* ht);
-//void hashtable_print_data(HashTable* ht);
-//void hashtable_free(HashTable* ht);
 
 /* message.c */
 void	 error_msg(ErrCode err);

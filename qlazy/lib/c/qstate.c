@@ -1029,91 +1029,6 @@ static bool _qstate_transform_basis_inv(QState* qstate, double angle, double pha
   SUC_RETURN(true);
 }
 
-//static int _qstate_measure_one_time_without_change_state(QState* qstate_in, double angle,
-//							 double phase, int qubit_num,
-//							 int* qubit_id)
-//{
-//  double	r      = rand()/(double)RAND_MAX;
-//  double	prob_s = 0.0;
-//  double	prob_e = 0.0;
-//  int		value  = qstate_in->state_num - 1;
-//  QState*	qstate = NULL;
-//  int		i;
-//
-//  if (qstate_in == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT,-1);
-//  
-//  /* copy qstate for measurement */
-//  if (!(qstate_copy(qstate_in, (void**)&qstate)))
-//    ERR_RETURN(ERROR_QSTATE_COPY,-1);
-//
-//  /* unitary transform, if measuremment base is not {|0><0|,|1><1|} */
-//  if ((angle != 0.0) || (phase != 0.0)) {
-//    for (i=0; i<qubit_num; i++) {
-//      if (!(_qstate_transform_basis(qstate, angle, phase, qubit_id[i])))
-//	ERR_RETURN(ERROR_INVALID_ARGUMENT,-1);
-//    }
-//  }
-//
-//  for (i=0; i<qstate->state_num; i++) {
-//    prob_s = prob_e;
-//    prob_e += pow(cabs(qstate->camp[i]),2.0);
-//    if (r >= prob_s && r < prob_e) value = i;
-//  }
-//
-//  qstate_free(qstate);
-//
-//  SUC_RETURN(value);
-//}
-//
-//static int _qstate_measure_one_time(QState* qstate, double angle, double phase,
-//				    int qubit_num, int* qubit_id)
-//{
-//  double	r      = rand()/(double)RAND_MAX;
-//  double	prob_s = 0.0;
-//  double	prob_e = 0.0;
-//  int		value  = qstate->state_num - 1;
-//  int           mes_id,x;
-//  int		i;
-//
-//  if (qstate == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT,-1);
-//
-//  /* change basis, if measurement axis isn't Z */
-//  if ((angle != 0.0) || (phase != 0.0)) {
-//    for (i=0; i<qubit_num; i++) {
-//      if (!(_qstate_transform_basis(qstate, angle, phase, qubit_id[i])))
-//	ERR_RETURN(ERROR_INVALID_ARGUMENT,-1);
-//    }
-//  }
-//
-//  for (i=0; i<qstate->state_num; i++) {
-//    prob_s = prob_e;
-//    prob_e += pow(cabs(qstate->camp[i]),2.0);
-//    if (r >= prob_s && r < prob_e) value = i;
-//  }
-//
-//  /* update quantum state by measurement (projection,normalize and change basis) */
-//
-//  /* projection*/
-//  if (!(select_bits(&mes_id, value, qubit_num, qstate->qubit_num, qubit_id)))
-//    ERR_RETURN(ERROR_INVALID_ARGUMENT,-1);
-//  for (i=0; i<qstate->state_num; i++) {
-//    if (!(select_bits(&x, i, qubit_num, qstate->qubit_num, qubit_id)))
-//      ERR_RETURN(ERROR_INVALID_ARGUMENT,-1);
-//    if (x != mes_id) qstate->camp[i] = 0.0;
-//  }
-//  /* normalize */
-//  if (!(qstate_normalize(qstate))) ERR_RETURN(ERROR_INVALID_ARGUMENT,-1);
-//  /* change basis (inverse), if measurement axis isn't Z */
-//  if ((angle != 0.0) || (phase != 0.0)) {
-//    for (i=0; i<qubit_num; i++) {
-//      if (!(_qstate_transform_basis_inv(qstate, angle, phase, qubit_id[i])))
-//	ERR_RETURN(ERROR_INVALID_ARGUMENT,-1);
-//    }
-//  }
-//  
-//  SUC_RETURN(value);
-//}
-
 static bool _qstate_update_prob_array(QState* qstate)
 {
   int		i;
@@ -1123,9 +1038,9 @@ static bool _qstate_update_prob_array(QState* qstate)
 
   for (i=0; i<qstate->state_num; i++) qstate->prob_array[i] = 0.0;
 
-  qstate->prob_array[0] = pow(cabs(qstate->camp[0]), 2.0);
+  qstate->prob_array[0] = 0.0;
   for (i=1; i<qstate->state_num; i++) {
-    prob = pow(cabs(qstate->camp[i]), 2.0);
+    prob = pow(cabs(qstate->camp[i-1]), 2.0);
     qstate->prob_array[i] = qstate->prob_array[i-1] + prob;
   }
 
@@ -1134,12 +1049,8 @@ static bool _qstate_update_prob_array(QState* qstate)
 
 static bool _qstate_get_measured_char(QState* qstate, int mnum, int* qid, char* mchar)
 {
-  int		i;
-  double	r      = 0.0;
-  double	prob_s = 0.0;
-  double	prob_e = 0.0;
-  int           value  = 0;
-  int           bit    = 0;
+  double	r;
+  int           i, idx, up;
 
   if (qstate == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
 
@@ -1149,19 +1060,16 @@ static bool _qstate_get_measured_char(QState* qstate, int mnum, int* qid, char* 
   }
 
   r = rand() / (double)RAND_MAX;
-  for (i=0; i<qstate->state_num; i++) {
-    prob_s = prob_e;
-    prob_e = qstate->prob_array[i];
-    if (r >= prob_s && r < prob_e) {
-      value = i;
-      break;
+  idx = 0;
+  for (i=0; i<qstate->qubit_num; i++) {
+    up = 1 << (qstate->qubit_num - 1 - i);
+    if (r >= qstate->prob_array[idx + up]) {
+      idx = idx + up;
     }
   }
 
   for (i=0; i<mnum; i++) {
-    bit = (value >> (qstate->qubit_num - qid[i] - 1)) % 2;
-    if (bit == 0) mchar[i] = 0;
-    else mchar[i] = 1;
+    mchar[i] = (idx >> (qstate->qubit_num - qid[i] - 1)) % 2;
   }
 
   SUC_RETURN(true);
@@ -1357,40 +1265,6 @@ bool qstate_operate_qgate(QState* qstate, Kind kind, double alpha, double beta,
   free(U); U = NULL;
   SUC_RETURN(true);
 }
-
-//bool qstate_operate_qgate(QState* qstate, Kind kind, double alpha, double beta,
-//			  double gamma, int* qubit_id)
-//{
-//  int		q0  = qubit_id[0];
-//  int		q1  = qubit_id[1];
-//  int		dim = 0;
-//  COMPLEX*	U   = NULL;
-//
-//  if (qstate == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
-//
-//  if ((kind == INIT) || (kind == MEASURE) || (kind ==MEASURE_X) ||
-//      (kind == MEASURE_Y) || (kind == MEASURE_Z) || (kind == MEASURE_BELL) ||
-//      (kind == RESET)) {
-//    SUC_RETURN(true);
-//  }
-//  else if (kind_is_controlled(kind) == true) {
-//    if (!(gbank_get_unitary(qstate->gbank, kind, alpha, beta, gamma, &dim, (void**)&U)))
-//      ERR_RETURN(ERROR_GBANK_GET_UNITARY,false);
-//    if (!(_qstate_operate_controlled_gate(qstate, U, q0, q1)))
-//      ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
-//    free(U); U = NULL;
-//    SUC_RETURN(true);
-//  }
-//  else {
-//    if (!(gbank_get_unitary(qstate->gbank, kind, alpha, beta, gamma, &dim, (void**)&U)))
-//      ERR_RETURN(ERROR_GBANK_GET_UNITARY,false);
-//    if (!(_qstate_operate_unitary(qstate, U, dim, q0, q1)))
-//      ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
-//    
-//    free(U); U = NULL;
-//    SUC_RETURN(true);
-//  }
-//}
 
 static bool _qstate_evolve_spro(QState* qstate, SPro* spro, double time)
 {
