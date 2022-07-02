@@ -4,7 +4,7 @@ import pathlib
 from setuptools import setup, find_packages, Extension
 from setuptools.command.build_ext import build_ext as build_ext_orig
 
-_VERSION = '0.2.8'
+_VERSION = '0.3.0'
 
 class CMakeExtension(Extension):
 
@@ -52,7 +52,7 @@ setup(
     include_package_data=True,
     install_requires=[
         'numpy>=1.21.0',
-        'pyzx>=0.7.0',
+        # 'pyzx>=0.7.0',
         # 'Qulacs>=0.3.0',
         # 'qiskit>=0.34.2',
         # 'amazon-braket-sdk>=1.18.0',
