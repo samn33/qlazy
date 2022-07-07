@@ -2033,6 +2033,6 @@ class QCirc(ctypes.Structure):
                 self.append_gate(kind, qid, para, c, ctrl)
 
 # c-library for qstate
-from qlazy.lib.qcirc_c import (qcirc_init, qcirc_copy, qcirc_merge,
-                               qcirc_is_equal, qcirc_append_gate,
-                               qcirc_kind_first, qcirc_pop_gate, qcirc_free)
+from qlazy.lib.qcirc_c import (qcirc_init, qcirc_copy, qcirc_merge, qcirc_is_equal,
+                               qcirc_append_gate, qcirc_kind_first, qcirc_pop_gate,
+                               qcirc_free)

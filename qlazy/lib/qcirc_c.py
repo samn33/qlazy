@@ -161,6 +161,17 @@ def qcirc_pop_gate(qc):
 
     return (kind, qid, para, c, ctrl)
 
+# def qcirc_is_measurement_only(qc):
+# 
+#     ans = 0
+#     c_ans = ctypes.c_bool(ans)
+#     
+#     lib.qcirc_is_measurement_only.restype = ctypes.c_int
+#     lib.qcirc_is_measurement_only.argtypes = [ctypes.POINTER(QCirc), ctypes.POINTER(ctypes.c_bool)]
+#     ret = lib.qcirc_is_measurement_only(ctypes.byref(qc), ctypes.byref(c_ans))
+# 
+#     return c_ans.value
+    
 def qcirc_free(qcirc):
     """ free memory of the QCirc object """
 

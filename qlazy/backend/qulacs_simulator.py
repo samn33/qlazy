@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """ run function for qulacs's cpu/gpu simulator """
 
+import random
 from collections import Counter
 import cmath
 import numpy as np
@@ -135,6 +136,30 @@ def __run_all(qcirc=None, shots=1, cid=None, backend=None, proc='CPU', out_state
     # after measurement gate
     #
 
+    if set(qcirc.kind_list()) == {cfg.MEASURE}:
+        q_list = []
+        while True:
+            kind =qcirc.kind_first()
+            if kind is None:
+                break
+            (kind, qid, para, c, ctrl) = qcirc.pop_gate()
+            q_list.append(qid[0])
+
+        frequency, qstate = __qulacs_measure_shots(qstate, q_list, shots)
+            
+        info = {'quantumstate': qstate, 'cmem': cmem}
+
+        result = Result()
+        result.qubit_num = qubit_num
+        result.cmem_num = cmem_num
+        result.cid = cid
+        result.shots = shots
+        result.frequency = frequency
+        result.backend = backend
+        result.info = info
+
+        return result
+    
     frequency = Counter()
     qstate_tmp = None
     for _ in range(shots):
@@ -148,7 +173,6 @@ def __run_all(qcirc=None, shots=1, cid=None, backend=None, proc='CPU', out_state
             if kind is None:
                 break
 
-            # elif kind == cfg.MEASURE:
             if kind == cfg.MEASURE:
                 (kind, qid, para, c, ctrl) = qcirc_tmp.pop_gate()
                 mval = __qulacs_measure(qstate_tmp, qubit_num, qid[0])
@@ -364,3 +388,61 @@ def __qulacs_measure(qstate, qubit_num, q):
     mval = qstate.get_classical_value(0)
 
     return mval
+
+def __qulacs_measure_shots(qstate, qid, shots=1):
+
+    # error check
+    qubit_num = qstate.get_qubit_count()
+    if max(qid) >= qubit_num:
+        raise ValueError
+
+    # list of binary vectors for len(qid) bit integers
+    qid_sorted = sorted(qid)
+    mbits_list = []
+    for i in range(2**len(qid)):
+        # ex)
+        # qid = [5,0,2] -> qid_sorted = [0,2,5]
+        # i = (0,1,2), idx = (2,0,1)
+        # bits = [q0,q1,q2] -> mbits = [q1,q2,q0]
+        bits = list(map(int, list(format(i, '0{}b'.format(len(qid))))))
+        mbits = [0] * len(qid)
+        for i, q in enumerate(qid):
+            idx = qid_sorted.index(q)
+            mbits[idx] = bits[i]
+        mbits_list.append(mbits)
+
+    # list of probabilities
+    prob_list = []
+    prob = 0.0
+    for mbits in mbits_list:
+        args = [2] * qubit_num
+        for j, q in enumerate(qid):
+            args[q] = mbits[j]
+        prob += qstate.get_marginal_probability(args)
+        prob_list.append(prob)
+    if prob_list[-1] != 1.0:
+        prob_list[-1] = 1.0
+
+    # frequency
+    mval_data = []
+    if shots > 1:
+        for i in range(shots-1):
+            rand = random.random()
+            for mbits, prob in zip(mbits_list, prob_list):
+                if rand <= prob:
+                    mval = ''.join(map(str, mbits))
+                    mval_data.append(mval)
+                    break
+
+    # last quantum state
+    circ = QuantumCircuit(qubit_num)
+    for i, q in enumerate(qid):
+        circ.add_gate(Measurement(q, i))
+    circ.update_quantum_state(qstate)
+    
+    last = ''.join(map(str, [qstate.get_classical_value(i) for i in range(len(qid))]))
+    mval_data.append(last)
+
+    frequency = Counter(mval_data)
+
+    return frequency, qstate
