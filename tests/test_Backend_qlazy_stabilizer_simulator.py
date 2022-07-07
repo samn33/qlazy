@@ -61,8 +61,8 @@ class TestBackend_1_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
         """
         bk = Backend(product='qlazy', device='stabilizer_simulator')
         qc = QCirc().x(0)
-        res = bk.run(qcirc=qc)
-        actual = res.info['stabilizer'].get_str()
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.stabilizer.get_str()
         expect = " -Z\n"
         self.assertEqual(actual, expect)
         
@@ -71,8 +71,8 @@ class TestBackend_1_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
         """
         bk = Backend(product='qlazy', device='stabilizer_simulator')
         qc = QCirc().h(0).x(0)
-        res = bk.run(qcirc=qc)
-        actual = res.info['stabilizer'].get_str()
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.stabilizer.get_str()
         expect = "  X\n"
         self.assertEqual(actual, expect)
         
@@ -81,8 +81,8 @@ class TestBackend_1_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
         """
         bk = Backend(product='qlazy', device='stabilizer_simulator')
         qc = QCirc().y(0)
-        res = bk.run(qcirc=qc)
-        actual = res.info['stabilizer'].get_str()
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.stabilizer.get_str()
         expect = " -Z\n"
         self.assertEqual(actual, expect)
         
@@ -91,8 +91,8 @@ class TestBackend_1_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
         """
         bk = Backend(product='qlazy', device='stabilizer_simulator')
         qc = QCirc().h(0).y(0)
-        res = bk.run(qcirc=qc)
-        actual = res.info['stabilizer'].get_str()
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.stabilizer.get_str()
         expect = " -X\n"
         self.assertEqual(actual, expect)
         
@@ -101,8 +101,8 @@ class TestBackend_1_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
         """
         bk = Backend(product='qlazy', device='stabilizer_simulator')
         qc = QCirc().z(0)
-        res = bk.run(qcirc=qc)
-        actual = res.info['stabilizer'].get_str()
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.stabilizer.get_str()
         expect = "  Z\n"
         self.assertEqual(actual, expect)
         
@@ -111,8 +111,8 @@ class TestBackend_1_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
         """
         bk = Backend(product='qlazy', device='stabilizer_simulator')
         qc = QCirc().h(0).z(0)
-        res = bk.run(qcirc=qc)
-        actual = res.info['stabilizer'].get_str()
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.stabilizer.get_str()
         expect = " -X\n"
         self.assertEqual(actual, expect)
         
@@ -121,8 +121,8 @@ class TestBackend_1_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
         """
         bk = Backend(product='qlazy', device='stabilizer_simulator')
         qc = QCirc().h(0)
-        res = bk.run(qcirc=qc)
-        actual = res.info['stabilizer'].get_str()
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.stabilizer.get_str()
         expect = "  X\n"
         self.assertEqual(actual, expect)
         
@@ -131,8 +131,8 @@ class TestBackend_1_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
         """
         bk = Backend(product='qlazy', device='stabilizer_simulator')
         qc = QCirc().h(0).h(0)
-        res = bk.run(qcirc=qc)
-        actual = res.info['stabilizer'].get_str()
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.stabilizer.get_str()
         expect = "  Z\n"
         self.assertEqual(actual, expect)
         
@@ -141,8 +141,8 @@ class TestBackend_1_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
         """
         bk = Backend(product='qlazy', device='stabilizer_simulator')
         qc = QCirc().s(0)
-        res = bk.run(qcirc=qc)
-        actual = res.info['stabilizer'].get_str()
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.stabilizer.get_str()
         expect = "  Z\n"
         self.assertEqual(actual, expect)
         
@@ -151,8 +151,8 @@ class TestBackend_1_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
         """
         bk = Backend(product='qlazy', device='stabilizer_simulator')
         qc = QCirc().h(0).s(0)
-        res = bk.run(qcirc=qc)
-        actual = res.info['stabilizer'].get_str()
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.stabilizer.get_str()
         expect = "  Y\n"
         self.assertEqual(actual, expect)
         
@@ -161,8 +161,8 @@ class TestBackend_1_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
         """
         bk = Backend(product='qlazy', device='stabilizer_simulator')
         qc = QCirc().s(0)
-        res = bk.run(qcirc=qc)
-        actual = res.info['stabilizer'].get_str()
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.stabilizer.get_str()
         expect = "  Z\n"
         self.assertEqual(actual, expect)
         
@@ -171,8 +171,8 @@ class TestBackend_1_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
         """
         bk = Backend(product='qlazy', device='stabilizer_simulator')
         qc = QCirc().h(0).s_dg(0)
-        res = bk.run(qcirc=qc)
-        actual = res.info['stabilizer'].get_str()
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.stabilizer.get_str()
         expect = " -Y\n"
         self.assertEqual(actual, expect)
         
@@ -189,8 +189,8 @@ class TestBackend_2_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
         """
         bk = Backend(product='qlazy', device='stabilizer_simulator')
         qc = QCirc().cx(0,1)
-        res = bk.run(qcirc=qc)
-        actual = res.info['stabilizer'].get_str()
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.stabilizer.get_str()
         expect = "  ZI\n  ZZ\n"
         self.assertEqual(actual, expect)
 
@@ -199,8 +199,8 @@ class TestBackend_2_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
         """
         bk = Backend(product='qlazy', device='stabilizer_simulator')
         qc = QCirc().h(0).h(1).cx(0,1)
-        res = bk.run(qcirc=qc)
-        actual = res.info['stabilizer'].get_str()
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.stabilizer.get_str()
         expect = "  XX\n  IX\n"
         self.assertEqual(actual, expect)
 
@@ -209,8 +209,8 @@ class TestBackend_2_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
         """
         bk = Backend(product='qlazy', device='stabilizer_simulator')
         qc = QCirc().cy(0,1)
-        res = bk.run(qcirc=qc)
-        actual = res.info['stabilizer'].get_str()
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.stabilizer.get_str()
         expect = "  ZI\n  ZZ\n"
         self.assertEqual(actual, expect)
 
@@ -219,8 +219,8 @@ class TestBackend_2_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
         """
         bk = Backend(product='qlazy', device='stabilizer_simulator')
         qc = QCirc().h(0).h(1).cy(0,1)
-        res = bk.run(qcirc=qc)
-        actual = res.info['stabilizer'].get_str()
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.stabilizer.get_str()
         expect = "-iXY\n  ZX\n"
         self.assertEqual(actual, expect)
 
@@ -229,8 +229,8 @@ class TestBackend_2_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
         """
         bk = Backend(product='qlazy', device='stabilizer_simulator')
         qc = QCirc().cz(0,1)
-        res = bk.run(qcirc=qc)
-        actual = res.info['stabilizer'].get_str()
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.stabilizer.get_str()
         expect = "  ZI\n  IZ\n"
         self.assertEqual(actual, expect)
 
@@ -239,8 +239,8 @@ class TestBackend_2_qubit_qlazy_stabilizer_simulator(unittest.TestCase):
         """
         bk = Backend(product='qlazy', device='stabilizer_simulator')
         qc = QCirc().h(0).h(1).cz(0,1)
-        res = bk.run(qcirc=qc)
-        actual = res.info['stabilizer'].get_str()
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.stabilizer.get_str()
         expect = "  XZ\n  ZX\n"
         self.assertEqual(actual, expect)
 
@@ -257,12 +257,12 @@ class TestBackend_operate_qlazy_stabilizer_simulator(unittest.TestCase):
         """
         bk = Backend(product='qlazy', device='stabilizer_simulator')
         qc = QCirc().x(0)
-        res = bk.run(qcirc=qc)
-        expect = res.info['stabilizer'].get_str()
+        res = bk.run(qcirc=qc, out_state=True)
+        expect = res.stabilizer.get_str()
         pp = PauliProduct(pauli_str="X")
         qc = QCirc().operate(pp=pp)
-        res = bk.run(qcirc=qc)
-        actual = res.info['stabilizer'].get_str()
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.stabilizer.get_str()
         self.assertEqual(expect, actual)
 
     def test_operate_h_x(self):
@@ -270,12 +270,12 @@ class TestBackend_operate_qlazy_stabilizer_simulator(unittest.TestCase):
         """
         bk = Backend(product='qlazy', device='stabilizer_simulator')
         qc = QCirc().h(0).x(0)
-        res = bk.run(qcirc=qc)
-        expect = res.info['stabilizer'].get_str()
+        res = bk.run(qcirc=qc, out_state=True)
+        expect = res.stabilizer.get_str()
         pp = PauliProduct(pauli_str="X")
         qc = QCirc().h(0).operate(pp=pp)
-        res = bk.run(qcirc=qc)
-        actual = res.info['stabilizer'].get_str()
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.stabilizer.get_str()
         self.assertEqual(expect, actual)
 
     def test_operate_h_y(self):
@@ -283,12 +283,12 @@ class TestBackend_operate_qlazy_stabilizer_simulator(unittest.TestCase):
         """
         bk = Backend(product='qlazy', device='stabilizer_simulator')
         qc = QCirc().h(0).y(0)
-        res = bk.run(qcirc=qc)
-        expect = res.info['stabilizer'].get_str()
+        res = bk.run(qcirc=qc, out_state=True)
+        expect = res.stabilizer.get_str()
         pp = PauliProduct(pauli_str="Y")
         qc = QCirc().h(0).operate(pp=pp)
-        res = bk.run(qcirc=qc)
-        actual = res.info['stabilizer'].get_str()
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.stabilizer.get_str()
         self.assertEqual(expect, actual)
 
     def test_operate_h_z(self):
@@ -296,12 +296,12 @@ class TestBackend_operate_qlazy_stabilizer_simulator(unittest.TestCase):
         """
         bk = Backend(product='qlazy', device='stabilizer_simulator')
         qc = QCirc().h(0).z(0)
-        res = bk.run(qcirc=qc)
-        expect = res.info['stabilizer'].get_str()
+        res = bk.run(qcirc=qc, out_state=True)
+        expect = res.stabilizer.get_str()
         pp = PauliProduct(pauli_str="Z")
         qc = QCirc().h(0).operate(pp=pp)
-        res = bk.run(qcirc=qc)
-        actual = res.info['stabilizer'].get_str()
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.stabilizer.get_str()
         self.assertEqual(expect, actual)
 
     def test_operate_xyz(self):
@@ -309,12 +309,12 @@ class TestBackend_operate_qlazy_stabilizer_simulator(unittest.TestCase):
         """
         bk = Backend(product='qlazy', device='stabilizer_simulator')
         qc = QCirc().x(2).y(0).z(1)
-        res = bk.run(qcirc=qc)
-        expect = res.info['stabilizer'].get_str()
+        res = bk.run(qcirc=qc, out_state=True)
+        expect = res.stabilizer.get_str()
         pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
         qc = QCirc().operate(pp=pp)
-        res = bk.run(qcirc=qc)
-        actual = res.info['stabilizer'].get_str()
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.stabilizer.get_str()
         self.assertEqual(expect, actual)
 
     def test_operate_controlled_xyz(self):
@@ -322,12 +322,12 @@ class TestBackend_operate_qlazy_stabilizer_simulator(unittest.TestCase):
         """
         bk = Backend(product='qlazy', device='stabilizer_simulator')
         qc = QCirc().cx(3,2).cy(3,0).cz(3,1)
-        res = bk.run(qcirc=qc)
-        expect = res.info['stabilizer'].get_str()
+        res = bk.run(qcirc=qc, out_state=True)
+        expect = res.stabilizer.get_str()
         pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
         qc = QCirc().operate(pp=pp, ctrl=3)
-        res = bk.run(qcirc=qc)
-        actual = res.info['stabilizer'].get_str()
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.stabilizer.get_str()
         self.assertEqual(expect, actual)
         
 #
@@ -376,11 +376,11 @@ class TestBackend_measure_qlazy_stabilizer_simulator(unittest.TestCase):
         """
         bk = Backend(product='qlazy', device='stabilizer_simulator')
         qc = QCirc().measure(qid=[0,1], cid=[1,2]).h(0).cx(0,1)
-        res = bk.run(qcirc=qc, shots=10, cid=[1,2])
+        res = bk.run(qcirc=qc, shots=10, cid=[1,2], out_state=True)
         freq = res.frequency
         cid = res.cid
         expect = "  XX\n  ZZ\n"
-        actual = res.info['stabilizer'].get_str()
+        actual = res.stabilizer.get_str()
         self.assertEqual(actual, expect)
         self.assertEqual(cid, [1,2])
 

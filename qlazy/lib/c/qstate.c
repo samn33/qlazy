@@ -1762,7 +1762,8 @@ static bool _qstate_operate_qcirc_cpu(QState* qstate, CMem* cmem, QCirc* qcirc,
   SUC_RETURN(true);
 }
 
-bool qstate_operate_qcirc(QState* qstate, CMem* cmem, QCirc* qcirc, int shots, char* mchar_shots)
+bool qstate_operate_qcirc(QState* qstate, CMem* cmem, QCirc* qcirc, int shots, char* mchar_shots,
+			  bool out_state)
 /* shots times execution */
 {
   int		i, j, k;
@@ -1826,8 +1827,8 @@ bool qstate_operate_qcirc(QState* qstate, CMem* cmem, QCirc* qcirc, int shots, c
 
       measure_update = false;
       for (i=0; i<shots; i++) {
-	if (i < shots - 1) measure_update = false;
-	else measure_update = true;
+	if (out_state == false || i < shots - 1) measure_update = false;
+	else measure_update = false;
 
 	if (!(qstate_measure(qstate, mnum, qid, measured_char, measure_update)))
 	  ERR_RETURN(ERROR_QSTATE_MEASURE, false);
@@ -1879,7 +1880,7 @@ bool qstate_operate_qcirc(QState* qstate, CMem* cmem, QCirc* qcirc, int shots, c
 
     else if (qcirc_monly != NULL) { /* measurement only */
       /* shots times meaurements */
-      if (!(qstate_operate_measure_gpu(qstate, cmem, qcirc_monly, shots, mchar_shots)))
+      if (!(qstate_operate_measure_gpu(qstate, cmem, qcirc_monly, shots, mchar_shots, out_state)))
 	ERR_RETURN(ERROR_QSTATE_OPERATE_MEASURE, false);
       qcirc_free(qcirc_monly); qcirc_monly = NULL;
     }

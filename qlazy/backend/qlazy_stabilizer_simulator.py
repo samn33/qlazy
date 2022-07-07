@@ -6,7 +6,7 @@ from qlazy.CMem import CMem
 from qlazy.Result import Result
 from qlazy.lib.stabilizer_c import stabilizer_operate_qcirc
 
-def run(qcirc=None, shots=1, cid=None, backend=None):
+def run(qcirc=None, shots=1, cid=None, backend=None, out_state=False):
     """ run the quantum circuit """
 
     if qcirc is None:
@@ -32,8 +32,6 @@ def run(qcirc=None, shots=1, cid=None, backend=None):
     frequency = stabilizer_operate_qcirc(stab, cmem, qcirc_unitary, 1, cid)
     frequency = stabilizer_operate_qcirc(stab, cmem, qcirc_non_unitary, shots, cid)
 
-    info = {'stabilizer': stab, 'cmem': cmem}
-
     result = Result()
     result.qubit_num = qubit_num
     result.cmem_num = cmem_num
@@ -41,6 +39,12 @@ def run(qcirc=None, shots=1, cid=None, backend=None):
     result.shots = shots
     result.frequency = frequency
     result.backend = backend
-    result.info = info
+    if out_state is True:
+        result.stabilizer = stab
+        result.cmem = cmem
+    else:
+        result.stabilizer = None
+        result.cmem = None
+    result.info = None
 
     return result

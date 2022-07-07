@@ -219,7 +219,7 @@ class Backend:
         backend_dict = {'product': self.product, 'device': self.device}
         return str(backend_dict)
 
-    def run(self, qcirc=None, shots=1, cid=None):
+    def run(self, qcirc=None, shots=1, cid=None, out_state=False):
         """
         run the quantum circuit.
 
@@ -231,6 +231,9 @@ class Backend:
             number of measurements.
         cid : list, default []
             classical register id list to count frequency.
+        out_state : bool, default False
+            output classical and quantum information after execting circuit.
+            (only for qlazy's qstate and stabilizer simulator)
 
         Returns
         -------
@@ -259,7 +262,7 @@ class Backend:
 
         """
         start_time = datetime.datetime.now()
-        result = self.__run(qcirc=qcirc, shots=shots, cid=cid, backend=self)
+        result = self.__run(qcirc=qcirc, shots=shots, cid=cid, backend=self, out_state=out_state)
         end_time = datetime.datetime.now()
 
         result.start_time = start_time

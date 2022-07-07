@@ -196,7 +196,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """
         qc = QCirc().x(0)
         bk = Backend()
-        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).x(0)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
         self.assertEqual(valid_or_not(qc), True)
@@ -206,7 +206,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """
         qc = QCirc().y(0)
         bk = Backend()
-        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).y(0)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
         self.assertEqual(valid_or_not(qc), True)
@@ -216,7 +216,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """
         qc = QCirc().z(0)
         bk = Backend()
-        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).z(0)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
         self.assertEqual(valid_or_not(qc), True)
@@ -226,7 +226,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """
         qc = QCirc().xr(0)
         bk = Backend()
-        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).xr(0)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
         self.assertEqual(valid_or_not(qc), True)
@@ -236,7 +236,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """
         qc = QCirc().xr_dg(0)
         bk = Backend()
-        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).xr_dg(0)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
         self.assertEqual(valid_or_not(qc), True)
@@ -246,7 +246,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """
         qc = QCirc().h(0)
         bk = Backend()
-        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).h(0)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
         self.assertEqual(valid_or_not(qc), True)
@@ -256,7 +256,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """
         qc = QCirc().s(0)
         bk = Backend()
-        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).s(0)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
         self.assertEqual(valid_or_not(qc), True)
@@ -266,7 +266,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """
         qc = QCirc().s_dg(0)
         bk = Backend()
-        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).s_dg(0)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
         self.assertEqual(valid_or_not(qc), True)
@@ -276,7 +276,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """
         qc = QCirc().t(0)
         bk = Backend()
-        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).t(0)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
         self.assertEqual(valid_or_not(qc), True)
@@ -286,7 +286,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """
         qc = QCirc().t_dg(0)
         bk = Backend()
-        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).t_dg(0)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
         self.assertEqual(valid_or_not(qc), True)
@@ -296,7 +296,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """
         qc = QCirc().p(0, phase=0.1)
         bk = Backend()
-        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).p(0, phase=0.1)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
         self.assertEqual(valid_or_not(qc), True)
@@ -306,7 +306,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """
         qc = QCirc().rx(0, phase=0.1)
         bk = Backend()
-        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).rx(0, phase=0.1)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
         self.assertEqual(valid_or_not(qc), True)
@@ -316,7 +316,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """
         qc = QCirc().ry(0, phase=0.1)
         bk = Backend()
-        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).ry(0, phase=0.1)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
         self.assertEqual(valid_or_not(qc), True)
@@ -326,7 +326,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """
         qc = QCirc().rz(0, phase=0.1)
         bk = Backend()
-        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).rz(0, phase=0.1)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
         self.assertEqual(valid_or_not(qc), True)
@@ -336,7 +336,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """
         qc = QCirc().cx(0,1)
         bk = Backend()
-        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).cx(0,1)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
         self.assertEqual(valid_or_not(qc), True)
@@ -346,7 +346,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """
         qc = QCirc().cy(0,1)
         bk = Backend()
-        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).cy(0,1)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
         self.assertEqual(valid_or_not(qc), True)
@@ -356,7 +356,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """
         qc = QCirc().cz(0,1)
         bk = Backend()
-        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).cz(0,1)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
         self.assertEqual(valid_or_not(qc), True)
@@ -366,7 +366,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """
         qc = QCirc().cxr(0,1)
         bk = Backend()
-        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).cxr(0,1)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
         self.assertEqual(valid_or_not(qc), True)
@@ -376,7 +376,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """
         qc = QCirc().h(0).cxr(0,1)
         bk = Backend()
-        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).h(0).cxr(0,1)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
         self.assertEqual(valid_or_not(qc), True)
@@ -386,7 +386,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """
         qc = QCirc().cxr_dg(0,1)
         bk = Backend()
-        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).cxr_dg(0,1)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
         self.assertEqual(valid_or_not(qc), True)
@@ -396,7 +396,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """
         qc = QCirc().ch(0,1)
         bk = Backend()
-        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).ch(0,1)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
         self.assertEqual(valid_or_not(qc), True)
@@ -406,7 +406,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """
         qc = QCirc().cs(0,1)
         bk = Backend()
-        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).cs(0,1)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
         self.assertEqual(valid_or_not(qc), True)
@@ -416,7 +416,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """
         qc = QCirc().cs_dg(0,1)
         bk = Backend()
-        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).cs_dg(0,1)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
         self.assertEqual(valid_or_not(qc), True)
@@ -426,7 +426,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """
         qc = QCirc().ct(0,1)
         bk = Backend()
-        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).ct(0,1)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
         self.assertEqual(valid_or_not(qc), True)
@@ -436,7 +436,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """
         qc = QCirc().ct_dg(0,1)
         bk = Backend()
-        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).ct_dg(0,1)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
         self.assertEqual(valid_or_not(qc), True)
@@ -446,7 +446,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """
         qc = QCirc().cp(0,1, phase=0.1)
         bk = Backend()
-        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).cp(0,1, phase=0.1)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
         self.assertEqual(valid_or_not(qc), True)
@@ -456,7 +456,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """
         qc = QCirc().crx(0,1, phase=0.1)
         bk = Backend()
-        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).crx(0,1, phase=0.1)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
         self.assertEqual(valid_or_not(qc), True)
@@ -466,7 +466,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """
         qc = QCirc().cry(0,1, phase=0.1)
         bk = Backend()
-        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).cry(0,1, phase=0.1)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
         self.assertEqual(valid_or_not(qc), True)
@@ -476,7 +476,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """
         qc = QCirc().crz(0,1, phase=0.1)
         bk = Backend()
-        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).crz(0,1, phase=0.1)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
         self.assertEqual(valid_or_not(qc), True)
@@ -486,7 +486,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """
         qc = QCirc().rxx(0,1, phase=0.1)
         bk = Backend()
-        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).rxx(0,1, phase=0.1)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
         self.assertEqual(valid_or_not(qc), True)
@@ -496,7 +496,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """
         qc = QCirc().ryy(0,1, phase=0.1)
         bk = Backend()
-        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).ryy(0,1, phase=0.1)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
         self.assertEqual(valid_or_not(qc), True)
@@ -506,7 +506,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """
         qc = QCirc().rzz(0,1, phase=0.1)
         bk = Backend()
-        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).rzz(0,1, phase=0.1)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
         self.assertEqual(valid_or_not(qc), True)
@@ -516,7 +516,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """
         qc = QCirc().sw(0,1)
         bk = Backend()
-        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).sw(0,1)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
         self.assertEqual(valid_or_not(qc), True)
@@ -526,7 +526,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """
         qc = QCirc().ccx(0,1,2)
         bk = Backend()
-        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).ccx(0,1,2)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
         self.assertEqual(valid_or_not(qc), True)
@@ -536,7 +536,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """
         qc = QCirc().csw(0,1,2)
         bk = Backend()
-        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).csw(0,1,2)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
         self.assertEqual(valid_or_not(qc), True)
@@ -546,7 +546,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """
         qc = QCirc().h(0).cx(0,1).crx(1,0, phase=0.1).csw(0,1,2)
         bk = Backend()
-        qs_A = bk.run(qcirc=qc).info['qstate']
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).h(0).cx(0,1).crx(1,0, phase=0.1).csw(0,1,2)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
         self.assertEqual(valid_or_not(qc), True)

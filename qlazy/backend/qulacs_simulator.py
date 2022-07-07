@@ -67,17 +67,19 @@ GateFunctionName = {
     cfg.CONTROLLED_U3:'__get_CU3',
 }
 
-def run_cpu(qcirc=None, shots=1, cid=None, backend=None):
+def run_cpu(qcirc=None, shots=1, cid=None, backend=None, out_state=False):
     """ run the quantum circuit (CPU) """
 
-    return __run_all(qcirc=qcirc, shots=shots, cid=cid, backend=backend, proc='CPU')
+    return __run_all(qcirc=qcirc, shots=shots, cid=cid, backend=backend, proc='CPU',
+                     out_state=out_state)
 
-def run_gpu(qcirc=None, shots=1, cid=None, backend=None):
+def run_gpu(qcirc=None, shots=1, cid=None, backend=None, out_state=False):
     """ run the quantum circuit (GPU) """
 
-    return __run_all(qcirc=qcirc, shots=shots, cid=cid, backend=backend, proc='GPU')
+    return __run_all(qcirc=qcirc, shots=shots, cid=cid, backend=backend, proc='GPU',
+                     out_state=out_state)
 
-def __run_all(qcirc=None, shots=1, cid=None, backend=None, proc='CPU'):
+def __run_all(qcirc=None, shots=1, cid=None, backend=None, proc='CPU', out_state=False):
 
     if qcirc is None:
         raise ValueError("quantum circuit must be specified.")

@@ -153,14 +153,12 @@ static bool _qstate_update_prob_array_gpu(QState* qstate)
   if (qstate->d_prob_updated == false) {
     if (qstate->d_buf_id == 0) d_camp = d_buffer_0;
     else d_camp = d_buffer_1;
-
+  
     cuda_qstate_update_prob_array<<< grid, block >>>(d_camp, d_prob_array,
-						     qstate->state_num);
-    qstate->d_prob_updated = true;
-
-    if (!(qstate_update_host_memory(qstate)))
-      ERR_RETURN(ERROR_QSTATE_UPDATE_HOST_MEMORY, false);
-
+  						     qstate->state_num);
+    checkCudaErrors(cudaMemcpy(qstate->prob_array, qstate->d_prob_array, sizeof(double) * qstate->state_num,
+  			       cudaMemcpyDeviceToHost));
+  
     prob_pre = qstate->prob_array[0];
     qstate->prob_array[0] = 0.0;
     for (i=1; i<qstate->state_num; i++) {
@@ -168,9 +166,11 @@ static bool _qstate_update_prob_array_gpu(QState* qstate)
       qstate->prob_array[i] = qstate->prob_array[i - 1] + prob_pre;
       prob_pre = prob_now;
     }
-
-    if (!(qstate_update_device_memory(qstate)))
-      ERR_RETURN(ERROR_QSTATE_UPDATE_DEVICE_MEMORY, false);
+  
+    checkCudaErrors(cudaMemcpy(qstate->d_prob_array, qstate->prob_array, sizeof(double) * qstate->state_num,
+  			       cudaMemcpyHostToDevice));
+    
+    qstate->d_prob_updated = true;
   }
 
   SUC_RETURN(true);
@@ -478,7 +478,7 @@ bool qstate_operate_qcirc_gpu(QState* qstate, CMem* cmem, QCirc* qcirc, bool mea
 }
 
 bool qstate_operate_measure_gpu(QState* qstate, CMem* cmem, QCirc* qcirc,
-				int shots, char* mchar_shots)
+				int shots, char* mchar_shots, bool out_state)
 /* qcirc execution and get measurement data (suppose that qcirc includes only measurements) */
 {
   char*			measured_char = NULL;
@@ -487,6 +487,7 @@ bool qstate_operate_measure_gpu(QState* qstate, CMem* cmem, QCirc* qcirc,
   QGate*		qgate	      = NULL;
   int			mnum;
   bool			last;
+  int                   shots_tmp;
   bool			measure_update;
   bool			ans;
   float*		d_rand	      = NULL;
@@ -532,27 +533,34 @@ bool qstate_operate_measure_gpu(QState* qstate, CMem* cmem, QCirc* qcirc,
   /* update prob array */
   _qstate_update_prob_array_gpu(qstate);
 
-  /* (shots - 1) times measurement -> not update qstate */
+  if (out_state == true) shots_tmp = shots - 1;
+  else shots_tmp = shots;
+  
+  /* shots_tmp times measurement -> not update qstate */
   cuda_qstate_operate_measure<<< grid, block >>>(qstate->d_camp, qstate->d_prob_array, d_mchar_shots,
 						 d_rand, qstate->qubit_num, qstate->state_num,
-						 cmem->cmem_num, mnum, shots - 1);
-
+						 cmem->cmem_num, mnum, shots_tmp);
+  
   checkCudaErrors(cudaMemcpy(mchar_shots, d_mchar_shots, sizeof(char) * cmem->cmem_num * shots,
 			     cudaMemcpyDeviceToHost));
 
   /* last one shot measurement -> update qstate */
-  measure_update = true;
-  if (!(_qstate_measure_gpu(qstate, mnum, qid, measured_char, measure_update)))
-    ERR_RETURN(ERROR_QSTATE_MEASURE, false);
-  for (k=0; k<mnum; k++) {
-    cmem->bit_array[cid[k]] = measured_char[k];
-  }
-  for (j=0; j<cmem->cmem_num; j++) {
-    mchar_shots[(shots - 1) * cmem->cmem_num + j] = cmem->bit_array[j];
+  if (out_state == true) {
+    measure_update = true;
+    if (!(_qstate_measure_gpu(qstate, mnum, qid, measured_char, measure_update)))
+      ERR_RETURN(ERROR_QSTATE_MEASURE, false);
+    for (k=0; k<mnum; k++) {
+      cmem->bit_array[cid[k]] = measured_char[k];
+    }
+    for (j=0; j<cmem->cmem_num; j++) {
+      mchar_shots[(shots - 1) * cmem->cmem_num + j] = cmem->bit_array[j];
+    }
   }
   
-  if (!(qstate_update_device_memory(qstate)))
-    ERR_RETURN(ERROR_QSTATE_UPDATE_DEVICE_MEMORY, false);
+  if (out_state == true) {
+    if (!(qstate_update_device_memory(qstate)))
+      ERR_RETURN(ERROR_QSTATE_UPDATE_DEVICE_MEMORY, false);
+  }
 
   qstate->d_prob_updated = false;
 

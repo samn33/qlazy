@@ -77,7 +77,6 @@ int main(int argc, char** argv)
   int		  sec, nsec;
   struct timespec e_start, e_end;
 
-  //  Proc            proc = CPU;
   bool            use_gpu = false;
   
   /* get command line arguments */
@@ -133,16 +132,12 @@ int main(int argc, char** argv)
   }
   else if (interactive == ON) {  /* execute in interactive mode */
     printf("interactive mode\n");
-    //if (!(qsystem_intmode(qsystem, fname_ini)))
-    //    if (!(qsystem_intmode(qsystem, fname_ini, proc)))
     if (!(qsystem_intmode(qsystem, fname_ini, use_gpu)))
       ERR_RETURN(ERROR_QSYSTEM_INTMODE,1);
   }
   else {  /* execute quantum circuit file */
     c_start = clock();
     clock_gettime(CLOCK_REALTIME, &e_start);
-    //    if (!(qsystem_execute(qsystem, fname_qc)))
-    //    if (!(qsystem_execute(qsystem, fname_qc, proc)))
     if (!(qsystem_execute(qsystem, fname_qc, use_gpu)))
       ERR_RETURN(ERROR_QSYSTEM_EXECUTE,1);
     c_end = clock();

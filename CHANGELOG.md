@@ -5,6 +5,8 @@
 - GPU suport for quantum circuit execution with state vector simulator (build from source code)
 ### Changed
 - improvement of measurement performance
+### Added
+- properties (qstate, stabilizer, cmem) to Result class
 
 ## [0.2.7] - 2022-03-31
 ### Fixed

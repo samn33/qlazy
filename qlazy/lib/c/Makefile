@@ -52,7 +52,6 @@ CC = g++
 CC_LINK = nvcc
 
 CFLAG_CC = -fPIC -fopenmp -Wall -O2 -DDEV
-# CFLAG_LINK = -Xcompiler '-fPIC -fopenmp -Wall -O2 -DUSE_GPU --std=c++03' -ccbin g++
 CFLAG_LINK = --default-stream per-thread -Xcompiler '-fPIC -fopenmp -Wall -O2 -DUSE_GPU --std=c++03' -ccbin g++
 
 IFLAG = -I. -I$(CUDA_INC_DIR)

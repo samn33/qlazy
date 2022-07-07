@@ -513,7 +513,8 @@ bool     gbank_get_unitary(GBank* gbank, Kind kind, double phase, double phase1,
 
 /* qstate.c */
 bool	 qstate_init(int qubit_num, void** qstate_out, bool use_gpu);
-bool	 qstate_init_with_vector(double* real, double* imag, int dim, void** qstate_out, bool use_gpu);
+bool	 qstate_init_with_vector(double* real, double* imag, int dim, void** qstate_out,
+				 bool use_gpu);
 bool     qstate_normalize(QState* qstate);
 bool	 qstate_reset(QState* qstate, int qubit_num, int* qubit_id);
 bool	 qstate_copy(QState* qstate, void** qstate_out);
@@ -537,7 +538,8 @@ bool     qstate_tensor_product(QState* qstate_0, QState* qstate_1, void** qstate
 bool     qstate_expect_value(QState* qstate, Observable* observ, double* value);
 bool     qstate_apply_matrix(QState* qstate, int qnum, int* qid,
 			     double* real, double *imag, int row, int col);
-bool     qstate_operate_qcirc(QState* qstate, CMem* cmem, QCirc* qcirc, int shots, char* mchar_shots);
+bool     qstate_operate_qcirc(QState* qstate, CMem* cmem, QCirc* qcirc, int shots,
+			      char* mchar_shots, bool out_state);
 void	 qstate_free(QState* qstate);
 
 /* mdata.c */
@@ -638,7 +640,8 @@ bool qstate_operate_unitary4_gpu(COMPLEX* camp_out, COMPLEX* camp_in, COMPLEX* U
 bool qstate_operate_controlled_gate_gpu(QState* qstate, COMPLEX* U, int m, int n);
 bool qstate_operate_unitary_gpu(QState* qstate, COMPLEX* U, int dim, int m, int n);
 bool qstate_operate_qcirc_gpu(QState* qstate, CMem* cmem, QCirc* qcirc, bool measure_update);
-bool qstate_operate_measure_gpu(QState* qstate, CMem* cmem, QCirc* qcirc, int shots, char* mchar_shots);
+bool qstate_operate_measure_gpu(QState* qstate, CMem* cmem, QCirc* qcirc, int shots,
+				char* mchar_shots, bool out_state);
 bool qstate_update_host_memory(QState* qstate);
 bool qstate_update_device_memory(QState* qstate);
 void qstate_free_gpu(QState* qstate);

@@ -112,7 +112,7 @@ def __convert_to_braket_circuit(qc_qlazy, product):
 
     return qc_braket, measured_info
 
-def run(qcirc=None, shots=1, cid=None, backend=None):
+def run(qcirc=None, shots=1, cid=None, backend=None, out_state=False):
     """ run the quantum circuit on braket_sv """
 
     if qcirc is None:

@@ -341,7 +341,7 @@ QStateクラスを継承することで、自分専用の量子ゲートを簡�
 確率振幅がゼロでない成分だけを表示したい場合、以下のように'nonzero'オ
 プションを使えばできます。
 
-    qs.show(nonzeor=True)
+    qs.show(nonzero=True)
 	
 とすると、
 

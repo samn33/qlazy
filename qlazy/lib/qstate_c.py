@@ -409,7 +409,6 @@ def qstate_operate_qgate(qs, kind=None, qid=None, phase=cfg.DEF_PHASE,
     if ret == cfg.FALSE:
         raise ValueError("can't operate quantum gate to the quantum state vector.")
 
-# bool     qstate_measure(QState*	qstate, int mnum, int* qid, char* measured_str);
 def qstate_measure(qs, qid=None):
     """ measurement of the qubits """
 
@@ -439,13 +438,8 @@ def qstate_measure(qs, qid=None):
     lib.qstate_measure.restype = ctypes.c_int
     lib.qstate_measure.argtypes = [ctypes.POINTER(QState), ctypes.c_int,
                                    IntArray, ctypes.c_char_p, ctypes.c_bool]
-    # ret = lib.qstate_measure(ctypes.byref(qs), ctypes.c_int(mnum),
-    #                          qid_array, mstr_array, True)
     ret = lib.qstate_measure(ctypes.byref(qs), ctypes.c_int(mnum),
                              qid_array, mchar_array, True)
-
-    # bool qstate_measure(QState* qstate, int mnum, int* qid, char* measured_char,
-    #		    bool measure_update)
 
     if ret == cfg.FALSE:
         raise ValueError("can't measure the qubits.")
@@ -453,44 +447,7 @@ def qstate_measure(qs, qid=None):
     measured_str = mstr_array.value.decode()
     measured_str = "".join(map(str, [int.from_bytes(c, byteorder='big') for c in mchar_array]))
 
-    # mchar = mchar_array[:]
-    # measured_str = "".join(map(str, mchar))
-
     return measured_str
-
-# def qstate_measure(qs, qid=None, angle=0.0, phase=0.0):
-#     """ measurement of the qubits """
-# 
-#     if qid is None or qid == []:
-#         qid = list(range(qs.qubit_num))
-# 
-#     # operate
-#     qubit_num = len(qid)
-#     qubit_id = [0 for _ in range(qubit_num)]
-#     for i, q in enumerate(qid):
-#         qubit_id[i] = q
-#     IntArray = ctypes.c_int * qubit_num
-#     qid_array = IntArray(*qubit_id)
-# 
-#     mval = 0
-#     c_mval = ctypes.c_int(mval)
-# 
-#     lib.qstate_measure.restype = ctypes.c_int
-#     lib.qstate_measure.argtypes = [ctypes.POINTER(QState),
-#                                    ctypes.c_double, ctypes.c_double,
-#                                    ctypes.c_int, IntArray, ctypes.POINTER(ctypes.c_int)]
-#     ret = lib.qstate_measure(ctypes.byref(qs),
-#                              ctypes.c_double(angle), ctypes.c_double(phase),
-#                              ctypes.c_int(qubit_num), qid_array, ctypes.byref(c_mval))
-# 
-#     if ret == cfg.FALSE:
-#         raise ValueError("can't measure the qubits.")
-# 
-#     mval = c_mval.value
-#     digits = len(qid)
-#     mval = '{:0{digits}b}'.format(mval, digits=digits)
-# 
-#     return mval
 
 def qstate_measure_stats(qs, qid=None, shots=cfg.DEF_SHOTS, angle=0.0, phase=0.0):
     """ measurement of the qubits and get stats """
@@ -562,8 +519,7 @@ def qstate_measure_bell_stats(qs, qid=None, shots=cfg.DEF_SHOTS):
 
     return out.contents
 
-# qstate_operate_qcircを一発実行して得られるmchar_shotsから頻度をreturnするように変更
-def qstate_operate_qcirc(qstate, cmem, qcirc, shots, cid):
+def qstate_operate_qcirc(qstate, cmem, qcirc, shots, cid, out_state):
     """ operate quantum circuit """
 
     if cmem is not None:
@@ -577,29 +533,25 @@ def qstate_operate_qcirc(qstate, cmem, qcirc, shots, cid):
     mchar_shots = CharArray(*mchar_array)
 
     lib.qstate_operate_qcirc.restype = ctypes.c_int
-    # lib.qstate_operate_qcirc.argtypes = [ctypes.POINTER(QState),
-    #                                      ctypes.POINTER(CMem), ctypes.POINTER(QCirc)]
     lib.qstate_operate_qcirc.argtypes = [ctypes.POINTER(QState),
                                          ctypes.POINTER(CMem), ctypes.POINTER(QCirc),
-                                         ctypes.c_int, CharArray]
+                                         ctypes.c_int, CharArray, ctypes.c_bool]
 
     if cmem is not None:
-
         ret = lib.qstate_operate_qcirc(ctypes.byref(qstate),
                                        ctypes.byref(cmem), ctypes.byref(qcirc),
-                                       ctypes.c_int(shots), mchar_shots)
-
+                                       ctypes.c_int(shots), mchar_shots, ctypes.c_bool(out_state))
         frequency = Counter()
         for i in range(0, len(mchar_shots), cmem_num):
             cmem_list = mchar_shots[i:i+cmem_num]
             cmem_list_part = [cmem_list[c] for c in cid]
             mchar = "".join(map(str, cmem_list_part))
             frequency[mchar] += 1
-        
+
     else: # unitary only
         c_cmem = ctypes.POINTER(CMem)()
         ret = lib.qstate_operate_qcirc(ctypes.byref(qstate), c_cmem, ctypes.byref(qcirc),
-                                       ctypes.c_int(shots), mchar_shots)
+                                       ctypes.c_int(shots), mchar_shots, ctypes.c_bool(out_state))
 
         frequency = None
 

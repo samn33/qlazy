@@ -6,6 +6,9 @@ import datetime
 import pickle
 
 from qlazy.Backend import Backend
+from qlazy.QState import QState
+from qlazy.Stabilizer import Stabilizer
+from qlazy.CMem import CMem
 
 class Result:
     """ Result of quantum circuit execution
@@ -30,6 +33,12 @@ class Result:
         end time to ececute the quantum circuit.
     elapsed_time : float
         elapsed time to ececute the quantum circuit.
+    qstate : instance of QState
+        quantum state after executing circuit.
+    stabilizer : instance of Stabilizer
+        stabilizer state after executing circuit.
+    cmem : instance of CMem
+        classical memory after executing circuit.
     info : dict
         result informations relating to the backend device
 
@@ -45,6 +54,9 @@ class Result:
         self.__start_time = None
         self.__end_time = None
         self.__elapsed_time = None
+        self.__qstate = None
+        self.__stabilizer = None
+        self.__cmem = None
         self.__info = None
 
     # backend
@@ -172,6 +184,42 @@ class Result:
         if isinstance(elapsed_time, float) is False:
             raise TypeError("type of elaased_time must be float.")
         self.__elapsed_time = elapsed_time
+
+    # qstate
+
+    @property
+    def qstate(self):
+        """ getter of qstate """
+        return self.__qstate
+
+    @qstate.setter
+    def qstate(self, qstate):
+        """ setter of qstate """
+        self.__qstate = qstate
+
+    # stabilizer
+
+    @property
+    def stabilizer(self):
+        """ getter of stabilizer """
+        return self.__stabilizer
+
+    @stabilizer.setter
+    def stabilizer(self, stabilizer):
+        """ setter of stabilizer """
+        self.__stabilizer = stabilizer
+
+    # cmem
+
+    @property
+    def cmem(self):
+        """ getter of cmem """
+        return self.__cmem
+
+    @cmem.setter
+    def cmem(self, cmem):
+        """ setter of cmem """
+        self.__cmem = cmem
 
     # info
 

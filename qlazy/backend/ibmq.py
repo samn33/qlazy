@@ -11,7 +11,7 @@ from qiskit.circuit.library.standard_gates import SXdgGate
 import qlazy.config as cfg
 from qlazy.Result import Result
 
-def run(qcirc=None, shots=1, cid=None, backend=None):
+def run(qcirc=None, shots=1, cid=None, backend=None, out_state=False):
     """ run the quantum circuit """
 
     if qcirc is None:

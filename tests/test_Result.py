@@ -107,7 +107,7 @@ class TestResult_setter_getter(unittest.TestCase):
         self.assertEqual(type(result.start_time), datetime.datetime)
         self.assertEqual(type(result.end_time), datetime.datetime)
         self.assertEqual(type(result.elapsed_time), float)
-        self.assertEqual(type(result.info), dict)
+        self.assertEqual(result.info, None)
             
 if __name__ == '__main__':
 
