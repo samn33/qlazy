@@ -5,13 +5,14 @@ Quantum Computing Simulator
 
 ## Feature
 
-- Simple quantum calculations are possible with command line tool.
-- Quantum state operations or quantum circuit executions are possible with Python package.
+- Simple quantum calculation using command line tool is possible.
+- Quantum state operation or quantum circuit execution is possible with Python package.
 - Support three types of quantum states: 1) quantum state vector, 2) density operator, 3) stabilizer state.
-- Other quantum computing services or simulators can be uesd as backend (followings are supported).
+- Other quantum computing services or simulators can be used as backend (followings are supported).
     - [qulacs](https://github.com/qulacs/qulacs)
     - [IBM Quantum(IBMQ)](https://quantum-computing.ibm.com/)
     - [Amazon Braket(LocalSimulator,AWS,IonQ,Rigetti,OQC)](https://aws.amazon.com/braket/?nc1=h_ls)
+- High-speed quantum circuit execution using GPU is possible (build from source code).
 
 ## Install
 
@@ -29,13 +30,13 @@ You may also need to install 'libreadline-dev'
 
     $ sudo apt install libreadline-dev
 
+If you want to use GPU version
+
+    $ python setup_gpu.py install --user
+
 ### Uninstall
 
     $ pip uninstall qlazy
-
-### Uninstall (old version <= 0.1.5)
-
-    $ rm ~/bin/qlazy ~/lib/libqlz.so
 
 ## Usage
 
@@ -114,7 +115,17 @@ bar.py
 	
     from qlazy import QCirc, Backend
     
-    bk = Backend()
+    bk = Backend(product='qlazy', device='qstate_simulator')
+    qc = QCirc().h(0).cx(0,1).measure(qid=[0,1], cid=[0,1])
+    result = bk.run(qcirc=qc, shots=100)
+    print(result.frequency)
+
+bar-gpu.py
+	
+    from qlazy import QCirc, Backend
+
+    # using GPU
+    bk = Backend(product='qlazy', device='qstate_gpu_simulator')
     qc = QCirc().h(0).cx(0,1).measure(qid=[0,1], cid=[0,1])
     result = bk.run(qcirc=qc, shots=100)
     print(result.frequency)
@@ -139,8 +150,16 @@ execute the program
 
 ## Requirements
 
-- Linux(Ubuntu20.04)
-- Python3.8
+- Linux (Ubuntu 20.04 LTS)
+- Python 3.8
+- numpy 1.21.0
+
+Optional ...
+- pyzx 0.7.0 (to use quantum circuit optimization with ZX-calculus)
+- Qulacs 0.3.0 (to use qulucs backend)
+- qiskit 0.34.2 (to use IBMQ backend)
+- amazon-braket-sdk 1.18.0 (to use amazon braket backend)
+- cuda 11 (to use GPU version)
 
 ## Licence
 

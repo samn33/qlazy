@@ -57,6 +57,7 @@ qstate_simulator(状態ベクトルシミュレータ)というdeviceで計算�
 やDensopクラスと同じ記法でQCircクラスのインスタンスにゲートを追加して
 いきます。例えば、Bell状態を作成する回路を作成したい場合は、
 
+    from qlazy import QCirc
     qc = QCirc()
     qc.h(0)
     qc.cx(0,1)
@@ -267,14 +268,15 @@ Pythonワンライナーで、以下のように結果データを見ること�
 ### 量子状態の取得(qlazyの場合のみ)
 
 qlazyの状態ベクトルシミュレータまたはスタビライザーシミュレータで量子
-計算を実行した場合、resultのinfoプロパティとして格納されている辞書デー
-タから以下のようにして、量子状態またはスタビライザー状態を取り出すこと
-ができます(複数回の測定があれば最後の測定後の状態が取り出せます)。
+回路を実行した場合、以下のようにして、最後の量子状態またはスタビライザー
+状態を取得することができます。runを実行するときにout_stateオプションを
+Trueにセットすると、Resultのプロパティqstateまたはstabilizerに状態がセッ
+トされます(複数回の測定があれば最後の測定後の状態が取り出せます)。
 
     qc = QCirc().h(0).cx(0,1)
     qs_sim = Backend(product='qlazy', device='qstate_simulator')
-    result = qs_sim.run(qcirc=qc)
-    qs = result.info['qstate']
+    result = qs_sim.run(qcirc=qc, out_state=True)
+    qs = result.qstate
     qs.show()
     >>> c[00] = +0.7071+0.0000*i : 0.5000 |++++++
     >>> c[01] = +0.0000+0.0000*i : 0.0000 |
@@ -283,8 +285,8 @@ qlazyの状態ベクトルシミュレータまたはスタビライザーシミ
 
     qc = QCirc().h(0).cx(0,1)
     sb_sim = Backend(product='qlazy', device='stabilizer_simulator')
-    result = sb_sim.run(qcirc=qc)
-    sb = result.info['stabilizer']
+    result = sb_sim.run(qcirc=qc, out_state)
+    sb = result.stabilizer
     sb.show()
     >>> g[0]:  XX
     >>> g[1]:  ZZ
@@ -879,6 +881,53 @@ OQCのLucyを使う場合、
 以下のページに料金表がありますので参考にしてください。
 
 [Amazon Braket Pricing](https://aws.amazon.com/jp/braket/pricing/)
+
+
+## GPU版の利用
+
+GPUを利用した高速な量子回路実行が可能です(v0.3.0より)。ただし、以下の
+ようにGPU対応版をインストールする必要があります。
+
+    $ git clone https://github.com/samn33/qlazy.git
+    $ cd qlazy
+    $ python setup_gpu.py install --user
+
+インストールにあたりNVIDIA CUDA11の環境が整っていることが前提です。GPU
+版がインストールされたかどうかは、
+
+    $ qlazy -v
+
+を実行して、
+
+    * Version: 0.3.0-cuda
+
+と表示されたら、とりあえずインストールされたのだと思って良いです。もし、
+
+    * Version: 0.3.0
+
+と表示されたとすると、あなたがお持ちのqlazyはCPU版です。
+
+さて、無事GPU版がインストールされたとして、どうやって使うかを説明します。
+CPU版の場合は、例えば、
+
+    from qlazy import QCirc, Backend
+    bk = Backend(product='qlazy', device='qstate_simulator')
+    qc = QCirc().h(0).cx(0,1).measure(qid=[0,1], cid=[0,1])
+	result = bk.run(qcic=qc, shots=100)
+
+でした。GPU版を使う場合は、Backendのインスタンス生成の時に、
+deviceを'qstate_gpu_simulator'にするだけです。
+
+    from qlazy import QCirc, Backend
+    bk = Backend(product='qlazy', device='qstate_gpu_simulator')
+    qc = QCirc().h(0).cx(0,1).measure(qid=[0,1], cid=[0,1])
+	result = bk.run(qcic=qc, shots=100)
+
+これでOKです。GPU対応のモジュールをimportするようなことは必要ありません。
+
+いまのところGPU対応版で計算できるのは、状態ベクトルシミュレータを利用
+した量子回路計算だけです。QStateやDensOpやStabilizerクラスのGPU版はあ
+りません（そのうち作るかどうかは未定です）。
 
 
 以上
