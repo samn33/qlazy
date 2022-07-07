@@ -4,7 +4,6 @@ import ctypes
 from ctypes.util import find_library
 import pathlib
 
-import qlazy.config as cfg
 from qlazy.util import get_lib_ext
 from qlazy.Observable import Observable
 
@@ -19,12 +18,12 @@ def observable_init(ostr):
     observ = None
     c_observ = ctypes.c_void_p(observ)
 
-    lib.observable_init.restype = ctypes.c_int
+    lib.observable_init.restype = ctypes.c_bool
     lib.observable_init.argtypes = [ctypes.POINTER(ctypes.c_char),
                                     ctypes.POINTER(ctypes.c_void_p)]
     ret = lib.observable_init(c_str, c_observ)
 
-    if ret == cfg.FALSE:
+    if ret is False:
         raise ValueError("can't initialize Observable object.")
 
     return c_observ

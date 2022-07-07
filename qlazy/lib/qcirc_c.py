@@ -17,11 +17,11 @@ def qcirc_init():
     qcirc = None
     c_qcirc = ctypes.c_void_p(qcirc)
 
-    lib.qcirc_init.restype = ctypes.c_int
+    lib.qcirc_init.restype = ctypes.c_bool
     lib.qcirc_init.argtypes = [ctypes.POINTER(ctypes.c_void_p)]
     ret = lib.qcirc_init(c_qcirc)
 
-    if ret == cfg.FALSE:
+    if ret is False:
         raise ValueError("can't initialize QCirc object.")
 
     return c_qcirc
@@ -32,12 +32,12 @@ def qcirc_copy(qc):
     qcirc = None
     c_qcirc = ctypes.c_void_p(qcirc)
 
-    lib.qcirc_copy.restype = ctypes.c_int
+    lib.qcirc_copy.restype = ctypes.c_bool
     lib.qcirc_copy.argtypes = [ctypes.POINTER(QCirc),
                                ctypes.POINTER(ctypes.c_void_p)]
     ret = lib.qcirc_copy(ctypes.byref(qc), c_qcirc)
 
-    if ret == cfg.FALSE:
+    if ret is False:
         raise ValueError("can't copy QCirc object.")
 
     return c_qcirc
@@ -48,12 +48,12 @@ def qcirc_merge(qc_L, qc_R):
     qcirc = None
     c_qcirc = ctypes.c_void_p(qcirc)
 
-    lib.qcirc_merge.restype = ctypes.c_int
+    lib.qcirc_merge.restype = ctypes.c_bool
     lib.qcirc_merge.argtypes = [ctypes.POINTER(QCirc), ctypes.POINTER(QCirc),
                                 ctypes.POINTER(ctypes.c_void_p)]
     ret = lib.qcirc_merge(ctypes.byref(qc_L), ctypes.byref(qc_R), c_qcirc)
 
-    if ret == cfg.FALSE:
+    if ret is False:
         raise ValueError("can't merge QCirc objects.")
 
     return c_qcirc
@@ -64,12 +64,12 @@ def qcirc_is_equal(qc_L, qc_R):
     ans = True
     c_ans = ctypes.c_bool(ans)
 
-    lib.qcirc_is_equal.restype = ctypes.c_int
+    lib.qcirc_is_equal.restype = ctypes.c_bool
     lib.qcirc_is_equal.argtypes = [ctypes.POINTER(QCirc), ctypes.POINTER(QCirc),
                                    ctypes.POINTER(ctypes.c_bool)]
     ret = lib.qcirc_is_equal(ctypes.byref(qc_L), ctypes.byref(qc_R), ctypes.byref(c_ans))
 
-    if ret == cfg.FALSE:
+    if ret is False:
         raise ValueError("can't determine equal or not.")
 
     ans = c_ans.value
@@ -92,13 +92,13 @@ def qcirc_append_gate(qcirc, kind, qid, para, c, ctrl):
     c_qid = IntArray(*qid)
     c_para = DoubleArray(*para)
 
-    lib.qcirc_append_gate.restype = ctypes.c_int
+    lib.qcirc_append_gate.restype = ctypes.c_bool
     lib.qcirc_append_gate.argtypes = [ctypes.POINTER(QCirc), ctypes.c_int, IntArray, DoubleArray,
                                       ctypes.c_int, ctypes.c_int]
     ret = lib.qcirc_append_gate(ctypes.byref(qcirc), ctypes.c_int(kind), c_qid, c_para,
                                 ctypes.c_int(c), ctypes.c_int(ctrl))
 
-    if ret == cfg.FALSE:
+    if ret is False:
         raise ValueError("can't append quantum gate.")
 
 def qcirc_kind_first(qc):
@@ -107,11 +107,11 @@ def qcirc_kind_first(qc):
     kind = 0
     c_kind = ctypes.c_int(kind)
 
-    lib.qcirc_kind_first.restype = ctypes.c_int
+    lib.qcirc_kind_first.restype = ctypes.c_bool
     lib.qcirc_kind_first.argtypes = [ctypes.POINTER(QCirc), ctypes.POINTER(ctypes.c_int)]
     ret = lib.qcirc_kind_first(ctypes.byref(qc), ctypes.byref(c_kind))
 
-    if ret == cfg.FALSE:
+    if ret is False:
         raise ValueError("can't get 1st gate kind.")
 
     kind = c_kind.value
@@ -137,7 +137,7 @@ def qcirc_pop_gate(qc):
     ctrl = -1
     c_ctrl = ctypes.c_int(ctrl)
 
-    lib.qcirc_pop_gate.restype = ctypes.c_int
+    lib.qcirc_pop_gate.restype = ctypes.c_bool
     lib.qcirc_pop_gate.argtypes = [ctypes.POINTER(QCirc), ctypes.POINTER(ctypes.c_int),
                                    ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_double),
                                    ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_int)]
@@ -145,7 +145,7 @@ def qcirc_pop_gate(qc):
     ret = lib.qcirc_pop_gate(ctypes.byref(qc), ctypes.byref(c_kind), c_qid, c_para,
                              ctypes.byref(c_c), ctypes.byref(c_ctrl))
 
-    if ret == cfg.FALSE:
+    if ret is False:
         raise ValueError("can't pop gate.")
 
     kind = c_kind.value
@@ -161,17 +161,6 @@ def qcirc_pop_gate(qc):
 
     return (kind, qid, para, c, ctrl)
 
-# def qcirc_is_measurement_only(qc):
-# 
-#     ans = 0
-#     c_ans = ctypes.c_bool(ans)
-#     
-#     lib.qcirc_is_measurement_only.restype = ctypes.c_int
-#     lib.qcirc_is_measurement_only.argtypes = [ctypes.POINTER(QCirc), ctypes.POINTER(ctypes.c_bool)]
-#     ret = lib.qcirc_is_measurement_only(ctypes.byref(qc), ctypes.byref(c_ans))
-# 
-#     return c_ans.value
-    
 def qcirc_free(qcirc):
     """ free memory of the QCirc object """
 
