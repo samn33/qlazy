@@ -109,6 +109,40 @@ class TestResult_setter_getter(unittest.TestCase):
         self.assertEqual(type(result.elapsed_time), float)
         self.assertEqual(result.info, None)
             
+class TestResult_save_load(unittest.TestCase):
+    """ test 'Result' : 'setter, getter'
+    """
+
+    def test_save_load(self):
+        """test 'save, load'
+        """
+        result_src = Result()
+        result_src.backend = Backend(product='qlazy', device='qstate_simulator')
+        result_src.qubit_num = 5
+        result_src.cmem_num = 6
+        result_src.cid = [0,1]
+        result_src.shots = 100
+        result_src.frequency = Counter({'00': 51, '11': 49})
+        result_src.start_time = datetime.datetime(2022, 7, 7)
+        result_src.end_time = datetime.datetime(2022, 7, 7, hour=1, minute=2, second=3)
+        result_src.elapsed_time = 0.01
+        result_src.info = {'hoge': 333}
+        result_src.save("tmp/result.dat")
+
+        result_dst = Result.load("tmp/result.dat")
+        self.assertEqual(result_dst.backend.product, 'qlazy')
+        self.assertEqual(result_dst.backend.device, 'qstate_simulator')
+        self.assertEqual(result_dst.qubit_num, 5)
+        self.assertEqual(result_dst.cmem_num, 6)
+        self.assertEqual(result_dst.cid, [0,1])
+        self.assertEqual(result_dst.shots, 100)
+        self.assertEqual(result_dst.frequency['00'], 51)
+        self.assertEqual(result_dst.frequency['11'], 49)
+        self.assertEqual(result_dst.start_time, datetime.datetime(2022, 7, 7))
+        self.assertEqual(result_dst.end_time, datetime.datetime(2022, 7, 7, hour=1, minute=2, second=3))
+        self.assertEqual(result_dst.elapsed_time, 0.01)
+        self.assertEqual(result_dst.info, None)
+        
 if __name__ == '__main__':
 
     unittest.main()
