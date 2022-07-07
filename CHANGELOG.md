@@ -1,8 +1,8 @@
 # Change Log
 
-## [0.3.0] - 2022-xx-xx
+## [0.3.0] - 2022-07-xx
 ### Added
-- GPU suport for quantum circuit execution with state vector simulator (build from source code)
+- GPU support for quantum circuit execution with state vector simulator (build from source code)
 ### Changed
 - improvement of measurement performance
 ### Added
