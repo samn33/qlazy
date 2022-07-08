@@ -265,13 +265,14 @@ Pythonワンライナーで、以下のように結果データを見ること�
     $ python -c "from qlazy import Result; Result.load('hoge.res').show(verbose=True)"
 
 
-### 量子状態の取得(qlazyの場合のみ)
+### 量子状態の取得(qlazyおよびqulacsのみ)
 
-qlazyの状態ベクトルシミュレータまたはスタビライザーシミュレータで量子
-回路を実行した場合、以下のようにして、最後の量子状態またはスタビライザー
-状態を取得することができます。runを実行するときにout_stateオプションを
-Trueにセットすると、Resultのプロパティqstateまたはstabilizerに状態がセッ
-トされます(複数回の測定があれば最後の測定後の状態が取り出せます)。
+qlazyの状態ベクトルシミュレータ(qstate_simulator)またはスタビライザー
+シミュレータ(stabilizer_simulator)で量子回路を実行した場合、以下のよう
+にして、最後の量子状態またはスタビライザー状態を取得することができます。
+runを実行するときにout_stateオプションをTrueにセットすると、Resultのプ
+ロパティqstateまたはstabilizerに状態がセットされます(複数回の測定があ
+れば最後の測定後の状態が取り出せます)。
 
     qc = QCirc().h(0).cx(0,1)
     qs_sim = Backend(product='qlazy', device='qstate_simulator')
@@ -290,6 +291,19 @@ Trueにセットすると、Resultのプロパティqstateまたはstabilizerに
     sb.show()
     >>> g[0]:  XX
     >>> g[1]:  ZZ
+
+また、qulacsの状態ベクトルシミュレータ(cpu_simulator, gpu_simulator)で
+も同様にして、qlazyの状態ベクトルを取得することができます。
+
+    qc = QCirc().h(0).cx(0,1)
+    qs_sim = Backend(product='qulacs', device='cpu_simulator')
+    result = qs_sim.run(qcirc=qc, out_state=True)
+    qs = result.qstate
+    qs.show()
+    >>> c[00] = +0.7071+0.0000*i : 0.5000 |++++++
+    >>> c[01] = +0.0000+0.0000*i : 0.0000 |
+    >>> c[10] = +0.0000+0.0000*i : 0.0000 |
+    >>> c[11] = +0.7071+0.0000*i : 0.5000 |++++++
 
 
 ### 対応している量子ゲート
