@@ -58,6 +58,16 @@ bool cmem_get_bits(CMem* cmem, void** bits_out)
   SUC_RETURN(true);
 }
 
+bool cmem_set_bits(CMem* cmem, BYTE* bits, int num)
+{
+  if ((cmem == NULL) || (cmem->cmem_num != num))
+    ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
+
+  memcpy(cmem->bit_array, bits, sizeof(BYTE) * cmem->cmem_num);
+  
+  SUC_RETURN(true);
+}
+
 void cmem_free(CMem* cmem)
 {
   if (cmem == NULL) return;

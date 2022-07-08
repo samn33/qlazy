@@ -624,6 +624,7 @@ void qcirc_free(QCirc* qcirc);
 bool cmem_init(int cmem_num, void** cmem_out);
 bool cmem_copy(CMem* cmem_in, void** cmem_out);
 bool cmem_get_bits(CMem* cmem, void** bits_out);
+bool cmem_set_bits(CMem* cmem, BYTE* bits, int num);
 void cmem_free(CMem* cmem);
 
 #ifdef USE_GPU

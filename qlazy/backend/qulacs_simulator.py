@@ -18,8 +18,10 @@ from qulacs.gate import DenseMatrix
 from qulacs.gate import to_matrix_gate
 
 import qlazy.config as cfg
-from qlazy.util import get_qgate_qubit_num, get_qgate_param_num
+from qlazy.util import get_qgate_qubit_num, get_qgate_param_num, reverse_bit_order
 from qlazy.Result import Result
+from qlazy.QState import QState
+from qlazy.CMem import CMem
 
 GateFunctionName = {
     # 1-qubit, 0-parameter gate
@@ -120,7 +122,6 @@ def __run_all(qcirc=None, shots=1, cid=None, backend=None, proc='CPU', out_state
                                    phase=para[0], phase1=para[1], phase2=para[2])
 
     if kind is None:
-        info = {'quantumstate': qstate, 'cmem': cmem}
 
         result = Result()
         result.qubit_num = qubit_num
@@ -129,7 +130,9 @@ def __run_all(qcirc=None, shots=1, cid=None, backend=None, proc='CPU', out_state
         result.shots = shots
         result.frequency = None
         result.backend = backend
-        result.info = info
+        if out_state is True:
+            result.qstate = __transform_qlazy_qstate(qstate)
+            result.cmem = __transform_qlazy_cmem(cmem)
         return result
 
     #
@@ -147,8 +150,6 @@ def __run_all(qcirc=None, shots=1, cid=None, backend=None, proc='CPU', out_state
 
         frequency, qstate = __qulacs_measure_shots(qstate, q_list, shots)
             
-        info = {'quantumstate': qstate, 'cmem': cmem}
-
         result = Result()
         result.qubit_num = qubit_num
         result.cmem_num = cmem_num
@@ -156,7 +157,9 @@ def __run_all(qcirc=None, shots=1, cid=None, backend=None, proc='CPU', out_state
         result.shots = shots
         result.frequency = frequency
         result.backend = backend
-        result.info = info
+        if out_state is True:
+            result.qstate = __transform_qlazy_qstate(qstate)
+            result.cmem = __transform_qlazy_cmem(cmem)
 
         return result
     
@@ -199,18 +202,33 @@ def __run_all(qcirc=None, shots=1, cid=None, backend=None, proc='CPU', out_state
     if len(frequency) == 0:
         frequency = None
 
-    info = {'quantumstate': qstate, 'cmem': cmem}
-
     result = Result()
-    result.backend = backend
     result.qubit_num = qubit_num
     result.cmem_num = cmem_num
     result.cid = cid
     result.shots = shots
     result.frequency = frequency
-    result.info = info
+    result.backend = backend
+    if out_state is True:
+        result.qstate = __transform_qlazy_qstate(qstate)
+        result.cmem = __transform_qlazy_cmem(cmem)
 
     return result
+
+def __transform_qlazy_qstate(qs_qulacs):
+
+    vector = reverse_bit_order(qs_qulacs.get_vector())
+    qs_qlazy = QState(vector=vector)
+    return qs_qlazy
+
+def __transform_qlazy_cmem(cmem_qulacs):
+
+    cmem_num = len(cmem_qulacs)
+    if cmem_num == 0:
+        return None
+    cmem_qlazy = CMem(cmem_num=cmem_num)
+    cmem_qlazy.set_bits(cmem_qulacs)
+    return cmem_qlazy
 
 def __is_supported_qgate(kind):
 

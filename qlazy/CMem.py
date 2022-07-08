@@ -78,9 +78,26 @@ class CMem(ctypes.Structure):
         bits = cmem_get_bits(self)
         return bits
 
+    def set_bits(self, bits):
+        """
+        set bit list to the classical memory.
+
+        Parameters
+        ----------
+        bits : list
+            bits array of the classical memory
+
+        Returns
+        -------
+        None
+
+        """
+        cmem_set_bits(self, bits)
+
     def __del__(self):
 
         cmem_free(self)
 
 # c-library for qstate
-from qlazy.lib.cmem_c import cmem_init, cmem_copy, cmem_get_bits, cmem_free
+from qlazy.lib.cmem_c import (cmem_init, cmem_copy, cmem_get_bits, cmem_set_bits,
+                              cmem_free)

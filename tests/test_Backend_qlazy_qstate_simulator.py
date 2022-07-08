@@ -787,11 +787,15 @@ class TestBackend_measure_qstate_simulator(unittest.TestCase):
         """
         bk = Backend(product='qlazy', device='qstate_simulator')
         qc = QCirc().measure(qid=[0,1], cid=[1,2]).x(0).measure(qid=[0,1], cid=[2,0])
-        res = bk.run(qcirc=qc, shots=10, cid=[0,1,2])
+        res = bk.run(qcirc=qc, shots=10, cid=[0,1,2], out_state=True)
         freq = res.frequency
         cid = res.cid
+        qstate = res.qstate
+        cmem = res.cmem
         self.assertEqual(freq['001'], 10)
         self.assertEqual(cid, [0,1,2])
+        self.assertEqual(list(qstate.amp), [0.+0.j, 0.+0.j, 1.+0.j, 0.+0.j])
+        self.assertEqual(list(cmem.bits), [0,0,1])
 
     def test_measure_unitary_measuremen_cunitary_measurement(self):
         """test 'measure' (unitary-measurement-cunitary-measurement)

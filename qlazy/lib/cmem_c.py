@@ -60,7 +60,7 @@ def cmem_get_bits(cmem):
     ret = lib.cmem_get_bits(ctypes.byref(cmem), c_bits)
 
     if ret is False:
-        raise ValueError("can't get element of the quantum state vector.")
+        raise ValueError("can't get element of the classical memory.")
 
     o = ctypes.cast(c_bits.value, ctypes.POINTER(ctypes.c_ubyte))
 
@@ -70,6 +70,26 @@ def cmem_get_bits(cmem):
     libc.free(o)
 
     return np.array(out)
+
+def cmem_set_bits(cmem, bits):
+    """ get bits of the classical memory """
+
+    # bool cmem_set_bits(CMem* cmem, BYTE* bits, int num)
+    if cmem is None:
+        raise Valueerror("cmem must be set.")
+
+    cmem_num = cmem.cmem_num
+    num = len(bits)
+
+    ByteArray = ctypes.c_char * cmem_num
+    c_bits = ByteArray(*bits)
+
+    lib.cmem_set_bits.restype = ctypes.c_bool
+    lib.cmem_set_bits.argtypes = [ctypes.POINTER(CMem), ByteArray, ctypes.c_int]
+    ret = lib.cmem_set_bits(ctypes.byref(cmem), c_bits, ctypes.c_int(num))
+
+    if ret is False:
+        raise ValueError("can't set element of the classical memory.")
 
 def cmem_free(cmem):
     """ free classical memory """

@@ -54,7 +54,7 @@ def equal_qstates(qs_0, qs_1):
 #
 
 class TestBackend_1_qubit_qulacs_cpu_simulator(unittest.TestCase):
-    """ test 'Backend' : 1-qubit gate (qulacs_simulator)
+    """ test 'Backend' : 1-qubit gate
     """
 
     def test_x(self):
@@ -62,9 +62,9 @@ class TestBackend_1_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().x(0)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([0.0, 1.0]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([0.0, 1.0])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -73,9 +73,9 @@ class TestBackend_1_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().h(0).x(0)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([1.0/SQRT_2, 1.0/SQRT_2]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([1.0/SQRT_2, 1.0/SQRT_2])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -84,9 +84,9 @@ class TestBackend_1_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().y(0)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([0.0, 1.0j]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([0.0, 1.0j])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -95,9 +95,9 @@ class TestBackend_1_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().h(0).y(0)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([-1.0j/SQRT_2, 1.0j/SQRT_2]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([-1.0j/SQRT_2, 1.0j/SQRT_2])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -106,9 +106,9 @@ class TestBackend_1_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().z(0)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([1.0, 0.0]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([1.0, 0.0])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -117,9 +117,9 @@ class TestBackend_1_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().h(0).z(0)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([1.0/SQRT_2, -1.0/SQRT_2]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([1.0/SQRT_2, -1.0/SQRT_2])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -128,9 +128,9 @@ class TestBackend_1_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().xr(0)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([0.5+0.5j, 0.5-0.5j]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([0.5+0.5j, 0.5-0.5j])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -139,9 +139,9 @@ class TestBackend_1_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().h(0).xr(0)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([1.0/SQRT_2, 1.0/SQRT_2]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([1.0/SQRT_2, 1.0/SQRT_2])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -150,9 +150,9 @@ class TestBackend_1_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().xr_dg(0)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([0.5-0.5j, 0.5+0.5j]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([0.5-0.5j, 0.5+0.5j])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -161,9 +161,9 @@ class TestBackend_1_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().h(0).xr_dg(0)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([1.0/SQRT_2, 1.0/SQRT_2]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([1.0/SQRT_2, 1.0/SQRT_2])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -172,9 +172,9 @@ class TestBackend_1_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().h(0)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([1.0/SQRT_2, 1.0/SQRT_2]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([1.0/SQRT_2, 1.0/SQRT_2])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -183,9 +183,9 @@ class TestBackend_1_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().h(0).h(0)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([1.0, 0.0]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([1.0, 0.0])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -194,9 +194,9 @@ class TestBackend_1_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().s(0)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([1.0, 0.0]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([1.0, 0.0])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -205,9 +205,9 @@ class TestBackend_1_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().h(0).s(0)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([1.0/SQRT_2, 1.0j/SQRT_2]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([1.0/SQRT_2, 1.0j/SQRT_2])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -216,9 +216,9 @@ class TestBackend_1_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().s_dg(0)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([1.0, 0.0]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([1.0, 0.0])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -227,9 +227,9 @@ class TestBackend_1_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().h(0).s_dg(0)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([1.0/SQRT_2, -1.0j/SQRT_2]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([1.0/SQRT_2, -1.0j/SQRT_2])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -238,9 +238,9 @@ class TestBackend_1_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().t(0)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([1.0, 0.0]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([1.0, 0.0])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -249,9 +249,9 @@ class TestBackend_1_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().h(0).t(0)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([1.0/SQRT_2, 0.5+0.5j]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([1.0/SQRT_2, 0.5+0.5j])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -260,9 +260,9 @@ class TestBackend_1_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().t_dg(0)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([1.0, 0.0]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([1.0, 0.0])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -271,9 +271,9 @@ class TestBackend_1_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().h(0).t_dg(0)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([1.0/SQRT_2, 0.5-0.5j]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([1.0/SQRT_2, 0.5-0.5j])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -282,9 +282,9 @@ class TestBackend_1_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().rx(0, phase=0.25)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([COS_PI_8, -SIN_PI_8*1.0j]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([COS_PI_8, -SIN_PI_8*1.0j])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -293,9 +293,9 @@ class TestBackend_1_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().h(0).rx(0, phase=0.25)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([0.65328148-0.27059805j, 0.65328148-0.27059805j]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([0.65328148-0.27059805j, 0.65328148-0.27059805j])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -304,9 +304,9 @@ class TestBackend_1_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().ry(0, phase=0.25)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([COS_PI_8, SIN_PI_8]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([COS_PI_8, SIN_PI_8])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -315,9 +315,9 @@ class TestBackend_1_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().h(0).ry(0, phase=0.25)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([0.38268343+0.j, 0.92387953+0.j]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([0.38268343+0.j, 0.92387953+0.j])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -326,9 +326,9 @@ class TestBackend_1_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().rz(0, phase=0.25)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([1.0, 0.0]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([1.0, 0.0])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -337,9 +337,9 @@ class TestBackend_1_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().h(0).rz(0, phase=0.25)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([0.65328148-0.27059805j, 0.65328148+0.27059805j]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([0.65328148-0.27059805j, 0.65328148+0.27059805j])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -348,9 +348,9 @@ class TestBackend_1_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().p(0, phase=0.25)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([1.0, 0.0]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([1.0, 0.0])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -359,77 +359,11 @@ class TestBackend_1_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().h(0).p(0, phase=0.25)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([0.70710678, 0.5+0.5j]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([0.70710678, 0.5+0.5j])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
-
-#     def test_u1(self):
-#         """test 'u1' gate
-#         """
-#         bk = Backend(product='qulacs', device='cpu_simulator')
-#         qc = QCirc().u1(0, alpha=0.1)
-#         res = bk.run(qcirc=qc)
-#         actual = res.info['quantumstate'].get_vector()
-#         expect = reverse_bit_order(np.array([1.0, 0.0]))
-#         ans = equal_vectors(actual, expect)
-#         self.assertEqual(ans,True)
-# 
-#     def test_h_u1(self):
-#         """test 'u1' gate (following 'h' gate)
-#         """
-#         bk = Backend(product='qulacs', device='cpu_simulator')
-#         qc = QCirc().h(0).u1(0, alpha=0.1)
-#         res = bk.run(qcirc=qc)
-#         actual = res.info['quantumstate'].get_vector()
-#         expect = reverse_bit_order(np.array([0.70710678+0.j, 0.67249851+0.21850801j]))
-#         ans = equal_vectors(actual, expect)
-#         self.assertEqual(ans,True)
-# 
-#     def test_u2(self):
-#         """test 'u2' gate
-#         """
-#         bk = Backend(product='qulacs', device='cpu_simulator')
-#         qc = QCirc().u2(0, alpha=0.1, beta=0.2)
-#         res = bk.run(qcirc=qc)
-#         actual = res.info['quantumstate'].get_vector()
-#         expect = reverse_bit_order(np.array([0.70710678+0.j, 0.5720614 +0.41562694j]))
-#         ans = equal_vectors(actual, expect)
-#         self.assertEqual(ans,True)
-# 
-#     def test_h_u2(self):
-#         """test 'u2' gate (following 'h' gate)
-#         """
-#         bk = Backend(product='qulacs', device='cpu_simulator')
-#         qc = QCirc().h(0).u2(0, alpha=0.1, beta=0.2)
-#         res = bk.run(qcirc=qc)
-#         actual = res.info['quantumstate'].get_vector()
-#         expect = reverse_bit_order(np.array([0.02447174-0.1545085j,0.69840112+0.69840112j]))
-#         ans = equal_vectors(actual, expect)
-#         self.assertEqual(ans,True)
-# 
-#     def test_u3(self):
-#         """test 'u3' gate
-#         """
-#         bk = Backend(product='qulacs', device='cpu_simulator')
-#         qc = QCirc().u3(0, alpha=0.1, beta=0.2, gamma=0.3)
-#         res = bk.run(qcirc=qc)
-#         actual = res.info['quantumstate'].get_vector()
-#         expect = reverse_bit_order(np.array([0.89100652+0.j, 0.36728603+0.26684892j]))
-#         ans = equal_vectors(actual, expect)
-#         self.assertEqual(ans,True)
-# 
-#     def test_h_u3(self):
-#         """test 'u3' gate (following 'h' gate)
-#         """
-#         bk = Backend(product='qulacs', device='cpu_simulator')
-#         qc = QCirc().h(0).u3(0, alpha=0.1, beta=0.2, gamma=0.3)
-#         res = bk.run(qcirc=qc)
-#         actual = res.info['quantumstate'].get_vector()
-#         expect = reverse_bit_order(np.array([0.32472882-0.09920056j, 0.63003676+0.69840112j]))
-#         ans = equal_vectors(actual, expect)
-#         self.assertEqual(ans,True)
 
 #
 # 2-qubit gate
@@ -444,9 +378,9 @@ class TestBackend_2_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().h(0).h(1).cx(0,1)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([(0.5+0j), (0.5+0j), (0.5+0j), (0.5+0j)]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([(0.5+0j), (0.5+0j), (0.5+0j), (0.5+0j)])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -455,9 +389,9 @@ class TestBackend_2_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().h(0).h(1).cy(0,1)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([(0.5+0j), (0.5+0j), -0.5j, 0.5j]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([(0.5+0j), (0.5+0j), -0.5j, 0.5j])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -466,9 +400,9 @@ class TestBackend_2_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().h(0).h(1).cz(0,1)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([(0.5+0j), (0.5+0j), (0.5+0j), (-0.5+0j)]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([(0.5+0j), (0.5+0j), (0.5+0j), (-0.5+0j)])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -477,9 +411,9 @@ class TestBackend_2_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().h(0).h(1).cxr(0,1)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([(0.5+0j), (0.5+0j), (0.5+0j), (0.5+0j)]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([(0.5+0j), (0.5+0j), (0.5+0j), (0.5+0j)])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -488,9 +422,9 @@ class TestBackend_2_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().h(0).h(1).cxr_dg(0,1)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([(0.5+0j), (0.5+0j), (0.5+0j), (0.5+0j)]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([(0.5+0j), (0.5+0j), (0.5+0j), (0.5+0j)])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -499,9 +433,9 @@ class TestBackend_2_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().h(0).h(1).ch(0,1)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([(0.5+0j), (0.5+0j), (0.7071067811865475+0j), 0j]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([(0.5+0j), (0.5+0j), (0.7071067811865475+0j), 0j])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -510,9 +444,9 @@ class TestBackend_2_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().h(0).h(1).cs(0,1)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([(0.5+0j), (0.5+0j), (0.5+0j), 0.5j]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([(0.5+0j), (0.5+0j), (0.5+0j), 0.5j])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -521,9 +455,9 @@ class TestBackend_2_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().h(0).h(1).cs_dg(0,1)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([(0.5+0j), (0.5+0j), (0.5+0j), -0.5j]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([(0.5+0j), (0.5+0j), (0.5+0j), -0.5j])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -532,10 +466,10 @@ class TestBackend_2_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().h(0).h(1).ct(0,1)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([(0.5+0j), (0.5+0j), (0.5+0j),
-                           (0.35355339059327373+0.35355339059327373j)]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([(0.5+0j), (0.5+0j), (0.5+0j),
+                           (0.35355339059327373+0.35355339059327373j)])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -544,10 +478,10 @@ class TestBackend_2_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().h(0).h(1).ct_dg(0,1)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([(0.5+0j), (0.5+0j), (0.5+0j),
-                           (0.35355339059327373-0.35355339059327373j)]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([(0.5+0j), (0.5+0j), (0.5+0j),
+                           (0.35355339059327373-0.35355339059327373j)])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -556,9 +490,9 @@ class TestBackend_2_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().h(0).h(1).sw(0,1)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([(0.5+0j), (0.5+0j), (0.5+0j), (0.5+0j)]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([(0.5+0j), (0.5+0j), (0.5+0j), (0.5+0j)])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -567,9 +501,9 @@ class TestBackend_2_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().x(0).sw(0,1)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([0j, (1+0j), 0j, 0j]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([0j, (1+0j), 0j, 0j])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -578,10 +512,10 @@ class TestBackend_2_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().h(0).h(1).cp(0,1, phase=0.25)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([(0.5+0j), (0.5+0j), (0.5+0j),
-                                             (0.3535533905932738+0.35355339059327373j)]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([(0.5+0j), (0.5+0j), (0.5+0j),
+                           (0.3535533905932738+0.35355339059327373j)])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -590,10 +524,10 @@ class TestBackend_2_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().h(0).h(1).crx(0,1, phase=0.25)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([(0.5+0j), (0.5+0j), (0.4619397662556434-0.1913417161825449j),
-                                             (0.4619397662556434-0.1913417161825449j)]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([(0.5+0j), (0.5+0j), (0.4619397662556434-0.1913417161825449j),
+                           (0.4619397662556434-0.1913417161825449j)])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -602,10 +536,10 @@ class TestBackend_2_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().h(0).h(1).cry(0,1, phase=0.25)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([(0.5+0j), (0.5+0j), (0.2705980500730985+0j),
-                                             (0.6532814824381882+0j)]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([(0.5+0j), (0.5+0j), (0.2705980500730985+0j),
+                           (0.6532814824381882+0j)])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -614,10 +548,10 @@ class TestBackend_2_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().h(0).h(1).crz(0,1, phase=0.25)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([(0.5+0j), (0.5+0j),(0.4619397662556434-0.1913417161825449j),
-                                             (0.4619397662556434+0.1913417161825449j)]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([(0.5+0j), (0.5+0j),(0.4619397662556434-0.1913417161825449j),
+                           (0.4619397662556434+0.1913417161825449j)])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -626,10 +560,10 @@ class TestBackend_2_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().h(0).h(1).rxx(0, 1, phase=0.25)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([(0.46193977-0.19134172j), (0.46193977-0.19134172j),
-                                             (0.46193977-0.19134172j), (0.46193977-0.19134172j)]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([(0.46193977-0.19134172j), (0.46193977-0.19134172j),
+                           (0.46193977-0.19134172j), (0.46193977-0.19134172j)])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
         
@@ -638,10 +572,10 @@ class TestBackend_2_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().h(0).h(1).ryy(0, 1, phase=0.25)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([(0.46193977+0.19134172j), (0.46193977-0.19134172j),
-                                             (0.46193977-0.19134172j), (0.46193977+0.19134172j)]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([(0.46193977+0.19134172j), (0.46193977-0.19134172j),
+                           (0.46193977-0.19134172j), (0.46193977+0.19134172j)])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
         
@@ -650,48 +584,12 @@ class TestBackend_2_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().h(0).h(1).rzz(0, 1, phase=0.25)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([(0.46193977-0.19134172j), (0.46193977+0.19134172j),
-                                             (0.46193977+0.19134172j), (0.46193977-0.19134172j)]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([(0.46193977-0.19134172j), (0.46193977+0.19134172j),
+                           (0.46193977+0.19134172j), (0.46193977-0.19134172j)])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
-
-#     def test_cu1(self):
-#         """test 'cu1' gate
-#         """
-#         bk = Backend(product='qulacs', device='cpu_simulator')
-#         qc = QCirc().h(0).h(1).cu1(0,1, alpha=0.1)
-#         res = bk.run(qcirc=qc)
-#         actual = res.info['quantumstate'].get_vector()
-#         expect = reverse_bit_order(np.array([(0.5+0j), (0.5+0j), (0.5+0j),
-#                            (0.47552825814757677+0.1545084971874737j)]))
-#         ans = equal_vectors(actual, expect)
-#         self.assertEqual(ans,True)
-# 
-#     def test_cu2(self):
-#         """test 'cu2' gate
-#         """
-#         bk = Backend(product='qulacs', device='cpu_simulator')
-#         qc = QCirc().h(0).h(1).cu2(0,1, alpha=0.1, beta=0.2)
-#         res = bk.run(qcirc=qc)
-#         actual = res.info['quantumstate'].get_vector()
-#         expect = reverse_bit_order(np.array([(0.5+0j), (0.5+0j), (0.0173041346112951-0.10925400611220525j),
-#                                              (0.49384417029756883+0.49384417029756883j)]))
-#         ans = equal_vectors(actual, expect)
-#         self.assertEqual(ans,True)
-# 
-#     def test_cu3(self):
-#         """test 'cu3' gate
-#         """
-#         bk = Backend(product='qulacs', device='cpu_simulator')
-#         qc = QCirc().h(0).h(1).cu3(0,1, alpha=0.1, beta=0.2, gamma=0.3)
-#         res = bk.run(qcirc=qc)
-#         actual = res.info['quantumstate'].get_vector()
-#         expect = reverse_bit_order(np.array([(0.5+0j), (0.5+0j), (0.22961795053748937-0.07014538985214754j),
-#                                              (0.44550326209418395+0.4938441702975689j)]))
-#         ans = equal_vectors(actual, expect)
-#         self.assertEqual(ans,True)
 
 #
 # 3-qubit gate
@@ -706,9 +604,9 @@ class TestBackend_3_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().x(0).x(1).ccx(0,1,2)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([0j, 0j, 0j, 0j, 0j, 0j, 0j, (1+0j)]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([0j, 0j, 0j, 0j, 0j, 0j, 0j, (1+0j)])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -717,9 +615,9 @@ class TestBackend_3_qubit_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().x(0).x(1).csw(0,1,2)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
-        expect = reverse_bit_order(np.array([0j, 0j, 0j, 0j, 0j, (1+0j), 0j, 0j]))
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
+        expect = np.array([0j, 0j, 0j, 0j, 0j, (1+0j), 0j, 0j])
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -736,12 +634,12 @@ class TestBackend_operate_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().x(0)
-        res = bk.run(qcirc=qc)
-        expect = res.info['quantumstate'].get_vector()
+        res = bk.run(qcirc=qc, out_state=True)
+        expect = res.qstate.amp
         pp = PauliProduct(pauli_str="X")
         qc = QCirc().operate(pp=pp)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -750,12 +648,12 @@ class TestBackend_operate_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().h(0).x(0)
-        res = bk.run(qcirc=qc)
-        expect = res.info['quantumstate'].get_vector()
+        res = bk.run(qcirc=qc, out_state=True)
+        expect = res.qstate.amp
         pp = PauliProduct(pauli_str="X")
         qc = QCirc().h(0).operate(pp=pp)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -764,12 +662,12 @@ class TestBackend_operate_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().h(0).y(0)
-        res = bk.run(qcirc=qc)
-        expect = res.info['quantumstate'].get_vector()
+        res = bk.run(qcirc=qc, out_state=True)
+        expect = res.qstate.amp
         pp = PauliProduct(pauli_str="Y")
         qc = QCirc().h(0).operate(pp=pp)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -778,12 +676,12 @@ class TestBackend_operate_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().h(0).z(0)
-        res = bk.run(qcirc=qc)
-        expect = res.info['quantumstate'].get_vector()
+        res = bk.run(qcirc=qc, out_state=True)
+        expect = res.qstate.amp
         pp = PauliProduct(pauli_str="Z")
         qc = QCirc().h(0).operate(pp=pp)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -792,12 +690,12 @@ class TestBackend_operate_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().x(2).y(0).z(1)
-        res = bk.run(qcirc=qc)
-        expect = res.info['quantumstate'].get_vector()
+        res = bk.run(qcirc=qc, out_state=True)
+        expect = res.qstate.amp
         pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
         qc = QCirc().operate(pp=pp)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
@@ -806,12 +704,12 @@ class TestBackend_operate_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().cx(3,2).cy(3,0).cz(3,1)
-        res = bk.run(qcirc=qc)
-        expect = res.info['quantumstate'].get_vector()
+        res = bk.run(qcirc=qc, out_state=True)
+        expect = res.qstate.amp
         pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
         qc = QCirc().operate(pp=pp, ctrl=3)
-        res = bk.run(qcirc=qc)
-        actual = res.info['quantumstate'].get_vector()
+        res = bk.run(qcirc=qc, out_state=True)
+        actual = res.qstate.amp
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
         
@@ -861,11 +759,11 @@ class TestBackend_measure_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().measure(qid=[0,1], cid=[1,2]).h(0).cx(0,1)
-        res = bk.run(qcirc=qc, shots=10, cid=[1,2])
+        res = bk.run(qcirc=qc, shots=10, cid=[1,2], out_state=True)
         freq = res.frequency
         cid = res.cid
         expect = np.array([(0.7071067811865476+0j), 0j, 0j, (0.7071067811865476+0j)])
-        actual = res.info['quantumstate'].get_vector()
+        actual = res.qstate.amp
         ans = equal_vectors(actual, expect)
         self.assertEqual(freq['00'], 10)
         self.assertEqual(ans, True)
@@ -888,11 +786,15 @@ class TestBackend_measure_qulacs_cpu_simulator(unittest.TestCase):
         """
         bk = Backend(product='qulacs', device='cpu_simulator')
         qc = QCirc().measure(qid=[0,1], cid=[1,2]).x(0).measure(qid=[0,1], cid=[2,0])
-        res = bk.run(qcirc=qc, shots=10, cid=[0,1,2])
+        res = bk.run(qcirc=qc, shots=10, cid=[0,1,2], out_state=True)
         freq = res.frequency
         cid = res.cid
+        qstate = res.qstate
+        cmem = res.cmem
         self.assertEqual(freq['001'], 10)
         self.assertEqual(cid, [0,1,2])
+        self.assertEqual(list(qstate.amp), [0.+0.j, 0.+0.j, 1.+0.j, 0.+0.j])
+        self.assertEqual(list(cmem.bits), [0,0,1])
     
     def test_measure_unitary_measuremen_cunitary_measurement(self):
         """test 'measure' (unitary-measurement-cunitary-measurement)
