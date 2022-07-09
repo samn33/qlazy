@@ -169,7 +169,7 @@ def run(qcirc=None, shots=1, cid=None, backend=None, out_state=False):
         if backend.device == 'aspen_11':
             device = AwsDevice("arn:aws:braket:::device/qpu/rigetti/Aspen-11")
             s3_folder = (backend.config_braket['backet_name'], "aspen_11")
-        if backend.device == 'aspen_m_1':
+        elif backend.device == 'aspen_m_1':
             device = AwsDevice("arn:aws:braket:us-west-1::device/qpu/rigetti/Aspen-M-1")
             s3_folder = (backend.config_braket['backet_name'], "aspen_m_1")
         else:
