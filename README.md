@@ -1,6 +1,8 @@
 qlazy
 =====
 
+[![Downloads](https://pepy.tech/badge/qlazy)](https://pepy.tech/project/qlazy)
+
 Quantum Computing Simulator
 
 ## Feature
@@ -13,6 +15,7 @@ Quantum Computing Simulator
     - [IBM Quantum(IBMQ)](https://quantum-computing.ibm.com/)
     - [Amazon Braket(LocalSimulator,AWS,IonQ,Rigetti,OQC)](https://aws.amazon.com/braket/?nc1=h_ls)
 - High-speed quantum circuit execution using GPU is possible (build from source code).
+
 
 ## Install
 
@@ -152,13 +155,13 @@ execute the program
 
 - Linux (Ubuntu 20.04 LTS)
 - Python 3.8
-- numpy 1.21.0
+- numpy 1.23.1
 
 Optional ...
 - pyzx 0.7.0 (to use quantum circuit optimization with ZX-calculus)
 - Qulacs 0.3.0 (to use qulucs backend)
-- qiskit 0.34.2 (to use IBMQ backend)
-- amazon-braket-sdk 1.18.0 (to use amazon braket backend)
+- qiskit 0.37.0 (to use IBMQ backend)
+- amazon-braket-sdk 1.25.2 (to use amazon braket backend)
 - cuda 11 (to use GPU version)
 
 ## Licence
