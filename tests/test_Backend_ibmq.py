@@ -16,9 +16,9 @@ class MyQCirc(QCirc):
         self.h(q0).cx(q0, q1)
         return self
 
-#================
-# aws_braket_sv
-#================
+#=======
+# ibmq
+#=======
 
 def evaluate(qc, qs, verbose=False):
     """ evaluate """
