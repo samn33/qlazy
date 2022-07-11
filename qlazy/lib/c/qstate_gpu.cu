@@ -347,6 +347,10 @@ static bool _qstate_measure_gpu(QState* qstate, int mnum, int* qid,
   int			mval_qid     = 0;
 
   if (measure_update == true) { /* measure and update qstate */
+
+    if (!(qstate_update_host_memory(qstate)))
+      ERR_RETURN(ERROR_QSTATE_UPDATE_HOST_MEMORY, false);
+
     _qstate_get_measured_char_gpu(qstate, mnum, qid, measured_char);
 
     /* update qstate */
