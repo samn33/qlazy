@@ -3,10 +3,9 @@
 ## [0.3.0] - 2022-07-xx
 ### Added
 - GPU support for quantum circuit execution with state vector simulator (build from source code)
+- properties (qstate, stabilizer, cmem) to Result class
 ### Changed
 - improvement of measurement performance
-### Added
-- properties (qstate, stabilizer, cmem) to Result class
 
 ## [0.2.7] - 2022-03-31
 ### Fixed

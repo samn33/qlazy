@@ -16,7 +16,6 @@ Quantum Computing Simulator
     - [Amazon Braket(LocalSimulator,AWS,IonQ,Rigetti,OQC)](https://aws.amazon.com/braket/?nc1=h_ls)
 - High-speed quantum circuit execution using GPU is possible (build from source code).
 
-
 ## Install
 
 ### Quick install
@@ -159,7 +158,7 @@ execute the program
 
 Optional ...
 - pyzx 0.7.0 (to use quantum circuit optimization with ZX-calculus)
-- Qulacs 0.3.0 (to use qulucs backend)
+- Qulacs 0.3.0 (to use qulacs backend)
 - qiskit 0.37.0 (to use IBMQ backend)
 - amazon-braket-sdk 1.25.2 (to use amazon braket backend)
 - cuda 11 (to use GPU version)
