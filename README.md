@@ -154,7 +154,7 @@ execute the program
 
 - Linux (Ubuntu 20.04 LTS)
 - Python 3.8
-- numpy 1.23.1
+- numpy 1.21.0
 
 Optional ...
 - pyzx 0.7.0 (to use quantum circuit optimization with ZX-calculus)
