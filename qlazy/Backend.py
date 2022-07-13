@@ -18,7 +18,7 @@ BACKEND_DEVICES = {'qlazy': ['qstate_simulator', 'stabilizer_simulator'],
 BACKEND_DEVICES_GPU = {'qlazy': ['qstate_gpu_simulator'],
                        'qulacs': ['gpu_simulator']}
 
-if is_gpu_available() is True:
+if is_gpu_available() is True and is_gpu_supported_lib() is True:
     gpu_preparation()
     USE_GPU = True
 else:

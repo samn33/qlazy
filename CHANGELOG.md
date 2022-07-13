@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.3.1] - 2022-xx-xx
+### Fixed
+- not work when 'pip install qlazy' on a GPU supported machine (#4)
+
 ## [0.3.0] - 2022-07-12
 ### Added
 - GPU support for quantum circuit execution with state vector simulator (build from source code)
