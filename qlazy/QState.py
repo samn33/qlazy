@@ -336,7 +336,7 @@ class QState(ctypes.Structure):
         qs = self.__class__(vector=vec)
         return qs
 
-    def show(self, qid=None, nonzero=False):
+    def show(self, qid=None, nonzero=False, q_real=0):
         """
         show the quantum state
         (elements of the state vector and probabilities).
@@ -347,6 +347,9 @@ class QState(ctypes.Structure):
             qubit id's list to show.
         nonzero : bool, default False
             if True, only non-zero amplitudes are printed.
+        q_real : int, default 0
+            qubit id to make positive real amplitude.
+            (if -1 is set, do not go out the global phase factor)
 
         Returns
         -------
@@ -388,13 +391,13 @@ class QState(ctypes.Structure):
 
         vec = self.get_amp(qid=qid)
 
-        exp_i_phase = 1.+0.j
-        if abs(vec[0].imag) > cfg.EPS:
-            exp_i_phase = vec[0] / abs(vec[0])
-        elif vec[0].real < 0.0:
-            exp_i_phase = -exp_i_phase
-
-        vec = vec / exp_i_phase
+        if q_real >= 0:
+            exp_i_phase = 1.+0.j
+            if abs(vec[q_real].imag) > cfg.EPS:
+                exp_i_phase = vec[q_real] / abs(vec[q_real])
+            elif vec[q_real].real < 0.0:
+                exp_i_phase = -exp_i_phase
+            vec = vec / exp_i_phase
 
         for i, v in enumerate(vec):
             bits = "{:0{digits}b}".format(i, digits=digits)
