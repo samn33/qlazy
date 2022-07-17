@@ -379,7 +379,36 @@ class QState(ctypes.Structure):
         c[11] = +0.7071+0.0000*i : 0.5000 |++++++
 
         """
-        qstate_print(self, qid, nonzero)
+        # qstate_print(self, qid, nonzero)
+
+        if qid is None or len(qid) == 0:
+            digits = self.qubit_num
+        else:
+            digits = len(qid)
+
+        vec = self.get_amp(qid=qid)
+
+        exp_i_phase = 1.+0.j
+        if abs(vec[0].imag) > cfg.EPS:
+            exp_i_phase = vec[0] / abs(vec[0])
+        elif vec[0].real < 0.0:
+            exp_i_phase = -exp_i_phase
+
+        vec = vec / exp_i_phase
+
+        for i, v in enumerate(vec):
+            bits = "{:0{digits}b}".format(i, digits=digits)
+            absval2 = abs(v) * abs(v)
+            if absval2 < cfg.EPS:
+                bar_len = 0
+            else:
+                bar_len = int(absval2 / 0.1 + 1.5)
+            bar_str = "|" + "+" * bar_len
+            if nonzero is True and absval2 < cfg.EPS:
+                continue
+            else:
+                print("c[{}] = {:+.4f}{:+.4f}*i : {:.4f} {}"
+                      .format(bits, v.real, v.imag, abs(v)**2, bar_str))
 
     def clone(self):
         """

@@ -340,8 +340,25 @@ class DensOp(ctypes.Structure):
         elm[1][1] = +0.5000+0.0000*i : 0.2500 |++++
 
         """
+        # de_part = self.partial(qid=qid)
+        # densop_print(de_part, nonzero)
+
         de_part = self.partial(qid=qid)
-        densop_print(de_part, nonzero)
+        mat = de_part.get_elm()
+        for i in range(de_part.row):
+            for j in range(de_part.col):
+                elm = mat[i][j]
+                absval2 = abs(elm) * abs(elm)
+                if absval2 < cfg.EPS:
+                    bar_len = 0
+                else:
+                    bar_len = int(absval2 / 0.1 + 1.5)
+                bar_str = "|" + "+" * bar_len
+                if nonzero is True and absval2 < cfg.EPS:
+                    continue
+                else:
+                    print("elm[{}][{}] = {:+.4f}{:+.4f}*i : {:.4f} {}"
+                          .format(i, j, elm.real, elm.imag, abs(elm)**2, bar_str))
 
     def clone(self):
         """

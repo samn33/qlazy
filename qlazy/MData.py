@@ -60,7 +60,27 @@ class MData(ctypes.Structure):
 
     def show(self):
         """ show the measured data"""
-        mdata_print(self)
+        # mdata_print(self)
+
+        if self.angle == 0.0 and self.phase == 0.0:
+            mdir = 'z-axis'
+        elif self.angle == 0.5 and self.phase == 0.0:
+            mdir = 'x-axis'
+        elif self.angle == 0.5 and self.phase == 0.5:
+            mdir = 'y-axis'
+        else:
+            mdir = "theta={:.3f}*PI, phi={:.3f}*PI".format(self.angle, self.phase)
+
+        print("direction of measurement: {}".format(mdir))
+
+        if mdir == 'z-axis':
+            for k, v in self.frequency.items():
+                print("frq[{}] = {}".format(k, v))
+            print("last state => {}".format(self.last))
+        else:
+            for k, v in self.frequency.items():
+                print("frq[{}] = {}".format(k.replace('0', 'u').replace('1', 'd'), v))
+            print("last state => {}".format(self.last.replace('0', 'u').replace('1', 'd')))
 
     @property
     def last(self):
