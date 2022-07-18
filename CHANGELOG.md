@@ -1,8 +1,11 @@
 # Change Log
 
 ## [0.3.1] - 2022-xx-xx
+### Added
+- QState show method option 'preal' to specify state vector component id to make positive real amplitude (default 0)
 ### Fixed
-- not work when 'pip install qlazy' on a GPU supported machine (#4)
+- 'pip install qlazy' on a GPU supported machine (#4)
+- show method of QState, DensOp, MData (support jupyter notebook)
 
 ## [0.3.0] - 2022-07-12
 ### Added
