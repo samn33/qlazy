@@ -31,6 +31,7 @@ directories=(
     ErrorCorrection
     SurfaceCode
     LatticeSurgery
+    QCircShow
 )
 for dir in ${directories[@]}; do
 

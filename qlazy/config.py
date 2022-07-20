@@ -168,6 +168,51 @@ GATE_STRING = {
     RESET:'reset'
 }
 
+# for circuit visualization
+GATE_LABEL = {
+    PAULI_X:'X',
+    PAULI_Y:'Y',
+    PAULI_Z:'Z',
+    ROOT_PAULI_X:'/X',
+    ROOT_PAULI_X_:'/Xdg',
+    HADAMARD:'H',
+    PHASE_SHIFT_S:'S',
+    PHASE_SHIFT_S_:'Sdg',
+    PHASE_SHIFT_T:'t',
+    PHASE_SHIFT_T_:'Tdg',
+    PHASE_SHIFT:'P',
+    ROTATION_X:'RX',
+    ROTATION_Y:'RY',
+    ROTATION_Z:'RZ',
+    ROTATION_U1:'U1',
+    ROTATION_U2:'U2',
+    ROTATION_U3:'U3',
+    CONTROLLED_X:'X',
+    CONTROLLED_Y:'Y',
+    CONTROLLED_Z:'Z',
+    CONTROLLED_XR:'/X',
+    CONTROLLED_XR_:'/Xdg',
+    CONTROLLED_H:'H',
+    CONTROLLED_S:'S',
+    CONTROLLED_S_:'Sdg',
+    CONTROLLED_T:'T',
+    CONTROLLED_T_:'Tdg',
+    CONTROLLED_P:'P',
+    CONTROLLED_RX:'RX',
+    CONTROLLED_RY:'RY',
+    CONTROLLED_RZ:'RZ',
+    CONTROLLED_U1:'U1',
+    CONTROLLED_U2:'U2',
+    CONTROLLED_U3:'U3',
+    SWAP_QUBITS:'SW',
+    MEASURE:'M',
+    MEASURE_X:'MX',
+    MEASURE_Y:'MY',
+    MEASURE_Z:'MZ',
+    MEASURE_BELL:'MB',
+    RESET:'|>'
+}
+
 GATE_STRING_QASM = {
     # 1-qubit
     PAULI_X:'x',

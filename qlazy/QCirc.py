@@ -24,6 +24,74 @@ def string_to_args(s):  # for from_qasm
 
     return args
 
+def init_qc_canvas(qubit_num, cmem_num): # for show method
+
+    qlen = len(str(qubit_num - 1))
+    clen = len(str(cmem_num))
+    qc_canvas = ["q[{:0{digits}d}] -"
+                 .format(i, digits=qlen) + "-" * (clen - 1) for i in range(qubit_num)]
+    if cmem_num > 0:
+        qc_canvas.append('c' + ' ' * (qlen+1) + '=/=' + '=' * (clen - 1))
+        qc_canvas.append(' ' + ' ' * (qlen+1) + ' ' + str(cmem_num) + ' ')
+
+    return qc_canvas
+    
+def append_qc_canvas(qc_canvas, gates, qubit_num, cmem_num): # for show method
+
+    if len(gates) == 1: # append single gate
+        g = gates[0]
+
+        if get_qgate_param_num(g['kind']) == 0:
+            g_label = cfg.GATE_LABEL[g['kind']] + '-'
+        else:
+            g_label = cfg.GATE_LABEL[g['kind']] + '(' + str(g['para'][0]) + ')-'
+            
+        if get_qgate_qubit_num(g['kind']) == 1 or is_reset_gate(g['kind']):
+            qc_canvas[g['qid'][0]] += g_label
+            if g['ctrl'] is not None:
+                for j in range(g['qid'][0] + 1, qubit_num):
+                    qc_canvas[j] += '|'
+                qc_canvas[qubit_num] += '^'
+                qc_canvas[qubit_num + 1] += (str(g['ctrl']) + ' ')
+
+        elif get_qgate_qubit_num(g['kind']) == 2:
+            qc_canvas[g['qid'][0]] += '*'
+            qc_canvas[g['qid'][1]] += g_label
+            qid_min = min(g['qid'][0], g['qid'][1])
+            qid_max = max(g['qid'][0], g['qid'][1])
+            for i in range(qid_min + 1, qid_max):
+                qc_canvas[i] += '|'
+            if g['ctrl'] is not None:
+                for j in range(qid_max, qubit_num):
+                    qc_canvas[j] += '|'
+                qc_canvas[qubit_num] += '^'
+                qc_canvas[qubit_num + 1] += (str(g['ctrl']) + ' ')
+
+        elif is_measurement_gate(g['kind']):
+            qc_canvas[g['qid'][0]] += g_label
+            qc_canvas[qubit_num + 1] += (str(g['c']) + ' ')
+            for i in range(g['qid'][0] + 1, qubit_num):
+                qc_canvas[i] += '|'
+            qc_canvas[qubit_num] += 'v'
+            
+    else: # append group of 1-qubit gates
+        for g in gates:
+            if get_qgate_param_num(g['kind']) == 0:
+                g_label = cfg.GATE_LABEL[g['kind']] + '-'
+            else:
+                g_label = cfg.GATE_LABEL[g['kind']] + '(' + str(g['para'][0]) + ')-'
+            qc_canvas[g['qid'][0]] += g_label
+
+    # padding
+    canvas_len = max(map(len, qc_canvas))
+    for i in range(len(qc_canvas)):
+        if i < qubit_num:
+            qc_canvas[i] += ('-' * (canvas_len - len(qc_canvas[i])))
+        elif i == qubit_num:
+            qc_canvas[i] += ('=' * (canvas_len - len(qc_canvas[i])))
+        else:
+            qc_canvas[i] += (' ' * (canvas_len - len(qc_canvas[i])))
+
 class QCirc(ctypes.Structure):
     """ Quantum Circuit
 
@@ -472,6 +540,59 @@ class QCirc(ctypes.Structure):
         s = self.to_qasm()
         with open(file_path, mode='w') as f:
             f.write(s)
+
+    def show(self):
+        """
+        show the circuit
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+
+        """
+        qc = self.clone()
+
+        qubit_num = self.qubit_num
+        cmem_num = self.cmem_num
+        gate_num = self.gate_num
+
+        qc_canvas = init_qc_canvas(qubit_num, cmem_num)
+        
+        gates = []
+        qids = []
+        while True:
+            kind = qc.kind_first()
+            if kind is None:
+                break
+
+            (kind, qid, para, c, ctrl) = qc.pop_gate()
+            gate = {'kind': kind, 'qid': qid, 'para': para, 'c': c, 'ctrl': ctrl}
+            # debug
+            if ((get_qgate_qubit_num(kind) == 1 or is_reset_gate(kind)) and ctrl is None):
+                if qid[0] in qids:
+                    append_qc_canvas(qc_canvas, gates, qubit_num, cmem_num)
+                    gates = [gate]
+                    qids = [qid[0]]
+                else:
+                    gates.append(gate)
+                    qids.append(qid[0])
+
+            else:
+                if gates != []:
+                    append_qc_canvas(qc_canvas, gates, qubit_num, cmem_num)
+                    gates = []
+                    qids = []
+                append_qc_canvas(qc_canvas, [gate], qubit_num, cmem_num)
+
+        if gates != []:
+            append_qc_canvas(qc_canvas, gates, qubit_num, cmem_num)
+            
+        for line in qc_canvas:
+            print(line)
 
     def clone(self):
         """
