@@ -1,11 +1,12 @@
 # Change Log
 
-## [0.3.1] - 2022-xx-xx
+## [0.3.1] - 2022-07-21
 ### Added
+- QCirc show method to display the quantum circuit
 - QState show method option 'preal' to specify state vector component id to make positive real amplitude (default 0)
 ### Fixed
 - 'pip install qlazy' on a GPU supported machine (#4)
-- show method of QState, DensOp, MData (support jupyter notebook)
+- show method of QState, DensOp, MData
 
 ## [0.3.0] - 2022-07-12
 ### Added
