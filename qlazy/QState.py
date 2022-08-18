@@ -509,12 +509,12 @@ class QState(ctypes.Structure):
 
     def fidelity(self, qstate, qid=None):
         """
-        get the fidelity with quantum state.
+        get fidelity with the quantum state.
 
         Parameters
         ----------
         qstate : instance of QState
-            one of the two quantum state.
+            one of the two quantum states.
         qid : list of int
             qubit id's list.
 

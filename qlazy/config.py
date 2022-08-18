@@ -164,7 +164,7 @@ GATE_STRING = {
     MEASURE_X:'measure_x',
     MEASURE_Y:'measure_y',
     MEASURE_Z:'measure_z',
-    MEASURE_BELL:'meaxure_bell',
+    MEASURE_BELL:'measure_bell',
     RESET:'reset'
 }
 
