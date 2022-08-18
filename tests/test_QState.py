@@ -24,6 +24,7 @@ VECTOR_16 = [-0.20483596+0.23441366j, -0.169582+0.27101216j,
 class MyQState(QState):
 
     def __init__(self, qubit_num=0, name=None):
+        super().__init__(qubit_num=qubit_num)
         self.name = name
 
     def get_name(self):

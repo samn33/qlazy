@@ -8,6 +8,7 @@ from qlazy import Stabilizer, PauliProduct
 class MyStabilizer(Stabilizer):
 
     def __init__(self, qubit_num=0, name=None):
+        super().__init__(qubit_num=qubit_num)
         self.name = name
 
     def get_name(self):

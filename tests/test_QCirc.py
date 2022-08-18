@@ -31,6 +31,7 @@ def valid_or_not(qc):
 class MyQCirc(QCirc):
 
     def __init__(self, name=None):
+        super().__init__()
         self.name = name
 
     def get_name(self):
