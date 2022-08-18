@@ -23,7 +23,7 @@
 #include <curand.h>
 #endif
 
-#define VERSION "0.3.1"
+#define VERSION "0.3.2"
 
 /*====================================================================*/
 /*  Definitions & Macros                                              */

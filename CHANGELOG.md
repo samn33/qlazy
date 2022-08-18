@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.3.2] - 2022-xx-xx
+### Added
+- matrix product state simulator
+
 ## [0.3.1] - 2022-07-21
 ### Added
 - QCirc show method to display the quantum circuit

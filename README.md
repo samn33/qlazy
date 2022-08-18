@@ -9,7 +9,7 @@ Quantum Computing Simulator
 
 - Simple quantum calculation using command line tool is possible.
 - Quantum state operation or quantum circuit execution is possible with Python package.
-- Support three types of quantum states: 1) quantum state vector, 2) density operator, 3) stabilizer state.
+- Support four types of quantum states: 1) quantum state vector, 2) density operator, 3) stabilizer state, 4) matrix product state.
 - Other quantum computing services or simulators can be used as backend (followings are supported).
     - [qulacs](https://github.com/qulacs/qulacs)
     - [IBM Quantum(IBMQ)](https://quantum-computing.ibm.com/)
