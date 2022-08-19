@@ -882,6 +882,169 @@ class TestQState_expect(unittest.TestCase):
     """ test 'QState' : 'expect'
     """
 
+    def test_expect_1(self):
+        """test 'expect_1'
+        """
+        qs = QState(qubit_num=3)
+        qs.h(0).h(1).h(2)
+        ob = Observable(string="x_0*x_1*x_2")
+        actual = qs.expect(observable=ob)
+        expect = 1.+0.j
+        ans = equal_values(actual, expect)
+        self.assertEqual(ans, True)
+
+    def test_expect_2(self):
+        """test 'expect_2'
+        """
+        qs = QState(qubit_num=3)
+        ob = Observable(string="x_0 * x_1 * x_2")
+        actual = qs.expect(observable=ob)
+        expect = 0.j
+        ans = equal_values(actual, expect)
+        self.assertEqual(ans, True)
+
+    def test_expect_3(self):
+        """test 'expect_3'
+        """
+        qs = QState(qubit_num=3)
+        qs.h(0).h(1).h(2)
+        ob = Observable(string="z_0 * z_1 * z_2")
+        actual = qs.expect(observable=ob)
+        expect = 0.j
+        ans = equal_values(actual, expect)
+        self.assertEqual(ans, True)
+
+    def test_expect_4(self):
+        """test 'expect_4'
+        """
+        qs = QState(qubit_num=3)
+        ob = Observable(string="z_0 * z_1 * z_2")
+        actual = qs.expect(observable=ob)
+        expect = 1.+0.j
+        ans = equal_values(actual, expect)
+        self.assertEqual(ans, True)
+
+    def test_expect_5(self):
+        """test 'expect_5'
+        """
+        qs = QState(qubit_num=3)
+        qs.h(0).cx(0,1).cx(0,2)
+        ob = Observable(string="z_0 * z_1 * z_2")
+        actual = qs.expect(observable=ob)
+        expect = 0.j
+        ans = equal_values(actual, expect)
+        self.assertEqual(ans, True)
+
+    def test_expect_6(self):
+        """test 'expect_6'
+        """
+        qs = QState(qubit_num=3)
+        qs.h(0).cx(0,1).cx(0,2)
+        ob = Observable(string="z_2 * z_1")
+        actual = qs.expect(observable=ob)
+        expect = 1.+0.j
+        ans = equal_values(actual, expect)
+        self.assertEqual(ans, True)
+
+    def test_expect_7(self):
+        """test 'expect_7'
+        """
+        qs = QState(qubit_num=3)
+        qs.h(0).cx(0,1).cx(0,2)
+        ob = Observable(string="x_0 * x_1 * x_2")
+        actual = qs.expect(observable=ob)
+        expect = 1.+0.j
+        ans = equal_values(actual, expect)
+        self.assertEqual(ans, True)
+
+    def test_expect_8(self):
+        """test 'expect_8'
+        """
+        qs = QState(qubit_num=3)
+        qs.h(0).cx(0,1).cx(0,2)
+        ob = Observable(string="x_0 * x_2")
+        actual = qs.expect(observable=ob)
+        expect = 0.j
+        ans = equal_values(actual, expect)
+        self.assertEqual(ans, True)
+
+    def test_expect_9(self):
+        """test 'expect_9'
+        """
+        qs = QState(qubit_num=3)
+        qs.h(0).cx(0,1).cx(0,2)
+        ob = Observable(string="z_0 * z_1 + 2.0 * z_1 * z_2 + 3.0 * z_2 * z_0")
+        actual = qs.expect(observable=ob)
+        expect = 6.+0.j
+        ans = equal_values(actual, expect)
+        self.assertEqual(ans, True)
+
+    def test_expect_10(self):
+        """test 'expect_10'
+        """
+        qs = QState(qubit_num=3)
+        qs.h(0).cx(0,1).cx(0,2)
+        ob = Observable(string="x_0 * x_1 + 2.0 * x_1 * x_2 + 3.0 * x_2 * x_0 + 4.0 * x_0 * x_1 * x_2")
+        actual = qs.expect(observable=ob)
+        expect = 4.+0.j
+        ans = equal_values(actual, expect)
+        self.assertEqual(ans, True)
+
+    def test_expect_11(self):
+        """test 'expect_11'
+        """
+        qs = QState(qubit_num=3)
+        qs.h(0).cx(0,1).cx(0,2)
+        ob = Observable(string="- x_0 * x_1 - 2.0 * x_1 * x_2 - 3.0 * x_2 * x_0 - 4.0 * x_0 * x_1 * x_2")
+        actual = qs.expect(observable=ob)
+        expect = -4.+0.j
+        ans = equal_values(actual, expect)
+        self.assertEqual(ans, True)
+
+    def test_expect_12(self):
+        """test 'expect_12'
+        """
+        qs = QState(qubit_num=2)
+        qs.h(1).s(1)
+        ob = Observable(string="y_1")
+        actual = qs.expect(observable=ob)
+        expect = 1.+0.j
+        ans = equal_values(actual, expect)
+        self.assertEqual(ans, True)
+
+    def test_expect_13(self):
+        """test 'expect_13'
+        """
+        qs = QState(qubit_num=2)
+        qs.h(1).s(1)
+        ob = Observable(string="z_0 * y_1")
+        actual = qs.expect(observable=ob)
+        expect = 1.+0.j
+        ans = equal_values(actual, expect)
+        self.assertEqual(ans, True)
+
+    def test_expect_14(self):
+        """test 'expect_14'
+        """
+        qs = QState(qubit_num=2)
+        qs.h(1).s(1)
+        ob = Observable(string="z_0 + y_1")
+        actual = qs.expect(observable=ob)
+        expect = 2.+0.j
+        ans = equal_values(actual, expect)
+        self.assertEqual(ans, True)
+
+    def test_expect_15(self):
+        """test 'expect_15'
+        """
+        qs = QState(qubit_num=2)
+        qs.h(1).s(1)
+        ob = Observable(string="2 * z_0 + 3 * z_1")
+        actual = qs.expect(observable=ob)
+        expect = 2.+0.j
+        ans = equal_values(actual, expect)
+        self.assertEqual(ans, True)
+
     def test_evolve_1_qubit(self):
         """test 'evolve' (1-qubit)
         """

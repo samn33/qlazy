@@ -1626,4 +1626,14 @@ class MPState(FiniteMPS):
         Obserbable class (Observable.py)
 
         """
-        pass
+        expect_value = 0.0
+        weighted_pp_list = observable.weighted_pp_list
+        for wpp in weighted_pp_list:
+            mps = self.clone()
+            weight = wpp['weight']
+            qid = wpp['pp'].qid
+            pauli_list = [pauli_str.lower() for pauli_str in wpp['pp'].pauli_list]
+            [mps.operate_1qubit_gate(s, q) for s, q in zip(pauli_list, qid)]
+            expect_value += (weight * self.inpro(mps).real)
+
+        return expect_value

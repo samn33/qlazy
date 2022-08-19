@@ -250,3 +250,12 @@ def check_gpu():
         return True
     except:
         return False
+
+def is_num(s):
+    """ is this string numeric or not """
+    try:
+        float(s)
+    except ValueError:
+        return False
+    else:
+        return True
