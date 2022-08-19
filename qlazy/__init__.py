@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from .QState import QState
+from .ObservableBase import ObservableBase
 from .Observable import Observable
 from .DensOp import DensOp
 from .Stabilizer import Stabilizer
@@ -14,5 +15,5 @@ from . import error
 from . import util
 from . import gpu
 
-__all__ = ["QState", "Observable", "DensOp", "Stabilizer", "MPState", "Backend",
-           "QCirc", "CMem", "PauliProduct", "Result", "config", "error", "util", "gpu"]
+__all__ = ["QState", "ObservableBase", "Observable", "DensOp", "Stabilizer", "MPState",
+           "Backend", "QCirc", "CMem", "PauliProduct", "Result", "config", "error", "util", "gpu"]

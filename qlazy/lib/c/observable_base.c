@@ -16,13 +16,13 @@ static int _get_term_num(char* str)
   SUC_RETURN(num);
 }
 
-bool observable_init(char* str, void** observ_out)
+bool observable_base_init(char* str, void** observ_out)
 /*
   [input string format (example)]
   "5.0+2.0*Z_0*X_1*Y_3+3.0*X_0*Z_1-Y_1"
  */
 {
-  Observable*	observ	= NULL;
+  ObservableBase*	observ	= NULL;
   int		str_len;
   char*		exp_str = NULL;
   char*		token[TOKEN_NUM];
@@ -59,7 +59,7 @@ bool observable_init(char* str, void** observ_out)
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
     
   /* set observ */
-  if (!(observ = (Observable*)malloc(sizeof(Observable))))
+  if (!(observ = (ObservableBase*)malloc(sizeof(ObservableBase))))
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
   observ->array_num = term_num;
   if (!(observ->spro_array = (SPro**)malloc(sizeof(SPro*)*observ->array_num)))
@@ -81,7 +81,7 @@ bool observable_init(char* str, void** observ_out)
   SUC_RETURN(true);
 }
 
-void observable_free(Observable* observ)
+void observable_base_free(ObservableBase* observ)
 {
   int i;
   

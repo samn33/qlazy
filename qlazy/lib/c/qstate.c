@@ -1358,7 +1358,7 @@ static bool _qstate_evolve_spro(QState* qstate, SPro* spro, double time)
   SUC_RETURN(true);
 }
 
-bool qstate_evolve(QState* qstate, Observable* observ, double time, int iter)
+bool qstate_evolve(QState* qstate, ObservableBase* observ, double time, int iter)
 {
   double	t = time / iter;
   int		i,j;
@@ -1465,7 +1465,7 @@ static QState* _qstate_apply_spro(QState* qstate, SPro* spro)
   SUC_RETURN(qstate_ob);
 }
 
-static QState* _qstate_apply_observable(QState* qstate, Observable* observ)
+static QState* _qstate_apply_observable(QState* qstate, ObservableBase* observ)
 {
   QState*	qstate_ob  = NULL;
   QState*	qstate_tmp = NULL;
@@ -1563,7 +1563,7 @@ bool qstate_tensor_product(QState* qstate_0, QState* qstate_1, void** qstate_out
   SUC_RETURN(true);
 }
 
-bool qstate_expect_value(QState* qstate, Observable* observ, double* value)
+bool qstate_expect_value(QState* qstate, ObservableBase* observ, double* value)
 {
   QState*	qstate_ob = NULL;
   double	real	  = 0.0;

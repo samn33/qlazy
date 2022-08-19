@@ -412,11 +412,11 @@ typedef struct _SPro {
 
 /* observable consist of pauli operators (= array of "SpinProduct") */
 /* ex) 3.0-2.0*X_0*Z_1*Y_2 + Z_1*X_2 + 4.0*Z_3 ... */
-typedef struct _Observable {
+typedef struct _ObservableBase {
   int		spin_num;
   int		array_num;
   SPro**	spro_array;
-} Observable;
+} ObservableBase;
 
 typedef struct _DensOp {
   int		row;
@@ -531,11 +531,11 @@ bool     qstate_measure_bell_stats(QState* qstate, int shot_num, int qubit_num,
 				   int* qubit_id, void** mdata_out);
 bool	 qstate_operate_qgate(QState* qstate, Kind kind, double alpha, double beta,
 			      double gamma, int* qubit_id);
-bool     qstate_evolve(QState* qstate, Observable* observ, double time, int iter);
+bool     qstate_evolve(QState* qstate, ObservableBase* observ, double time, int iter);
 bool     qstate_inner_product(QState* qstate_0, QState* qstate_1, double* real,
 			      double* imag);
 bool     qstate_tensor_product(QState* qstate_0, QState* qstate_1, void** qstate_out);
-bool     qstate_expect_value(QState* qstate, Observable* observ, double* value);
+bool     qstate_expect_value(QState* qstate, ObservableBase* observ, double* value);
 bool     qstate_apply_matrix(QState* qstate, int qnum, int* qid,
 			     double* real, double *imag, int row, int col);
 bool     qstate_operate_qcirc(QState* qstate, CMem* cmem, QCirc* qcirc, int shots,
@@ -559,9 +559,9 @@ void	 qsystem_free(QSystem* qsystem);
 bool     spro_init(char* str, void** spro_out);
 void     spro_free(SPro* spro);
 
-/* observable.c */
-bool     observable_init(char* str, void** observ_out);
-void     observable_free(Observable* observ);
+/* observable_base.c */
+bool     observable_base_init(char* str, void** observ_out);
+void     observable_base_free(ObservableBase* observ);
 
 /* densop.c */
 bool     densop_init(QState* qstate, double* prob, int num, void** densop_out);

@@ -2,43 +2,20 @@
 """ Obserbavle for quantum many-body spin system. """
 import ctypes
 
-class Observable(ctypes.Structure):
-    """ Obserbavle for quantum many-body spin system. """
+from qlazy.ObservableBase import ObservableBase
 
-    _fields_ = [
-        ('spin_num', ctypes.c_int),
-        ('array_num', ctypes.c_int),
-        ('spro_array', ctypes.c_void_p),
-    ]
+class Observable(ObservableBase):
+    """ Observable for quantum many-body spin system.
 
-    def __new__(cls, string=None, **kwargs):
-        """
-        Parameters
-        ----------
-        string : str
-            expression for the observable.
+    Attributes
+    ----------
+    string : str
+        string of observable description
+        ex) "-2.0 + z_0 * z_1 + x_0 + x_1" for 2-qubit system
 
-        Returns
-        -------
-        ob : instance of Observable
-            observable corresponding to the string expression.
+    """
+    def __init__(self, string=None):
+        self.string = string
 
-        Examles
-        -------
-        Hamiltonian for 2-body spin system : -2.0 + Z0 X1 + X0 X1
-        >>> ob = Observable("-2.0+z_0*z_1+x_0+x_1")
-
-        """
-        cls.spin_num = 0
-        cls.array_num = 0
-        cls.spro_array = None
-        obj = observable_init(string)
-        ob = ctypes.cast(obj.value, ctypes.POINTER(cls)).contents
-        return ob
-
-    def __del__(self):
-
-        observable_free(self)
-
-# c-library for observable
-from qlazy.lib.observable_c import observable_init, observable_free
+    def __str__(self):
+        return self.string

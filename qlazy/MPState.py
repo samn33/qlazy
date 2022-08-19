@@ -10,6 +10,7 @@ from collections import Counter
 import tensornetwork as tn
 from tensornetwork import FiniteMPS
 
+# from qlazy import PauliProduct, Observable
 import qlazy.config as cfg
 
 class MDataMPState:
@@ -50,8 +51,8 @@ class MPState(FiniteMPS):
         list of 3-rank tensors for the matrix product
     
     """
-    def __init__(self, qubit_num: int = 0, bits_str: str = None, tensors: list = None,
-                 max_singular_values: int = 1024, **kwargs):
+    def __init__(self, qubit_num=0, bits_str=None, tensors=None, max_singular_values=1024,
+                 **kwargs):
         """
         Parameters
         ----------
@@ -60,7 +61,7 @@ class MPState(FiniteMPS):
         bits_str : str
             string of initial quantum state.
             ex) set '0011' if initial quantum state is |0011>
-        tensors : list (np.ndarray)
+        tensors : list (numpy.ndarray)
             list of 3-rank tensors for the matrix product
         max_singular_values : int, default - 1024
             maximum of singular values
@@ -411,7 +412,7 @@ class MPState(FiniteMPS):
         """
         return abs(self.inpro(mps, qid=qid))
 
-    def __get_gate_array(self, gate_str: str, para: float = 0.0):
+    def __get_gate_array(self, gate_str, para=0.0):
 
         phase = para * np.pi
         
@@ -600,14 +601,48 @@ class MPState(FiniteMPS):
 
         return gate_array
 
-    def operate_1qubit_gate(self, gate_str: str, q: int, para: float = 0.0):
+    def operate_1qubit_gate(self, gate_str, q, para=0.0):
+        """
+        operate 1-qubit gate.
 
+        Parameters
+        ----------
+        gate_str : str
+            gate stiring (ex. 'x','y','z','h','s', ..)
+        q0 : int
+            qubit id.
+        para : float
+            angle for rotation gate (unit of angle is PI radian).
+
+        Returns
+        -------
+        self : instance of MPState
+
+        """
         gate_array = self.__get_gate_array(gate_str, para)
         self.apply_one_site_gate(gate=gate_array, site=q)
         return self
         
-    def operate_2qubit_gate(self, gate_str: str, q0: int, q1: int, para: float = 0.0):
+    def operate_2qubit_gate(self, gate_str, q0, q1, para=0.0):
+        """
+        operate 2-qubit gate.
 
+        Parameters
+        ----------
+        gate_str : str
+            gate stiring (ex. 'cx','cy','cz','ch','crz', ..)
+        q0 : int
+            qubit id.
+        q1 : int
+            qubit id.
+        para : float
+            angle for rotation gate (unit of angle is PI radian).
+
+        Returns
+        -------
+        self : instance of MPState
+
+        """
         if q0 == q1:
             raise ValueError("q0 is equal to q1, they must be different value.")
 
@@ -783,7 +818,7 @@ class MPState(FiniteMPS):
 
         Returns
         -------
-        self : instance of QState
+        self : instance of MPState
 
         """
         self.operate_1qubit_gate('t', q0)
@@ -800,7 +835,7 @@ class MPState(FiniteMPS):
 
         Returns
         -------
-        self : instance of QState
+        self : instance of MPState
 
         """
         self.operate_1qubit_gate('t_dg', q0)
@@ -1338,8 +1373,27 @@ class MPState(FiniteMPS):
 
         return prob_all
 
-    def m(self, qid: list = None, shots: int = 1):
+    def m(self, qid=None, shots=1):
+        """
+        measurement in Z-direction
 
+        Parameters
+        ----------
+        qid : list of int
+            qubit id list to measure.
+        shots : int, default 1
+            number of measurements.
+
+        Returns
+        -------
+        md : instance of MDataMPState
+            measurement data.
+
+        See Also
+        --------
+        MDataMPState class
+
+        """
         if qid is None or qid == []:
             qid = list(range(self.__qubit_num))
         
@@ -1429,10 +1483,10 @@ class MPState(FiniteMPS):
 
         Examples
         --------
-        >>> qs = QState(qubit_num=2).h(0).cx(0,1)
-        >>> qs.show()
-        >>> print(qs.measure(qid=[0,1]))
-        >>> qs.show()
+        >>> mps = MPState(qubit_num=2).h(0).cx(0,1)
+        >>> mps.show()
+        >>> print(mps.measure(qid=[0,1]))
+        >>> mps.show()
         c[00] = +0.7071+0.0000*i : 0.5000 |++++++
         c[01] = +0.0000+0.0000*i : 0.0000 |
         c[10] = +0.0000+0.0000*i : 0.0000 |
@@ -1449,7 +1503,27 @@ class MPState(FiniteMPS):
         return mval
         
     def reset(self, qid: list = None):
+        """
+        reset to |00..0> state.
 
+        Parameters
+        ----------
+        qid : list, default - qubit id's list for all of the qubits
+            qubit id's list to reset.
+
+        Returns
+        -------
+        self : instance of MPState
+            matrix product state.
+
+        Notes
+        -----
+        If 'qid' is set, specified qubits are reset after
+        measurement. So if the specified qubits are entangled with the
+        remaining qubits, output quantum state is probabilistic. If no
+        qubits are set, all qubits are zero reset.
+
+        """
         if qid is None or qid == []:
             qid = list(range(self.__qubit_num))
 
@@ -1499,6 +1573,10 @@ class MPState(FiniteMPS):
         self : instance of QState
             quantum state after operation
 
+        See Also
+        --------
+        PauliProduct class (PauliProduct.py)
+
         """
         pauli_list = pp.pauli_list
         qid = pp.qid
@@ -1528,3 +1606,24 @@ class MPState(FiniteMPS):
                     continue
 
         return self
+
+    def expect(self, observable=None):
+        """
+        get the expectation value for observable under the matrix product state.
+
+        Parameters
+        ----------
+        observable : instance of Observable
+            obserbable of the system.
+
+        Returns
+        -------
+        expect : float
+            expect value.
+
+        See Also
+        --------
+        Obserbable class (Observable.py)
+
+        """
+        pass

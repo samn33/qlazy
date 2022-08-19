@@ -10,7 +10,7 @@ import qlazy.config as cfg
 from qlazy.util import get_lib_ext, qstate_check_args
 from qlazy.QState import QState
 from qlazy.MData import MData
-from qlazy.Observable import Observable
+from qlazy.ObservableBase import ObservableBase
 from qlazy.QCirc import QCirc
 from qlazy.CMem import CMem
 
@@ -287,7 +287,7 @@ def qstate_evolve(qs, observable=None, time=0.0, iteration=0):
 
     try:
         lib.qstate_evolve.restype = ctypes.c_bool
-        lib.qstate_evolve.argtypes = [ctypes.POINTER(QState), ctypes.POINTER(Observable),
+        lib.qstate_evolve.argtypes = [ctypes.POINTER(QState), ctypes.POINTER(ObservableBase),
                                       ctypes.c_double, ctypes.c_int]
         ret = lib.qstate_evolve(ctypes.byref(qs), ctypes.byref(observable),
                                 ctypes.c_double(time), ctypes.c_int(iteration))
@@ -311,7 +311,7 @@ def qstate_expect_value(qs, observable=None):
         c_val = ctypes.c_double(val)
         lib.qstate_expect_value.restype = ctypes.c_bool
         lib.qstate_expect_value.argtypes = [ctypes.POINTER(QState),
-                                            ctypes.POINTER(Observable),
+                                            ctypes.POINTER(ObservableBase),
                                             ctypes.POINTER(ctypes.c_double)]
         ret = lib.qstate_expect_value(ctypes.byref(qs),
                                       ctypes.byref(observable),
