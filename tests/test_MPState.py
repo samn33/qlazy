@@ -891,49 +891,41 @@ class TestMPState_expect(unittest.TestCase):
         ans = equal_values(actual, expect)
         self.assertEqual(ans, True)
 
-# class TestMPState_evolve(unittest.TestCase):
-#     """ test 'MPState' : 'evolve'
-#     """
-# 
-#     def test_evolve(self):
-#         """test 'evolve'
-#         """
-#         hm = Observable("x_0")
-#         mps = MPState(qubit_num=1)
-#         mps.evolve(observable=hm, time=0.2, iteration=100)
-#         actual = mps.amp
-#         expect = np.array([(0.8090169943749473+0j), 0.5877852522924732j])
-#         ans = equal_vectors(actual, expect)
-#         self.assertEqual(ans,True)
-# 
-# class TestMPState_expect(unittest.TestCase):
-#     """ test 'MPState' : 'expect'
-#     """
-# 
-#     def test_evolve_1_qubit(self):
-#         """test 'evolve' (1-qubit)
-#         """
-#         ob = Observable("y_0")
-#         hm = Observable("x_0")
-#         mps = MPState(qubit_num=1)
-#         mps.evolve(observable=hm, time=0.2, iteration=100)
-#         actual = mps.expect(observable=ob)
-#         expect = 0.9510565162951199
-#         ans = equal_values(actual, expect)
-#         self.assertEqual(ans,True)
-# 
-#     def test_evolve_2_qubit(self):
-#         """test 'evolve' (2-qubit)
-#         """
-#         qs = QState(qubit_num=2).x(0)
-#         hm = Observable("z_0*z_1+x_0+x_1")
-#         ob = Observable("2.0+z_0+z_1")
-#         mps.evolve(observable=hm,time=0.1,iteration=10)
-#         actual = mps.expect(observable=ob)
-#         expect = 1.9999999999999898+0j
-#         ans = equal_values(actual, expect)
-#         self.assertEqual(ans,True)
+    def test_expect_random(self):
+        """test 'expect_random'
+        """
+        qubit_num = 12
+        operation_num = 6
 
+        ob = Observable(string="x_0 * y_2 * z_3 * y_5 * x_6")
+
+        rnd_list = [random.random() for _ in range(operation_num * 3)]
+
+        mps = MPState(qubit_num=qubit_num)
+        for j in range(operation_num):
+            for i in range(qubit_num):
+                mps.rx(i, phase=rnd_list[3*j])
+                mps.ry(i, phase=rnd_list[3*j+1])
+                mps.rz(i, phase=rnd_list[3*j+2])
+            for k in range(1, qubit_num):
+                mps.cx(k-1,k)
+
+        expval_mps = mps.expect(observable=ob)
+
+        qs = QState(qubit_num=qubit_num)
+        for j in range(operation_num):
+            for i in range(qubit_num):
+                qs.rx(i, phase=rnd_list[3*j])
+                qs.ry(i, phase=rnd_list[3*j+1])
+                qs.rz(i, phase=rnd_list[3*j+2])
+            for k in range(1, qubit_num):
+                qs.cx(k-1,k)
+
+        expval_qs = qs.expect(observable=ob)
+
+        ans = equal_values(expval_mps, expval_qs)
+        self.assertEqual(ans, True)
+        
 class TestMPState_measure(unittest.TestCase):
     """ test 'MPState' : various kind of measurements
     """

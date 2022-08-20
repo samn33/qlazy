@@ -1618,7 +1618,7 @@ class MPState(FiniteMPS):
 
         Returns
         -------
-        expect : float
+        expect : complex
             expect value.
 
         See Also
@@ -1634,6 +1634,6 @@ class MPState(FiniteMPS):
             qid = wpp['pp'].qid
             pauli_list = [pauli_str.lower() for pauli_str in wpp['pp'].pauli_list]
             [mps.operate_1qubit_gate(s, q) for s, q in zip(pauli_list, qid)]
-            expect_value += (weight * self.inpro(mps).real)
+            expect_value += (weight * self.inpro(mps))
 
         return expect_value

@@ -45,6 +45,7 @@
 #define DEF_QC_STEPS		100
 #define DEF_QCIRC_DEPTH		100
 #define MAX_QUBIT_NUM		30	        /* max qubit number for state vector simulation */
+#define MAX_MPS_QUBIT_NUM	2048	        /* max qubit number for MPS simulation */
 #define DEF_QLAZYINIT		"./.qlazyinit"
 
 #define DEF_SHOTS 100
@@ -407,7 +408,7 @@ typedef struct _QSystem {
 typedef struct _SPro {
   double	coef;
   int		spin_num;	                /* max of spin id + 1 */
-  SpinType	spin_type[MAX_QUBIT_NUM];	/* Pauli-X,Y,Z,or Identity*/
+  SpinType	spin_type[MAX_MPS_QUBIT_NUM];	/* Pauli-X,Y,Z,or Identity*/
 } SPro;
 
 /* observable consist of pauli operators (= array of "SpinProduct") */

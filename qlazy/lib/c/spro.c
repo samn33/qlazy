@@ -17,10 +17,10 @@ bool spro_init(char* str, void** spro_out)
   int		tnum;
   int		anum;
   int		spin_id;
-  int           flg[MAX_QUBIT_NUM];
+  int           flg[MAX_MPS_QUBIT_NUM];
   int		i;
 
-  for (i=0; i<MAX_QUBIT_NUM; i++) flg[i] = OFF;
+  for (i=0; i<MAX_MPS_QUBIT_NUM; i++) flg[i] = OFF;
 
   if (!line_check_length(str)) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
   if (!line_chomp(str)) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
@@ -36,7 +36,7 @@ bool spro_init(char* str, void** spro_out)
   
   if (!(spro = (SPro*)malloc(sizeof(SPro))))
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,false);
-  for (i=0; i<MAX_QUBIT_NUM; i++) spro->spin_type[i] = NONE;
+  for (i=0; i<MAX_MPS_QUBIT_NUM; i++) spro->spin_type[i] = NONE;
 
   spro->coef = 1.0;
   spro->spin_num = 0;
@@ -52,7 +52,7 @@ bool spro_init(char* str, void** spro_out)
       if (strcmp(args[0], "X") == 0) {
 	if (!(is_decimal(args[1]))) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 	spin_id = strtol(args[1], NULL, 10);
-	if (spin_id >= MAX_QUBIT_NUM) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+	if (spin_id >= MAX_MPS_QUBIT_NUM) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 	if (flg[spin_id] == ON) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 	flg[spin_id] = ON;
 	spro->spin_type[spin_id] = SIGMA_X;
@@ -60,7 +60,7 @@ bool spro_init(char* str, void** spro_out)
       else if (strcmp(args[0], "x") == 0) {
 	if (!(is_decimal(args[1]))) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 	spin_id = strtol(args[1], NULL, 10);
-	if (spin_id >= MAX_QUBIT_NUM) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+	if (spin_id >= MAX_MPS_QUBIT_NUM) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 	if (flg[spin_id] == ON) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 	flg[spin_id] = ON;
 	spro->spin_type[spin_id] = SIGMA_X;
@@ -68,7 +68,7 @@ bool spro_init(char* str, void** spro_out)
       else if (strcmp(args[0], "Y") == 0) {
 	if (!(is_decimal(args[1]))) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 	spin_id = strtol(args[1], NULL, 10);
-	if (spin_id >= MAX_QUBIT_NUM) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+	if (spin_id >= MAX_MPS_QUBIT_NUM) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 	if (flg[spin_id] == ON) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 	flg[spin_id] = ON;
 	spro->spin_type[spin_id] = SIGMA_Y;
@@ -76,7 +76,7 @@ bool spro_init(char* str, void** spro_out)
       else if (strcmp(args[0], "y") == 0) {
 	if (!(is_decimal(args[1]))) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 	spin_id = strtol(args[1], NULL, 10);
-	if (spin_id >= MAX_QUBIT_NUM) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+	if (spin_id >= MAX_MPS_QUBIT_NUM) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 	if (flg[spin_id] == ON) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 	flg[spin_id] = ON;
 	spro->spin_type[spin_id] = SIGMA_Y;
@@ -84,7 +84,7 @@ bool spro_init(char* str, void** spro_out)
       else if (strcmp(args[0], "Z") == 0) {
 	if (!(is_decimal(args[1]))) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 	spin_id = strtol(args[1], NULL, 10);
-	if (spin_id >= MAX_QUBIT_NUM) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+	if (spin_id >= MAX_MPS_QUBIT_NUM) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 	if (flg[spin_id] == ON) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 	flg[spin_id] = ON;
 	spro->spin_type[spin_id] = SIGMA_Z;
@@ -92,7 +92,7 @@ bool spro_init(char* str, void** spro_out)
       else if (strcmp(args[0], "z") == 0) {
 	if (!(is_decimal(args[1]))) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 	spin_id = strtol(args[1], NULL, 10);
-	if (spin_id >= MAX_QUBIT_NUM) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+	if (spin_id >= MAX_MPS_QUBIT_NUM) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 	if (flg[spin_id] == ON) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 	flg[spin_id] = ON;
 	spro->spin_type[spin_id] = SIGMA_Z;
