@@ -1169,6 +1169,34 @@ class QCirc(ctypes.Structure):
         qc_pair = (qc_unitary, qc_non_unitary)
         return qc_pair
 
+    def all_gates_measurement(self):
+        """
+        gates of the qcirc are all measurement
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        ans : bool
+            True if all gates are measurement, False if otherwise
+        """
+        if self.kind_first() is None:
+            return False
+        
+        ans = True
+        qcirc = self.clone()
+        while True:
+            kind = qcirc.kind_first()
+            if kind is None:
+                break
+            (kind, qid, para, c, ctrl) = qcirc.pop_gate()
+            if kind is not cfg.MEASURE:
+                ans = False
+                break
+        return ans
+
     def __del__(self):
 
         qcirc_free(self)

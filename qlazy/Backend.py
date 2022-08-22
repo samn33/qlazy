@@ -6,7 +6,7 @@ import datetime
 from qlazy.util import read_config_ini
 from qlazy.gpu import is_gpu_available, is_gpu_supported_lib, gpu_preparation
 
-BACKEND_DEVICES = {'qlazy': ['qstate_simulator', 'stabilizer_simulator'],
+BACKEND_DEVICES = {'qlazy': ['qstate_simulator', 'stabilizer_simulator', 'mps_simulator'],
                    'qulacs': ['cpu_simulator'],
                    'ibmq': ['aer_simulator'],
                    'braket_local': ['braket_sv'],
@@ -15,7 +15,7 @@ BACKEND_DEVICES = {'qlazy': ['qstate_simulator', 'stabilizer_simulator'],
                    'braket_rigetti': ['aspen_11', 'aspen_m_1'],
                    'braket_oqc': ['lucy']}
 
-BACKEND_DEVICES_GPU = {'qlazy': ['qstate_gpu_simulator'],
+BACKEND_DEVICES_GPU = {'qlazy': ['qstate_gpu_simulator', 'mps_gpu_simulator'],
                        'qulacs': ['gpu_simulator']}
 
 if is_gpu_available() is True and is_gpu_supported_lib() is True:
@@ -107,6 +107,11 @@ class Backend:
             # stabilizer simulator
             elif self.device == 'stabilizer_simulator':
                 from qlazy.backend.qlazy_stabilizer_simulator import run
+                self.__run = run
+
+            # mps simulator
+            elif self.device == 'mps_simulator':
+                from qlazy.backend.qlazy_mps_simulator import run
                 self.__run = run
 
             else:

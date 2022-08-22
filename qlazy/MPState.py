@@ -1412,7 +1412,11 @@ class MPState(FiniteMPS):
 
         for i in range(shots):
 
-            mps = self.clone()
+            if i == shots - 1:
+                mps = self
+            else:
+                mps = self.clone()
+            # mps = self.clone()
 
             prob_total = 1.0
             measured_str = ""
@@ -1502,7 +1506,7 @@ class MPState(FiniteMPS):
         mval = md.last
         return mval
         
-    def reset(self, qid: list = None):
+    def reset(self, qid=None):
         """
         reset to |00..0> state.
 
