@@ -224,7 +224,7 @@ class Backend:
         backend_dict = {'product': self.product, 'device': self.device}
         return str(backend_dict)
 
-    def run(self, qcirc=None, shots=1, cid=None, out_state=False):
+    def run(self, qcirc=None, shots=1, cid=None, out_state=False, **kwargs):
         """
         run the quantum circuit.
 
@@ -267,7 +267,8 @@ class Backend:
 
         """
         start_time = datetime.datetime.now()
-        result = self.__run(qcirc=qcirc, shots=shots, cid=cid, backend=self, out_state=out_state)
+        result = self.__run(qcirc=qcirc, shots=shots, cid=cid, backend=self,
+                            out_state=out_state, **kwargs)
         end_time = datetime.datetime.now()
 
         result.start_time = start_time

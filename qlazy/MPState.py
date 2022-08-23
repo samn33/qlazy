@@ -10,7 +10,6 @@ from collections import Counter
 import tensornetwork as tn
 from tensornetwork import FiniteMPS
 
-# from qlazy import PauliProduct, Observable
 import qlazy.config as cfg
 
 class MDataMPState:
@@ -45,13 +44,13 @@ class MPState(FiniteMPS):
         number of qubits (number of nodes)
     bond_dimensions : list (int)
         list of bond dimensions
-    max_singular_values : int
-        maximum of singular values
+    max_truncation_err : float
+        maximum of truncation error
     tensors : list (np.ndarray)
         list of 3-rank tensors for the matrix product
     
     """
-    def __init__(self, qubit_num=0, bits_str=None, tensors=None, max_singular_values=1024,
+    def __init__(self, qubit_num=0, bits_str=None, tensors=None, max_truncation_err=cfg.EPS,
                  **kwargs):
         """
         Parameters
@@ -63,8 +62,8 @@ class MPState(FiniteMPS):
             ex) set '0011' if initial quantum state is |0011>
         tensors : list (numpy.ndarray)
             list of 3-rank tensors for the matrix product
-        max_singular_values : int, default - 1024
-            maximum of singular values
+        max_truncation_err : float
+            maximum of truncation error
 
         Notes
         -----
@@ -99,15 +98,15 @@ class MPState(FiniteMPS):
         super().__init__(tensors=tensors, center_position=center_position, canonicalize=True)
 
         self.__qubit_num = qubit_num
-        self.__max_singular_values = max_singular_values
+        self.__max_truncation_err = max_truncation_err
 
     @property
     def qubit_num(self):
         return self.__qubit_num
 
     @property
-    def max_singular_values(self):
-        return self.__max_singular_values
+    def max_truncation_err(self):
+        return self.__max_truncation_err
 
     def __str__(self):
 
@@ -115,7 +114,7 @@ class MPState(FiniteMPS):
         s += "== attributes ==\n"
         s += "qubit_num           = {}\n".format(self.qubit_num)
         s += "bond_dimensions     = {}\n".format(self.bond_dimensions)
-        s += "max_singular_values = {}\n".format(self.max_singular_values)
+        s += "max_truncation_err  = {}\n".format(self.max_truncation_err)
 
         for n, tensor in enumerate(self.tensors):
             s += "\n== qubit id = {} (row:{}, column:{}) ==\n".format(n, tensor.shape[0], tensor.shape[2])
@@ -658,13 +657,15 @@ class MPState(FiniteMPS):
 
         for i in range(len(path) - 2, pos, -1):
             self.position(site=path[i])
-            self.apply_two_site_gate(gate=swap_gate, site1=path[i], site2=path[i + 1])
+            self.apply_two_site_gate(gate=swap_gate, site1=path[i], site2=path[i + 1],
+                                     max_truncation_err=self.__max_truncation_err)
         self.position(site=path[0])
         self.apply_two_site_gate(gate=gate_array, site1=path[0], site2=path[1],
-                                 max_singular_values=self.__max_singular_values)
+                                 max_truncation_err=self.__max_truncation_err)
         for i in range(pos + 1, len(path) - 1):
             self.position(site=path[i])
-            self.apply_two_site_gate(gate=swap_gate, site1=path[i], site2=path[i + 1])
+            self.apply_two_site_gate(gate=swap_gate, site1=path[i], site2=path[i + 1],
+                                     max_truncation_err=self.__max_truncation_err)
 
         return self
 
