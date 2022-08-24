@@ -178,7 +178,7 @@ GATE_LABEL = {
     HADAMARD:'H',
     PHASE_SHIFT_S:'S',
     PHASE_SHIFT_S_:'Sdg',
-    PHASE_SHIFT_T:'t',
+    PHASE_SHIFT_T:'T',
     PHASE_SHIFT_T_:'Tdg',
     PHASE_SHIFT:'P',
     ROTATION_X:'RX',

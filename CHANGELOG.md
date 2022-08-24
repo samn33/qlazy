@@ -2,7 +2,9 @@
 
 ## [0.3.2] - 2022-xx-xx
 ### Added
-- matrix product state simulator
+- matrix product state simulation
+### Fixed
+- generate_random_gates method of QCirc
 
 ## [0.3.1] - 2022-07-21
 ### Added

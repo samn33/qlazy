@@ -944,7 +944,9 @@ class QCirc(ctypes.Structure):
         qcirc = cls()
 
         TRY_MAX = 10  # for random generation
-        for _ in range(gate_num):
+        max_q = -1
+        gate_count = 0
+        while gate_count < gate_num or max_q < qubit_num - 1:
             r = random.random()
             kind = None
             for i, p in enumerate(plist):
@@ -957,6 +959,8 @@ class QCirc(ctypes.Structure):
             if term_num == 1 and para_num == 0:    # 1-qubit gate
                 q0 = random.randint(0, qubit_num - 1)
                 qcirc.append_gate(kind, [q0])
+                max_q = max(max_q, q0)
+                gate_count += 1
             elif term_num == 1 and para_num == 1:  # 1-qubit and 1-parameter gate
                 q0 = random.randint(0, qubit_num - 1)
                 if phase is None:
@@ -966,6 +970,8 @@ class QCirc(ctypes.Structure):
                 else:
                     p = random.choice(phase)
                 qcirc.append_gate(kind, [q0], para=[p, 0., 0.])
+                max_q = max(max_q, q0)
+                gate_count += 1
             elif term_num == 2 and para_num == 0:  # 2-qubit gate
                 q0 = random.randint(0, qubit_num - 1)
                 q1 = random.randint(0, qubit_num - 1)
@@ -977,6 +983,8 @@ class QCirc(ctypes.Structure):
                     raise ValueError(("can't generate qubit id for '{}' gate."
                                       .format(cfg.GATE_STRING[kind])))
                 qcirc.append_gate(kind, [q0, q1])
+                max_q = max(max_q, q0, q1)
+                gate_count += 1
             elif term_num == 2 and para_num == 1:  # 2-qubit and 1-parameter gate
                 q0 = random.randint(0, qubit_num - 1)
                 q1 = random.randint(0, qubit_num - 1)
@@ -994,9 +1002,15 @@ class QCirc(ctypes.Structure):
                 else:
                     p = random.choice(phase)
                 qcirc.append_gate(kind, [q0, q1], para=[p, 0., 0.])
+                max_q = max(max_q, q0, q1)
+                gate_count += 1
             else:
                 raise ValueError(("gate of term_num={}, param_num={} is not supported"
                                   .format(term_num, para_num)))
+
+        # delete extra gates
+        for _ in range(gate_count - gate_num):
+            qcirc.pop_gate()
 
         return qcirc
 
