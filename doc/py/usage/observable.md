@@ -6,7 +6,7 @@
 算もできます。オブザーバブルを利用可能とするために、QStateクラスに加え、
 Observableクラスをimportする必要があります。
 
-    from qlazy import QState,Observable
+    >>> from qlazy import QState,Observable
 
 利用可能な計算は、
 
@@ -24,9 +24,9 @@ Observableクラスをimportする必要があります。
 は、この計算を実装しています。QStateクラスのevolveメソッドを使います。
 使用例を以下に示します。
 
-    qs = QState(2)
-    hm = Observable("-2.0+z_0*z_1+x_0+x_1")
-    qs.evolve(observable=hm, time=0.1, iteration=10)
+    >>> qs = QState(2)
+    >>> hm = Observable("-2.0+z_0*z_1+x_0+x_1")
+    >>> qs.evolve(observable=hm, time=0.1, iteration=10)
 	
 １行目で、２粒子を定義しています。量子状態は|00>に初期化されます。２行
 目で、"-2.0*Z0*Z1+X0+X1"というパウリ行列で記述されるハミルトニアンを定
@@ -40,8 +40,8 @@ Observableクラスをimportする必要があります。
 QStateクラスのexpectメソッドを使います。使用例を以下に示します。上で示
 した例の続きです。
 
-    ob = Observable("z_0+z_1")
-    exp = qs.expect(observable=ob)
+    >>> ob = Observable("z_0+z_1")
+    >>> exp = qs.expect(observable=ob)
 
 １行目で、期待値を求めたい物理量(オブザーバブル)を指定します。２行目で、
 現在の量子状態qsに対するオブザーバブルの期待値を計算して、変数exp(実数

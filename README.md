@@ -92,19 +92,12 @@ print help
 
 #### State Vector Simulation (by QState class)
 
-foo.py
-	
-    from qlazy import QState
-    
-    qs = QState(2)
-    qs.h(0).cx(0,1)
-    qs.show()
-    md = qs.m(shots=100)
-    print(md.frequency)
-
-execute the program
-
-    $ python foo.py
+    >>> from qlazy import QState
+    >>> qs = QState(2)
+    >>> qs.h(0).cx(0,1)
+    >>> qs.show()
+    >>> md = qs.m(shots=100)
+    >>> print(md.frequency)
     c[00] = +0.7071+0.0000*i : 0.5000 |++++++
     c[01] = +0.0000+0.0000*i : 0.0000 |
     c[10] = +0.0000+0.0000*i : 0.0000 |
@@ -113,36 +106,47 @@ execute the program
 
 #### Quantum Circuit Execution (by QCirc and Backend class)
 
-bar.py
-	
-    from qlazy import QCirc, Backend
-    
-    bk = Backend(product='qlazy', device='qstate_simulator')
-    qc = QCirc().h(0).cx(0,1).measure(qid=[0,1], cid=[0,1])
-    result = bk.run(qcirc=qc, shots=100)
-    print(result.frequency)
-
-bar-gpu.py
-	
-    from qlazy import QCirc, Backend
-
-    # using GPU
-    bk = Backend(product='qlazy', device='qstate_gpu_simulator')
-    qc = QCirc().h(0).cx(0,1).measure(qid=[0,1], cid=[0,1])
-    result = bk.run(qcirc=qc, shots=100)
-    print(result.frequency)
-
-execute the program
-
-    $ python bar.py
+    >>> # quantum state vector simulator
+    >>> from qlazy import QCirc, Backend
+    >>> bk = Backend(product='qlazy', device='qstate_simulator')
+    >>> qc = QCirc().h(0).cx(0,1).measure(qid=[0,1], cid=[0,1])
+    >>> result = bk.run(qcirc=qc, shots=100)
+    >>> print(result.frequency)
 	Counter({'00':52, '11':48})
+
+    >>> # quantum state vector simulator (GPU)
+    >>> from qlazy import QCirc, Backend
+    >>> bk = Backend(product='qlazy', device='qstate_gpu_simulator')
+    >>> qc = QCirc().h(0).cx(0,1).measure(qid=[0,1], cid=[0,1])
+    >>> result = bk.run(qcirc=qc, shots=100)
+    >>> print(result.frequency)
+	Counter({'00':54, '11':46})
+
+    >>> # stabilizer state simulator
+    >>> bk = Backend(product='qlazy', device='stabilizer_simulator')
+    >>> qc = QCirc().h(0)
+    >>> [qc.cx(i,i+1) for i in range(49)]
+    >>> qc.measure(qid=list(range(50)), cid=list(range(50)))
+    >>> result = bk.run(qcirc=qc, shots=100)
+    >>> print(result.frequency)
+    Counter({'00000000000000000000000000000000000000000000000000': 52, '11111111111111111111111111111111111111111111111111': 48})
+
+    >>> # matrix product state simulator
+    >>> bk = Backend(product='qlazy', device='mps_simulator')
+    >>> qc = QCirc().h(0)
+    >>> [qc.cx(i,i+1) for i in range(49)]
+    >>> qc.measure(qid=list(range(50)), cid=list(range(50)))
+    >>> result = bk.run(qcirc=qc, shots=100)
+    >>> print(result.frequency)
+    Counter({'11111111111111111111111111111111111111111111111111': 57, '00000000000000000000000000000000000000000000000000': 43})
 
 #### Other classes
 
-- DensOp class: for operating density operators.
-- Stabilizer class: for operating stabilizer states.
-- Observable class: for specifying observables.
-- PauliProduct: for operations related to pauli product.
+- DensOp class: for operating density operator.
+- Stabilizer class: for operating stabilizer state.
+- MPState class: for operating matrix product state.
+- Observable class: for specifying observable.
+- PauliProduct: for specifying pauli product.
 
 ## Documents
 
@@ -161,6 +165,7 @@ Optional ...
 - Qulacs 0.3.0 (to use qulacs backend)
 - qiskit 0.37.0 (to use IBMQ backend)
 - amazon-braket-sdk 1.25.2 (to use amazon braket backend)
+- tensornetwork 0.4.6 (to use matrix product state simulation)
 - cuda 11 (to use GPU version)
 
 ## Licence

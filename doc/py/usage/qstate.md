@@ -10,7 +10,7 @@
 を呼び出すのが基本ですが、乱数生成のシードを指定するオプションもありま
 す。
 
-    qs = QState(2, seed=123)
+    >>> qs = QState(2, seed=123)
 
 デフォルトではseedはランダムに設定されるので実行のたびに結果は変わ
 りますが、このseedを指定すると、何度実行しても結果は同じになります。
@@ -24,9 +24,9 @@
 また、numpyのベクトルを使って、量子状態を初期化することもできます。使
 い方は、以下です。
 
-    import numpy as np
-    vec = np.array([1,0,0,0])
-    qs = QState(vector=vec)
+    >>> import numpy as np
+    >>> vec = np.array([1,0,0,0])
+    >>> qs = QState(vector=vec)
 
 指定するベクトルの次元は２のべき乗である必要があります。
 
@@ -46,28 +46,28 @@ qlazy/qlazy/lib/c/qlazy.hの以下の行の数字を変えて、
 量子状態を複製することができます。シミュレータならではの機能です。以下
 のようにcloneメソッドを呼び出します。
 
-    qs_clone = qs.clone()
+    >>> qs_clone = qs.clone()
 
 ### リセット
 
 すでに生成済みの量子状態を破棄することなく、再度初期化して使いたい場合
 は、reset()メソッドを使います。例えば、
 
-    qs = QState(2)
-	qs.x(0).h(1).cx(0,1)
-    ...
+    >>> qs = QState(qubit_num=2)
+	>>> qs.x(0).h(1).cx(0,1)
+    >>> ...
 
 という一連の処理を行って結果を得た後、qsを|00...0>の状態に戻して、
 再び一連の処理を実行する場合、
 
-    qs.reset()
+    >>> qs.reset()
 
 とすれば、qsは強制的に|00...>となります。これは、同じ量子回路を何度も
 繰り返し適用しながら、何らかの統計量を得たいような場合に便利な機能です。
 
 また、
 
-    qs.reset(qid=[1,5])
+    >>> qs.reset(qid=[1,5])
 
 のように、量子番号リストを引数で与えると、その番号に対応した量子ビット
 のみを強制的に|0>にすることもできます。
@@ -84,27 +84,27 @@ qlazy/qlazy/lib/c/qlazy.hの以下の行の数字を変えて、
 量子状態インスタンスのメモリは使用されなくなったら自動的に解放されますが、
 明示的に解放したい場合、
 
-    del qs
+    >>> del qs
 
 とすれば好きなタイミングで解放することができます。
 	
 クラス・メソッド'del_all'を使えば複数の量子状態のインスタンスを一気に
 解放することができます。
 
-    qs_0 = QState(1)
-    qs_1 = QState(1)
-    qs_2 = QState(1)
-    ...
-    QState.del_all(qs_0, qs_1, qs_2)
+    >>> qs_0 = QState(1)
+    >>> qs_1 = QState(1)
+    >>> qs_2 = QState(1)
+    >>> ...
+    >>> QState.del_all(qs_0, qs_1, qs_2)
 
 このとき、引数に指定するのは量子状態のリストやタプルであっても良いですし、
 それらの入れ子でもOKです。例えば、
 
-    qs_A = [qs_1, qs_2]
-    QState.del_all(qs_0, qs_A)
-
-    qs_B = [qs_3, [qs_4, qs_5]]
-    QState.del_all(qs_B)
+    >>> qs_A = [qs_1, qs_2]
+    >>> QState.del_all(qs_0, qs_A)
+	>>> 
+    >>> qs_B = [qs_3, [qs_4, qs_5]]
+    >>> QState.del_all(qs_B)
 
 という指定の仕方でも大丈夫です。
 
@@ -114,9 +114,9 @@ qlazy/qlazy/lib/c/qlazy.hの以下の行の数字を変えて、
 
 #### パウリX,Y,Zゲート
 
-    qs.x(q)
-    qs.y(q)
-    qs.z(q)
+    >>> qs.x(q)
+    >>> qs.y(q)
+    >>> qs.z(q)
 
 qには量子ビット番号を指定します（以下、同様）。
 	
@@ -124,25 +124,25 @@ qには量子ビット番号を指定します（以下、同様）。
 
 ２乗したらXになるゲートです。
 
-    qs.xr(q)
-    qs.xr_dg(q)  # エルミート共役
+    >>> qs.xr(q)
+    >>> qs.xr_dg(q)  # エルミート共役
 
 #### アダマールゲート
 
-    qs.h(q)
+    >>> qs.h(q)
 
 #### 位相シフトゲート
 
-    qs.s(q)
-    qs.t(q)
-    qs.s_dg(q)  # エルミート共役
-    qs.t_dg(q)  # エルミート共役
+    >>> qs.s(q)
+    >>> qs.t(q)
+    >>> qs.s_dg(q)  # エルミート共役
+    >>> qs.t_dg(q)  # エルミート共役
 	
 #### 回転ゲート
 
-    qs.rx(q, phase=xxx)  # X軸周りの回転
-    qs.ry(q, phase=xxx)  # Y軸周りの回転
-    qs.rz(q, phase=xxx)  # Z軸周りの回転
+    >>> qs.rx(q, phase=xxx)  # X軸周りの回転
+    >>> qs.ry(q, phase=xxx)  # Y軸周りの回転
+    >>> qs.rz(q, phase=xxx)  # Z軸周りの回転
 	
 phase（実数値）が指定されなければ0ラジアンとみなされます（つまり何もし
 ない）。phaseに指定する値の単位はPIラジアンです。なので、0.5は0.5*PIラ
@@ -155,40 +155,40 @@ phase（実数値）が指定されなければ0ラジアンとみなされま�
 子ビット番号を表しています（以下、同様）。q0が制御量子ビット、q1が標
 的量子ビットです。
 
-    qs.cx(q0,q1)              # 制御Xゲート（制御NOT,CNOT）
-    qs.cy(q0,q1)              # 制御Xゲート
-    qs.cz(q0,q1)              # 制御Zゲート
-    qs.cxr(q0,q1)             # 制御XR(ルートパウリX)ゲート
-    qs.cxr_dg(q0,q1)          # 制御XR+(ルートパウリX)ゲート (エルミート共役)
-    qs.ch(q0,q1)              # 制御Hゲート
-    qs.cs(q0,q1)              # 制御Sゲート
-    qs.cs_dg(q0,q1)           # 制御S+ゲート (エルミート共役)
-    qs.ct(q0,q1)              # 制御Tゲート
-    qs.ct_dg(q0,q1)           # 制御T+ゲート (エルミート共役)
-	qs.cp(q0,q1, phase=xxx)   # 制御位相シフトゲート
-	qs.crx(q0,q1, phase=xxx)  # 制御X軸回転ゲート
-	qs.cry(q0,q1, phase=xxx)  # 制御Y軸回転ゲート
-	qs.crz(q0,q1, phase=xxx)  # 制御Z軸回転ゲート
+    >>> qs.cx(q0,q1)              # 制御Xゲート（制御NOT,CNOT）
+    >>> qs.cy(q0,q1)              # 制御Xゲート
+    >>> qs.cz(q0,q1)              # 制御Zゲート
+    >>> qs.cxr(q0,q1)             # 制御XR(ルートパウリX)ゲート
+    >>> qs.cxr_dg(q0,q1)          # 制御XR+(ルートパウリX)ゲート (エルミート共役)
+    >>> qs.ch(q0,q1)              # 制御Hゲート
+    >>> qs.cs(q0,q1)              # 制御Sゲート
+    >>> qs.cs_dg(q0,q1)           # 制御S+ゲート (エルミート共役)
+    >>> qs.ct(q0,q1)              # 制御Tゲート
+    >>> qs.ct_dg(q0,q1)           # 制御T+ゲート (エルミート共役)
+	>>> qs.cp(q0,q1, phase=xxx)   # 制御位相シフトゲート
+	>>> qs.crx(q0,q1, phase=xxx)  # 制御X軸回転ゲート
+	>>> qs.cry(q0,q1, phase=xxx)  # 制御Y軸回転ゲート
+	>>> qs.crz(q0,q1, phase=xxx)  # 制御Z軸回転ゲート
 
 ### イジング結合ゲート（Ising coupling gate） 翻訳適当？
 
 イオントラップ方式の量子コンピュータで基本となる2量子ビットゲートです。
 
-	qs.rxx(q0,q1, phase=xxx)  # XX演算子に対するイジング結合ゲート
-	qs.ryy(q0,q1, phase=xxx)  # YY演算子に対するイジング結合ゲート
-	qs.rzz(q0,q1, phase=xxx)  # ZZ演算子に対するイジング結合ゲート
+	>>> qs.rxx(q0,q1, phase=xxx)  # XX演算子に対するイジング結合ゲート
+	>>> qs.ryy(q0,q1, phase=xxx)  # YY演算子に対するイジング結合ゲート
+	>>> qs.rzz(q0,q1, phase=xxx)  # ZZ演算子に対するイジング結合ゲート
 
 #### 交換ゲート（スワップゲート）
 
-    qs.sw(q0,q1)  # q0とq1を入れ替え
+    >>> qs.sw(q0,q1)  # q0とq1を入れ替え
 
 #### トフォリゲート
 
-    qs.ccx(q0,q1,q2)  # q0,q1: 制御ビット
+    >>> qs.ccx(q0,q1,q2)  # q0,q1: 制御ビット
 
 #### 制御スワップゲート（フレドキンゲート）
 
-    qs.csw(q0,q1,q2)  # q0: 制御ビット
+    >>> qs.csw(q0,q1,q2)  # q0: 制御ビット
 
 #### マルチ制御Xゲート
 
@@ -196,7 +196,7 @@ phase（実数値）が指定されなければ0ラジアンとみなされま�
 トですが、3つ以上の制御ビットを持つ制御Xゲート演算を実行できます。ここ
 では「マルチ制御Xゲート」と呼ぶことにします。
 
-    qs.mcx(qid=[q0,q1,..])
+    >>> qs.mcx(qid=[q0,q1,..])
 
 任意の数の量子ビットを対象に演算することができますので、引数には量子ビッ
 ト番号のリストを指定します。そのリストの一番最後の要素が標的ビット番号、
@@ -212,15 +212,14 @@ QStateクラスを継承することで、自分専用の量子ゲートを簡�
 ることができます。ベル状態を作成する回路をbellメソッドとして、QStateを
 継承したMyQStateクラスに追加する例を示します。
 
-    class MyQState(QState):
-
-        def bell(self, q0, q1):
-            self.h(q0).cx(q0,q1)
-            return self
-
-    qs = MyQState(qubit_num=2)
-	qs.bell(0,1)
-    ...
+    >>> class MyQState(QState):
+    >>>     def bell(self, q0, q1):
+    >>>         self.h(q0).cx(q0,q1)
+    >>>         return self
+	>>> 
+    >>> qs = MyQState(qubit_num=2)
+	>>> qs.bell(0,1)
+    >>> ...
 
 これは非常に簡単な例なのであまりご利益を感じないかもしれませんが、大規
 模な量子回路を作成したい場合など、便利に使える場面は多いと思います。
@@ -231,22 +230,22 @@ QStateクラスを継承することで、自分専用の量子ゲートを簡�
 パウリ演算子X,Y,Zのテンソル積を定義して量子状態に演算することができま
 す。パウリ積を扱うために、まず、
 
-    from qlazy import QState, PauliProduct
+    >>> from qlazy import QState, PauliProduct
 	
 のようにPauliProductクラスをimportする必要があります。例えば、3量子ビッ
 トの状態に対して、X2 Y0 Z1というパウリ積を演算したい場合、
 
-    qs = QState(qubit_num=3)
-	pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
-	qs.operate(pp=pp)
+    >>> qs = QState(qubit_num=3)
+	>>> pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
+	>>> qs.operate(pp=pp)
 	
 のようにoperateメソッドのppオプションにPauliProductのインスタンスを指
 定します。制御化されたパウリ積はoperateメソッドのctrlオプションに制御
 量子ビット番号を指定することで実現できます。以下のようにします。
 
-    qs = QState(qubit_num=4)
-	pp = PauliProduct(pauli_str="XYZ", qid=[0,1,2])
-	qs.operate(pp=pp, ctlr=3)
+    >>> qs = QState(qubit_num=4)
+	>>> pp = PauliProduct(pauli_str="XYZ", qid=[0,1,2])
+	>>> qs.operate(pp=pp, ctlr=3)
 
 
 ## 量子状態の表示
@@ -256,14 +255,14 @@ QStateクラスを継承することで、自分専用の量子ゲートを簡�
 量子ビット全体の状態を表示するのが基本ですが、特定の量子ビットを選択し
 て表示することもできます。
 
-    qs.show(qid=[q0,q1...])
+    >>> qs.show(qid=[q0,q1...])
 
 例えば、
 
-    qs = QState(3)
-	qs.h(0)
-	qs.h(2)
-	qs.show()
+    >>> qs = QState(3)
+	>>> qs.h(0)
+	>>> qs.h(2)
+	>>> qs.show()
 
 とすると、全体の状態が表示されます。
 
@@ -278,7 +277,7 @@ QStateクラスを継承することで、自分専用の量子ゲートを簡�
 
 ここで、
 
-    qs.show(qid=[0,2])
+    >>> qs.show(qid=[0,2])
 
 とすると、以下になります。
 
@@ -289,7 +288,7 @@ QStateクラスを継承することで、自分専用の量子ゲートを簡�
 
 また、
 
-    qs.show(qid=[1])
+    >>> qs.show(qid=[1])
 	
 とすると、以下になります。
 
@@ -314,7 +313,7 @@ QStateクラスを継承することで、自分専用の量子ゲートを簡�
 
 のようなエンタングルした状態があったときに、
 
-    qs.show(qid=[0])
+    >>> qs.show(qid=[0])
    
 をやると、
 
@@ -341,7 +340,7 @@ QStateクラスを継承することで、自分専用の量子ゲートを簡�
 確率振幅がゼロでない成分だけを表示したい場合、以下のように'nonzero'オ
 プションを使えばできます。
 
-    qs.show(nonzero=True)
+    >>> qs.show(nonzero=True)
 	
 とすると、
 
@@ -364,11 +363,11 @@ C[00..0]が0の場合は、グローバル位相項を括りだすことはし�
 実数にしたいかを指定します。2番目の係数を正の実数に正規化して表示した
 い場合は、
 
-    qs.show(preal=2)
+    >>> qs.show(preal=2)
 
 のようにします。また、グローバル位相を括りだしたくない場合は、
 
-    qs.show(preal=-1)
+    >>> qs.show(preal=-1)
 
 のようにprealに-1を指定します。
 
@@ -379,12 +378,12 @@ get_ampメソッドで、特定の量子ビットに対応した確率振幅の�
 配列として取得できます。
 qidを指定しない場合は、全量子ビットに対応した確率振幅となります。
 
-    qs.get_amp(qid=[q0,q1...])
+    >>> qs.get_amp(qid=[q0,q1...])
 
 引数を指定しないget_ampメソッドをampプロパティとして定義していますので。
 qs.get_amp()と同じ結果は、以下でも取得できます。
 
-    qs.amp
+    >>> qs.amp
 
 指定した量子ビットとそれ以外がエンタングルしている場合、実行のたびに結
 果が変わりますのでご注意ください（showメソッドと同様）。
@@ -392,20 +391,20 @@ qs.get_amp()と同じ結果は、以下でも取得できます。
 また、確率振幅でなく各々の絶対値の２乗、つまり各固有状態に対応した確率は、
 get_probメソッドを使って、
 
-    prob = qs.get_prob(qid=[q0,q1,...])
+    >>> prob = qs.get_prob(qid=[q0,q1,...])
 
 で取得することができます。probは、ビット文字列をキー、
 確率値をバリューとした辞書データです。
 
-    print(prob)
-    >>> {'00': 0.5, '11': 0.5}
+    >>> print(prob)
+    {'00': 0.5, '11': 0.5}
 
 
 ### 部分系
 
 特定の量子ビットに対応した部分系の量子状態を取得できます。
 
-    qs_partial = qs.partial(qid=[1,3])
+    >>> qs_partial = qs.partial(qid=[1,3])
 
 指定した量子ビットとそれ以外がエンタングルしている場合、実行のたびに結
 果が変わりますのでご注意ください（showメソッドと同様）。
@@ -417,7 +416,7 @@ blochメソッドで、特定の１つの量子ビットに対応したブロッ
 下のように座標値を取得できます。角度の単位はpi(ラジアン)です。0.5は
 0.5*piを表します。
 
-    theta, phi = qs.bloch(q)
+    >>> theta, phi = qs.bloch(q)
 
 ただし、複数の量子ビットを同時に指定することはできません。引数を指定し
 ない場合、0が指定されたものとみなされます。
@@ -431,10 +430,10 @@ blochメソッドで、特定の１つの量子ビットに対応したブロッ
 
 mメソッドに、以下のような引数を与えて実行します。
 
-    md = qs.m(qid=[q0,q1...], shots=aaa, angle=bbb, phase=ccc)
+    >>> md = qs.m(qid=[q0,q1...], shots=aaa, angle=bbb, phase=ccc)
 
 qid,shots,angle,phaseの指定をしない場合、通常のZ軸方向の測定を1回実施
-します（shotsのデフォルト値はv0.0.33で100から1に変更しました）。idには
+します（shotsのデフォルト値はv0.0.33で100から1に変更しました）。qidには
 測定したい量子ビットの番号リストを指定します。shotsには測定回数を指定
 します。angle,phaseは測定の方向を表しており、angleにはZ軸とのなす角を
 単位PIラジアンで指定します。phaseにはX軸プラス方向を基準にしたZ軸周り
@@ -444,25 +443,25 @@ qid,shots,angle,phaseの指定をしない場合、通常のZ軸方向の測定�
 
 X軸、Y軸、Z軸方向の測定をするメッソドも用意されています。
 
-    md = qs.mx(qid=[q0,q1...], shots=aaa)
-    md = qs.my(qid=[q0,q1...], shots=aaa)
-    md = qs.mz(qid=[q0,q1...], shots=aaa)
+    >>> md = qs.mx(qid=[q0,q1...], shots=aaa)
+    >>> md = qs.my(qid=[q0,q1...], shots=aaa)
+    >>> md = qs.mz(qid=[q0,q1...], shots=aaa)
 
 mzメソッドはmメソッドと全く同じものです。
 
 また、ベル測定のメソッドもあります。
 
-    md = qs.mb(qid=[q0,q1], shots=aaa)
+    >>> md = qs.mb(qid=[q0,q1], shots=aaa)
 
 測定のメソッドの後にメソッド・チェーンでQStateのメソッドをつなげること
 はできませんので、ご注意ください。つまり、
 
-    qs.h(0).cx(0,1).m([0],shots=10).x(0).m(id=[1],shots=20)
+    >>> qs.h(0).cx(0,1).m(qid=[0],shots=10).x(0).m(qid=[1],shots=20)
 
 というメソッド・チェーンは実行できません。この演算をやりたい場合は、
 
-    qs.h(0).cx(0,1).m(qid=[0],shosts=10)
-    qs.x(1).m(qid=[1], shots=20)
+    >>> qs.h(0).cx(0,1).m(qid=[0],shosts=10)
+    >>> qs.x(1).m(qid=[1], shots=20)
 
 という具合に、2行に分けてください。
 
@@ -479,17 +478,17 @@ mzメソッドはmメソッドと全く同じものです。
 「H-CX-M-X-M」の回路を何度も通すシミュレーションは、ちょっと面倒ですが、
 例えば、以下のようにやればできます。
 
-    from collections import Counter
-    from qlazy import QState
-    
-    qs = QState(2)
-    freq = Counter()
-    for _ in range(100):
-        qs.h(0).cx(0,1).m(qid=[0])
-        md = qs.x(1).m(qid=[1])
-        freq += md.frequency
-        qs.reset()
-    print(freq)
+    >>> from collections import Counter
+    >>> from qlazy import QState
+    >>> 
+    >>> qs = QState(2)
+    >>> freq = Counter()
+    >>> for _ in range(100):
+    >>>     qs.h(0).cx(0,1).m(qid=[0])
+    >>>     md = qs.x(1).m(qid=[1])
+    >>>     freq += md.frequency
+    >>>     qs.reset()
+    >>> print(freq)
 
 frequencyプロパティについては、少し下の「測定データの取得」に説明があ
 りますので、そちらを見てください。
@@ -532,15 +531,15 @@ Y軸方向の測定結果
 
 frqプロパティで頻度のリスト、lstプロパティで最後の測定結果を取得できます。
 
-    md.frq  # 頻度リスト
-	md.lst  # 最後の結果
+    >>> md.frq  # 頻度リスト
+	>>> md.lst  # 最後の結果
 	
 頻度のリストは測定値を十進数で表したときの降順で頻度が格納されたリスト
 です。例えば、|00>が48回、|11>が52回、それ以外が0回という、2量子ビット
 の測定は、
 
-    print(md.frq)
-    >> [48,0,0,52]
+    >>> print(md.frq)
+    [48,0,0,52]
 	
 となります。
 
@@ -555,29 +554,29 @@ phi+ => 0, phi- => 3, psi+ => 1, psi- => 2と定義しています。
 得したい場合はfrequencyプロパティを、測定値をバイナリの文字列で取得し
 たい場合はlastプロパティを使います。
 
-    print(md.frequency)  # 頻度リスト
-	>> Counter({'00':53,'11':47})
-	print(md.last)       # 最後の結果
-	>> '11'
+    >>> print(md.frequency)  # 頻度リスト
+	Counter({'00':53,'11':47})
+	>>> print(md.last)       # 最後の結果
+	11
 
 ### 一回限りの測定
 
 計算基底で単純に１回だけ測定してその測定値を得たい場合、measureメソッ
 ドを使うこともできます。
 
-	qs = QState(qubit=2).h(0).cx(0,1)
-	mval = qs.measure(qid=[0,1])
-	print(mval)
-	qs.show()
+	>>> qs = QState(qubit=2).h(0).cx(0,1)
+	>>> mval = qs.measure(qid=[0,1])
+	>>> print(mval)
+	>>> qs.show()
 
 とやればmvalに文字列'00'または'11'が格納されます。量子状態は測定後の状
 態になります（例えば以下のように）。
 
-	>> 11
-	>> c[00] = +0.0000+0.0000*i : 0.0000 |
-	>> c[01] = +0.0000+0.0000*i : 0.0000 |
-	>> c[10] = +0.0000+0.0000*i : 0.0000 |
-	>> c[11] = +1.0000+0.0000*i : 1.0000 |+++++++++++
+	11
+	c[00] = +0.0000+0.0000*i : 0.0000 |
+	c[01] = +0.0000+0.0000*i : 0.0000 |
+	c[10] = +0.0000+0.0000*i : 0.0000 |
+	c[11] = +1.0000+0.0000*i : 1.0000 |+++++++++++
 
 
 ## 量子状態に関する計算
@@ -586,9 +585,9 @@ phi+ => 0, phi- => 3, psi+ => 1, psi- => 2と定義しています。
 
 QStateクラスのinproメソッドを使います。使用例を以下に示します。
 
-    qs_0 = QState(2)
-    qs_1 = QState(2).x(0).x(1)
-    v = qs_0.inpro(qs_1)
+    >>> qs_0 = QState(2)
+    >>> qs_1 = QState(2).x(0).x(1)
+    >>> v = qs_0.inpro(qs_1)
 
 状態|00>と状態|11>の内積を計算しています。
 
@@ -596,9 +595,9 @@ QStateクラスのinproメソッドを使います。使用例を以下に示し
 
 QStateクラスのfidelityメソッドを使います。使用例を以下に示します。
 
-    qs_0 = QState(2)
-    qs_1 = QState(2).x(0).x(1)
-    v = qs_0.fidelity(qs_1)
+    >>> qs_0 = QState(2)
+    >>> qs_1 = QState(2).x(0).x(1)
+    >>> v = qs_0.fidelity(qs_1)
 
 状態|00>と状態|11>の内積の絶対値を計算しています。
 
@@ -606,9 +605,9 @@ QStateクラスのfidelityメソッドを使います。使用例を以下に示
 
 QStateクラスのtensproメソッドを使います。使用例を以下に示します。
 
-    qs_1 = QState(1).x(0)
-    qs_2 = QState(2).h(0).cx(0,1)
-    qs_3 = qs_1.tenspro(qs_2)
+    >>> qs_1 = QState(1).x(0)
+    >>> qs_2 = QState(2).h(0).cx(0,1)
+    >>> qs_3 = qs_1.tenspro(qs_2)
 
 |1>と(|00>+|11>)/sqrt(2)のテンソル積を作成し、変数qs_3に格納しています。
 
@@ -616,7 +615,7 @@ QStateクラスのtensproメソッドを使います。使用例を以下に示�
 
 QStateクラスのcompositeメソッドを使います。
 
-    qs_com = qs.composite(4)
+    >>> qs_com = qs.composite(4)
 
 qsを4つ複合した状態が生成されます。
 
@@ -626,9 +625,9 @@ QStateクラスのapplyメソッドを使います。行列をnumpyの配列と�
 applyメソッドの引数として渡します。また、適用したい量子ビット番号リス
 トを指定することもできます。使用例を以下に示します。
 
-    qs = QState(5)	
-    M = np.array([[0,1],[1,0]])
-	qs.apply(matrix=M, qid=[2])
+    >>> qs = QState(5)	
+    >>> M = np.array([[0,1],[1,0]])
+	>>> qs.apply(matrix=M, qid=[2])
 
 5量子ビット状態|00000>の2番目の量子ビットにXゲートを適用しています。
 量子状態の次元よりも変換行列の次元の方が小さくなくてはいけません。また、
@@ -643,7 +642,7 @@ qidで指定する引数のリストのサイズをnとしたとき、行列の�
 子ビット[0,1]番目の系と[2,3,4]番目の系にシュミット分解したいとします。
 schmidt_decompメソッドを使って、以下のようにします。
 
-    coef,qs_0,qs_1 = qs.schmidt_decomp(qid_0=[0,1], qid_1=[2,3,4])
+    >>> coef,qs_0,qs_1 = qs.schmidt_decomp(qid_0=[0,1], qid_1=[2,3,4])
 
 この計算の結果、シュミットランクが4だったとします。coefは4個のシュミッ
 ト係数（実数値）を要素とするリストになります。qs_0は量子ビットが[0,1]
@@ -652,13 +651,30 @@ schmidt_decompメソッドを使って、以下のようにします。
 
 シュミット係数だけを取得したい場合は、schmidt_coefメソッドを使います。
 
-    coef = qs.schmidt_coef(qid_0=[0,1], qid_1=[2,3,4])
+    >>> coef = qs.schmidt_coef(qid_0=[0,1], qid_1=[2,3,4])
 	
 どちらのメソッドも0となるシュミット係数を無視しますので、len(coef)がシュ
 ミットランクになります。シュミットランクが1だった場合、[0,1]番目の系と
 [2,3,4]番目の系は、テンソル積で分解できる、つまりエンタングルしていな
 いということなので、シュミット分解はエンタングルメント判定器として使用
 することもできます。
+
+## オブザーバブルの期待値
+
+量子状態に対するオブザーバブルの期待値を計算できます。QStateクラスの
+expectメソッドに引数としてObservableクラスのインスタンスを指定します。
+使用例を以下に示します。
+
+期待値を求めたい物理量(オブザーバブル)を
+
+    >>> ob = Observable("z_0 + 2.0 * z_1")
+
+のように作成します(例えばZ0+2*Z1というオブザーバブルの場合)。
+現在の量子状態がqsで与えられているとすると、
+
+    >>> exp = qs.expect(observable=ob)
+
+のようにして期待値expを求めることができます。
 
 
 以上

@@ -16,17 +16,22 @@ device(デバイス名)を指定することで量子計算させる量子コン
 qstate_simulator(状態ベクトルシミュレータ)というdeviceで計算させたい場
 合は、
 
-    from qlazy import Backend
-	bk = Backend(product='qlazy', device='qstate_simulator')
+    >>> from qlazy import Backend
+	>>> bk = Backend(product='qlazy', device='qstate_simulator')
 
 とします。qlazyのstabilizer_simulator(スタビライザーシミュレータ)で計
 算させたい場合、
 
-	bk = Backend(product='qlazy', device='stabilizer_simulator')
+	>>> bk = Backend(product='qlazy', device='stabilizer_simulator')
+
+とします。qlazyのmps_simulator(行列積状態シミュレータ)で計算させたい場
+合、
+
+	>>> bk = Backend(product='qlazy', device='mps_simulator')
 
 とします。
 
-	bk = Backend()
+	>>> bk = Backend()
 
 のようにproductとdeviceを指定しない場合、qlazyのqstate_simulatorが指定
 されます。
@@ -38,13 +43,13 @@ qstate_simulator(状態ベクトルシミュレータ)というdeviceで計算�
 
 対応しているproductは、
 
-    print(Backend.products())
-    >>> ['qlazy', 'qulacs', 'ibmq', 'braket_local', 'braket_aws', 'braket_ionq', 'braket_rigetti', 'braket_oqc']
+    >>> print(Backend.products())
+    ['qlazy', 'qulacs', 'ibmq', 'braket_local', 'braket_aws', 'braket_ionq', 'braket_rigetti', 'braket_oqc']
 
 とすれば確認できます。各々のproductで使えるdeviceは、例えば、
 
-	print(Backend.devices('ibmq'))
-    >>> ['aer_simulator', 'qasm_simulator', 'least_busy', 'ibmq_armonk', 'ibmq_bogota', 'ibmq_lima', 'ibmq_belem', 'ibmq_quito', 'ibmq_manila']
+	>>> print(Backend.devices('ibmq'))
+    ['aer_simulator', 'qasm_simulator', 'least_busy', 'ibmq_armonk', 'ibmq_bogota', 'ibmq_lima', 'ibmq_belem', 'ibmq_quito', 'ibmq_manila']
 
 とすれば確認できます。
 
@@ -57,15 +62,15 @@ qstate_simulator(状態ベクトルシミュレータ)というdeviceで計算�
 やDensopクラスと同じ記法でQCircクラスのインスタンスにゲートを追加して
 いきます。例えば、Bell状態を作成する回路を作成したい場合は、
 
-    from qlazy import QCirc
-    qc = QCirc()
-    qc.h(0)
-    qc.cx(0,1)
+    >>> from qlazy import QCirc
+    >>> qc = QCirc()
+    >>> qc.h(0)
+    >>> qc.cx(0,1)
 
 のようにします。ここでhはアダマールゲート、cxはCNOTゲートを表します。
 または、
 
-    qc = QCirc().h(0).cx(0,1)
+    >>> qc = QCirc().h(0).cx(0,1)
 
 のようにゲートをつなげて書いてもOKです。
 
@@ -83,20 +88,20 @@ qstate_simulator(状態ベクトルシミュレータ)というdeviceで計算�
 パウリ演算子X,Y,Zのテンソル積を定義して量子回路に追加することができま
 す。パウリ積を扱うために、まず、
 
-    from qlazy import QCirc, PauliProduct
+    >>> from qlazy import QCirc, PauliProduct
 	
 のようにPauliProductクラスをimportする必要があります。例えば、3量子ビッ
 トの状態に対して、X2 Y0 Z1というパウリ積を演算したい場合、
 
-	pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
-	qc = QCirc().operate(pp=pp)
+	>>> pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
+	>>> qc = QCirc().operate(pp=pp)
 	
 のようにoperateメソッドのppオプションにPauliProductのインスタンスを指
 定します。制御化されたパウリ積はoperateメソッドのctrlオプションに制御
 量子ビット番号を指定することで実現できます。以下のようにします。
 
-	pp = PauliProduct(pauli_str="XYZ", qid=[0,1,2])
-	qc = QCirc().operate(pp=pp, ctlr=3)
+	>>> pp = PauliProduct(pauli_str="XYZ", qid=[0,1,2])
+	>>> qc = QCirc().operate(pp=pp, ctlr=3)
 	
 #### 測定ゲート
 
@@ -104,7 +109,7 @@ qstate_simulator(状態ベクトルシミュレータ)というdeviceで計算�
 を格納するための古典ビット番号（古典メモリ番号または古典レジスタ番号）
 のリストcidを指定します(qidとcidの長さは一致していなければなりません)。
 
-    qc = QCirc().h(0).cx(0,1).measure(qid=[0,1], cid=[0,1])
+    >>> qc = QCirc().h(0).cx(0,1).measure(qid=[0,1], cid=[0,1])
 	
 図で書くと、以下のような量子回路が作成されたことになります。
 
@@ -121,9 +126,9 @@ qstate_simulator(状態ベクトルシミュレータ)というdeviceで計算�
 古典ビットに格納されている測定結果に応じて、以降のゲート制御をしたい
 ことがあります。そのような一例を以下に示します。
 
-    qc = QCirc()
-    qc.h(0).cx(0,1).measure(qid=[0],cid=[0])
-    qc.x(0, ctrl=0).x(1, ctrl=0).measure(qid=[0,1], cid=[0,1])
+    >>> qc = QCirc()
+    >>> qc.h(0).cx(0,1).measure(qid=[0],cid=[0])
+    >>> qc.x(0, ctrl=0).x(1, ctrl=0).measure(qid=[0,1], cid=[0,1])
 
 h(0).cx(0,1)を追加した後にmeasure(qid=[0],cid=[0])を追加しています。つ
 まり、0番目の量子ビットの測定結果を0番目の古典レジスタに格納します。次
@@ -154,7 +159,7 @@ h(0).cx(0,1)を追加した後にmeasure(qid=[0],cid=[0])を追加していま�
 特定の量子ビットを強制的に|0>にすることができます。例えば、以下のよう
 にresetメソッドを使います。
 
-    qc = QCirc().h(0).cx(0,1).reset(qid=[0])
+    >>> qc = QCirc().h(0).cx(0,1).reset(qid=[0])
 
 qidオプションには|0>にしたい量子ビット番号を指定します。
 
@@ -163,31 +168,31 @@ qidオプションには|0>にしたい量子ビット番号を指定します�
 
 量子計算を実行するには、Backendクラスのrunメソッドを使います。
 
-	bk = Backend()  # qlazyの状態ベクトルシミュレータ(デフォルト)
-    qc = QCirc().h(0).cx(0,1).measure(qid=[0,1], cid=[0,1])
-	result = bk.run(qcirc=qc, shots=100)
+	>>> bk = Backend()  # qlazyの状態ベクトルシミュレータ(デフォルト)
+    >>> qc = QCirc().h(0).cx(0,1).measure(qid=[0,1], cid=[0,1])
+	>>> result = bk.run(qcirc=qc, shots=100)
 
 上記のようにrunメソッドの引数qcircに量子回路、引数shotsに測定回数を指
 定します。結果はresult(Resultクラスのインスタンス)に格納されます。
 Resultにはcidとfrequencyという2つのプロパティが定義されていて、各々、
 
-    print(result.cid)
-	>>> [0,1]
-	print(result.frequency)
-	>>> Counter({'00': 52, '11': 48})
+    >>> print(result.cid)
+	[0,1]
+	>>> print(result.frequency)
+	Counter({'00': 52, '11': 48})
 	
 のように値を取り出すことができます。cidは測定値が格納されている古典レ
 ジスタの番号リストです。runのオプションとして頻度を取得したい古典レジ
 スタ番号cidを指定することもできます。例えば、上の回路で、
 
-	result = bk.run(qcirc=qc, shots=100, cid=[0])
+	>>> result = bk.run(qcirc=qc, shots=100, cid=[0])
 
 とすると、0番目の古典レジスタに入る値の頻度だけ取り出すことができて、
 
-    print(result.cid)
-	>>> [0]
-    print(result.frequency)
-    >>> Counter({'0': 52, '1': 48})
+    >>> print(result.cid)
+	[0]
+    >>> print(result.frequency)
+    Counter({'0': 52, '1': 48})
 
 という結果を得ることができます(いわゆる周辺化ですね)。cidを省略した場
 合、全古典レジスタにわたり頻度が計算されます。
@@ -196,25 +201,25 @@ Resultにはcidとfrequencyという2つのプロパティが定義されてい�
 算開始時刻、計算終了時刻、計算時間がResultのプロパティとして定義されていて、
 各々以下のように取得することができます。
 
-    print(result.backend)
-    >>> {'product': 'qlazy', 'device': 'qstate_simulator'}
-    print(result.qubit_num)
-    >>> 2
-    print(result.cmem_num)
-    >>> 2
-    print(result.shots)
-    >>> 100
-    print(result.start_time)
-    >>> 2022-03-05 13:32:33.837965
-    print(result.end_time)
-    >>> 2022-03-05 13:32:33.842534
-    print(result.elapsed_time)
-    >>> 0.004569
+    >>> print(result.backend)
+    {'product': 'qlazy', 'device': 'qstate_simulator'}
+    >>> print(result.qubit_num)
+    2
+    >>> print(result.cmem_num)
+    2
+    >>> print(result.shots)
+    100
+    >>> print(result.start_time)
+    2022-03-05 13:32:33.837965
+    >>> print(result.end_time)
+    2022-03-05 13:32:33.842534
+    >>> print(result.elapsed_time)
+    0.004569
 
 とりあえず測定値の頻度だけわかりやすく見たいという場合は、
 showメソッドを使って、
 
-    result.show()
+    >>> result.show()
 
 とすれば、
 
@@ -225,7 +230,7 @@ showメソッドを使って、
 棒グラフだけでなく、すべてを一度に表示したい場合は、
 verboseオプションをTrueにして、
 
-    result.show(verbose=True)
+    >>> result.show(verbose=True)
 
 とすれば、
 
@@ -251,12 +256,12 @@ verboseオプションをTrueにして、
 この実行結果をファイルとして保存したり、保存したものを読み出すこともできます。
 saveメソッドを使って、
 
-    result.save("hoge.res")
+    >>> result.save("hoge.res")
 
 としてファイルhoge.resに保存しておいて、loadメソッド(classmethod)を使って、
 
-    from qlazy import Result
-    result_load = Result.load("hoge.res")
+    >>> from qlazy import Result
+    >>> result_load = Result.load("hoge.res")
 	
 とすれば、保存しておいた計算結果をロードして結果データを再度取得することができます。
 
@@ -271,39 +276,49 @@ qlazyの状態ベクトルシミュレータ(qstate_simulator)またはスタビ
 シミュレータ(stabilizer_simulator)で量子回路を実行した場合、以下のよう
 にして、最後の量子状態またはスタビライザー状態を取得することができます。
 runを実行するときにout_stateオプションをTrueにセットすると、Resultのプ
-ロパティqstateまたはstabilizerに状態がセットされます(複数回の測定があ
-れば最後の測定後の状態が取り出せます)。
+ロパティqstateまたはstabilizerまたはmpstateに状態がセットされます(複数
+回の測定があれば最後の測定後の状態が取り出せます)。
 
-    qc = QCirc().h(0).cx(0,1)
-    qs_sim = Backend(product='qlazy', device='qstate_simulator')
-    result = qs_sim.run(qcirc=qc, out_state=True)
-    qs = result.qstate
-    qs.show()
-    >>> c[00] = +0.7071+0.0000*i : 0.5000 |++++++
-    >>> c[01] = +0.0000+0.0000*i : 0.0000 |
-    >>> c[10] = +0.0000+0.0000*i : 0.0000 |
-    >>> c[11] = +0.7071+0.0000*i : 0.5000 |++++++
+    >>> qc = QCirc().h(0).cx(0,1)
+    >>> qs_sim = Backend(product='qlazy', device='qstate_simulator')
+    >>> result = qs_sim.run(qcirc=qc, out_state=True)
+    >>> qs = result.qstate
+    >>> qs.show()
+    c[00] = +0.7071+0.0000*i : 0.5000 |++++++
+    c[01] = +0.0000+0.0000*i : 0.0000 |
+    c[10] = +0.0000+0.0000*i : 0.0000 |
+    c[11] = +0.7071+0.0000*i : 0.5000 |++++++
 
-    qc = QCirc().h(0).cx(0,1)
-    sb_sim = Backend(product='qlazy', device='stabilizer_simulator')
-    result = sb_sim.run(qcirc=qc, out_state)
-    sb = result.stabilizer
-    sb.show()
-    >>> g[0]:  XX
-    >>> g[1]:  ZZ
+    >>> qc = QCirc().h(0).cx(0,1)
+    >>> sb_sim = Backend(product='qlazy', device='stabilizer_simulator')
+    >>> result = sb_sim.run(qcirc=qc, out_state=True)
+    >>> sb = result.stabilizer
+    >>> sb.show()
+    g[0]:  XX
+    g[1]:  ZZ
+
+    >>> qc = QCirc().h(0).cx(0,1)
+    >>> mps_sim = Backend(product='qlazy', device='mps_simulator')
+    >>> result = mps_sim.run(qcirc=qc, out_state=True)
+    >>> mps = result.mpstate
+    >>> mps.show()
+    c[00] = +0.7071+0.0000*i : 0.5000 |++++++
+    c[01] = +0.0000+0.0000*i : 0.0000 |
+    c[10] = +0.0000+0.0000*i : 0.0000 |
+    c[11] = +0.7071+0.0000*i : 0.5000 |++++++
 
 また、qulacsの状態ベクトルシミュレータ(cpu_simulator, gpu_simulator)で
 も同様にして、qlazyの状態ベクトルを取得することができます。
 
-    qc = QCirc().h(0).cx(0,1)
-    qs_sim = Backend(product='qulacs', device='cpu_simulator')
-    result = qs_sim.run(qcirc=qc, out_state=True)
-    qs = result.qstate
-    qs.show()
-    >>> c[00] = +0.7071+0.0000*i : 0.5000 |++++++
-    >>> c[01] = +0.0000+0.0000*i : 0.0000 |
-    >>> c[10] = +0.0000+0.0000*i : 0.0000 |
-    >>> c[11] = +0.7071+0.0000*i : 0.5000 |++++++
+    >>> qc = QCirc().h(0).cx(0,1)
+    >>> qs_sim = Backend(product='qulacs', device='cpu_simulator')
+    >>> result = qs_sim.run(qcirc=qc, out_state=True)
+    >>> qs = result.qstate
+    >>> qs.show()
+    c[00] = +0.7071+0.0000*i : 0.5000 |++++++
+    c[01] = +0.0000+0.0000*i : 0.0000 |
+    c[10] = +0.0000+0.0000*i : 0.0000 |
+    c[11] = +0.7071+0.0000*i : 0.5000 |++++++
 
 
 ### 対応している量子ゲート
@@ -359,10 +374,10 @@ runを実行するときにout_stateオプションをTrueにセットすると�
 
 作成した量子回路はprint関数で表示することができます。例えば、
 
-    qc = QCirc()
-    qc.h(0).cx(0,1).measure(qid=[0],cid=[0])
-    qc.x(0, ctrl=0).x(1, ctrl=0).measure(qid=[0,1], cid=[0,1])
-	print(qc)
+    >>> qc = QCirc()
+    >>> qc.h(0).cx(0,1).measure(qid=[0],cid=[0])
+    >>> qc.x(0, ctrl=0).x(1, ctrl=0).measure(qid=[0,1], cid=[0,1])
+	>>> print(qc)
 
 とすると、
 
@@ -388,13 +403,13 @@ runを実行するときにout_stateオプションをTrueにセットすると�
 2つの量子回路が全く同じものかどうか（同等性と呼ぶことにします）は
 論理演算子'=='で判定できます。
 
-    qc_A = QCirc().h(0).cx(0,1)
-	qc_B = QCirc().h(0).cx(0,1)
-	qc_C = QCirc().h(0).cx(1,0)
-	print(qc_A == qc_B)
-	>>> True
-	print(qc_A == qc_C)
-	>>> False
+    >>> qc_A = QCirc().h(0).cx(0,1)
+	>>> qc_B = QCirc().h(0).cx(0,1)
+	>>> qc_C = QCirc().h(0).cx(1,0)
+	>>> print(qc_A == qc_B)
+	True
+	>>> print(qc_A == qc_C)
+	False
 
 量子回路の等価性（一見違うように見えていても実は同等の効果を及ぼす回路）
 の判定については後述します。
@@ -403,13 +418,13 @@ runを実行するときにout_stateオプションをTrueにセットすると�
 
 複数の量子回路を'+'でつなげることで連結させることができます。例えば、
 
-    qc_A = QCirc().h(0)
-	qc_B = QCirc().cx(0,1)
-	qc_C = QCirc().measure(qid=[0], cid=[0])
+    >>> qc_A = QCirc().h(0)
+	>>> qc_B = QCirc().cx(0,1)
+	>>> qc_C = QCirc().measure(qid=[0], cid=[0])
 
 という3つの量子回路があったとき、
 
-    qc = qc_A + qc_B + qc_C
+    >>> qc = qc_A + qc_B + qc_C
 
 のようにすると、
 
@@ -421,9 +436,9 @@ runを実行するときにout_stateオプションをTrueにセットすると�
 
 という量子回路を作成することができます。また、
 
-    qc = qc_A
-    qc += qc_B
-    qc += qc_C
+    >>> qc = qc_A
+    >>> qc += qc_B
+    >>> qc += qc_C
 
 のようにインクリメント演算子を使って連結することも可能です。
 
@@ -431,28 +446,28 @@ runを実行するときにout_stateオプションをTrueにセットすると�
 
 ここまでの説明でお気づきかと思いますが、qlazyでは最初の量子回路生成
 
-    qc = QCirc()
+    >>> qc = QCirc()
 
 の段階で使用する量子ビット数や古典ビット数を明示的に指定しておく必要はありません。
 追加された量子ゲート情報から自動的に内部で都度更新・保持されます。
 
-    qubit_num = qc.qubit_num
-    cmem_num = qc.cmem_num
+    >>> qubit_num = qc.qubit_num
+    >>> cmem_num = qc.cmem_num
 	
 で、量子ビット数と古典ビット数を取得できます。
 また、使用されている量子ゲートの数も、
 
-    gate_num = qc.gate_num
+    >>> gate_num = qc.gate_num
 	
 で取得できます。例えば、
 
-    qc = QCirc().h(0).cx(1,0)
-    print(qc.qubit_num)
-    >>> 2
-    print(qc.cmem_num)
-	>>> 0
-    print(qc.gate_num)
-    >>> 2
+    >>> qc = QCirc().h(0).cx(1,0)
+    >>> print(qc.qubit_num)
+    2
+    >>> print(qc.cmem_num)
+	0
+    >>> print(qc.gate_num)
+    2
 
 となります。
 
@@ -462,22 +477,22 @@ x,z,h,s,s_dg,t,t_dg,rx,rz,cx,cz,ch,crz,measure,resetの15種類に限定され
 ています。他の量子ゲートはこれらを組み合わせて内部的に表現されています。
 例えば、swゲートは、
 
-    qc.cx(0,1).cx(1,0).cx(0,1)
+    >>> qc.cx(0,1).cx(1,0).cx(0,1)
 	
 のように3個のゲート演算の形に展開されています。crxは、
 
-    qc.h(1).crz(0,1).h(1)
+    >>> qc.h(1).crz(0,1).h(1)
 
 のように展開されています。また、measureやresetは1量子ビットごとの演算に展開されます。
 つまり、
 
-    qc.measure(qid=[0,1], cid=[0,1])
-    qc.reset(qid=[0,1])
+    >>> qc.measure(qid=[0,1], cid=[0,1])
+    >>> qc.reset(qid=[0,1])
 
 は、
 
-    qc.measure(qid=[0], cid=[0]).measure(qid=[1], cid=[1])
-    qc.reset(qid=[0]).reset(qid=[1])
+    >>> qc.measure(qid=[0], cid=[0]).measure(qid=[1], cid=[1])
+    >>> qc.reset(qid=[0]).reset(qid=[1])
 
 のように展開されます。なので、qc.gate_numで取得した値が自分の意図した
 値よりも大きくなっていて、ん？となることがあるかもしれませんが、このよ
@@ -487,9 +502,9 @@ x,z,h,s,s_dg,t,t_dg,rx,rz,cx,cz,ch,crz,measure,resetの15種類に限定され
 get_statsメソッドを使えば、一気に取得することができます。
 以下のような辞書データとして結果が得られます。
 
-    qc = QCirc().h(0).cx(1,0).t(1).measure(qid=[0,1], cid=[0,1])
-	print(qc.get_stats())
-    >>> {'qubit_num': 2, 'cmem_num': 2, 'gate_num': 5, 'gate_freq': Counter({'measure': 2, 'h': 1, 'cx': 1, 't': 1}), 'gatetype_freq': Counter({'unitary': 3, 'clifford': 2, 'non-unitary': 2, 'non-clifford': 1})}
+    >>> qc = QCirc().h(0).cx(1,0).t(1).measure(qid=[0,1], cid=[0,1])
+	>>> print(qc.get_stats())
+    {'qubit_num': 2, 'cmem_num': 2, 'gate_num': 5, 'gate_freq': Counter({'measure': 2, 'h': 1, 'cx': 1, 't': 1}), 'gatetype_freq': Counter({'unitary': 3, 'clifford': 2, 'non-unitary': 2, 'non-clifford': 1})}
 
 
 ### 量子回路の生成
@@ -498,8 +513,7 @@ get_statsメソッドを使えば、一気に取得することができます�
 たくなることがあります。そんなときはget_random_gatesメソッド
 (classmethod)が使えます。例えば、以下のようにします。
 
-    qc = QCirc.generate_random_gates(qubit_num=5, gate_num=100, phase=(0.0, 0.25, 0.5),
-                                     prob={'h':7, 'cx':5, 'rx':3, 'crz':3})
+    >>> qc = QCirc.generate_random_gates(qubit_num=5, gate_num=100, phase=(0.0, 0.25, 0.5), prob={'h':7, 'cx':5, 'rx':3, 'crz':3})
 
 ここで、qubit_numとgate_numは作成したい量子回路の量子ビット数と量子ゲー
 ト数を指定します。
@@ -546,14 +560,14 @@ rxとかcrzなどの位相をどのようにバラけさせたいかをタプル
 
 まず、書き出す場合はsaveメソッドを使って、
 
-    qc_A = QCirc().h(0).cx(1,0).measure(qid=[0,1], cid=[0,1])
-	qc_A.save("hoge.qc")
+    >>> qc_A = QCirc().h(0).cx(1,0).measure(qid=[0,1], cid=[0,1])
+	>>> qc_A.save("hoge.qc")
 	
 のようにします。これでhoge.qcというファイルにqcの内容が書き出されます(内部でpickle使ってます)。
 
 読み込む場合は、loadメソッド(classmethod)を使って、
 
-    qc_B = QCirc.load("hoge.qc")
+    >>> qc_B = QCirc.load("hoge.qc")
 
 のようにします。
 
@@ -565,26 +579,26 @@ qlazyで作成した量子回路をOpenQASM形式の文字列やファイルに�
 to_qasmメソッドを使って、以下のようにQpenQASM形式の文字列を出力するこ
 とができます。
 
-    qc = QCirc().h(0).cx(0,1)
-	qasm = qc.to_qasm()
-	print(qasm)
-    >> OPENQASM 2.0;
-    >> include "qelib1.inc";
-    >> qreg q[2];
-    >> h q[0];
-    >> cx q[0],q[1];
+    >>> qc = QCirc().h(0).cx(0,1)
+	>>> qasm = qc.to_qasm()
+	>>> print(qasm)
+    OPENQASM 2.0;
+    include "qelib1.inc";
+    qreg q[2];
+    h q[0];
+    cx q[0],q[1];
 
 to_qasm_fileメソッドを使って、以下のようにOpenQASM形式のファイルを出力
 することができます。
 
-	qc.to_qasm_file("foo.qasm")
+	>>> qc.to_qasm_file("foo.qasm")
 
 また、from_qasmメソッドおよびfrom_qasm_fileメソッド(staticmethod)を使って、
 以下のようにOpenQASM(バージョン2.0)の文字列およびファイルからqlazyの量子回路を
 作成することができます。
 
-    qc = QCirc.from_qasm(qasm)  # qasm: OpenQASM string
-    qc = QCirc.from_qasm_file("foo.qasm")  # foo.qasm: OpenQASM file
+    >>> qc = QCirc.from_qasm(qasm)  # qasm: OpenQASM string
+    >>> qc = QCirc.from_qasm_file("foo.qasm")  # foo.qasm: OpenQASM file
 
 ただし、非ユニタリゲート(measure,reset)やユーザーがカスタマイズしたゲー
 トには対応していません。対応しているゲートは、
@@ -614,12 +628,12 @@ qlazyでは、equivalentメソッドを使って等価であるかどうかを�
 
 が等価であるということを確認してみます（知っておくと便利な公式です）。
 
-    qc_A = QCirc().h(0).h(1).cx(0,1).h(0).h(1)
-    qc_B = QCirc().cx(1,0)
-    print(qc_A == qc_B)
-    print(qc_A.equivalent(qc_B))
-    >>> False
-    >>> True
+    >>> qc_A = QCirc().h(0).h(1).cx(0,1).h(0).h(1)
+    >>> qc_B = QCirc().cx(1,0)
+    >>> print(qc_A == qc_B)
+    False
+    >>> print(qc_A.equivalent(qc_B))
+    True
 
 となり、確かに見た目が違うので同等ではないですが、
 その意味するところは同じということで等価であることが確認できました。
@@ -637,17 +651,17 @@ qlazyではこの機能(full_optimize)を使って最適化を実行すること
 (ただし非ユニタリゲートは非対応)。
 以下のようにoptimizeメソッドを使います。
 
-    qc_opt = qc_ori.optimize()
+    >>> qc_opt = qc_ori.optimize()
 
 試しに、h,cx,tを含んだ回路をランダムに発生させて、
 optimeizeの効果をget_statsで見てみます。
 
-    qc = QCirc.generate_random_gates(qubit_num=10, gate_num=100, prob={'h':5, 'cx':5, 't':3})
-    qc_opt = qc.optimize()
-	print("== before ==")
-    print(qc.get_stats())
-	print("== after ==")
-    print(qc_opt.get_stats())
+    >>> qc = QCirc.generate_random_gates(qubit_num=10, gate_num=100, prob={'h':5, 'cx':5, 't':3})
+    >>> qc_opt = qc.optimize()
+	>>> print("== before ==")
+    >>> print(qc.get_stats())
+	>>> print("== after ==")
+    >>> print(qc_opt.get_stats())
 
 とすると、
 
@@ -666,11 +680,11 @@ pyzxにはいろんな機能があって最適化に限ってみてもいろん�
 また、ZX-calculusのグラフを表示したり編集したりする機能もあったりします。諸々遊びたい人のために、
 pyzxのCircuitを入出力する機能も用意しました。
 
-    zxqc = qc.to_pyzx()
+    >>> zxqc = qc.to_pyzx()
 	
 でpyzxのCircuitインスタンスを吐き出すことができます。また、
 
-    qc = QCirc.from_pyzx(zxqc)
+    >>> qc = QCirc.from_pyzx(zxqc)
 	
 でCircuitインスタンスをqlazyのQCircインスタンスに変換できます。
 
@@ -681,16 +695,15 @@ QCircクラスを継承することで、自分専用の量子ゲートを簡単
 ることができます。ベル状態を作成する回路をbellメソッドとして、QCircを
 継承したMyQCircクラスに追加する例を示します。
 
-    class MyQCirc(QCirc):
-
-        def bell(self, q0, q1):
-            self.h(q0).cx(q0,q1)
-            return self
-
-    bk = Backend()
-    qc = MyQCirc().bell(0,1).measure(qid=[0,1], cid=[0,1])
-    result = bk.run(qcirc=qc, shots=10)
-    ...
+    >>> class MyQCirc(QCirc):
+    >>>     def bell(self, q0, q1):
+    >>>         self.h(q0).cx(q0,q1)
+    >>>         return self
+	>>> 
+    >>> bk = Backend()
+    >>> qc = MyQCirc().bell(0,1).measure(qid=[0,1], cid=[0,1])
+    >>> result = bk.run(qcirc=qc, shots=10)
+    >>> ...
 
 これは非常に簡単な例なのであまりご利益を感じないかもしれませんが、大き
 な量子回路を繰り返し使いたい場合など、便利に使える場面は多いと思います。
@@ -721,18 +734,18 @@ GPUを利用した高速計算を実行したい場合、このバックエン�
 
 GPUを利用しないシミュレータで計算させたい場合、
 
-    bk = Backend(product='qulacs', device='cpu_simulator')
+    >>> bk = Backend(product='qulacs', device='cpu_simulator')
 
 GPUを利用したシミュレータで計算させたい場合、
 
-    bk = Backend(product='qulacs', device='gpu_simulator')
+    >>> bk = Backend(product='qulacs', device='gpu_simulator')
 
 のように指定します(deviceを省略した場合のデフォルト値は'cpu_simulator'です)。
 
 あとは上述したように、
 
-	qc = QCirc().h(0).cx(0,1).measure(qid=[0,1], cid=[0,1])
-	result = bk.run(qcirc=qc, shots=100)
+	>>> qc = QCirc().h(0).cx(0,1).measure(qid=[0,1], cid=[0,1])
+	>>> result = bk.run(qcirc=qc, shots=100)
 
 のようにすれば、qulacsを使った計算ができます。
 
@@ -760,25 +773,25 @@ Experienceの使い
 
 本物の量子コンピュータを利用しないでローカルなシミュレータで計算させたい場合、
 
-    bk = Backend(product='ibmq', device='aer_simulator')
+    >>> bk = Backend(product='ibmq', device='aer_simulator')
 
 のように指定します。本物の量子コンピュータを利用したい場合は、例えば、
 
-    bk = Backend(product='ibmq', device='least_busy')
+    >>> bk = Backend(product='ibmq', device='least_busy')
 
 のように指定します。'least_busy'というのは、自分のアカウントで利用可能
 な量子コンピュータシステムの中で、現在最も空いているシステムを自動選択
 して実行するためのものです。実行するシステムを明示的に指定することもで
 きます。例えば、'ibmq_athens'で実行したい場合、
 
-    bk = Backend(product='ibmq', device='ibmq_athens')
+    >>> bk = Backend(product='ibmq', device='ibmq_athens')
 	
 のように指定します(deviceを省略した場合のデフォルト値は'aer_simulator'です)。
 
 あとは上述したように、
 
-    qc = QCirc().h(0).cx(0,1).measure(qid=[0,1], cid=[0,1])
-	result = bk.run(qcic=qc, shots=100)
+    >>> qc = QCirc().h(0).cx(0,1).measure(qid=[0,1], cid=[0,1])
+	>>> result = bk.run(qcic=qc, shots=100)
 
 のようにすれば、IBMQを使った計算ができます。
 
@@ -806,17 +819,17 @@ Experienceの使い
 以下のようなコードが問題なく動くようになったら[Amazon Braket](https://aws.amazon.com/braket/?nc1=h_ls)
 の利用環境が整ったと思って良いです（多分）。
 
-    import boto3
-    from braket.aws import AwsDevice
-    from braket.circuits import Circuit
-    
-    device = AwsDevice("arn:aws:braket:::device/quantum-simulator/amazon/sv1")
-    s3_folder = ("amazon-braket-xxxx", "sv1") # Use the S3 bucket you created during onboarding
-    
-    bell = Circuit().h(0).cnot(0, 1)
-    task = device.run(bell, s3_folder, shots=100)
-    result = task.result()
-    print(result.measurement_counts)
+    >>> import boto3
+    >>> from braket.aws import AwsDevice
+    >>> from braket.circuits import Circuit
+    >>> 
+    >>> device = AwsDevice("arn:aws:braket:::device/quantum-simulator/amazon/sv1")
+    >>> s3_folder = ("amazon-braket-xxxx", "sv1") # Use the S3 bucket you created during onboarding
+    >>> 
+    >>> bell = Circuit().h(0).cnot(0, 1)
+    >>> task = device.run(bell, s3_folder, shots=100)
+    >>> result = task.result()
+    >>> print(result.measurement_counts)
 
 さらに、qlazyから[Amazon Braket](https://aws.amazon.com/braket/?nc1=h_ls)を利用できるようにするため、
 ホームディレクトリに"~/.qlazy/"というディレクトリを作成して、その配下にconfig.iniというファイルを作り、
@@ -865,31 +878,31 @@ braket_oqc(Oxford Quantum Circuits)の5種類です。
 
 例えば、ローカルな状態ベクトルシミュレータを使う場合、
 
-    bk = Backend(product='braket_local', device='braket_sv')
+    >>> bk = Backend(product='braket_local', device='braket_sv')
 
 AWSの状態ベクトルシミュレータを使う場合、
 
-    bk = Backend(product='braket_aws', device='sv1')
+    >>> bk = Backend(product='braket_aws', device='sv1')
 
 IonQの量子コンピュータを使う場合、
 
-    bk = Backend(product='braket_ionq', device='ionq')
+    >>> bk = Backend(product='braket_ionq', device='ionq')
 
 RigettiのAspen-M-1を使う場合、
 
-    bk = Backend(product='braket_rigetti', device='aspnen_m_1')
+    >>> bk = Backend(product='braket_rigetti', device='aspnen_m_1')
 
 OQCのLucyを使う場合、
 
-    bk = Backend(product='braket_oqc', device='lucy')
+    >>> bk = Backend(product='braket_oqc', device='lucy')
 
 のように指定します。あとは、
 
-    qc = QCirc().h(0).cx(0,1).measure(qid=[0,1], cid=[0,1])
+    >>> qc = QCirc().h(0).cx(0,1).measure(qid=[0,1], cid=[0,1])
 
 のように量子回路を作成して、
 
-    result = bk.run(qcic=qc, shots=100)
+    >>> result = bk.run(qcic=qc, shots=100)
 
 のようにすれば、Amazon Braketを使った計算ができます。
 
@@ -931,18 +944,18 @@ GPUを利用した高速な量子回路実行が可能です(v0.3.0より)。た
 さて、無事GPU版がインストールされたとして、どうやって使うかを説明します。
 CPU版の場合は、例えば、
 
-    from qlazy import QCirc, Backend
-    bk = Backend(product='qlazy', device='qstate_simulator')
-    qc = QCirc().h(0).cx(0,1).measure(qid=[0,1], cid=[0,1])
-	result = bk.run(qcic=qc, shots=100)
+    >>> from qlazy import QCirc, Backend
+    >>> bk = Backend(product='qlazy', device='qstate_simulator')
+    >>> qc = QCirc().h(0).cx(0,1).measure(qid=[0,1], cid=[0,1])
+	>>> result = bk.run(qcic=qc, shots=100)
 
 でした。GPU版を使う場合は、Backendのインスタンス生成の時に、
 deviceを'qstate_gpu_simulator'にするだけです。
 
-    from qlazy import QCirc, Backend
-    bk = Backend(product='qlazy', device='qstate_gpu_simulator')
-    qc = QCirc().h(0).cx(0,1).measure(qid=[0,1], cid=[0,1])
-	result = bk.run(qcic=qc, shots=100)
+    >>> from qlazy import QCirc, Backend
+    >>> bk = Backend(product='qlazy', device='qstate_gpu_simulator')
+    >>> qc = QCirc().h(0).cx(0,1).measure(qid=[0,1], cid=[0,1])
+	>>> result = bk.run(qcic=qc, shots=100)
 
 これでOKです。GPU対応のモジュールをimportするようなことは必要ありません。
 
