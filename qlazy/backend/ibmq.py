@@ -58,6 +58,10 @@ def run(qcirc=None, shots=1, cid=None, backend=None, out_state=False):
     # set backend
     if backend.device == 'aer_simulator':
         ibmq_backend = Aer.get_backend("aer_simulator")
+    elif backend.device == 'aer_simulator_statevector':
+        ibmq_backend = Aer.get_backend("aer_simulator_statevector")
+    elif backend.device == 'aer_simulator_matrix_product_state':
+        ibmq_backend = Aer.get_backend("aer_simulator_matrix_product_state")
     else:
         provider = IBMQ.load_account()
         if backend.device == 'least_busy':

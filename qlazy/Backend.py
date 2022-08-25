@@ -6,13 +6,20 @@ import datetime
 from qlazy.util import read_config_ini
 from qlazy.gpu import is_gpu_available, is_gpu_supported_lib, gpu_preparation
 
-BACKEND_DEVICES = {'qlazy': ['qstate_simulator', 'stabilizer_simulator', 'mps_simulator'],
+BACKEND_DEVICES = {'qlazy': ['qstate_simulator',
+                             'stabilizer_simulator',
+                             'mps_simulator'],
                    'qulacs': ['cpu_simulator'],
-                   'ibmq': ['aer_simulator'],
+                   'ibmq': ['aer_simulator',
+                            'aer_simulator_statevector',
+                            'aer_simulator_matrix_product_state'],
                    'braket_local': ['braket_sv'],
-                   'braket_aws': ['sv1', 'tn1', 'dm1'],
+                   'braket_aws': ['sv1',
+                                  'tn1',
+                                  'dm1'],
                    'braket_ionq': ['ionq'],
-                   'braket_rigetti': ['aspen_11', 'aspen_m_1'],
+                   'braket_rigetti': ['aspen_11',
+                                      'aspen_m_1'],
                    'braket_oqc': ['lucy']}
 
 BACKEND_DEVICES_GPU = {'qlazy': ['qstate_gpu_simulator'],
