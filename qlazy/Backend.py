@@ -15,7 +15,7 @@ BACKEND_DEVICES = {'qlazy': ['qstate_simulator', 'stabilizer_simulator', 'mps_si
                    'braket_rigetti': ['aspen_11', 'aspen_m_1'],
                    'braket_oqc': ['lucy']}
 
-BACKEND_DEVICES_GPU = {'qlazy': ['qstate_gpu_simulator', 'mps_gpu_simulator'],
+BACKEND_DEVICES_GPU = {'qlazy': ['qstate_gpu_simulator'],
                        'qulacs': ['gpu_simulator']}
 
 if is_gpu_available() is True and is_gpu_supported_lib() is True:
@@ -97,7 +97,7 @@ class Backend:
                 from qlazy.backend.qlazy_qstate_simulator import run_cpu
                 self.__run = run_cpu
 
-            # qstate simulator
+            # qstate simulator (GPU)
             elif self.device == 'qstate_gpu_simulator':
                 from qlazy.backend.qlazy_qstate_simulator import run_gpu
                 if USE_GPU is False:

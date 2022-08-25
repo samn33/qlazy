@@ -93,8 +93,7 @@ def __mps_operate_qcirc(mps, cmem, qcirc, shots, cid):
         
     return frequency
 
-def run(qcirc=None, shots=1, cid=None, backend=None, out_state=False,
-        max_truncation_err=cfg.EPS):
+def run(qcirc=None, shots=1, cid=None, backend=None, out_state=False, max_truncation_err=cfg.EPS):
     """ run the quantum circuit """
 
     if qcirc is None:
