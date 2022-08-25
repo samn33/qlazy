@@ -1395,6 +1395,18 @@ class MPState(FiniteMPS):
         MDataMPState class
 
         """
+        if shots > 1:
+            md = self.__m_nochange(qid=qid, shots=shots-1)
+            mstr = self.measure(qid=qid)
+            md.frequency[mstr] += 1
+            md.last = mstr
+        else:
+            md = self.__m_nochange(qid=qid, shots=1)
+        return md
+        
+    def __m_nochange(self, qid=None, shots=1):
+        """ no change if shots > 1 """
+
         if qid is None or qid == []:
             qid = list(range(self.__qubit_num))
         
@@ -1413,11 +1425,10 @@ class MPState(FiniteMPS):
 
         for i in range(shots):
 
-            if i == shots - 1:
+            if shots == 1:
                 mps = self
             else:
                 mps = self.clone()
-            # mps = self.clone()
 
             prob_total = 1.0
             measured_str = ""
