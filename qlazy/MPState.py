@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """ Matrix Product State """
 
-import sys
-import time
 import random
 import numpy as np
 from collections import Counter
