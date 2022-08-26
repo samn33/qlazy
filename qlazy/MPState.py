@@ -1465,17 +1465,18 @@ class MPState(FiniteMPS):
                 shots = shots - i - 1
                 break
 
-        mstr_list = list(prob_total_dict.keys())
-        prob_list = list(prob_total_dict.values())
-        for i in range(1, len(prob_list)):
-            prob_list[i] += prob_list[i - 1]
+        if i != shots - 1:
+            mstr_list = list(prob_total_dict.keys())
+            prob_list = list(prob_total_dict.values())
+            for i in range(1, len(prob_list)):
+                prob_list[i] += prob_list[i - 1]
 
-        for i in range(shots):
-            r = random.random()
-            for j, p in enumerate(prob_list):
-                if r <= p:
-                    frequency[mstr_list[j]] += 1
-                    break
+            for i in range(shots):
+                r = random.random()
+                for j, p in enumerate(prob_list):
+                    if r <= p:
+                        frequency[mstr_list[j]] += 1
+                        break
         
         md = MDataMPState(frequency=frequency, last=last, qid=qid, qubit_num=len(qid))
 
