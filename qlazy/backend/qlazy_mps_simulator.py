@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-""" run function for qlazy's stabilizer simulator """
+""" run function for qlazy's matrix product state simulator """
 
 import numpy as np
 from collections import Counter
@@ -28,13 +28,12 @@ def __mps_operate_qcirc(mps, cmem, qcirc, shots, cid):
                 mps.operate_2qubit_gate(cfg.GATE_STRING[kind], qid[0], qid[1], phase)
             else:
                 raise ValueError("invalid gate description: {}".format(kind, qid, para, c, ctrl))
-
     
     # non-unitary part
     if qcirc_non_unitary.kind_first() is None: # non-unitary part includes no gates
         frequency = None
     
-    elif qcirc_non_unitary.all_gates_measurement() is True:
+    elif qcirc_non_unitary.all_gates_measurement() is True: # non-unitary part includes measurements only
         q_list = []
         c_list = []
         bits_array = np.array([0] * cmem.cmem_num)

@@ -670,6 +670,40 @@ class TestMPState_3_qubit(unittest.TestCase):
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
 
+class TestMPState_n_qubit(unittest.TestCase):
+    """ test 'MPState' : n-qubit gate
+    """
+
+    def test_mcx_3(self):
+        """test 'mcx' gate (for 3-qubit)
+        """
+        mps = MPState(qubit_num=3).x(0).x(1).mcx([0,1,2])
+        actual = mps.amp
+        expect = np.array([0j, 0j, 0j, 0j, 0j, 0j, 0j, (1+0j)])
+        ans = equal_vectors(actual, expect)
+        self.assertEqual(ans, True)
+
+    def test_mcx_4(self):
+        """test 'mcx' gate (for 4-qubit)
+        """
+        mps = MPState(qubit_num=4).x(0).x(1).x(2).mcx([0,1,2,3])
+        actual = mps.amp
+        expect = np.array([0j, 0j, 0j, 0j, 0j, 0j, 0j, 0j,
+                           0j, 0j, 0j, 0j, 0j, 0j, 0j, (1+0j)])
+        ans = equal_vectors(actual, expect)
+        self.assertEqual(ans,True)
+    
+    def test_mcx_5(self):
+        """test 'mcx' gate (for 5-qubit)
+        """
+        mps = QState(qubit_num=5).x(0).x(1).x(2).x(3).mcx([0,1,2,3,4])
+        actual = mps.amp
+        expect = np.array([0j, 0j, 0j, 0j, 0j, 0j, 0j, 0j,
+                           0j, 0j, 0j, 0j, 0j, 0j, 0j, 0j,
+                           0j, 0j, 0j, 0j, 0j, 0j, 0j, 0j,
+                           0j, 0j, 0j, 0j, 0j, 0j, 0j, (1+0j)])
+        ans = equal_vectors(actual, expect)
+        self.assertEqual(ans,True)
 
 class TestMPState_clone(unittest.TestCase):
     """ test 'MPState' : 'clone'

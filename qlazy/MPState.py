@@ -4,11 +4,18 @@
 import random
 import numpy as np
 from collections import Counter
+import copy
 
 import tensornetwork as tn
 from tensornetwork import FiniteMPS
 
 import qlazy.config as cfg
+
+def gray_code(n):
+    """ gray code generator (for mcx method) """
+
+    for k in range(2**n):
+        yield k^(k>>1)
 
 class MDataMPState:
     """ Measured Data for MPState
@@ -93,7 +100,7 @@ class MPState(FiniteMPS):
 
         center_position = 0
         canonicalize = True
-        super().__init__(tensors=tensors, center_position=center_position, canonicalize=True)
+        super().__init__(tensors=tensors, center_position=center_position, canonicalize=canonicalize)
 
         self.__qubit_num = qubit_num
         self.__max_truncation_err = max_truncation_err
@@ -163,8 +170,7 @@ class MPState(FiniteMPS):
             copy of the original matrix product state.
 
         """
-        tensors_clone = [self.get_tensor(i) for i in range(self.qubit_num)]
-        mps = self.__class__(tensors=tensors_clone)
+        mps = copy.deepcopy(self)
         return mps
 
     def show(self, qid=None, nonzero=False, preal=0):
@@ -1321,57 +1327,63 @@ class MPState(FiniteMPS):
         """
         self.cx(q2, q1).ccx(q0, q1, q2).cx(q2, q1)
         return self
+
+    # other gate
+
+    def mcx(self, qid=None):
+        """
+        operate MCX gate (multi-controlled X gate).
+
+        Parameters
+        ----------
+        qid : list of int
+            qubit id list [control, control, ... , control, target]
+
+        Returns
+        -------
+        self : instance of QState
+
+        """
+        if qid is None:
+            raise ValueError("qid must be set.")
+
+        # controled and target register
+        qid_ctr = qid[:-1]
+        qid_tar = qid[-1]
+
+        # hadamard
+        self.h(qid_tar)
+
+        # controlled-RZ(psi), psi=pi/(2**(bitnum-1))
+        bitnum = len(qid_ctr)
+        psi = 1.0/(2**(bitnum-1)) # unit=pi(radian)
+        gray_pre = 0
+        for gray in gray_code(bitnum):
+            if gray == 0:
+                continue
+            msb = len(str(bin(gray)))-3
+            chb = len(str(bin(gray^gray_pre)))-3
+            if gray != 1:
+                if chb == msb:
+                    chb -= 1
+                self.cx(qid_ctr[chb], qid_ctr[msb])
+            self.cp(qid_ctr[msb], qid_tar, phase=psi)
+            psi = -psi
+            gray_pre = gray
+
+        # hadamard
+        self.h(qid_tar)
+
+        return self
     
     def __probability(self, q):
 
         z_gate = self.__get_gate_array('z')
         expect_value = self.measure_local_operator([z_gate], [q])[0]
-        if expect_value.imag > cfg.EPS or abs(expect_value.real) > 1.0 + cfg.EPS:
-            raise ValueError("probability calculation failure.")
-            
         prob_1 = (1.0 - expect_value.real) / 2.0
-        if prob_1 < 0.0:
-            prob_1 = 0.0
-        elif prob_1 > 1.0:
-            prob_1 = 1.0
-        elif abs(prob_1) < cfg.EPS:
-            prob_1 = 0.0
-        elif abs(prob_1 - 1.0) < cfg.EPS:
-            prob_1 = 1.0
         prob_0 = 1.0 - prob_1
         return (prob_0, prob_1)
-
-    def __probability_all(self):
-
-        z_gate = self.__get_gate_array('z')
-        z_gate_all = [z_gate] * self.__qubit_num
-        qid_all = list(range(self.__qubit_num))
-        expect_value_all = self.measure_local_operator(z_gate_all, qid_all)
-
-        prob_all = []
-        for expect_value in expect_value_all:
-            if expect_value.imag > cfg.EPS or abs(expect_value.real) > 1.0 + cfg.EPS:
-                raise ValueError("probability calculation failure.")
-            
-            prob_1 = (1.0 - expect_value.real) / 2.0
-            if prob_1 < 0.0:
-                prob_1 = 0.0
-            elif prob_1 > 1.0:
-                prob_1 = 1.0
-            elif abs(prob_1) < cfg.EPS:
-                prob_1 = 0.0
-            elif abs(prob_1 - 1.0) < cfg.EPS:
-                prob_1 = 1.0
-                
-            prob_0 = 1.0 - prob_1
-
-            if prob_1 == 0.0 or prob_1 == 1.0:
-                prob_all.append((prob_0, prob_1))
-            else:
-                prob_all.append(None)
-
-        return prob_all
-
+        
     def m(self, qid=None, shots=1):
         """
         measurement in Z-direction
@@ -1393,36 +1405,39 @@ class MPState(FiniteMPS):
         MDataMPState class
 
         """
-        if shots > 1:
-            md = self.__m_nochange(qid=qid, shots=shots-1)
-            mstr = self.measure(qid=qid)
-            md.frequency[mstr] += 1
-            md.last = mstr
-        else:
-            md = self.__m_nochange(qid=qid, shots=1)
-        return md
-        
-    def __m_nochange(self, qid=None, shots=1):
-        """ no change if shots > 1 """
-
         if qid is None or qid == []:
             qid = list(range(self.__qubit_num))
         
+        if shots > 1:
+            md = self.__m_many_shots(qid=qid, shots=shots-1) # get stats by measurements (self not change)
+            md_one_shot = self.__m_many_shots(qid=qid, shots=1) # mps changes by measurement
+            mstr = md_one_shot.last
+            md.frequency[mstr] += 1
+            md.last = mstr
+        else:
+            md = self.__m_many_shots(qid=qid, shots=1)
+        return md
+        
+    def __m_many_shots(self, qid=None, shots=1):
+        """ mps is change if shots = 1 (projection), not change otherwise """
+
         proj_gate = [np.array([[1.+0.j, 0.+0.j],
                                [0.+0.j, 0.+0.j]]),
                      np.array([[0.+0.j, 0.+0.j],
                                [0.+0.j, 1.+0.j]])]
-        frequency = Counter()
-        prob_total_dict = {}
+
+        if qid is None or qid == []:
+            qid = list(range(self.__qubit_num))
 
         self.canonicalize(normalize=True)
         if shots > 1:
             [self.position(site=i, max_truncation_err=cfg.EPS) for i in range(self.__qubit_num)]
 
-        prob_all = self.__probability_all()
+        frequency = Counter()
+        prob_total_dict = {}
 
         for i in range(shots):
-
+            
             if shots == 1:
                 mps = self
             else:
@@ -1431,17 +1446,14 @@ class MPState(FiniteMPS):
             prob_total = 1.0
             measured_str = ""
             for q in qid:
-                if prob_all[q] is None:
-                    mps.position(q)
-                    prob = mps.__probability(q=q)
-                else:
-                    prob = prob_all[q]
-
-                if abs(prob[0] - 1.0) < cfg.EPS:
+                mps.position(q)
+                prob = mps.__probability(q=q)
+        
+                if prob[0] == 1.0:
                     measured_value = 0
                     measured_str += str(measured_value)
                     continue
-                elif abs(prob[1] - 1.0) < cfg.EPS:
+                elif prob[1] == 1.0:
                     measured_value = 1
                     measured_str += str(measured_value)
                     continue
@@ -1455,13 +1467,12 @@ class MPState(FiniteMPS):
                     measured_str += str(measured_value)
                     prob_total = prob_total * prob[1]
                 mps.apply_one_site_gate(gate=proj_gate[measured_value], site=q)
-                mps.canonicalize(normalize=True)
-
+        
             frequency[measured_str] += 1
             last = measured_str
-
+        
             prob_total_dict[measured_str] = prob_total
-            if sum(prob_total_dict.values()) >= 1.0:
+            if abs(sum(prob_total_dict.values()) - 1.0) < cfg.EPS:
                 shots = shots - i - 1
                 break
 
@@ -1470,7 +1481,8 @@ class MPState(FiniteMPS):
             prob_list = list(prob_total_dict.values())
             for i in range(1, len(prob_list)):
                 prob_list[i] += prob_list[i - 1]
-
+            prob_list[-1] = 1.0
+        
             for i in range(shots):
                 r = random.random()
                 for j, p in enumerate(prob_list):
@@ -1479,7 +1491,6 @@ class MPState(FiniteMPS):
                         break
         
         md = MDataMPState(frequency=frequency, last=last, qid=qid, qubit_num=len(qid))
-
         return md
 
     def measure(self, qid=None):
