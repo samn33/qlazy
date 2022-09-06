@@ -615,7 +615,7 @@ class QCirc(ctypes.Structure):
     def merge(self, qc):
         """
         merge quantum circuit.
-
+n
         Parameters
         ----------
         qc : instance of QCirc

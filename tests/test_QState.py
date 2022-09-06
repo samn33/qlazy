@@ -837,10 +837,22 @@ class TestQState_evolve(unittest.TestCase):
     """ test 'QState' : 'evolve'
     """
 
-    def test_evolve(self):
+    def test_evolve_1(self):
         """test 'evolve'
         """
-        hm = Observable("x_0")
+        hm = Observable("X_0")
+        qs = QState(qubit_num=1)
+        qs.evolve(observable=hm, time=0.2, iteration=100)
+        actual = qs.amp
+        expect = np.array([(0.8090169943749473+0j), 0.5877852522924732j])
+        ans = equal_vectors(actual, expect)
+        self.assertEqual(ans,True)
+
+    def test_evolve_2(self):
+        """test 'evolve'
+        """
+        hm = Observable()
+        hm.add_wpp(weight=1.0, pp=PauliProduct('X', [0]))
         qs = QState(qubit_num=1)
         qs.evolve(observable=hm, time=0.2, iteration=100)
         actual = qs.amp
@@ -857,7 +869,7 @@ class TestQState_expect(unittest.TestCase):
         """
         qs = QState(qubit_num=3)
         qs.h(0).h(1).h(2)
-        ob = Observable(string="x_0*x_1*x_2")
+        ob = Observable(string="X_0*X_1*X_2")
         actual = qs.expect(observable=ob)
         expect = 1.+0.j
         ans = equal_values(actual, expect)
@@ -867,7 +879,7 @@ class TestQState_expect(unittest.TestCase):
         """test 'expect_2'
         """
         qs = QState(qubit_num=3)
-        ob = Observable(string="x_0 * x_1 * x_2")
+        ob = Observable(string="X_0 * X_1 * X_2")
         actual = qs.expect(observable=ob)
         expect = 0.j
         ans = equal_values(actual, expect)
@@ -878,7 +890,7 @@ class TestQState_expect(unittest.TestCase):
         """
         qs = QState(qubit_num=3)
         qs.h(0).h(1).h(2)
-        ob = Observable(string="z_0 * z_1 * z_2")
+        ob = Observable(string="Z_0 * Z_1 * Z_2")
         actual = qs.expect(observable=ob)
         expect = 0.j
         ans = equal_values(actual, expect)
@@ -888,7 +900,7 @@ class TestQState_expect(unittest.TestCase):
         """test 'expect_4'
         """
         qs = QState(qubit_num=3)
-        ob = Observable(string="z_0 * z_1 * z_2")
+        ob = Observable(string="Z_0 * Z_1 * Z_2")
         actual = qs.expect(observable=ob)
         expect = 1.+0.j
         ans = equal_values(actual, expect)
@@ -899,7 +911,7 @@ class TestQState_expect(unittest.TestCase):
         """
         qs = QState(qubit_num=3)
         qs.h(0).cx(0,1).cx(0,2)
-        ob = Observable(string="z_0 * z_1 * z_2")
+        ob = Observable(string="Z_0 * Z_1 * Z_2")
         actual = qs.expect(observable=ob)
         expect = 0.j
         ans = equal_values(actual, expect)
@@ -910,7 +922,7 @@ class TestQState_expect(unittest.TestCase):
         """
         qs = QState(qubit_num=3)
         qs.h(0).cx(0,1).cx(0,2)
-        ob = Observable(string="z_2 * z_1")
+        ob = Observable(string="Z_2 * Z_1")
         actual = qs.expect(observable=ob)
         expect = 1.+0.j
         ans = equal_values(actual, expect)
@@ -921,7 +933,7 @@ class TestQState_expect(unittest.TestCase):
         """
         qs = QState(qubit_num=3)
         qs.h(0).cx(0,1).cx(0,2)
-        ob = Observable(string="x_0 * x_1 * x_2")
+        ob = Observable(string="X_0 * X_1 * X_2")
         actual = qs.expect(observable=ob)
         expect = 1.+0.j
         ans = equal_values(actual, expect)
@@ -932,7 +944,7 @@ class TestQState_expect(unittest.TestCase):
         """
         qs = QState(qubit_num=3)
         qs.h(0).cx(0,1).cx(0,2)
-        ob = Observable(string="x_0 * x_2")
+        ob = Observable(string="X_0 * X_2")
         actual = qs.expect(observable=ob)
         expect = 0.j
         ans = equal_values(actual, expect)
@@ -943,7 +955,7 @@ class TestQState_expect(unittest.TestCase):
         """
         qs = QState(qubit_num=3)
         qs.h(0).cx(0,1).cx(0,2)
-        ob = Observable(string="z_0 * z_1 + 2.0 * z_1 * z_2 + 3.0 * z_2 * z_0")
+        ob = Observable(string="Z_0 * Z_1 + 2.0 * Z_1 * Z_2 + 3.0 * Z_2 * Z_0")
         actual = qs.expect(observable=ob)
         expect = 6.+0.j
         ans = equal_values(actual, expect)
@@ -954,7 +966,7 @@ class TestQState_expect(unittest.TestCase):
         """
         qs = QState(qubit_num=3)
         qs.h(0).cx(0,1).cx(0,2)
-        ob = Observable(string="x_0 * x_1 + 2.0 * x_1 * x_2 + 3.0 * x_2 * x_0 + 4.0 * x_0 * x_1 * x_2")
+        ob = Observable(string="X_0 * X_1 + 2.0 * X_1 * X_2 + 3.0 * X_2 * X_0 + 4.0 * X_0 * X_1 * X_2")
         actual = qs.expect(observable=ob)
         expect = 4.+0.j
         ans = equal_values(actual, expect)
@@ -965,7 +977,7 @@ class TestQState_expect(unittest.TestCase):
         """
         qs = QState(qubit_num=3)
         qs.h(0).cx(0,1).cx(0,2)
-        ob = Observable(string="- x_0 * x_1 - 2.0 * x_1 * x_2 - 3.0 * x_2 * x_0 - 4.0 * x_0 * x_1 * x_2")
+        ob = Observable(string="- X_0 * X_1 - 2.0 * X_1 * X_2 - 3.0 * X_2 * X_0 - 4.0 * X_0 * X_1 * X_2")
         actual = qs.expect(observable=ob)
         expect = -4.+0.j
         ans = equal_values(actual, expect)
@@ -976,7 +988,7 @@ class TestQState_expect(unittest.TestCase):
         """
         qs = QState(qubit_num=2)
         qs.h(1).s(1)
-        ob = Observable(string="y_1")
+        ob = Observable(string="Y_1")
         actual = qs.expect(observable=ob)
         expect = 1.+0.j
         ans = equal_values(actual, expect)
@@ -987,7 +999,7 @@ class TestQState_expect(unittest.TestCase):
         """
         qs = QState(qubit_num=2)
         qs.h(1).s(1)
-        ob = Observable(string="z_0 * y_1")
+        ob = Observable(string="Z_0 * Y_1")
         actual = qs.expect(observable=ob)
         expect = 1.+0.j
         ans = equal_values(actual, expect)
@@ -998,7 +1010,7 @@ class TestQState_expect(unittest.TestCase):
         """
         qs = QState(qubit_num=2)
         qs.h(1).s(1)
-        ob = Observable(string="z_0 + y_1")
+        ob = Observable(string="Z_0 + Y_1")
         actual = qs.expect(observable=ob)
         expect = 2.+0.j
         ans = equal_values(actual, expect)
@@ -1009,17 +1021,36 @@ class TestQState_expect(unittest.TestCase):
         """
         qs = QState(qubit_num=2)
         qs.h(1).s(1)
-        ob = Observable(string="2 * z_0 + 3 * z_1")
+        ob = Observable(string="2 * Z_0 + 3 * Z_1")
         actual = qs.expect(observable=ob)
         expect = 2.+0.j
         ans = equal_values(actual, expect)
         self.assertEqual(ans, True)
 
+    def test_expect_16(self):
+        """test 'expect_16' : equivalent to 'expect_11'
+        """
+        qs = QState(qubit_num=3)
+        qs.h(0).cx(0,1).cx(0,2)
+        ob = Observable()
+        ob.add_wpp(weight=-1.0, pp=PauliProduct('XX', [0,1]))
+        ob.add_wpp(weight=-2.0, pp=PauliProduct('XX', [1,2]))
+        ob.add_wpp(weight=-3.0, pp=PauliProduct('XX', [2,0]))
+        ob.add_wpp(weight=-4.0, pp=PauliProduct('XXX', [0,1,2]))
+        actual = qs.expect(observable=ob)
+        expect = -4.+0.j
+        ans = equal_values(actual, expect)
+        self.assertEqual(ans, True)
+
+class TestQState_evolv(unittest.TestCase):
+    """ test 'QState' : 'evolve'
+    """
+
     def test_evolve_1_qubit(self):
         """test 'evolve' (1-qubit)
         """
-        ob = Observable("y_0")
-        hm = Observable("x_0")
+        ob = Observable("Y_0")
+        hm = Observable("X_0")
         qs = QState(qubit_num=1)
         qs.evolve(observable=hm, time=0.2, iteration=100)
         actual = qs.expect(observable=ob)
@@ -1031,8 +1062,8 @@ class TestQState_expect(unittest.TestCase):
         """test 'evolve' (2-qubit)
         """
         qs = QState(qubit_num=2).x(0)
-        hm = Observable("z_0*z_1+x_0+x_1")
-        ob = Observable("2.0+z_0+z_1")
+        hm = Observable("Z_0*Z_1+X_0+X_1")
+        ob = Observable("2.0+Z_0+Z_1")
         qs.evolve(observable=hm,time=0.1,iteration=10)
         actual = qs.expect(observable=ob)
         expect = 1.9999999999999898+0j

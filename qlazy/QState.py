@@ -606,7 +606,11 @@ class QState(ctypes.Structure):
         Obserbable class (Observable.py)
 
         """
-        qstate_evolve(self, observable=observable, time=time, iteration=iteration)
+        ob = observable.clone()
+        if ob.recalc_weight() is False:
+            raise ValueError("Observable is not hermitian.")
+
+        qstate_evolve(self, observable=ob.base, time=time, iteration=iteration)
         return self
 
     def expect(self, observable=None):
@@ -628,7 +632,11 @@ class QState(ctypes.Structure):
         Obserbable class (Observable.py)
 
         """
-        expect = qstate_expect_value(self, observable=observable)
+        ob = observable.clone()
+        if ob.recalc_weight() is False:
+            raise ValueError("Observable is not hermitian.")
+
+        expect = qstate_expect_value(self, observable=ob.base)
         return expect
 
     def apply(self, matrix=None, qid=None):
@@ -1572,6 +1580,7 @@ class QState(ctypes.Structure):
         """
         pauli_list = pp.pauli_list
         qid = pp.qid
+        factor = pp.factor
 
         if ctrl is None:
             for q, pauli in zip(qid, pauli_list):
@@ -1596,6 +1605,13 @@ class QState(ctypes.Structure):
                     self.cz(ctrl, q)
                 else:
                     continue
+
+            if factor == -1.+0.j:
+                self.z(ctrl)
+            elif factor == 0.+1.j:
+                self.s(ctrl)
+            elif factor == 0.-1.j:
+                self.s_dg(ctrl)
 
         return self
 

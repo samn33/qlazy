@@ -1829,6 +1829,7 @@ class DensOp(ctypes.Structure):
         """
         pauli_list = pp.pauli_list
         qid = pp.qid
+        factor = pp.factor
 
         if ctrl is None:
             for q, pauli in zip(qid, pauli_list):
@@ -1853,6 +1854,13 @@ class DensOp(ctypes.Structure):
                     self.cz(ctrl, q)
                 else:
                     continue
+
+            if factor == -1.+0.j:
+                self.z(ctrl)
+            elif factor == 0.+1.j:
+                self.s(ctrl)
+            elif factor == 0.-1.j:
+                self.s_dg(ctrl)
 
         return self
 

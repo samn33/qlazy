@@ -767,7 +767,7 @@ class TestMPState_expect(unittest.TestCase):
         """
         mps = MPState(qubit_num=3)
         mps.h(0).h(1).h(2)
-        ob = Observable(string="x_0*x_1*x_2")
+        ob = Observable(string="X_0*X_1*X_2")
         actual = mps.expect(observable=ob)
         expect = 1.+0.j
         ans = equal_values(actual, expect)
@@ -777,7 +777,7 @@ class TestMPState_expect(unittest.TestCase):
         """test 'expect_2'
         """
         mps = MPState(qubit_num=3)
-        ob = Observable(string="x_0 * x_1 * x_2")
+        ob = Observable(string="X_0 * X_1 * X_2")
         actual = mps.expect(observable=ob)
         expect = 0.j
         ans = equal_values(actual, expect)
@@ -788,7 +788,7 @@ class TestMPState_expect(unittest.TestCase):
         """
         mps = MPState(qubit_num=3)
         mps.h(0).h(1).h(2)
-        ob = Observable(string="z_0 * z_1 * z_2")
+        ob = Observable(string="Z_0 * Z_1 * Z_2")
         actual = mps.expect(observable=ob)
         expect = 0.j
         ans = equal_values(actual, expect)
@@ -798,7 +798,7 @@ class TestMPState_expect(unittest.TestCase):
         """test 'expect_4'
         """
         mps = MPState(qubit_num=3)
-        ob = Observable(string="z_0 * z_1 * z_2")
+        ob = Observable(string="Z_0 * Z_1 * Z_2")
         actual = mps.expect(observable=ob)
         expect = 1.+0.j
         ans = equal_values(actual, expect)
@@ -809,7 +809,7 @@ class TestMPState_expect(unittest.TestCase):
         """
         mps = MPState(qubit_num=3)
         mps.h(0).cx(0,1).cx(0,2)
-        ob = Observable(string="z_0 * z_1 * z_2")
+        ob = Observable(string="Z_0 * Z_1 * Z_2")
         actual = mps.expect(observable=ob)
         expect = 0.j
         ans = equal_values(actual, expect)
@@ -820,7 +820,7 @@ class TestMPState_expect(unittest.TestCase):
         """
         mps = MPState(qubit_num=3)
         mps.h(0).cx(0,1).cx(0,2)
-        ob = Observable(string="z_2 * z_1")
+        ob = Observable(string="Z_2 * Z_1")
         actual = mps.expect(observable=ob)
         expect = 1.+0.j
         ans = equal_values(actual, expect)
@@ -831,7 +831,7 @@ class TestMPState_expect(unittest.TestCase):
         """
         mps = MPState(qubit_num=3)
         mps.h(0).cx(0,1).cx(0,2)
-        ob = Observable(string="x_0 * x_1 * x_2")
+        ob = Observable(string="X_0 * X_1 * X_2")
         actual = mps.expect(observable=ob)
         expect = 1.+0.j
         ans = equal_values(actual, expect)
@@ -842,7 +842,7 @@ class TestMPState_expect(unittest.TestCase):
         """
         mps = MPState(qubit_num=3)
         mps.h(0).cx(0,1).cx(0,2)
-        ob = Observable(string="x_0 * x_2")
+        ob = Observable(string="X_0 * X_2")
         actual = mps.expect(observable=ob)
         expect = 0.j
         ans = equal_values(actual, expect)
@@ -853,7 +853,7 @@ class TestMPState_expect(unittest.TestCase):
         """
         mps = MPState(qubit_num=3)
         mps.h(0).cx(0,1).cx(0,2)
-        ob = Observable(string="z_0 * z_1 + 2.0 * z_1 * z_2 + 3.0 * z_2 * z_0")
+        ob = Observable(string="Z_0 * Z_1 + 2.0 * Z_1 * Z_2 + 3.0 * Z_2 * Z_0")
         actual = mps.expect(observable=ob)
         expect = 6.+0.j
         ans = equal_values(actual, expect)
@@ -864,7 +864,7 @@ class TestMPState_expect(unittest.TestCase):
         """
         mps = MPState(qubit_num=3)
         mps.h(0).cx(0,1).cx(0,2)
-        ob = Observable(string="x_0 * x_1 + 2.0 * x_1 * x_2 + 3.0 * x_2 * x_0 + 4.0 * x_0 * x_1 * x_2")
+        ob = Observable(string="X_0 * X_1 + 2.0 * X_1 * X_2 + 3.0 * X_2 * X_0 + 4.0 * X_0 * X_1 * X_2")
         actual = mps.expect(observable=ob)
         expect = 4.+0.j
         ans = equal_values(actual, expect)
@@ -875,7 +875,7 @@ class TestMPState_expect(unittest.TestCase):
         """
         mps = MPState(qubit_num=3)
         mps.h(0).cx(0,1).cx(0,2)
-        ob = Observable(string="- x_0 * x_1 - 2.0 * x_1 * x_2 - 3.0 * x_2 * x_0 - 4.0 * x_0 * x_1 * x_2")
+        ob = Observable(string="- X_0 * X_1 - 2.0 * X_1 * X_2 - 3.0 * X_2 * X_0 - 4.0 * X_0 * X_1 * X_2")
         actual = mps.expect(observable=ob)
         expect = -4.+0.j
         ans = equal_values(actual, expect)
@@ -886,7 +886,7 @@ class TestMPState_expect(unittest.TestCase):
         """
         mps = MPState(qubit_num=2)
         mps.h(1).s(1)
-        ob = Observable(string="y_1")
+        ob = Observable(string="Y_1")
         actual = mps.expect(observable=ob)
         expect = 1.+0.j
         ans = equal_values(actual, expect)
@@ -897,7 +897,7 @@ class TestMPState_expect(unittest.TestCase):
         """
         mps = MPState(qubit_num=2)
         mps.h(1).s(1)
-        ob = Observable(string="z_0 * y_1")
+        ob = Observable(string="Z_0 * Y_1")
         actual = mps.expect(observable=ob)
         expect = 1.+0.j
         ans = equal_values(actual, expect)
@@ -908,7 +908,7 @@ class TestMPState_expect(unittest.TestCase):
         """
         mps = MPState(qubit_num=2)
         mps.h(1).s(1)
-        ob = Observable(string="z_0 + y_1")
+        ob = Observable(string="Z_0 + Y_1")
         actual = mps.expect(observable=ob)
         expect = 2.+0.j
         ans = equal_values(actual, expect)
@@ -919,9 +919,24 @@ class TestMPState_expect(unittest.TestCase):
         """
         mps = MPState(qubit_num=2)
         mps.h(1).s(1)
-        ob = Observable(string="2 * z_0 + 3 * z_1")
+        ob = Observable(string="2 * Z_0 + 3 * Z_1")
         actual = mps.expect(observable=ob)
         expect = 2.+0.j
+        ans = equal_values(actual, expect)
+        self.assertEqual(ans, True)
+
+    def test_expect_16(self):
+        """test 'expect_16' : equivalent to 'expect_11'
+        """
+        mps = MPState(qubit_num=3)
+        mps.h(0).cx(0,1).cx(0,2)
+        ob = Observable()
+        ob.add_wpp(weight=-1.0, pp=PauliProduct('XX', [0,1]))
+        ob.add_wpp(weight=-2.0, pp=PauliProduct('XX', [1,2]))
+        ob.add_wpp(weight=-3.0, pp=PauliProduct('XX', [2,0]))
+        ob.add_wpp(weight=-4.0, pp=PauliProduct('XXX', [0,1,2]))
+        actual = mps.expect(observable=ob)
+        expect = -4.+0.j
         ans = equal_values(actual, expect)
         self.assertEqual(ans, True)
 
@@ -931,7 +946,7 @@ class TestMPState_expect(unittest.TestCase):
         qubit_num = 12
         operation_num = 6
 
-        ob = Observable(string="x_0 * y_2 * z_3 * y_5 * x_6")
+        ob = Observable(string="X_0 * Y_2 * Z_3 * Y_5 * X_6")
 
         rnd_list = [random.random() for _ in range(operation_num * 3)]
 

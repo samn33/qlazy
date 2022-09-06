@@ -1,6 +1,7 @@
 import math
 import cmath
 from qlazy import QState,Observable
+from qlazy.Observable import X,Y,Z
 
 def bloch(alpha,beta):
 

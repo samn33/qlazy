@@ -1606,6 +1606,7 @@ class MPState(FiniteMPS):
         """
         pauli_list = pp.pauli_list
         qid = pp.qid
+        factor = pp.factor
 
         if ctrl is None:
             for q, pauli in zip(qid, pauli_list):
@@ -1631,6 +1632,13 @@ class MPState(FiniteMPS):
                 else:
                     continue
 
+            if factor == -1.+0.j:
+                self.z(ctrl)
+            elif factor == 0.+1.j:
+                self.s(ctrl)
+            elif factor == 0.-1.j:
+                self.s_dg(ctrl)
+
         return self
 
     def expect(self, observable=None):
@@ -1652,8 +1660,12 @@ class MPState(FiniteMPS):
         Obserbable class (Observable.py)
 
         """
+        ob = observable.clone()
+        if ob.recalc_weight() is False:
+            raise ValueError("Observable is not hermitian.")
+
         expect_value = 0.0
-        weighted_pp_list = observable.weighted_pp_list
+        weighted_pp_list = ob.weighted_pp_list
         for wpp in weighted_pp_list:
             mps = self.clone()
             weight = wpp['weight']

@@ -2,7 +2,8 @@
 
 ## [0.3.2] - 2022-xx-xx
 ### Added
-- matrix product state simulation
+- matrix product state simulation (MPState class and 'mps_simulator' as a backend)
+- setting observable object by X,Y,Z functions and operations like '+','-','*','/'
 ### Fixed
 - generate_random_gates method of QCirc
 
