@@ -675,7 +675,13 @@ expectメソッドに引数としてObservableクラスのインスタンスを�
 	>>> ob.add_wpp(weight=1.0, pp=PauliPruduct('Z', [0]))
 	>>> ob.add_wpp(weight=2.0, pp=PauliPruduct('Z', [1]))
 
-のように作成することもできます。
+のように作成することもできます。あるいは、
+
+    >>> from qlazy.Observable import X, Y, Z
+	>>> ob = Z(0) + 2.0 * Z(1)
+	
+のように作成することもできます(詳細についてはObservableのドキュメント
+を参照してください)。
 
 現在の量子状態がqsで与えられているとすると、
 
@@ -693,7 +699,7 @@ expectメソッドに引数としてObservableクラスのインスタンスを�
 使用例を以下に示します。
 
     >>> qs = QState(2)
-    >>> hm = Observable("-2.0+z_0*z_1+x_0+x_1")
+    >>> hm = -2.0*Z(0) + Z(0)*Z(1) + X(0) + X(1)
     >>> qs.evolve(observable=hm, time=0.1, iteration=10)
 	
 １行目で、２粒子を定義しています。量子状態は|00>に初期化されます。２行

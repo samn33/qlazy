@@ -178,6 +178,35 @@ class Observable:
         ans = not self.__eq__(ob)
         return ans
 
+    def __pos__(self):
+        """
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        out : instance of Observable
+            observable (result)
+
+        """
+        return self
+
+    def __neg__(self):
+        """
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        out : instance of Observable
+            observable (result)
+
+        """
+        self *= -1.0
+        return self
+
     def __add__(self, other):
         """
         Parameters
@@ -392,6 +421,27 @@ class Observable:
         self.weighted_pp_list = out.weighted_pp_list[:]
         return self
 
+    def is_hermitian(self):
+        """ hermitian or not
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        ans : bool
+            is the observable hermitian or not
+
+        """
+        ans = True
+        for wpp in self.weighted_pp_list:
+            weight = wpp['weight'] * wpp['pp'].factor
+            if weight.imag != 0.0:
+                ans = False
+                break
+        return ans
+
     def recalc_weight(self):
         """ recalculate the weights of weighted_pp_list
             (weight <= weight * pp.factor, pp.factor <= 1.0)
@@ -414,7 +464,7 @@ class Observable:
                 break
             wpp['weight'] = weight.real
             wpp['pp'].factor = 1.+0.j
-        return True
+        return ans
     
     @property
     def base(self):

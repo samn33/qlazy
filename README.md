@@ -96,12 +96,12 @@ print help
     >>> qs = QState(2)
     >>> qs.h(0).cx(0,1)
     >>> qs.show()
-    >>> md = qs.m(shots=100)
-    >>> print(md.frequency)
     c[00] = +0.7071+0.0000*i : 0.5000 |++++++
     c[01] = +0.0000+0.0000*i : 0.0000 |
     c[10] = +0.0000+0.0000*i : 0.0000 |
     c[11] = +0.7071+0.0000*i : 0.5000 |++++++
+    >>> md = qs.m(shots=100)
+    >>> print(md.frequency)
     Counter({'00':53,'11':47})
 
 #### Quantum Circuit Execution (by QCirc and Backend class)

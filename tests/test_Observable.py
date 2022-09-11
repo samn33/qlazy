@@ -74,6 +74,32 @@ class Observable_eq(unittest.TestCase):
         self.assertEqual(ob_1 == ob_2, True)
         self.assertEqual(ob_1 != ob_2, False)
         
+class Observable_pos(unittest.TestCase):
+    """ test 'Observable' : '__pos__'
+    """
+
+    def test_pos_1(self):
+        """test 'pos_1'
+        """
+        ob_1 = Observable()
+        ob_1.add_wpp(weight=1.0, pp=PauliProduct('X', [0]))
+        ob_1.add_wpp(weight=1.0, pp=PauliProduct('ZZ', [0,1]))
+        ob_2 = +X(0) + Z(0) * Z(1)
+        self.assertEqual(ob_1, ob_2)
+        
+class Observable_neg(unittest.TestCase):
+    """ test 'Observable' : '__neg__'
+    """
+
+    def test_neg_1(self):
+        """test 'neg_1'
+        """
+        ob_1 = Observable()
+        ob_1.add_wpp(weight=-1.0, pp=PauliProduct('X', [0]))
+        ob_1.add_wpp(weight=-1.0, pp=PauliProduct('ZZ', [0,1]))
+        ob_2 = -X(0) - Z(0) * Z(1)
+        self.assertEqual(ob_1, ob_2)
+        
 class Observable_add(unittest.TestCase):
     """ test 'Observable' : '__add__', '__iadd__'
     """

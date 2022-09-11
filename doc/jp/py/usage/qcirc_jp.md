@@ -293,8 +293,8 @@ qlazyの状態ベクトルシミュレータ(qstate_simulator)またはスタビ
 すると、Resultのプロパティqstateまたはstabilizerまたはmpstateに各クラ
 スで規定されている量子状態がセットされます。これらをもとにQState,
 Stabilizer, MPStateで定義されている各種計算が実行できます(例えばオブザー
-バブルに対する期待値計算など)。詳細については各クラスに関するチュート
-リアルをご参照ください。
+バブルに対する期待値計算など)。詳細については各クラスに関するドキュメ
+ントご参照してください。
 
     >>> qc = QCirc().h(0).cx(0,1)
     >>> qs_sim = Backend(product='qlazy', device='qstate_simulator')

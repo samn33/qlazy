@@ -622,6 +622,8 @@ class MPState(FiniteMPS):
         self : instance of MPState
 
         """
+        if gate_str == 'i':
+            return self
         gate_array = self.__get_gate_array(gate_str, para)
         self.apply_one_site_gate(gate=gate_array, site=q)
         return self

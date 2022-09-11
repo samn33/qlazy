@@ -3,6 +3,7 @@ import unittest
 import math
 import numpy as np
 from qlazy import QState, Observable, PauliProduct
+from qlazy.Observable import X, Y, Z
 
 EPS = 1.0e-6
 
@@ -1039,6 +1040,30 @@ class TestQState_expect(unittest.TestCase):
         ob.add_wpp(weight=-4.0, pp=PauliProduct('XXX', [0,1,2]))
         actual = qs.expect(observable=ob)
         expect = -4.+0.j
+        ans = equal_values(actual, expect)
+        self.assertEqual(ans, True)
+
+    def test_expect_17(self):
+        """test 'expect_17' : equivalent to 'expect_11'
+        """
+        qs = QState(qubit_num=3)
+        qs.h(0).cx(0,1).cx(0,2)
+        ob = Observable()
+        ob = -X(0) * X(1) - 2.0 * X(1) * X(2) - 3.0 * X(2) * X(0) - 4.0 * X(0) * X(1) * X(2)
+        actual = qs.expect(observable=ob)
+        expect = -4.+0.j
+        ans = equal_values(actual, expect)
+        self.assertEqual(ans, True)
+
+    def test_expect_18(self):
+        """test 'expect_18'
+        """
+        qs = QState(qubit_num=3)
+        qs.h(0).cx(0,1).cx(0,2)
+        ob = Observable()
+        ob = -Z(0) * Z(1) * Z(2) + 3.0
+        actual = qs.expect(observable=ob)
+        expect = 3.+0.j
         ans = equal_values(actual, expect)
         self.assertEqual(ans, True)
 

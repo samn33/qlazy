@@ -376,7 +376,13 @@ MPStateクラスのfidelityメソッドを使います。使用例を以下に�
 	>>> ob.add_wpp(weight=1.0, pp=PauliPruduct('Z', [0]))
 	>>> ob.add_wpp(weight=2.0, pp=PauliPruduct('Z', [1]))
 
-のように作成することもできます。
+のように作成することもできます。あるいは、
+
+    >>> from qlazy.Observable import X, Y, Z
+	>>> ob = Z(0) + 2.0 * Z(1)
+	
+のように作成することもできます(詳細についてはObservableのドキュメント
+を参照してください)。
 
 現在の行列積状態がmpsで与えられているとすると、
 
