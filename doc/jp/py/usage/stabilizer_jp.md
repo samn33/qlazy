@@ -90,7 +90,7 @@ set_pauli_facメソッドを使います。例えば、
 
     >>> str_list = ["IIIXXXX", "IXXIIXX", "XIXIXIX", "IIIZZZZ", "IZZIIZZ", "ZIZIZIZ"]
     >>> pp_list = [PauliProduct(pauli_str=pp_str) for pp_str in str_list]
-    >>> sb = Stabilizer(pp_list=gene_list)
+    >>> sb = Stabilizer(pp_list=pp_list)
 	>>> sb.show()
     g[0]:  IIIXXXX
     g[1]:  IXXIIXX

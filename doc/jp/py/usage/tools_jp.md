@@ -61,7 +61,7 @@
     >>> cmem_num = InitRegister(cid)
 	>>> 
     >>> # 量子コンピュータ(バックエンド)の用意
-    >>> bk = Backend('qlazy_stabilizer_simulator')
+    >>> bk = Backend(product='qlazy', device='qstate_simulator')
 	>>> 
     >>> # 量子回路の設定と実行
     >>> qc = QCirc().h(qid[0]).cx(qid[0],qid[1]).measure(qid=qid[0], cid=cid[0])

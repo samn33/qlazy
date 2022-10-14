@@ -103,7 +103,7 @@ frq[xx]は、測定の結果、|xx>だった回数を表しています。測定
 のように、定義されているコマンドや使用可能な量子ゲートのリストを表示できます。
 各々の詳細は、helpの後に参照したいコマンドや量子ゲートの記号を入れると表示されます。
 
-    >> help X
+    >> help x
     == X gate ==
     [description]
       X gate is 1-qubit gate called 'pauli X gate'.
