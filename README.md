@@ -10,7 +10,7 @@ Quantum Computing Simulator
 - Simple quantum calculation using command line tool is possible.
 - Quantum state operation or quantum circuit execution is possible with Python package.
 - Support four types of quantum states: 1) quantum state vector, 2) density operator, 3) stabilizer state, 4) matrix product state.
-- Other quantum computing services or simulators can be used as backend (followings are supported).
+- Other quantum computing services or simulators can be used as backend (The followings are supported).
     - [qulacs](https://github.com/qulacs/qulacs)
     - [IBM Quantum(IBMQ)](https://quantum-computing.ibm.com/)
     - [Amazon Braket(LocalSimulator,AWS,IonQ,Rigetti,OQC)](https://aws.amazon.com/braket/?nc1=h_ls)
@@ -151,6 +151,7 @@ print help
 ## Documents
 
 - [Welcome to qlazy's documentations!](http://samn33.github.io/qlazy-docs/index.html)
+    - [Tutorial](http://samn33.github.io/qlazy-docs/Tutorial_en.html)
     - [Tutorial (japanese)](http://samn33.github.io/qlazy-docs/Tutorial_jp.html)
     - [Python API](http://samn33.github.io/qlazy-docs/python-api/qlazy.html)
 
