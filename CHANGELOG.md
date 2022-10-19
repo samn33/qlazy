@@ -1,5 +1,9 @@
 # Change Log
 
+## [0.3.3] - 2022-xx-xx
+### Added
+- get current version name from VERSION file when building the codes
+
 ## [0.3.2] - 2022-09-11
 ### Added
 - matrix product state simulation (MPState class and 'mps_simulator' as a backend)
