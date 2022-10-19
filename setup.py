@@ -4,8 +4,12 @@ import pathlib
 from setuptools import setup, find_packages, Extension
 from setuptools.command.build_ext import build_ext as build_ext_orig
 
-_VERSION = '0.3.2'
+with open("VERSION", "r") as fh:
+    _VERSION = fh.read().strip()
 
+with open("qlazy/lib/c/version.h", "w") as fh:
+    fh.write("#define VERSION " + '"' + _VERSION + '"')
+    
 class CMakeExtension(Extension):
 
     def __init__(self, name):
@@ -56,6 +60,7 @@ setup(
         # 'Qulacs>=0.3.0',
         # 'qiskit>=0.34.2',
         # 'amazon-braket-sdk>=1.18.0',
+        # 'tensornetwork>=0.4.6',
     ],
     license='Apache Software License',
     classifiers=[

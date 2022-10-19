@@ -22,6 +22,9 @@ INSTALL_INC_DIR = ~/include
 # defalut: GPU is not available
 GPU = no
 
+# get current version number
+CURRENT_VERSION=$$(cat VERSION)
+
 #===============================================================================
 # GPU available or not
 
@@ -78,9 +81,11 @@ $(PROG_OBJ): $(INC) $(PROG_SRC)
 $(LIB_OBJ): $(INC) $(LIB_SRC)
 
 cpu:
+	echo "#define VERSION \"$(CURRENT_VERSION)\"" > version.h;
 	make GPU=no
 
 gpu:
+	echo "#define VERSION \"$(CURRENT_VERSION)\"" > version.h;
 	make GPU=yes
 
 tags:
