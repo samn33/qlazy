@@ -160,13 +160,13 @@ print help
 - Linux (Ubuntu 20.04 LTS)
 - Python 3.8
 - numpy 1.21.0
+- tensornetwork 0.4.6
 
 Optional ...
 - pyzx 0.7.0 (to use quantum circuit optimization with ZX-calculus)
 - Qulacs 0.3.0 (to use qulacs backend)
 - qiskit 0.37.0 (to use IBMQ backend)
 - amazon-braket-sdk 1.25.2 (to use amazon braket backend)
-- tensornetwork 0.4.6 (to use matrix product state simulation)
 - cuda 11 (to use GPU version)
 
 ## Licence
