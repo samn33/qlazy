@@ -323,7 +323,8 @@ static bool _qstate_get_measured_char_gpu(QState* qstate, int mnum, int* qid, ch
     _qstate_update_prob_array_gpu(qstate);
   }
 
-  r = rand() / (double)RAND_MAX;
+  //  r = rand() / (double)RAND_MAX;
+  r = genrand_real1();
   idx = 0;
   for (i=0; i<qstate->qubit_num; i++) {
     up = 1 << (qstate->qubit_num - 1 - i);

@@ -1059,7 +1059,8 @@ static bool _qstate_get_measured_char(QState* qstate, int mnum, int* qid, char* 
     qstate->prob_updated = true;
   }
 
-  r = rand() / (double)RAND_MAX;
+  //r = rand() / (double)RAND_MAX;
+  r = genrand_real1();
   idx = 0;
   for (i=0; i<qstate->qubit_num; i++) {
     up = 1 << (qstate->qubit_num - 1 - i);

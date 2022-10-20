@@ -3,6 +3,8 @@
 ## [0.3.3] - 2022-xx-xx
 ### Added
 - get current version name from VERSION file when building the codes
+### Changed
+- random generation function of C codes to 'Mersenne Twister'
 
 ## [0.3.2] - 2022-09-11
 ### Added

@@ -20,7 +20,8 @@ libc = ctypes.CDLL(find_library("c"), mode=ctypes.RTLD_GLOBAL)
 def qstate_init(qubit_num=None, seed=None, use_gpu=False):
     """ initialize QState object """
 
-    libc.srand(ctypes.c_int(seed))
+    # libc.srand(ctypes.c_int(seed))
+    lib.init_genrand(ctypes.c_int(seed))
 
     qstate = None
     c_qstate = ctypes.c_void_p(qstate)

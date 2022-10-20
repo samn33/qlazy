@@ -40,7 +40,8 @@ bool stabilizer_init(int gene_num, int qubit_num, unsigned int seed, void** stab
   int		matrix_size = gene_num * qubit_num * 2;
   int		i;
 
-  srand(seed);
+  //  srand(seed);
+  init_genrand(seed);
 
   if ((qubit_num < 1) || (gene_num < 1))
     ERR_RETURN(ERROR_OUT_OF_BOUND,false);
@@ -734,7 +735,8 @@ bool stabilizer_measure(Stabilizer* stab, int q, double* prob_out, int* mval_out
       stab->check_matrix[not_commute_id*col+i] = measured_op[i];
     }
     
-    if (rand()%2 == 0) {
+    //if (rand()%2 == 0) {
+    if (genrand_int32()%2 == 0) {
       stab->pauli_factor[not_commute_id] = REAL_PLUS; /* Z(q) */
       *mval_out = 0;
     }

@@ -24,6 +24,7 @@
 #endif
 
 #include "version.h"
+#include "MT.h"
 
 /*====================================================================*/
 /*  Definitions & Macros                                              */
@@ -627,6 +628,16 @@ bool cmem_copy(CMem* cmem_in, void** cmem_out);
 bool cmem_get_bits(CMem* cmem, void** bits_out);
 bool cmem_set_bits(CMem* cmem, BYTE* bits, int num);
 void cmem_free(CMem* cmem);
+
+/* random.c */
+void init_genrand(unsigned long s);
+void init_by_array(unsigned long init_key[], int key_length);
+unsigned long genrand_int32(void);
+long genrand_int31(void);
+double genrand_real1(void);
+double genrand_real2(void);
+double genrand_real3(void);
+double genrand_res53(void);
 
 #ifdef USE_GPU
 
