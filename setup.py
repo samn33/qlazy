@@ -8,7 +8,7 @@ with open("VERSION", "r") as fh:
     _VERSION = fh.read().strip()
 
 with open("qlazy/lib/c/version.h", "w") as fh:
-    fh.write("#define VERSION " + '"' + _VERSION + '"')
+    fh.write("#define VERSION " + '"' + _VERSION + '"\n')
     
 class CMakeExtension(Extension):
 
