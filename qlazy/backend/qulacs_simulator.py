@@ -73,20 +73,21 @@ GateFunctionName = {
 def run_cpu(qcirc=None, shots=1, cid=None, backend=None, out_state=False):
     """ run the quantum circuit (CPU) """
 
-    return __run_all(qcirc=qcirc, shots=shots, cid=cid, backend=backend, proc='CPU',
+    return __run_all(qcirc_in=qcirc, shots=shots, cid=cid, backend=backend, proc='CPU',
                      out_state=out_state)
 
 def run_gpu(qcirc=None, shots=1, cid=None, backend=None, out_state=False):
     """ run the quantum circuit (GPU) """
 
-    return __run_all(qcirc=qcirc, shots=shots, cid=cid, backend=backend, proc='GPU',
+    return __run_all(qcirc_in=qcirc, shots=shots, cid=cid, backend=backend, proc='GPU',
                      out_state=out_state)
 
-def __run_all(qcirc=None, shots=1, cid=None, backend=None, proc='CPU', out_state=False):
+def __run_all(qcirc_in=None, shots=1, cid=None, backend=None, proc='CPU', out_state=False):
 
-    if qcirc is None:
+    if qcirc_in is None:
         raise ValueError("quantum circuit must be specified.")
-
+    qcirc = qcirc_in.clone()
+    
     qubit_num = qcirc.qubit_num
     cmem_num = qcirc.cmem_num
 
