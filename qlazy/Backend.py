@@ -5,6 +5,8 @@ import datetime
 
 from qlazy.util import read_config_ini
 from qlazy.gpu import is_gpu_available, is_gpu_supported_lib, gpu_preparation
+from qlazy.QCirc import QCirc
+from qlazy.ParametricQCirc import ParametricQCirc
 
 BACKEND_DEVICES = {'qlazy': ['qstate_simulator',
                              'stabilizer_simulator',
@@ -237,11 +239,11 @@ class Backend:
 
         Parameters
         ----------
-        qcirc : instance of QCirc, default None
+        qcirc : instance of QCirc or ParametricQCirc
             quantum circuit.
         shots : int, default 1
             number of measurements.
-        cid : list, default []
+        cid : list, default None
             classical register id list to count frequency.
         out_state : bool, default False
             output classical and quantum information after execting circuit.
@@ -273,6 +275,19 @@ class Backend:
         Counter({'00': 100})
 
         """
+        if not isinstance(qcirc, (QCirc, ParametricQCirc)):
+            raise TypeError("qcirc must be QCirc or ParamtricQCirc.")
+        if not isinstance(shots, int):
+            raise TypeError("shots must be int.")
+        if cid is not None and not isinstance(cid, list):
+            raise TypeError("cid must be list of int.")
+        elif cid is not None:
+            for x in cid:
+                if not isinstance(x, int):
+                    raise TypeError("cid must be list of int.")
+        if not isinstance(out_state, bool):
+            raise TypeError("out_state must be bool.")
+        
         start_time = datetime.datetime.now()
         result = self.__run(qcirc=qcirc, shots=shots, cid=cid, backend=self,
                             out_state=out_state, **kwargs)
