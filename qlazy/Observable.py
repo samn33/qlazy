@@ -225,7 +225,7 @@ class Observable:
             if wpp['weight'] != 0.0:
                 out.add_wpp(weight=wpp['weight'], pp=wpp['pp'])
 
-        if isinstance(other, Observable):
+        if isinstance(other, self.__class__):
             for wpp in other.weighted_pp_list:
                 if wpp['weight'] != 0.0:
                     out.add_wpp(weight=wpp['weight'], pp=wpp['pp'])
@@ -274,7 +274,7 @@ class Observable:
             if wpp['weight'] != 0.0:
                 out.add_wpp(weight=wpp['weight'], pp=wpp['pp'])
 
-        if isinstance(other, Observable):
+        if isinstance(other, self.__class__):
             for wpp in other.weighted_pp_list:
                 if wpp['weight'] != 0.0:
                     out.add_wpp(weight=-wpp['weight'], pp=wpp['pp'])
@@ -321,7 +321,7 @@ class Observable:
             observable (result)
 
         """
-        if isinstance(other, Observable):
+        if isinstance(other, self.__class__):
             out = Observable()
             for wpp_1 in self.weighted_pp_list:
                 for wpp_2 in other.weighted_pp_list:
