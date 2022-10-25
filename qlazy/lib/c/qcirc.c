@@ -347,6 +347,26 @@ bool qcirc_decompose(QCirc* qcirc_in, void** qcirc_uonly_out, void** qcirc_mixed
   SUC_RETURN(true);
 }
 
+bool qcirc_set_phase_list(QCirc* qcirc, double* phase_list)
+{
+  QGate*	gate = NULL;
+  int		cnt;
+
+  if (qcirc == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
+  
+  gate = qcirc->first;
+  cnt = 0;
+  while (gate != NULL) {
+    if (phase_list[cnt] != 0.0) {
+      gate->para[0] = phase_list[cnt];
+    }
+    gate = gate->next;
+    cnt++;
+  }
+  
+  SUC_RETURN(true);
+}
+
 void qcirc_free(QCirc* qcirc)
 {
   QGate* qgate = NULL;

@@ -161,6 +161,20 @@ def qcirc_pop_gate(qc):
 
     return (kind, qid, para, c, ctrl)
 
+def qcirc_set_phase_list(qcirc, phase_list):
+    """ set phase list """
+
+    phase_num = len(phase_list)
+    DoubleArray = ctypes.c_double * phase_num
+    c_phase_list = DoubleArray(*phase_list)
+
+    lib.qcirc_set_phase_list.restype = ctypes.c_bool
+    lib.qcirc_set_phase_list.argtypes = [ctypes.POINTER(QCirc), DoubleArray]
+    ret = lib.qcirc_set_phase_list(ctypes.byref(qcirc), c_phase_list)
+
+    if ret is False:
+        raise ValueError("can't set phase list.")
+
 def qcirc_free(qcirc):
     """ free memory of the QCirc object """
 

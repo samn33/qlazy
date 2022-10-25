@@ -3,8 +3,13 @@
 ## [0.3.3] - 2022-xx-xx
 ### Added
 - get current version name from VERSION file when building the codes
+- ParametricQCirc class for parametric quantum circuit
+- VQE example using parametric quantum circuit
+- QAOA example using parametric quantum circuit
 ### Changed
-- random generation function of C codes to 'Mersenne Twister'
+- random generation algorithm of C codes to 'Mersenne Twister'
+### Fixed
+- run method of qulacs backend
 
 ## [0.3.2] - 2022-09-11
 ### Added

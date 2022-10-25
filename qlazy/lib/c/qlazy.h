@@ -24,7 +24,6 @@
 #endif
 
 #include "version.h"
-#include "MT.h"
 
 /*====================================================================*/
 /*  Definitions & Macros                                              */
@@ -620,6 +619,7 @@ bool qcirc_append_gate(QCirc* qcirc, Kind kind, int* qid, double* para, int c, i
 bool qcirc_pop_gate(QCirc* qcirc, Kind* kind, int* qid, double* para, int* c, int* ctrl);
 bool qcirc_decompose(QCirc* qcirc_in, void** qcirc_uonly_out, void** qcirc_mixed_out,
 		     void** qcirc_monly_out);
+bool qcirc_set_phase_list(QCirc* qcirc, double* phase_list);
 void qcirc_free(QCirc* qcirc);
 
 /* cmem.c */
