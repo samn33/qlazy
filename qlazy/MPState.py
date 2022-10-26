@@ -1666,6 +1666,9 @@ class MPState(FiniteMPS):
         if ob.recalc_weight() is False:
             raise ValueError("Observable is not hermitian.")
 
+        if self.qubit_num < ob.qubit_num:
+            raise ValueError("total qubit number of the observable must be less than mpstate's.")
+
         expect_value = 0.0
         weighted_pp_list = ob.weighted_pp_list
         for wpp in weighted_pp_list:

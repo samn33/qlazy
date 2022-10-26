@@ -636,6 +636,9 @@ class QState(ctypes.Structure):
         if ob.recalc_weight() is False:
             raise ValueError("Observable is not hermitian.")
 
+        if self.qubit_num < ob.qubit_num:
+            raise ValueError("total qubit number of the observable must be less than qstate's.")
+
         expect = qstate_expect_value(self, observable=ob.base)
         return expect
 
