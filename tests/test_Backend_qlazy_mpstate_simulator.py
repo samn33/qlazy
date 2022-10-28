@@ -5,6 +5,7 @@ import numpy as np
 import sys
 
 from qlazy import QCirc, Backend, PauliProduct
+from qlazy.Observable import X,Y,Z
 
 EPS = 1.0e-6
 
@@ -865,6 +866,50 @@ class TestBackend_random_mps_simulator(unittest.TestCase):
         ans = equal_vectors(vec_mps, vec_qs)
         self.assertEqual(ans, True)
     
+#
+# expect
+#
+
+class TestBackend_expect_mps_simulator(unittest.TestCase):
+    """ test 'Backend' : expectation value
+    """
+
+    def test_1(self):
+        """test 'X(0)X(1)+X(1)X(2)/2'
+        """
+        ob = X(0)*X(1) + 0.5*X(1)*X(2)
+        bk = Backend(product='qlazy', device='mps_simulator')
+        qc = QCirc().h(0).h(1).h(2).h(3)
+        expval_1 = bk.expect(qcirc=qc, observable=ob, precise=True)
+        expval_2 = bk.expect(qcirc=qc, observable=ob, shots=10000)
+        self.assertEqual(expval_1.imag == 0.0, True)
+        self.assertEqual(expval_2.imag == 0.0, True)
+        self.assertEqual(abs(expval_1.real - expval_2.real) < 0.05, True)
+        
+    def test_2(self):
+        """test 'Y(0)Y(1)+Y(1)Y(2)/2'
+        """
+        ob = Y(0)*Y(1) + 0.5*Y(1)*Y(2)
+        bk = Backend(product='qlazy', device='mps_simulator')
+        qc = QCirc().h(0).h(1).h(2).h(3)
+        expval_1 = bk.expect(qcirc=qc, observable=ob, precise=True)
+        expval_2 = bk.expect(qcirc=qc, observable=ob, shots=10000)
+        self.assertEqual(expval_1.imag == 0.0, True)
+        self.assertEqual(expval_2.imag == 0.0, True)
+        self.assertEqual(abs(expval_1.real - expval_2.real) < 0.05, True)
+        
+    def test_3(self):
+        """test 'Z(0)Z(1)+Z(1)Z(2)/2'
+        """
+        ob = Z(0)*Z(1) + 0.5*Z(1)*Z(2)
+        bk = Backend(product='qlazy', device='mps_simulator')
+        qc = QCirc().h(0).h(1).h(2).h(3)
+        expval_1 = bk.expect(qcirc=qc, observable=ob, precise=True)
+        expval_2 = bk.expect(qcirc=qc, observable=ob, shots=10000)
+        self.assertEqual(expval_1.imag == 0.0, True)
+        self.assertEqual(expval_2.imag == 0.0, True)
+        self.assertEqual(abs(expval_1.real - expval_2.real) < 0.05, True)
+
 #
 # inheritance
 #

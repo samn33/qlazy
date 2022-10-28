@@ -1,6 +1,7 @@
 from qlazy import QCirc, Backend
+from qlazy.Observable import X,Y,Z
 
-def main():
+def real_qc_run():
 
     shots = 100
     qc = QCirc()
@@ -32,6 +33,32 @@ def main():
     result = bk.run(qcirc=qc, shots=shots)
     result.show(verbose=True)
 
+def real_qc_expect():
+
+    ob = 0.5*X(0)*X(1)
+    qc = QCirc().h(0).h(1).h(2).h(3)
+
+    bk = Backend()  # OK
+
+    # bk = Backend(product='ibmq', device='aer_simulator') # OK
+    # bk = Backend(product='ibmq', device='qasm_simulator') # OK
+    # bk = Backend(product='qulacs', device='cpu_simulator') # OK
+
+    # bk = Backend(product='braket_local', device='braket_sv') # OK
+    # bk = Backend(product='braket_aws', device='sv1') # OK
+    # bk = Backend(product='braket_aws', device='tn1') # OK
+    # bk = Backend(product='braket_aws', device='dm1') # OK
+
+    # bk = Backend(product='braket_ionq', device='ionq') # OK
+    # bk = Backend(product='braket_rigetti', device='aspen_11')
+    # bk = Backend(product='braket_rigetti', device='aspen_m_1') # OK
+    # bk = Backend(product='braket_oqc', device='lucy') # OK
+
+    print("* exp (theoretical) = 0.5+0.j")
+    expval = bk.expect(qcirc=qc, observable=ob, shots=1000)
+    print("* exp (real qc)     = {}".format(expval))
+
 if __name__ == '__main__':
 
-    main()
+    # real_qc_run()
+    real_qc_expect()

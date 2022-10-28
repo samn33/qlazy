@@ -65,6 +65,8 @@ class Observable:
         ex) "-2.0+Z_0*Z_1+X_0+X_1" for 2-qubit system
     weighted_pp_list : list of dict ({'weight':weight, 'pp':pauli_product})
         weighted pauli product list
+    qubit_num : int
+        total qubit number
 
     """
     def __init__(self, string=None):
@@ -676,3 +678,27 @@ class Observable:
                 self.weighted_pp_list[i]['weight'] = w
 
         return self
+
+    @property
+    def qubit_num(self):
+        return self.get_qubit_num()
+
+    def get_qubit_num(self):
+        """
+        get the total qubit number considerd
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        qubit_num : inst
+            total qubit number considerd by the observable.
+
+        """
+        qubit_num = 0
+        for wpp in self.weighted_pp_list:
+            qubit_num = max(qubit_num, wpp['pp'].get_qubit_num())
+
+        return qubit_num

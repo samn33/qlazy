@@ -6,6 +6,7 @@ import datetime
 from qlazy.util import read_config_ini
 from qlazy.gpu import is_gpu_available, is_gpu_supported_lib, gpu_preparation
 from qlazy.QCirc import QCirc
+from qlazy.Observable import Observable
 from qlazy.ParametricQCirc import ParametricQCirc
 
 BACKEND_DEVICES = {'qlazy': ['qstate_simulator',
@@ -298,3 +299,116 @@ class Backend:
         result.elapsed_time = (end_time - start_time).total_seconds()
 
         return result
+
+    def _get_expectation_value_by_calculation(self, qcirc, observable, state='qstate'):
+        """ estimate expectation value by calcu """
+
+        if state == 'qstate' or state == 'mpstate':
+            result = self.run(qcirc=qcirc, out_state=True)
+        else:
+            raise ValueError("state must be 'qstate' or 'mpstate'.")
+
+        if state == 'qstate':
+            expval = result.qstate.expect(observable=observable)
+        elif state == 'mpstate':
+            expval = result.mpstate.expect(observable=observable)
+        return expval
+
+    def _get_expectation_value_by_measurement(self, qcirc, observable, shots):
+        """ estimate expectation value by measurements """
+
+        expval = 0.+0.j
+        for wpp in observable.weighted_pp_list:
+            qid = []
+            qc_pp = QCirc()
+            for q, pstr in zip(wpp['pp'].qid, wpp['pp'].pauli_list):
+                if pstr == 'X':
+                    qid.append(q)
+                    qc_pp.h(q)
+                elif pstr == 'Y':
+                    qid.append(q)
+                    qc_pp.rx(q, phase=0.5)
+                elif pstr == 'Z':
+                    qid.append(q)
+
+            cid = qid[:]
+            qc = qcirc + qc_pp
+            qc.measure(qid=qid, cid=cid)
+            fac = wpp['weight'] * wpp['pp'].factor  # complex (imaginary is zero, maybe)
+
+            result = self.run(qcirc=qc, shots=shots)
+            freq = result.frequency
+            
+            n_even = 0
+            n_odd = 0
+            for m, f in freq.items():
+                if sum(list(map(int, list(m)))) % 2 == 0:
+                    n_even += f
+                else:
+                    n_odd += f
+
+            expval += fac * (n_even - n_odd) / (n_even + n_odd)
+
+        return expval
+
+    def expect(self, qcirc=None, observable=None, shots=None, precise=False):
+        """
+        run the quantum circuit.
+
+        Parameters
+        ----------
+        qcirc : instance of QCirc or ParametricQCirc
+            quantum circuit.
+        observable : instance of Observable
+            obserbable considerd.
+        shots : int, default - None
+            number of measurements for estimating the expectation value.
+        precise : bool, default - False
+            precise calculation (only qlazy and qulacs) or estimation by measurements.
+
+        Returns
+        -------
+        expval : complex
+            expectation value
+
+        Examples
+        --------
+        >>> # simple example
+        >>> from qlazy import QCirc, Backend
+        >>> from qlazy.Observable import X,Y,Z
+        >>> bk = Backend(product='qlazy', device='qstate_simulator')
+        >>> ob = Z(0)*X(1)
+        >>> qc = QCirc().h(0).cx(0,1)
+        >>> exp = bk.expect(qcirc=qc, shots=10000, observable=ob)
+        >>> print(exp.real)
+        >>> 0.0074
+
+        """
+        if not isinstance(qcirc, (QCirc, ParametricQCirc)):
+            raise TypeError("qcirc must be QCirc or ParamtricQCirc.")
+        if not isinstance(observable, Observable):
+            raise TypeError("observable must be Observable.")
+        if not observable.is_hermitian():
+            raise ValueError("the observable must be a hermitian.")
+        if qcirc.qubit_num < observable.qubit_num:
+            raise ValueError("total qubit number of the observable must be less than qcirc's.")
+
+        if precise is True:
+            if self.product == 'qlazy':
+                if self.device == 'qstate_simulator':
+                    expval = self._get_expectation_value_by_calculation(qcirc, observable, state='qstate')
+                elif self.device == 'mps_simulator':
+                    expval = self._get_expectation_value_by_calculation(qcirc, observable, state='mpstate')
+                else:
+                    raise ValueError("device must be 'qstate_simulator' or 'mps_simulator'.")
+            elif self.product == 'qulacs':
+                expval = self._get_expectation_value_by_calculation(qcirc, observable, state='qstate')
+            else:
+                raise ValueError("product must be qlazy or qulacs.")
+        else:
+            if isinstance(shots, int):
+                expval = self._get_expectation_value_by_measurement(qcirc, observable, shots)
+            else:
+                raise ValueError("shots must be set as int.")
+
+        return expval

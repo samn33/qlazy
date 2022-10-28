@@ -11,6 +11,8 @@ class PauliProduct:
         list of qubit id.
     pauli_list : list of str
         list of pauli operators.
+    factor : complex
+        factor of pauli product.
 
     """
     def __init__(self, pauli_str, qid=None, factor=1.+0.j):
@@ -304,3 +306,19 @@ class PauliProduct:
         pp_out = self.__class__(pauli_str=pauli_str, qid=qid)
 
         return pp_out
+
+    def get_qubit_num(self):
+        """
+        get the total qubit number considerd
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        qubit_num : inst
+            total qubit number considerd by the pauli product.
+
+        """
+        return max(self.qid) + 1
