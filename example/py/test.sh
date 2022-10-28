@@ -10,6 +10,7 @@ directories=(
     QFT
     PEA
     VQE
+    QAOA
     DeutschJozsa
     LogicalFunction
     Arithmetic
