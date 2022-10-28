@@ -6,6 +6,7 @@
 - ParametricQCirc class for parametric quantum circuit
 - VQE example using parametric quantum circuit
 - QAOA example using parametric quantum circuit
+- expect method of Backend class to get an expectation value
 ### Changed
 - random generation algorithm of C codes to 'Mersenne Twister'
 ### Fixed
