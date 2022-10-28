@@ -1,0 +1,1080 @@
+import unittest
+import math
+import numpy as np
+import pyzx as zx
+
+from pyzx import Circuit
+from qlazy import QState, QCirc, ParametricQCirc, Backend, PauliProduct
+from qlazy.config import *
+
+EPS = 1.0e-6
+
+def equal_or_not(qs_A, qs_B):
+
+    fid = qs_A.fidelity(qs_B)
+    if abs(fid - 1.0) < EPS:
+        return True
+    else:
+        return False
+
+def valid_or_not(qc):
+
+    bk = Backend(product='ibmq', device='aer_simulator')
+    res = bk.run(qcirc=qc)
+    qasm_A = res.info['quantum_circuit'].qasm()
+    qasm_B = qc.to_qasm()
+    circ_A = Circuit.from_qasm(qasm_A)
+    circ_B = Circuit.from_qasm(qasm_B)
+    ans = circ_A.verify_equality(circ_B)
+    return ans
+
+class MyParametricQCirc(QCirc):
+
+    def __init__(self, name=None):
+        super().__init__()
+        self.name = name
+
+    def get_name(self):
+        return self.name
+    
+    def bell(self, q0, q1):
+        self.h(q0).cx(q0,q1)
+        return self
+
+class TestParametricQCirc_new(unittest.TestCase):
+    """ test 'ParametricQCirc' : '__new__'
+    """
+
+    def test_init(self):
+        """test '__new__'
+        """
+        qc = QCirc()
+        self.assertEqual(qc.qubit_num, 0)
+        self.assertEqual(qc.cmem_num, 0)
+        self.assertEqual(qc.gate_num, 0)
+
+class TestParametricQCirc_append_gate(unittest.TestCase):
+    """ test 'ParametricQCirc' : 'append_gate'
+    """
+
+    def test_append_gate_simple(self):
+        """test 'append_gate' (simple)
+        """
+        qc = ParametricQCirc().h(0).cx(0,1).rx(3, phase=0.1)
+        self.assertEqual(qc.qubit_num, 4)
+        self.assertEqual(qc.cmem_num, 0)
+        self.assertEqual(qc.gate_num, 3)
+        
+    def test_append_gate_with_cid(self):
+        """test 'append_gate' (with cid)
+        """
+        qc = ParametricQCirc().h(0).cx(0,1).rx(3, phase=0.1).measure(qid=[0,5], cid=[1,2]) 
+        self.assertEqual(qc.qubit_num, 6)
+        self.assertEqual(qc.cmem_num, 3)
+        self.assertEqual(qc.gate_num, 5)
+       
+    def test_append_gate_with_cid(self):
+        """test 'append_gate' (with ctrl)
+        """
+        qc = ParametricQCirc().h(0).cx(0,1, ctrl=5).rx(3, phase=0.1)
+        self.assertEqual(qc.qubit_num, 4)
+        self.assertEqual(qc.cmem_num, 6)
+        self.assertEqual(qc.gate_num, 3)
+        
+
+class TestParametricQCirc_is_equal(unittest.TestCase):
+    """ test 'ParametricQCirc' : 'is_equal'
+    """
+
+    def test_is_equal(self):
+        """test 'is_equal'
+        """
+        qc_L = ParametricQCirc().h(0).cx(0,1).rx(1, phase=0.2)
+        qc_R = ParametricQCirc().crx(0, 1, phase=0.3).measure(qid=[0,1,2], cid=[0,1,2])
+        qc_L_clone = qc_L.clone()
+        ans = (qc_L == qc_R)
+        self.assertEqual(qc_L == qc_R, False)
+        self.assertEqual(qc_R != qc_L, True)
+        self.assertEqual(qc_L == qc_L_clone, True)
+        self.assertEqual(qc_L != qc_L_clone, False)
+
+class TestParametricQCirc_merge(unittest.TestCase):
+    """ test 'ParametricQCirc' : 'merge'
+    """
+
+    def test_merge_2terms(self):
+        """test 'merge' (2 terms)
+        """
+        qc_L = ParametricQCirc().h(0).cx(0,1).rx(1, phase=0.2)
+        qc_R = ParametricQCirc().crx(0, 1, phase=0.3).measure(qid=[0,1,2], cid=[0,1,2])
+        qc_LR = ParametricQCirc().h(0).cx(0,1).rx(1, phase=0.2).crx(0, 1, phase=0.3).measure(qid=[0,1,2], cid=[0,1,2])
+        self.assertEqual(qc_L + qc_R == qc_LR, True)
+        self.assertEqual(qc_R + qc_L == qc_LR, False)
+        
+    def test_merge_3terms(self):
+        """test 'merge' (2 terms)
+        """
+        qc_1 = ParametricQCirc().h(0).cx(0,1).rx(1, phase=0.2)
+        qc_2 = ParametricQCirc().cry(0, 1, phase=0.3).measure(qid=[0,1,2], cid=[0,1,2])
+        qc_3 = ParametricQCirc().x(0).z(5)
+        qc_123 = ParametricQCirc().h(0).cx(0,1).rx(1, phase=0.2).cry(0, 1, phase=0.3).measure(qid=[0,1,2], cid=[0,1,2]).x(0).z(5)
+        self.assertEqual(qc_1 + qc_2 + qc_3 == qc_123, True)
+        
+    def test_merge_incremental(self):
+        """test 'merge' (incremental)
+        """
+        qc_1 = ParametricQCirc().h(0).cx(0,1).rx(1, phase=0.2)
+        qc_2 = ParametricQCirc().cry(0, 1, phase=0.3).measure(qid=[0,1,2], cid=[0,1,2])
+        qc_3 = ParametricQCirc().x(0).z(5)
+        qc_expect = ParametricQCirc().h(0).cx(0,1).rx(1, phase=0.2).cry(0, 1, phase=0.3).measure(qid=[0,1,2], cid=[0,1,2]).x(0).z(5)
+        qc_actual = qc_1.clone()
+        qc_actual += qc_2
+        qc_actual += qc_3
+        self.assertEqual(qc_actual == qc_expect, True)
+        
+class TestParametricQCirc_kind_first(unittest.TestCase):
+    """ test 'ParametricQCirc' : 'kind_first'
+    """
+
+    def test_kind_first(self):
+        """test 'kind_first'
+        """
+        qc_L = ParametricQCirc().h(0).cx(0,1).rx(1, phase=0.2)
+        qc_R = ParametricQCirc().crz(0, 1, phase=0.3).measure(qid=[0,1,2], cid=[0,1,2])
+        qc_LR = ParametricQCirc().h(0).cx(0,1).rx(1, phase=0.2).cry(0, 1, phase=0.3).measure(qid=[0,1,2], cid=[0,1,2])
+        self.assertEqual(qc_L.kind_first(), HADAMARD)
+        self.assertEqual(qc_R.kind_first(), CONTROLLED_RZ)
+        self.assertEqual(qc_LR.kind_first(), HADAMARD)
+
+class TestParametricQCirc_pop_gate(unittest.TestCase):
+    """ test 'ParametricQCirc' : 'pop_gate'
+    """
+
+    def test_pop_gate_not_update(self):
+        """test 'pop_gate' (not update)
+        """
+        qc = ParametricQCirc().h(0).cx(0,1).rx(1, phase=0.2).crz(0, 1, phase=0.3).measure(qid=[0,1,2], cid=[0,1,2])
+        self.assertEqual(qc.qubit_num, 3)
+        self.assertEqual(qc.cmem_num, 3)
+        self.assertEqual(qc.gate_num, 7)
+        (kind, qid, para, c, ctrl) = qc.pop_gate()
+        self.assertEqual(kind, HADAMARD)
+        self.assertEqual(qid, [0,-1])
+        self.assertEqual(para, [0.0,0.0,0.0])
+        self.assertEqual(c, None)
+        self.assertEqual(ctrl, None)
+        self.assertEqual(qc.qubit_num, 3)
+        self.assertEqual(qc.cmem_num, 3)
+        self.assertEqual(qc.gate_num, 6)
+
+    def test_pop_gate_updte(self):
+        """test 'pop_gate' (update)
+        """
+        qc = ParametricQCirc().h(5, ctrl=6).cx(0,1).rx(1, phase=0.2).crz(0, 1, phase=0.3).measure(qid=[0,1,2], cid=[0,1,2])
+        self.assertEqual(qc.qubit_num, 6)
+        self.assertEqual(qc.cmem_num, 7)
+        self.assertEqual(qc.gate_num, 7)
+        (kind, qid, para, c, ctrl) = qc.pop_gate()
+        self.assertEqual(kind, HADAMARD)
+        self.assertEqual(qid, [5,-1])
+        self.assertEqual(para, [0.0,0.0,0.0])
+        self.assertEqual(c, None)
+        self.assertEqual(ctrl, 6)
+        self.assertEqual(qc.qubit_num, 3)
+        self.assertEqual(qc.cmem_num, 3)
+        self.assertEqual(qc.gate_num, 6)
+
+#
+# export OpenQASM
+#
+
+class TestParametricQCirc_to_qasm(unittest.TestCase):
+    """ test 'ParametricQCirc' : 'to_qasm'
+    """
+
+    def test_x(self):
+        """test x
+        """
+        qc = ParametricQCirc().x(0)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
+        qs_B = QState(qubit_num=qc.qubit_num).x(0)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+        
+    def test_y(self):
+        """test y
+        """
+        qc = ParametricQCirc().y(0)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
+        qs_B = QState(qubit_num=qc.qubit_num).y(0)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+        
+    def test_z(self):
+        """test z
+        """
+        qc = ParametricQCirc().z(0)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
+        qs_B = QState(qubit_num=qc.qubit_num).z(0)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+        
+    def test_xr(self):
+        """test xr
+        """
+        qc = ParametricQCirc().xr(0)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
+        qs_B = QState(qubit_num=qc.qubit_num).xr(0)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+        
+    def test_xr_dg(self):
+        """test xr_dg
+        """
+        qc = ParametricQCirc().xr_dg(0)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
+        qs_B = QState(qubit_num=qc.qubit_num).xr_dg(0)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+        
+    def test_h(self):
+        """test h
+        """
+        qc = ParametricQCirc().h(0)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
+        qs_B = QState(qubit_num=qc.qubit_num).h(0)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+        
+    def test_s(self):
+        """test s
+        """
+        qc = ParametricQCirc().s(0)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
+        qs_B = QState(qubit_num=qc.qubit_num).s(0)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+        
+    def test_s_dg(self):
+        """test s_dg
+        """
+        qc = ParametricQCirc().s_dg(0)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
+        qs_B = QState(qubit_num=qc.qubit_num).s_dg(0)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+        
+    def test_t(self):
+        """test t
+        """
+        qc = ParametricQCirc().t(0)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
+        qs_B = QState(qubit_num=qc.qubit_num).t(0)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+        
+    def test_t_dg(self):
+        """test t_dg
+        """
+        qc = ParametricQCirc().t_dg(0)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
+        qs_B = QState(qubit_num=qc.qubit_num).t_dg(0)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+        
+    def test_p(self):
+        """test p
+        """
+        qc = ParametricQCirc().p(0, phase=0.1)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
+        qs_B = QState(qubit_num=qc.qubit_num).p(0, phase=0.1)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+        
+    def test_rx(self):
+        """test rx
+        """
+        qc = ParametricQCirc().rx(0, phase=0.1)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
+        qs_B = QState(qubit_num=qc.qubit_num).rx(0, phase=0.1)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+        
+    def test_ry(self):
+        """test ry
+        """
+        qc = ParametricQCirc().ry(0, phase=0.1)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
+        qs_B = QState(qubit_num=qc.qubit_num).ry(0, phase=0.1)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+        
+    def test_rz(self):
+        """test rz
+        """
+        qc = ParametricQCirc().rz(0, phase=0.1)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
+        qs_B = QState(qubit_num=qc.qubit_num).rz(0, phase=0.1)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+    
+    def test_cx(self):
+        """test cx
+        """
+        qc = ParametricQCirc().cx(0,1)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
+        qs_B = QState(qubit_num=qc.qubit_num).cx(0,1)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+    
+    def test_cy(self):
+        """test cy
+        """
+        qc = ParametricQCirc().cy(0,1)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
+        qs_B = QState(qubit_num=qc.qubit_num).cy(0,1)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+    
+    def test_cz(self):
+        """test cz
+        """
+        qc = ParametricQCirc().cz(0,1)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
+        qs_B = QState(qubit_num=qc.qubit_num).cz(0,1)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+    
+    def test_cxr(self):
+        """test cxr
+        """
+        qc = ParametricQCirc().cxr(0,1)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
+        qs_B = QState(qubit_num=qc.qubit_num).cxr(0,1)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+    
+    def test_cxr_2(self):
+        """test cxr (2)
+        """
+        qc = ParametricQCirc().h(0).cxr(0,1)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
+        qs_B = QState(qubit_num=qc.qubit_num).h(0).cxr(0,1)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+    
+    def test_cxr_dg(self):
+        """test cxr_dg
+        """
+        qc = ParametricQCirc().cxr_dg(0,1)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
+        qs_B = QState(qubit_num=qc.qubit_num).cxr_dg(0,1)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+    
+    def test_ch(self):
+        """test ch
+        """
+        qc = ParametricQCirc().ch(0,1)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
+        qs_B = QState(qubit_num=qc.qubit_num).ch(0,1)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+    
+    def test_cs(self):
+        """test cs
+        """
+        qc = ParametricQCirc().cs(0,1)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
+        qs_B = QState(qubit_num=qc.qubit_num).cs(0,1)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+    
+    def test_cs_dg(self):
+        """test cs_dg
+        """
+        qc = ParametricQCirc().cs_dg(0,1)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
+        qs_B = QState(qubit_num=qc.qubit_num).cs_dg(0,1)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+    
+    def test_ct(self):
+        """test ct
+        """
+        qc = ParametricQCirc().ct(0,1)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
+        qs_B = QState(qubit_num=qc.qubit_num).ct(0,1)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+    
+    def test_ct_dg(self):
+        """test ct_dg
+        """
+        qc = ParametricQCirc().ct_dg(0,1)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
+        qs_B = QState(qubit_num=qc.qubit_num).ct_dg(0,1)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+    
+    def test_cp(self):
+        """test cp
+        """
+        qc = ParametricQCirc().cp(0,1, phase=0.1)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
+        qs_B = QState(qubit_num=qc.qubit_num).cp(0,1, phase=0.1)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+    
+    def test_crx(self):
+        """test crx
+        """
+        qc = ParametricQCirc().crx(0,1, phase=0.1)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
+        qs_B = QState(qubit_num=qc.qubit_num).crx(0,1, phase=0.1)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+    
+    def test_cry(self):
+        """test cry
+        """
+        qc = ParametricQCirc().cry(0,1, phase=0.1)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
+        qs_B = QState(qubit_num=qc.qubit_num).cry(0,1, phase=0.1)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+    
+    def test_crz(self):
+        """test crz
+        """
+        qc = ParametricQCirc().crz(0,1, phase=0.1)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
+        qs_B = QState(qubit_num=qc.qubit_num).crz(0,1, phase=0.1)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+    
+    def test_rxx(self):
+        """test rxx
+        """
+        qc = ParametricQCirc().rxx(0,1, phase=0.1)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
+        qs_B = QState(qubit_num=qc.qubit_num).rxx(0,1, phase=0.1)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+    
+    def test_ryy(self):
+        """test ryy
+        """
+        qc = ParametricQCirc().ryy(0,1, phase=0.1)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
+        qs_B = QState(qubit_num=qc.qubit_num).ryy(0,1, phase=0.1)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+    
+    def test_rzz(self):
+        """test rzz
+        """
+        qc = ParametricQCirc().rzz(0,1, phase=0.1)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
+        qs_B = QState(qubit_num=qc.qubit_num).rzz(0,1, phase=0.1)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+    
+    def test_sw(self):
+        """test sw
+        """
+        qc = ParametricQCirc().sw(0,1)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
+        qs_B = QState(qubit_num=qc.qubit_num).sw(0,1)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+    
+    def test_ccx(self):
+        """test ccx
+        """
+        qc = ParametricQCirc().ccx(0,1,2)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
+        qs_B = QState(qubit_num=qc.qubit_num).ccx(0,1,2)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+    
+    def test_csw(self):
+        """test csw
+        """
+        qc = ParametricQCirc().csw(0,1,2)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
+        qs_B = QState(qubit_num=qc.qubit_num).csw(0,1,2)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+    
+    def test_many_unitary_gates(self):
+        """test many unitary gates
+        """
+        qc = ParametricQCirc().h(0).cx(0,1).crx(1,0, phase=0.1).csw(0,1,2)
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc, out_state=True).qstate
+        qs_B = QState(qubit_num=qc.qubit_num).h(0).cx(0,1).crx(1,0, phase=0.1).csw(0,1,2)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        self.assertEqual(valid_or_not(qc), True)
+    
+    def test_measure(self):
+        """test measure
+        """
+        qc = ParametricQCirc().measure(qid=[0,1], cid=[0,1])
+        self.assertEqual(valid_or_not(qc), True)
+    
+    def test_reset(self):
+        """test reset
+        """
+        qc = ParametricQCirc().reset(qid=[0,1])
+        actual = qc.to_qasm()
+        expect = """OPENQASM 2.0;\ninclude "qelib1.inc";\nqreg q[2];\nreset q[0];\nreset q[1];"""
+        self.assertEqual(actual, expect)
+
+#
+# import OpenQASM
+#
+
+class TestParametricQCirc_from_qasm(unittest.TestCase):
+    """ test 'ParametricQCirc' : 'from_qasm'
+    """
+
+    def test_x(self):
+        """test x
+        """
+        qc_A = ParametricQCirc().x(0)
+        str_A = qc_A.to_qasm()
+        qc_B = ParametricQCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+
+    def test_y(self):
+        """test y
+        """
+        qc_A = ParametricQCirc().y(0)
+        str_A = qc_A.to_qasm()
+        qc_B = ParametricQCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+        
+    def test_z(self):
+        """test z
+        """
+        qc_A = ParametricQCirc().z(0)
+        str_A = qc_A.to_qasm()
+        qc_B = ParametricQCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+        
+    def test_xr(self):
+        """test xr
+        """
+        qc_A = ParametricQCirc().xr(0)
+        str_A = qc_A.to_qasm()
+        qc_B = ParametricQCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+        
+    def test_xr_dg(self):
+        """test xr_dg
+        """
+        qc_A = ParametricQCirc().xr_dg(0)
+        str_A = qc_A.to_qasm()
+        qc_B = ParametricQCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+        
+    def test_h(self):
+        """test h
+        """
+        qc_A = ParametricQCirc().h(0)
+        str_A = qc_A.to_qasm()
+        qc_B = ParametricQCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+        
+    def test_s(self):
+        """test s
+        """
+        qc_A = ParametricQCirc().s(0)
+        str_A = qc_A.to_qasm()
+        qc_B = ParametricQCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+        
+    def test_s_dg(self):
+        """test s_dg
+        """
+        qc_A = ParametricQCirc().s_dg(0)
+        str_A = qc_A.to_qasm()
+        qc_B = ParametricQCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+        
+    def test_t(self):
+        """test t
+        """
+        qc_A = ParametricQCirc().t(0)
+        str_A = qc_A.to_qasm()
+        qc_B = ParametricQCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+        
+    def test_t_dg(self):
+        """test t_dg
+        """
+        qc_A = ParametricQCirc().t_dg(0)
+        str_A = qc_A.to_qasm()
+        qc_B = ParametricQCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+        
+    def test_p(self):
+        """test p
+        """
+        qc_A = ParametricQCirc().p(0, phase=0.1)
+        str_A = qc_A.to_qasm()
+        qc_B = ParametricQCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+        
+    def test_rx(self):
+        """test rx
+        """
+        qc_A = ParametricQCirc().rx(0, phase=0.1)
+        str_A = qc_A.to_qasm()
+        qc_B = ParametricQCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+        
+    def test_ry(self):
+        """test ry
+        """
+        qc_A = ParametricQCirc().ry(0, phase=0.1)
+        str_A = qc_A.to_qasm()
+        qc_B = ParametricQCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+        
+    def test_rz(self):
+        """test rz
+        """
+        qc_A = ParametricQCirc().rz(0, phase=0.1)
+        str_A = qc_A.to_qasm()
+        qc_B = ParametricQCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+    
+    def test_cx(self):
+        """test cx
+        """
+        qc_A = ParametricQCirc().cx(0,1)
+        str_A = qc_A.to_qasm()
+        qc_B = ParametricQCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+    
+    def test_cy(self):
+        """test cy
+        """
+        qc_A = ParametricQCirc().cy(0,1)
+        str_A = qc_A.to_qasm()
+        qc_B = ParametricQCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+    
+    def test_cz(self):
+        """test cz
+        """
+        qc_A = ParametricQCirc().cz(0,1)
+        str_A = qc_A.to_qasm()
+        qc_B = ParametricQCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+    
+    def test_cxr(self):
+        """test cxr
+        """
+        qc_A = ParametricQCirc().cxr(0,1)
+        str_A = qc_A.to_qasm()
+        qc_B = ParametricQCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+    
+    def test_cxr_2(self):
+        """test cxr (2)
+        """
+        qc_A = ParametricQCirc().h(0).cxr(0,1)
+        str_A = qc_A.to_qasm()
+        qc_B = ParametricQCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+    
+    def test_cxr_dg(self):
+        """test cxr_dg
+        """
+        qc_A = ParametricQCirc().cxr_dg(0,1)
+        str_A = qc_A.to_qasm()
+        qc_B = ParametricQCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+    
+    def test_ch(self):
+        """test ch
+        """
+        qc_A = ParametricQCirc().ch(0,1)
+        str_A = qc_A.to_qasm()
+        qc_B = ParametricQCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+    
+    def test_cs(self):
+        """test cs
+        """
+        qc_A = ParametricQCirc().cs(0,1)
+        str_A = qc_A.to_qasm()
+        qc_B = ParametricQCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+    
+    def test_cs_dg(self):
+        """test cs_dg
+        """
+        qc_A = ParametricQCirc().cs_dg(0,1)
+        str_A = qc_A.to_qasm()
+        qc_B = ParametricQCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+    
+    def test_ct(self):
+        """test ct
+        """
+        qc_A = ParametricQCirc().ct(0,1)
+        str_A = qc_A.to_qasm()
+        qc_B = ParametricQCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+    
+    def test_ct_dg(self):
+        """test ct_dg
+        """
+        qc_A = ParametricQCirc().ct_dg(0,1)
+        str_A = qc_A.to_qasm()
+        qc_B = ParametricQCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+    
+    def test_cp(self):
+        """test cp
+        """
+        qc_A = ParametricQCirc().cp(0,1, phase=0.1)
+        str_A = qc_A.to_qasm()
+        qc_B = ParametricQCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+    
+    def test_crx(self):
+        """test crx
+        """
+        qc_A = ParametricQCirc().crx(0,1, phase=0.1)
+        str_A = qc_A.to_qasm()
+        qc_B = ParametricQCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+    
+    def test_cry(self):
+        """test cry
+        """
+        qc_A = ParametricQCirc().cry(0,1, phase=0.1)
+        str_A = qc_A.to_qasm()
+        qc_B = ParametricQCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+    
+    def test_crz(self):
+        """test crz
+        """
+        qc_A = ParametricQCirc().crz(0,1, phase=0.1)
+        str_A = qc_A.to_qasm()
+        qc_B = ParametricQCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+    
+    def test_sw(self):
+        """test sw
+        """
+        qc_A = ParametricQCirc().sw(0,1)
+        str_A = qc_A.to_qasm()
+        qc_B = ParametricQCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+    
+    def test_ccx(self):
+        """test ccx
+        """
+        qc_A = ParametricQCirc().ccx(0,1,2)
+        str_A = qc_A.to_qasm()
+        qc_B = ParametricQCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+    
+    def test_csw(self):
+        """test csw
+        """
+        qc_A = ParametricQCirc().csw(0,1,2)
+        str_A = qc_A.to_qasm()
+        qc_B = ParametricQCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+    
+    def test_many_unitary_gates(self):
+        """test many unitary gates
+        """
+        qc_A = ParametricQCirc().h(0).cx(0,1).crx(1,0, phase=0.1).csw(0,1,2)
+        str_A = qc_A.to_qasm()
+        qc_B = ParametricQCirc.from_qasm(str_A)
+        str_B = qc_B.to_qasm()
+        self.assertEqual(str_A, str_B)
+
+class TestParametricQCirc_get_stats(unittest.TestCase):
+    """ test 'QCirc' : get_stats
+    """
+
+    def test_get_stats(self):
+        """test get_stats
+        """
+        qc = ParametricQCirc().x(0).z(2).h(0).h(0).cx(0,1).h(0).h(1).crz(1,0, phase=0.1).rx(1, phase=0.2)
+        qc.measure(qid=[0,1], cid=[0,1]).reset(qid=[0])
+        stats = qc.get_stats()
+        self.assertEqual(stats['qubit_num'], 3)
+        self.assertEqual(stats['gate_num'], 12)
+        self.assertEqual(stats['gate_freq']['h'], 4)
+        self.assertEqual(stats['gate_freq']['x'], 1)
+        self.assertEqual(stats['gate_freq']['z'], 1)
+        self.assertEqual(stats['gate_freq']['cx'], 1)
+        self.assertEqual(stats['gate_freq']['crz'], 1)
+        self.assertEqual(stats['gate_freq']['rx'], 1)
+        self.assertEqual(stats['gate_freq']['measure'], 2)
+        self.assertEqual(stats['gate_freq']['reset'], 1)
+        self.assertEqual(stats['gatetype_freq']['unitary'], 9)
+        self.assertEqual(stats['gatetype_freq']['non-unitary'], 3)
+        self.assertEqual(stats['gatetype_freq']['clifford'], 7)
+        self.assertEqual(stats['gatetype_freq']['non-clifford'], 2)
+
+class TestParametricQCirc_dump_load(unittest.TestCase):
+    """ test 'QCirc' : dump, save, load
+    """
+
+    def test_dump_load(self):
+        """test dump, load
+        """
+        qc_A = ParametricQCirc().x(0).z(2).h(0).h(0).cx(0,1).h(0).h(1).crz(1,0, phase=0.1).rx(1, phase=0.2)
+        qc_A.dump("tmp/foo.qc")
+        qc_B = ParametricQCirc.load("tmp/foo.qc")
+        self.assertEqual(qc_A, qc_B)
+
+    def test_save_load(self):
+        """test save, load
+        """
+        qc_A = ParametricQCirc().x(0).z(2).h(0).h(0).cx(0,1).h(0).h(1).crz(1,0, phase=0.1).rx(1, phase=0.2)
+        qc_A.save("tmp/foo.qc")
+        qc_B = ParametricQCirc.load("tmp/foo.qc")
+        self.assertEqual(qc_A, qc_B)
+
+class TestParametricQCirc_get_gates(unittest.TestCase):
+    """ test 'ParametricQCirc' : get_gates, add_gates
+    """
+
+    def test_get_add_gates(self):
+        """test get_gates, add_gates
+        """
+        qc_A = ParametricQCirc().x(0).z(2).h(0).h(0).cx(0,1).h(0).h(1).crz(1,0, phase=0.1).rx(1, phase=0.2)
+        gates = qc_A.get_gates()
+        qc_B = ParametricQCirc().add_gates(gates)
+        self.assertEqual(qc_A, qc_B)
+
+class TestParametricQCirc_generate_random_gates(unittest.TestCase):
+    """ test 'ParametricQCirc' : generate_random_gates
+    """
+
+    def test_generate_random_gates(self):
+        """test get_gates, add_gates
+        """
+        qc = ParametricQCirc.generate_random_gates(qubit_num=3, gate_num=1000,
+                                                   prob={'h':5, 'cx':3, 't':2})
+        stats = qc.get_stats()
+        self.assertEqual(round(stats['gate_freq']['h'] / 100.), 5)
+        self.assertEqual(round(stats['gate_freq']['cx'] / 100.), 3)
+        self.assertEqual(round(stats['gate_freq']['t'] / 100.), 2)
+        
+class TestParametricQCirc_equivalent(unittest.TestCase):
+    """ test 'ParametricQCirc' : equivalent
+    """
+
+    def test_equivalent_true(self):
+        """test equivalent (true)
+        """
+        qc_A = ParametricQCirc().h(0).h(1).cx(0,1).h(0).h(1)
+        qc_B = ParametricQCirc().cx(1,0)
+        self.assertEqual(qc_A.equivalent(qc_B), True)
+
+    def test_equivalent_false(self):
+        """test equivalent (false)
+        """
+        qc_A = ParametricQCirc().h(0).h(1).cx(0,1).h(0).h(1)
+        qc_B = ParametricQCirc().cx(1,0).t(1)
+        self.assertEqual(qc_A.equivalent(qc_B), False)
+
+class TestParametricQCirc_optimize(unittest.TestCase):
+    """ test 'ParametricQCirc' : optimize
+    """
+
+    def test_optimize(self):
+        """test optimize
+        """
+        qc = ParametricQCirc.generate_random_gates(qubit_num=10, gate_num=100,
+                                                   prob={'h':5, 'cx':5, 't':3})
+        qc_opt = qc.optimize()
+        self.assertEqual(qc_opt is not None, True)
+
+class TestParametricQCirc_using_tag(unittest.TestCase):
+    """ test 'ParametricQCirc' : tag
+    """
+
+    def test_1(self):
+        """test 1
+        """
+        qc_A = ParametricQCirc().h(0).rz(0, phase=0.2).cx(0,1).crz(0,1, phase=0.3)
+        qc_B = ParametricQCirc().h(0).rz(0, tag='foo').cx(0,1).crz(0,1, tag='bar')
+        qc_B.set_params({'foo': 0.2, 'bar': 0.3})
+
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc_A, out_state=True).qstate
+        qs_B = bk.run(qcirc=qc_B, out_state=True).qstate
+
+        self.assertEqual(qc_A != qc_B, True)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        
+    def test_2(self):
+        """test 2
+        """
+        qc_A = ParametricQCirc().h(0).rz(0, phase=0.2, tag='foo').cx(0,1).crz(0,1, phase=0.3, tag='bar')
+        qc_B = ParametricQCirc().h(0).rz(0, tag='foo').cx(0,1).crz(0,1, tag='bar')
+        qc_B.set_params({'foo': 0.2, 'bar': 0.3})
+
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc_A, out_state=True).qstate
+        qs_B = bk.run(qcirc=qc_B, out_state=True).qstate
+
+        self.assertEqual(qc_A == qc_B, True)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        
+    def test_3(self):
+        """test 3
+        """
+        qc_A = ParametricQCirc().h(0).rz(0, phase=0.2, tag='foo').cx(0,1).crz(0,1, phase=0.3, tag='bar')
+        qc_B = ParametricQCirc().h(0).rz(0, tag='foo').cx(0,1).crz(0,1, tag='bar')
+        qc_B.set_params({'bar': 0.3})
+        qc_B.set_params({'foo': 0.2})
+
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc_A, out_state=True).qstate
+        qs_B = bk.run(qcirc=qc_B, out_state=True).qstate
+
+        self.assertEqual(qc_A == qc_B, True)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        
+    def test_4(self):
+        """test 4
+        """
+        qc_A = ParametricQCirc().h(0).rz(0, phase=0.2, tag='foo').cx(0,1).crz(0,1, phase=0.3, tag='bar')
+        qc_B = ParametricQCirc().h(0).rz(0, tag='foo').cx(0,1).crz(0,1, tag='bar')
+        qc_B.set_params({'foo': 0.1, 'bar': 0.2})
+        qc_B.set_params({'foo': 0.3, 'bar': 0.4})
+        qc_B.set_params({'bar': 0.6})
+        qc_B.set_params({'foo': 0.2, 'bar': 0.3})
+
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc_A, out_state=True).qstate
+        qs_B = bk.run(qcirc=qc_B, out_state=True).qstate
+
+        self.assertEqual(qc_A == qc_B, True)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        
+    def test_5(self):
+        """test 5
+        """
+        qc_A = ParametricQCirc().h(0).rz(0, phase=0.2, tag='foo').cx(0,1).crz(0,1, phase=0.3, tag='bar')
+        qc_B = ParametricQCirc().h(0).rz(0, tag='foo').cx(0,1).crz(0,1, tag='bar')
+        qc_B.set_params({'foo': 0.2, 'bar': 0.3})
+
+        qc_A.x(2).crx(0, 2, tag='foo')
+        qc_B.x(2).crx(0, 2, tag='foo')
+
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc_A, out_state=True).qstate
+        qs_B = bk.run(qcirc=qc_B, out_state=True).qstate
+
+        self.assertEqual(qc_A == qc_B, True)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+    
+#
+# inheritance
+#
+
+class TestParametricQCirc_inheritance(unittest.TestCase):
+    """ test 'ParametricQCirc' : inheritance
+    """
+
+    def test_inheritance(self):
+        """test 'inheritance'
+        """
+        qc_expect = ParametricQCirc().h(0).cx(0,1).measure(qid=[0,1], cid=[0,1])
+        qc_actual = MyParametricQCirc().bell(0,1).measure(qid=[0,1], cid=[0,1])
+        self.assertEqual(qc_actual, qc_expect)
+
+    def test_inheritance_init(self):
+        """test 'inheritance_init'
+        """
+        qc = MyParametricQCirc(name='hoge').h(0).cx(0,1).measure(qid=[0,1], cid=[0,1])
+        s = qc.get_name()
+        self.assertEqual(s, 'hoge')
+
+if __name__ == '__main__':
+
+    unittest.main()

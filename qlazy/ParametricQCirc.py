@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-""" Quantum Circuit """
+""" Parametric Quantum Circuit """
+import pickle
 
 import qlazy.config as cfg
 from qlazy.QCirc import QCirc
@@ -125,7 +126,6 @@ class ParametricQCirc(QCirc):
             quantum circuit (result)
 
         """
-        # if not isinstance(qc, ParametricQCirc):
         if not isinstance(qc, self.__class__):
             raise TypeError("quantum circuit is not {}.".format(self.__class__))
 
@@ -151,7 +151,6 @@ class ParametricQCirc(QCirc):
             quantum circuit (result)
 
         """
-        # if not isinstance(qc, ParametricQCirc):
         if not isinstance(qc, self.__class__):
             raise TypeError("quantum circuit is not {}.".format(self.__class__))
 
@@ -161,7 +160,66 @@ class ParametricQCirc(QCirc):
                 ans = True
         return ans
 
-    def append_gate(self, kind, qid, para=None, c=None, ctrl=None, tag=None, fac=None):
+    def dump(self, file_path):
+        """
+        dump the circuit
+
+        Parameters
+        ----------
+        file_path: str
+            file path of dump file
+
+        Returns
+        -------
+        None
+
+        """
+        obj = (self.get_gates(), self.tag_list, self.fac_list, self.phase_list, self.params)
+        with open(file_path, mode='wb') as f:
+            pickle.dump(obj, f)
+
+    def save(self, file_path):
+        """
+        save the circuit
+
+        Parameters
+        ----------
+        file_path: str
+            file path of dump file
+
+        Returns
+        -------
+        None
+
+        """
+        self.dump(file_path)
+
+    @classmethod
+    def load(cls, file_path):
+        """
+        load the circuit
+
+        Parameters
+        ----------
+        file_path: str
+            file path of dump file
+
+        Returns
+        -------
+        qcirc: instance of QCirc
+            loaded circuit
+
+        """
+        with open(file_path, mode='rb') as f:
+            gates, tag_list, fac_list, phase_list, params = pickle.load(f)
+        qcirc = cls().add_gates(gates)
+        qcirc.tag_list = tag_list
+        qcirc.fac_list = fac_list
+        qcirc.phase_list = phase_list
+        qcirc.params = params
+        return qcirc
+
+    def append_gate(self, kind, qid, para=None, c=None, ctrl=None, tag=None, fac=1.0):
         """
         append gate to the end of the circuit.
     
