@@ -1,5 +1,5 @@
-Quantum circuit execution (QCirc class, Backend class)
-======================================================
+Quantum circuit execution (Backend, QCirc, ParametricQCirc class)
+=================================================================
 
 ## Basics of quantum circuit execution
 
@@ -270,7 +270,7 @@ calculations, and optimization issues on NISC devices, so we recommend
 that you try it with the expectation value calculation instead of
 obtaining the measurement values in large number of shots.
 
-### Getting quantum state (qlazy and qulacs only)
+#### Getting quantum state (qlazy and qulacs only)
 
 When you execute the 'run' method using qlazy's 'qstate_simulator',
 'stabilizer_simulator', or 'mps_simulator', by specifing 'out_state'
@@ -322,6 +322,59 @@ or 'gpu_simulator' of 'qulacs' as follows.
     c[01] = +0.0000+0.0000*i : 0.0000 |
     c[10] = +0.0000+0.0000*i : 0.0000 |
     c[11] = +0.7071+0.0000*i : 0.5000 |++++++
+
+#### Expectation value of observable
+
+When you want to calculate an expectation value of an observable after
+executing a quantum circuit, you can use 'expect' method of
+'Backend' class.  For example, after executing the following quantum
+circuit,
+
+    >>> qc = QCirc().h(0).h(1).h(2).h(3)
+
+expectation value of the following observable,
+
+    >>> ob = Z(0)*Z(1) + 0.5*Z(1)*Z(2)
+
+is obtained as follows,
+
+    >>> bk = Backend(product='qlazy', device='qstate_simulator')
+    >>> qc = QCirc().h(0).h(1).h(2).h(3)
+    >>> ob = Z(0)*Z(1) + 0.5*Z(1)*Z(2)
+    >>> exp = bk.expect(qcirc=qc, observable=ob, shots=10000)
+
+If you set the quantum circuit to the 'qcirc' option, set the
+observable to 'observable' option and set the number of trials to
+'shots' option, then qlazy executes the quantum circuit and measures
+the observable for the number of times specified in 'shots', outputs
+the average value of the measured values as the expectation value.  If
+a simulator is specified as a backend, it generates a random number
+internally and simulates the measurement.  If the actual machine is
+specified, obtain the actual measurement values and calculate the
+expected value.  Therefore, the obtained expectation value isn't equal
+to the theoretical value.  The expectation value in the above example
+should be theoretically zero, but in fact, it shifts a little as
+follows.
+
+    >>> print("exp = {:.6f}".format(exp))
+    exp = -0.001200+0.000000j
+
+If you want to get the theoretical expectation value, set the
+'precise' option to True instead of the 'shots' option as follows.
+
+    >>> exp = bk.expect(qcirc=qc, observable=ob, precise=True)
+
+This executes the theoretical calculation internally to output
+accurate expectation value.
+
+    >>> print("exp = {:.6f}".format(exp))
+    -0.000000+0.000000j	
+	
+However, this can be executed when a simulator is specified in the
+backend, specifically, when only qlazy's 'qstate_simulator',
+'qstate_gpu_simulator', 'mps_simulator', and qulacs' 'cpu_simulator'
+and 'gpu_simulator' are specified.
+
 
 ### Supported quantum gate
 
@@ -713,6 +766,52 @@ own quantum gate as follows.
 This is a very simple example, so you may not feel much profit, but
 there are many situations where you can use it, such as when you want
 to create a large quantum circuit.
+
+
+### Parametric quantum circuit
+
+When you want to execute the quantum circuit repeatedly while changing
+the parameters contained in the quantum circuit, you can use
+'ParametricQCirc' class.
+
+For example, Suppose you have the following quantum circuit.
+
+    >>> qc = QCirc().h(0).rz(0, phase=0.2).cx(0,1).crx(0,1, phase=0.3).measure(qid=[0,1], cid=[0,1])
+
+It has an 'rz' gate with parameter '0.2' and a 'crx' gate with
+parameter '0.3'.  After executing this quantum circuit, if you want to
+execute the quantum circuit changing this parameter from (0.2, 0.3) to
+(0.4, 0.5), you need to generate a new quantum circuit from scratch as
+follows.
+
+    >>> qc = QCirc().h(0).rz(0, phase=0.4).cx(0,1).crx(0,1, phase=0.5).measure(qid=[0,1], cid=[0,1])
+
+If you calculate with a very deep quantum circuit, or if you update
+and execute many times, this method is very useless.  In such a case,
+you can create a parametric quantum circuit using 'ParametricQCirc'
+class.  First of all, make your quantum circuit as follows,
+
+    >>> qc = ParametricQCirc().h(0).rz(0, tag='foo').cx(0,1).crx(0,1, tag='bar').measure(qid=[0,1], cid=[0,1])
+
+Here, you can set a tag name in the 'tag' option instead of specifing
+the 'phase' parameter.  When setting each parameter to 0.2,0.3, use
+'set_params' method to set the phase value corresponding to each tag
+name as follows.
+
+    >>> qc.set_params({'foo': 0.2, 'bar': 0.3})
+	
+This means that a quantum circuit containing a specific phase value
+has been created.  You can execute this circuit as follows,
+
+    >>> bk = Bakcend()
+	>>> result = bk.run(qcirc=qc, ...)
+
+Then, if you want to change the parameters to 0.4,0.5, do as follows,
+
+    >>> qc.set_params({'foo': 0.4, 'bar': 0.5})
+    >>> bk.run(qcirc=qc, ...)
+
+There is no need to create another quantum circuit.
 
 
 ## Supported backend
