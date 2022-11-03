@@ -541,13 +541,14 @@ class QCirc(ctypes.Structure):
         with open(file_path, mode='w') as f:
             f.write(s)
 
-    def show(self):
+    def show(self, width=100):
         """
         show the circuit
 
         Parameters
         ----------
-        None
+        width : int, default - 100
+            width for line breaks and display long quantum circuit
 
         Returns
         -------
@@ -571,7 +572,6 @@ class QCirc(ctypes.Structure):
 
             (kind, qid, para, c, ctrl) = qc.pop_gate()
             gate = {'kind': kind, 'qid': qid, 'para': para, 'c': c, 'ctrl': ctrl}
-            # debug
             if ((get_qgate_qubit_num(kind) == 1 or is_reset_gate(kind)) and ctrl is None):
                 if qid[0] in qids:
                     append_qc_canvas(qc_canvas, gates, qubit_num, cmem_num)
@@ -591,8 +591,16 @@ class QCirc(ctypes.Structure):
         if gates != []:
             append_qc_canvas(qc_canvas, gates, qubit_num, cmem_num)
             
-        for line in qc_canvas:
-            print(line)
+        pos_start = 0
+        pos_end = width
+        while True:
+            if pos_start >= len(qc_canvas[0]):
+                break
+            for line in qc_canvas:
+                print(line[pos_start:pos_end])
+            print()
+            pos_start += width
+            pos_end +=width
 
     def clone(self):
         """
