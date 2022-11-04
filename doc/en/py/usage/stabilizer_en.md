@@ -187,10 +187,10 @@ then perform 'operate' method with 'pp' option.
 	>>> sb.operate(pp=pp)
 
 Controlled pauli product can be operated by specifying the control
-qubit id in the 'ctrl' option of the 'operate' method as follows.
+qubit id in the 'qctrl' option of the 'operate' method as follows.
 
 	>>> pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
-	>>> sb.operate(pp=pp, ctlr=3)
+	>>> sb.operate(pp=pp, qctlr=3)
 
 ### Measurement
 

@@ -33,7 +33,7 @@ class QStateLogical(QState):
 
         self.reset(qid=[self.__anc[0]])
         self.h(self.__anc[0])
-        self.operate(ctrl=self.__anc[0], pp=pp)
+        self.operate(qctrl=self.__anc[0], pp=pp)
         self.h(self.__anc[0])
         return self.m(qid=[self.__anc[0]], shots=shots)
     

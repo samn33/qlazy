@@ -1,4 +1,4 @@
-Quantum circuit execution (Backend, QCirc, ParametricQCirc class)
+Quantum circuit execution (Backend, QCirc class)
 =================================================================
 
 ## Basics of quantum circuit execution
@@ -92,10 +92,10 @@ then perform 'operate' method with 'pp' option.
 	>>> qc.operate(pp=pp)
 
 Controlled pauli product can be added by specifying the control
-qubit id in the 'ctrl' option of the 'operate' method as follows.
+qubit id in the 'qctrl' option of the 'operate' method as follows.
 
 	>>> pp = PauliProduct(pauli_str="XYZ", qid=[0,1,2])
-	>>> qc.operate(pp=pp, ctlr=3)
+	>>> qc.operate(pp=pp, qctlr=3)
 
 #### Measuring gate
 
@@ -800,7 +800,7 @@ to create a large quantum circuit.
 
 When you want to execute the quantum circuit repeatedly while changing
 the parameters contained in the quantum circuit, you can use
-'ParametricQCirc' class.
+parametric quantum circut.
 
 For example, Suppose you have the following quantum circuit.
 
@@ -814,14 +814,13 @@ follows.
 
     >>> qc = QCirc().h(0).rz(0, phase=0.4).cx(0,1).crx(0,1, phase=0.5).measure(qid=[0,1], cid=[0,1])
 
-If you calculate with a very deep quantum circuit, or if you update
-and execute many times, this method is very useless.  In such a case,
-you can create a parametric quantum circuit using 'ParametricQCirc'
-class.  First of all, make your quantum circuit as follows,
+If your quantum circuit is very deep and is operated many times, this
+method is very useless.  In such a case, you can create a parametric
+quantum circuit as follows.
 
-    >>> qc = ParametricQCirc().h(0).rz(0, tag='foo').cx(0,1).crx(0,1, tag='bar').measure(qid=[0,1], cid=[0,1])
+    >>> qc = QCirc().h(0).rz(0, tag='foo').cx(0,1).crx(0,1, tag='bar').measure(qid=[0,1], cid=[0,1])
 
-Here, you can set a tag name in the 'tag' option instead of specifing
+Here, you set a tag name in the 'tag' option instead of specifing
 the 'phase' parameter.  When setting each parameter to 0.2,0.3, use
 'set_params' method to set the phase value corresponding to each tag
 name as follows.

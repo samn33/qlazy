@@ -8,7 +8,7 @@ Python Package
 - [Density operator (DensOp class)](usage/densop_en.md)
 - [Stabilizer state (Stabilizer class)](usage/stabilizer_en.md)
 - [Matrix product state (MPState class)](usage/mpstate_en.md)
-- [Quantum circuit execution (Backend, QCirc, ParametricQCirc class)](usage/qcirc_en.md)
+- [Quantum circuit execution (Backend, QCirc)](usage/qcirc_en.md)
 - [Observable (Observable class)](usage/observable_en.md)
 - [Useful tools](usage/tools_en.md)
 

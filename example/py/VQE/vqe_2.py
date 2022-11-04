@@ -1,6 +1,6 @@
 import numpy as np
 import scipy.optimize
-from qlazy import Backend, ParametricQCirc
+from qlazy import Backend, QCirc
 from qlazy.Observable import X, Y, Z
 
 #------------------------------------
@@ -30,7 +30,7 @@ M = (-3.8503 - 0.2288*X(1) - 1.0466*Z(1) - 0.2288*X(0) + 0.2613*X(0)*X(1) + 0.22
 bk = Backend(product='qlazy', device='qstate_simulator')
 
 # Parametric quantum circuit
-qc = ParametricQCirc()
+qc = QCirc()
 qc.rx(0, tag='0').rz(0, tag='1').rx(1, tag='2').rz(1, tag='3').cx(1,0).rz(1, tag='4').rx(1, tag='5')
 
 # VQE

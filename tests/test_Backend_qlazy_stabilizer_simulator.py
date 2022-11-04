@@ -325,7 +325,7 @@ class TestBackend_operate_qlazy_stabilizer_simulator(unittest.TestCase):
         res = bk.run(qcirc=qc, out_state=True)
         expect = res.stabilizer.get_str()
         pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
-        qc = QCirc().operate(pp=pp, ctrl=3)
+        qc = QCirc().operate(pp=pp, qctrl=3)
         res = bk.run(qcirc=qc, out_state=True)
         actual = res.stabilizer.get_str()
         self.assertEqual(expect, actual)

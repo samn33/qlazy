@@ -510,8 +510,8 @@ class TestBackend_operate(unittest.TestCase):
         """test 'operate' (xyz)
         """
         pp = PauliProduct(pauli_str="XYZ", qid=[1, 2, 3])
-        qc = QCirc().operate(pp=pp, ctrl=0).measure(qid=[0, 1, 2, 3], cid=[0, 1, 2, 3])
-        qs = QState(qubit_num=4).operate(pp=pp, ctrl=0)
+        qc = QCirc().operate(pp=pp, qctrl=0).measure(qid=[0, 1, 2, 3], cid=[0, 1, 2, 3])
+        qs = QState(qubit_num=4).operate(pp=pp, qctrl=0)
         value = evaluate(qc, qs)
         self.assertEqual(value < EPS, True)
 

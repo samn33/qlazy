@@ -3,7 +3,7 @@
 ## [0.3.3] - 2022-xx-xx
 ### Added
 - get current version name from VERSION file when building the codes
-- ParametricQCirc class for parametric quantum circuit
+- support parametric quantum circuit
 - VQE example using parametric quantum circuit
 - QAOA example using parametric quantum circuit
 - expect method of Backend class to get an expectation value

@@ -1585,7 +1585,7 @@ class MPState(FiniteMPS):
 
         return self
 
-    def operate(self, pp=None, ctrl=None):
+    def operate(self, pp=None, ctrl=None, qctrl=None):
         """
         operate unitary operator to quantum state.
 
@@ -1594,6 +1594,9 @@ class MPState(FiniteMPS):
         pp : instance of PauliProduct
             pauli product to operate
         ctrl : int
+            contoroll qubit id for controlled pauli product
+            (this option will be removed near future)
+        qctrl : int
             contoroll qubit id for controlled pauli product
 
         Returns
@@ -1609,6 +1612,9 @@ class MPState(FiniteMPS):
         pauli_list = pp.pauli_list
         qid = pp.qid
         factor = pp.factor
+
+        if ctrl is None:
+            ctrl = qctrl
 
         if ctrl is None:
             for q, pauli in zip(qid, pauli_list):

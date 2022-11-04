@@ -1199,7 +1199,7 @@ class TestStabilizer_operate(unittest.TestCase):
         sb_expect = Stabilizer(gene_num=4, qubit_num=4).set_all('Z').cx(3,2).cy(3,0).cz(3,1)
         expect = sb_expect.get_str()
         pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
-        sb_actual = Stabilizer(gene_num=4, qubit_num=4).set_all('Z').operate(pp=pp, ctrl=3)
+        sb_actual = Stabilizer(gene_num=4, qubit_num=4).set_all('Z').operate(pp=pp, qctrl=3)
         actual = sb_actual.get_str()
         self.assertEqual(actual, expect)
         

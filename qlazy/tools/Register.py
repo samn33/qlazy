@@ -1,7 +1,28 @@
 # -*- coding: utf-8 -*-
 """ functions to create and initialize registers """
+from collections import UserList
 import numpy as np
 
+class Register(UserList):
+
+    def __init__(self, shape=None):
+
+        super().__init__(list(np.zeros(shape, dtype=int).tolist()))
+        self.shape = shape
+        self.start = 0
+        self.num = np.prod(shape)
+        
+    def set_number(self, start):
+
+        self.data = []
+        self.start = start
+        end = start + self.num
+        reg_arr = np.array(list(range(start, end)))
+        reg_arr = reg_arr.reshape(self.shape).tolist()
+        [self.append(r) for r in reg_arr] 
+
+        return end
+        
 def CreateRegister(*args):
     """
     create multi-dimensional register id and initialize zero.
@@ -26,9 +47,7 @@ def CreateRegister(*args):
     [[0,0,0],[0,0,0]]
 
     """
-    global COUNT
-    COUNT = 0
-    reg = np.zeros(args, dtype=int).tolist()
+    reg = Register(shape=args)
     return reg
 
 def InitRegister(*args):
@@ -47,21 +66,16 @@ def InitRegister(*args):
 
     Examples
     --------
-    >>> reg_0 = QState.create_register(3)
-    >>> reg_1 = QState.create_register(2,4)
+    >>> reg_0 = CreateRegister(3)
+    >>> reg_1 = CreateRegister(2,4)
     >>> print(reg_0, reg_1)
     [0,0,0] [[0,0,0,0],[0,0,0,0]]
     >>> reg_num = InitRegister(reg_0, reg_1)
     >>> print(reg_num, reg_0, reg_1)
     11 [0,1,2] [[3,4,5,6],[7,8,9,10]]
+
     """
-    global COUNT
-    for x in args:
-        if isinstance(x, list):
-            for i, v in enumerate(x):
-                if isinstance(v, int):
-                    x[i] = COUNT
-                    COUNT += 1
-                else:
-                    num = InitRegister(v)
-    return COUNT
+    cnt = 0
+    for reg in args:
+        cnt = reg.set_number(cnt)
+    return cnt

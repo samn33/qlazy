@@ -936,7 +936,7 @@ class TestQCirc_generate_random_gates(unittest.TestCase):
         """test get_gates, add_gates
         """
         qc = QCirc.generate_random_gates(qubit_num=3, gate_num=1000,
-                                         prob={'h':5, 'cx':3, 't':2})
+                                                   prob={'h':5, 'cx':3, 't':2})
         stats = qc.get_stats()
         self.assertEqual(round(stats['gate_freq']['h'] / 100.), 5)
         self.assertEqual(round(stats['gate_freq']['cx'] / 100.), 3)
@@ -968,10 +968,91 @@ class TestQCirc_optimize(unittest.TestCase):
         """test optimize
         """
         qc = QCirc.generate_random_gates(qubit_num=10, gate_num=100,
-                                         prob={'h':5, 'cx':5, 't':3})
+                                                   prob={'h':5, 'cx':5, 't':3})
         qc_opt = qc.optimize()
         self.assertEqual(qc_opt is not None, True)
 
+class TestQCirc_using_tag(unittest.TestCase):
+    """ test 'QCirc' : tag
+    """
+
+    def test_1(self):
+        """test 1
+        """
+        qc_A = QCirc().h(0).rz(0, phase=0.2).cx(0,1).crz(0,1, phase=0.3)
+        qc_B = QCirc().h(0).rz(0, tag='foo').cx(0,1).crz(0,1, tag='bar')
+        qc_B.set_params({'foo': 0.2, 'bar': 0.3})
+
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc_A, out_state=True).qstate
+        qs_B = bk.run(qcirc=qc_B, out_state=True).qstate
+
+        self.assertEqual(qc_A != qc_B, True)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        
+    def test_2(self):
+        """test 2
+        """
+        qc_A = QCirc().h(0).rz(0, phase=0.2, tag='foo').cx(0,1).crz(0,1, phase=0.3, tag='bar')
+        qc_B = QCirc().h(0).rz(0, tag='foo').cx(0,1).crz(0,1, tag='bar')
+        qc_B.set_params({'foo': 0.2, 'bar': 0.3})
+
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc_A, out_state=True).qstate
+        qs_B = bk.run(qcirc=qc_B, out_state=True).qstate
+
+        self.assertEqual(qc_A == qc_B, True)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        
+    def test_3(self):
+        """test 3
+        """
+        qc_A = QCirc().h(0).rz(0, phase=0.2, tag='foo').cx(0,1).crz(0,1, phase=0.3, tag='bar')
+        qc_B = QCirc().h(0).rz(0, tag='foo').cx(0,1).crz(0,1, tag='bar')
+        qc_B.set_params({'bar': 0.3})
+        qc_B.set_params({'foo': 0.2})
+
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc_A, out_state=True).qstate
+        qs_B = bk.run(qcirc=qc_B, out_state=True).qstate
+
+        self.assertEqual(qc_A == qc_B, True)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        
+    def test_4(self):
+        """test 4
+        """
+        qc_A = QCirc().h(0).rz(0, phase=0.2, tag='foo').cx(0,1).crz(0,1, phase=0.3, tag='bar')
+        qc_B = QCirc().h(0).rz(0, tag='foo').cx(0,1).crz(0,1, tag='bar')
+        qc_B.set_params({'foo': 0.1, 'bar': 0.2})
+        qc_B.set_params({'foo': 0.3, 'bar': 0.4})
+        qc_B.set_params({'bar': 0.6})
+        qc_B.set_params({'foo': 0.2, 'bar': 0.3})
+
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc_A, out_state=True).qstate
+        qs_B = bk.run(qcirc=qc_B, out_state=True).qstate
+
+        self.assertEqual(qc_A == qc_B, True)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+        
+    def test_5(self):
+        """test 5
+        """
+        qc_A = QCirc().h(0).rz(0, phase=0.2, tag='foo').cx(0,1).crz(0,1, phase=0.3, tag='bar')
+        qc_B = QCirc().h(0).rz(0, tag='foo').cx(0,1).crz(0,1, tag='bar')
+        qc_B.set_params({'foo': 0.2, 'bar': 0.3})
+
+        qc_A.x(2).crx(0, 2, tag='foo')
+        qc_B.x(2).crx(0, 2, tag='foo')
+
+        bk = Backend()
+        qs_A = bk.run(qcirc=qc_A, out_state=True).qstate
+        qs_B = bk.run(qcirc=qc_B, out_state=True).qstate
+
+        self.assertEqual(qc_A == qc_B, True)
+        self.assertEqual(equal_or_not(qs_A, qs_B), True)
+    
 #
 # inheritance
 #
@@ -983,7 +1064,7 @@ class TestQCirc_inheritance(unittest.TestCase):
     def test_inheritance(self):
         """test 'inheritance'
         """
-        qc_expect = QCirc().h(0).cx(0,1).measure(qid=[0,1], cid=[0,1])
+        qc_expect = MyQCirc().h(0).cx(0,1).measure(qid=[0,1], cid=[0,1])
         qc_actual = MyQCirc().bell(0,1).measure(qid=[0,1], cid=[0,1])
         self.assertEqual(qc_actual, qc_expect)
 

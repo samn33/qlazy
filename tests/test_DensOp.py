@@ -1625,7 +1625,7 @@ class TestDensOp_operate(unittest.TestCase):
         mat = make_densop_matrix(VECTORS_8, PROBS_8)
         expect = DensOp(matrix=mat).cx(2,0).cz(2,1)
         pp = PauliProduct(pauli_str="XZ", qid=[0,1])
-        actual = DensOp(matrix=mat).operate(pp=pp, ctrl=2)
+        actual = DensOp(matrix=mat).operate(pp=pp, qctrl=2)
         ans = equal_densops(expect, actual)
         self.assertEqual(ans,True)
         

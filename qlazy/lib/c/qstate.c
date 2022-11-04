@@ -1660,7 +1660,7 @@ bool qstate_apply_matrix(QState* qstate, int qnum_part, int* qid,
   SUC_RETURN(true);
 }
 
-static bool _qstate_operate_qcirc_cpu(QState* qstate, CMem* cmem, QCirc* qcirc,
+static bool _qstate_operate_qcirc_cpu(QState* qstate, CMem* cmem, QCircBase* qcirc,
 				      bool measure_update)
 /* one shot execution */
 {
@@ -1763,14 +1763,14 @@ static bool _qstate_operate_qcirc_cpu(QState* qstate, CMem* cmem, QCirc* qcirc,
   SUC_RETURN(true);
 }
 
-bool qstate_operate_qcirc(QState* qstate, CMem* cmem, QCirc* qcirc, int shots, char* mchar_shots,
+bool qstate_operate_qcirc(QState* qstate, CMem* cmem, QCircBase* qcirc, int shots, char* mchar_shots,
 			  bool out_state)
 /* shots times execution */
 {
   int		i, j, k;
-  QCirc*	qcirc_uonly    = NULL;
-  QCirc*	qcirc_mixed    = NULL;
-  QCirc*	qcirc_monly    = NULL;
+  QCircBase*	qcirc_uonly    = NULL;
+  QCircBase*	qcirc_mixed    = NULL;
+  QCircBase*	qcirc_monly    = NULL;
   QState*	qstate_tmp     = NULL;
   bool		measure_update = true;
   QGate*        qgate	       = NULL;
@@ -1780,7 +1780,7 @@ bool qstate_operate_qcirc(QState* qstate, CMem* cmem, QCirc* qcirc, int shots, c
   bool		last	       = false;
   char*		measured_char  = NULL;
 
-  if (!(qcirc_decompose(qcirc, (void**)&qcirc_uonly, (void**)&qcirc_mixed, (void**)&qcirc_monly)))
+  if (!(qcirc_base_decompose(qcirc, (void**)&qcirc_uonly, (void**)&qcirc_mixed, (void**)&qcirc_monly)))
     ERR_RETURN(ERROR_QCIRC_DECOMPOSE, false);
   
   if (qstate->use_gpu == false) {
@@ -1789,7 +1789,7 @@ bool qstate_operate_qcirc(QState* qstate, CMem* cmem, QCirc* qcirc, int shots, c
       measure_update = true; /* not efficient because of including no measurements */
       if (!(_qstate_operate_qcirc_cpu(qstate, cmem, qcirc_uonly, measure_update)))
 	ERR_RETURN(ERROR_QSTATE_OPERATE_QCIRC, false);
-      qcirc_free(qcirc_uonly); qcirc_uonly = NULL;
+      qcirc_base_free(qcirc_uonly); qcirc_uonly = NULL;
     }
     
     if (qcirc_mixed != NULL) { /* unitary and non-unitary mixed */
@@ -1809,7 +1809,7 @@ bool qstate_operate_qcirc(QState* qstate, CMem* cmem, QCirc* qcirc, int shots, c
       for (j=0; j<cmem->cmem_num; j++) {
 	mchar_shots[(shots - 1) * cmem->cmem_num + j] = cmem->bit_array[j];
       }
-      qcirc_free(qcirc_mixed); qcirc_mixed = NULL;
+      qcirc_base_free(qcirc_mixed); qcirc_mixed = NULL;
     }
     
     else if (qcirc_monly != NULL) { /* measurement only */
@@ -1845,7 +1845,7 @@ bool qstate_operate_qcirc(QState* qstate, CMem* cmem, QCirc* qcirc, int shots, c
       free(measured_char); measured_char = NULL;
       free(qid); qid = NULL;
 
-      qcirc_free(qcirc_monly); qcirc_monly = NULL;
+      qcirc_base_free(qcirc_monly); qcirc_monly = NULL;
     }
   }
 
@@ -1856,7 +1856,7 @@ bool qstate_operate_qcirc(QState* qstate, CMem* cmem, QCirc* qcirc, int shots, c
       measure_update = true; /* not efficient because of including no measurements */
       if (!(qstate_operate_qcirc_gpu(qstate, cmem, qcirc_uonly, measure_update)))
 	ERR_RETURN(ERROR_QSTATE_OPERATE_QCIRC, false);
-      qcirc_free(qcirc_uonly); qcirc_uonly = NULL;
+      qcirc_base_free(qcirc_uonly); qcirc_uonly = NULL;
     }
 
     if (qcirc_mixed != NULL) { /* unitary and non-unitary mixed */
@@ -1876,14 +1876,14 @@ bool qstate_operate_qcirc(QState* qstate, CMem* cmem, QCirc* qcirc, int shots, c
       for (j=0; j<cmem->cmem_num; j++) {
 	mchar_shots[(shots - 1) * cmem->cmem_num + j] = cmem->bit_array[j];
       }
-      qcirc_free(qcirc_mixed); qcirc_mixed = NULL;
+      qcirc_base_free(qcirc_mixed); qcirc_mixed = NULL;
     }
 
     else if (qcirc_monly != NULL) { /* measurement only */
       /* shots times meaurements */
       if (!(qstate_operate_measure_gpu(qstate, cmem, qcirc_monly, shots, mchar_shots, out_state)))
 	ERR_RETURN(ERROR_QSTATE_OPERATE_MEASURE, false);
-      qcirc_free(qcirc_monly); qcirc_monly = NULL;
+      qcirc_base_free(qcirc_monly); qcirc_monly = NULL;
     }
   }
 #endif

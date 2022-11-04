@@ -1,14 +1,14 @@
 /*
- *  qcirc.c
+ *  qcirc_base.c
  */
 
 #include "qlazy.h"
 
-bool qcirc_init(void** qcirc_out)
+bool qcirc_base_init(void** qcirc_out)
 {
-  QCirc* qcirc = NULL;
+  QCircBase* qcirc = NULL;
   
-  if (!(qcirc = (QCirc*)malloc(sizeof(QCirc))))
+  if (!(qcirc = (QCircBase*)malloc(sizeof(QCircBase))))
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,NULL);
 
   qcirc->qubit_num = 0;
@@ -22,18 +22,18 @@ bool qcirc_init(void** qcirc_out)
   SUC_RETURN(true);
 }
 
-bool qcirc_copy(QCirc* qcirc_in, void** qcirc_out)
+bool qcirc_base_copy(QCircBase* qcirc_in, void** qcirc_out)
 {
-  QCirc*	qcirc = NULL;
+  QCircBase*	qcirc = NULL;
   QGate*        gate  = NULL;
 
   if (qcirc_in == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
 
-  if (!(qcirc_init((void**)&qcirc))) ERR_RETURN(ERROR_QCIRC_INIT, false);
+  if (!(qcirc_base_init((void**)&qcirc))) ERR_RETURN(ERROR_QCIRC_INIT, false);
 
   gate = qcirc_in->first;
   while (gate != NULL) {
-    if (!(qcirc_append_gate(qcirc, gate->kind, gate->qid, gate->para, gate->c, gate->ctrl)))
+    if (!(qcirc_base_append_gate(qcirc, gate->kind, gate->qid, gate->para, gate->c, gate->ctrl)))
       ERR_RETURN(ERROR_QCIRC_APPEND_GATE, false);
     gate = gate->next;
   }
@@ -43,15 +43,15 @@ bool qcirc_copy(QCirc* qcirc_in, void** qcirc_out)
   SUC_RETURN(true);
 }
 
-bool qcirc_merge(QCirc* qcirc_L, QCirc* qcirc_R, void** qcirc_out)
+bool qcirc_base_merge(QCircBase* qcirc_L, QCircBase* qcirc_R, void** qcirc_out)
 {
-  QCirc*	qcirc = NULL;
+  QCircBase*	qcirc = NULL;
   QGate*        gate  = NULL;
 
   if ((qcirc_L == NULL) || (qcirc_R == NULL)) ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
 
   /* create NULL circuit (qcirc) */
-  if (!(qcirc_init((void**)&qcirc))) ERR_RETURN(ERROR_QCIRC_INIT, NULL);
+  if (!(qcirc_base_init((void**)&qcirc))) ERR_RETURN(ERROR_QCIRC_INIT, NULL);
 
   if (qcirc_L->qubit_num > qcirc_R->qubit_num) qcirc->qubit_num = qcirc_L->qubit_num;
   else qcirc->qubit_num = qcirc_R->qubit_num;
@@ -62,7 +62,7 @@ bool qcirc_merge(QCirc* qcirc_L, QCirc* qcirc_R, void** qcirc_out)
   /* append left */
   gate = qcirc_L->first;
   while (gate != NULL) {
-    if (!(qcirc_append_gate(qcirc, gate->kind, gate->qid, gate->para, gate->c, gate->ctrl)))
+    if (!(qcirc_base_append_gate(qcirc, gate->kind, gate->qid, gate->para, gate->c, gate->ctrl)))
       ERR_RETURN(ERROR_QCIRC_APPEND_GATE, NULL);
     gate = gate->next;
   }
@@ -70,7 +70,7 @@ bool qcirc_merge(QCirc* qcirc_L, QCirc* qcirc_R, void** qcirc_out)
   /* append right */
   gate = qcirc_R->first;
   while (gate != NULL) {
-    if (!(qcirc_append_gate(qcirc, gate->kind, gate->qid, gate->para, gate->c, gate->ctrl)))
+    if (!(qcirc_base_append_gate(qcirc, gate->kind, gate->qid, gate->para, gate->c, gate->ctrl)))
       ERR_RETURN(ERROR_QCIRC_APPEND_GATE, NULL);
     gate = gate->next;
   }
@@ -80,7 +80,7 @@ bool qcirc_merge(QCirc* qcirc_L, QCirc* qcirc_R, void** qcirc_out)
   SUC_RETURN(true);
 }
 
-bool qcirc_is_equal(QCirc* qcirc_L, QCirc* qcirc_R, bool* ans)
+bool qcirc_base_is_equal(QCircBase* qcirc_L, QCircBase* qcirc_R, bool* ans)
 {
   QGate*        gate_L = NULL;
   QGate*        gate_R = NULL;
@@ -117,7 +117,7 @@ bool qcirc_is_equal(QCirc* qcirc_L, QCirc* qcirc_R, bool* ans)
   SUC_RETURN(true);
 }
 
-bool qcirc_is_unitary_only(QCirc* qcirc, bool* ans)
+bool qcirc_base_is_unitary_only(QCircBase* qcirc, bool* ans)
 {
   QGate* gate = NULL;
 
@@ -137,7 +137,7 @@ bool qcirc_is_unitary_only(QCirc* qcirc, bool* ans)
   SUC_RETURN(true);
 }
 
-bool qcirc_is_measurement_only(QCirc* qcirc, bool* ans)
+bool qcirc_base_is_measurement_only(QCircBase* qcirc, bool* ans)
 {
   QGate* gate = NULL;
 
@@ -157,7 +157,7 @@ bool qcirc_is_measurement_only(QCirc* qcirc, bool* ans)
   SUC_RETURN(true);
 }
 
-bool qcirc_append_gate(QCirc* qcirc, Kind kind, int* qid, double* para, int c, int ctrl)
+bool qcirc_base_append_gate(QCircBase* qcirc, Kind kind, int* qid, double* para, int c, int ctrl)
 {
   QGate* qgate = NULL;
   int qid_size = 0;
@@ -213,7 +213,7 @@ bool qcirc_append_gate(QCirc* qcirc, Kind kind, int* qid, double* para, int c, i
   SUC_RETURN(true);
 }
 
-bool qcirc_kind_first(QCirc* qcirc, Kind* kind)
+bool qcirc_base_kind_first(QCircBase* qcirc, Kind* kind)
 {
   if (qcirc == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
   if (qcirc->first == NULL) {
@@ -226,7 +226,7 @@ bool qcirc_kind_first(QCirc* qcirc, Kind* kind)
   SUC_RETURN(true);
 }
 
-static void _qcirc_update(QCirc* qcirc)
+static void _qcirc_base_update(QCircBase* qcirc)
 {
   QGate*	qgate	  = NULL;
   int		qubit_num = 0;
@@ -248,7 +248,7 @@ static void _qcirc_update(QCirc* qcirc)
   qcirc->gate_num = gate_num;
 }
 
-bool qcirc_pop_gate(QCirc* qcirc, Kind* kind, int* qid, double* para, int* c, int* ctrl)
+bool qcirc_base_pop_gate(QCircBase* qcirc, Kind* kind, int* qid, double* para, int* c, int* ctrl)
 {
   QGate*	ori_first;
   int		q_max = -1;
@@ -273,25 +273,25 @@ bool qcirc_pop_gate(QCirc* qcirc, Kind* kind, int* qid, double* para, int* c, in
   for (i=0; i<2; i++) q_max = MAX(q_max, qid[i] + 1);
   c_max = MAX(c_max, *c);
   c_max = MAX(c_max, *ctrl);
-  if ((q_max >= qcirc->qubit_num) || (c_max >= qcirc->cmem_num)) _qcirc_update(qcirc);
+  if ((q_max >= qcirc->qubit_num) || (c_max >= qcirc->cmem_num)) _qcirc_base_update(qcirc);
   else qcirc->gate_num -= 1;
   
   SUC_RETURN(true);
 }
 
-bool qcirc_decompose(QCirc* qcirc_in, void** qcirc_uonly_out, void** qcirc_mixed_out,
+bool qcirc_base_decompose(QCircBase* qcirc_in, void** qcirc_uonly_out, void** qcirc_mixed_out,
 		     void** qcirc_monly_out)
 {
-  QCirc*	qcirc_uonly = NULL; /* unitary only */
-  QCirc*	qcirc_monly = NULL; /* measurement only */
+  QCircBase*	qcirc_uonly = NULL; /* unitary only */
+  QCircBase*	qcirc_monly = NULL; /* measurement only */
   QGate*	qgate	    = NULL;
   bool          uonly_flg;
   bool          monly_flg;
 
   if (qcirc_in == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
 
-  if (!(qcirc_init((void**)&qcirc_uonly))) ERR_RETURN(ERROR_QCIRC_INIT, false);
-  if (!(qcirc_init((void**)&qcirc_monly))) ERR_RETURN(ERROR_QCIRC_INIT, false);
+  if (!(qcirc_base_init((void**)&qcirc_uonly))) ERR_RETURN(ERROR_QCIRC_INIT, false);
+  if (!(qcirc_base_init((void**)&qcirc_monly))) ERR_RETURN(ERROR_QCIRC_INIT, false);
 
   /* qcirc_uonly */
 
@@ -300,13 +300,13 @@ bool qcirc_decompose(QCirc* qcirc_in, void** qcirc_uonly_out, void** qcirc_mixed
   while (qgate != NULL) {
     if (kind_is_unitary(qgate->kind) == true) {
       uonly_flg = true;
-      if (!(qcirc_append_gate(qcirc_uonly, qgate->kind, qgate->qid, qgate->para, qgate->c, qgate->ctrl)))
+      if (!(qcirc_base_append_gate(qcirc_uonly, qgate->kind, qgate->qid, qgate->para, qgate->c, qgate->ctrl)))
 	ERR_RETURN(ERROR_QCIRC_APPEND_GATE, false);
       *qcirc_uonly_out = qcirc_uonly;
     }
     else {
       if (uonly_flg == false) { /* 1st gate is non-uniary */
-	qcirc_free(qcirc_uonly); qcirc_uonly = NULL;
+	qcirc_base_free(qcirc_uonly); qcirc_uonly = NULL;
 	*qcirc_uonly_out = NULL;
 	break;
       }
@@ -318,7 +318,7 @@ bool qcirc_decompose(QCirc* qcirc_in, void** qcirc_uonly_out, void** qcirc_mixed
   }
 
   if (qgate == NULL) { /* include unitary gates only -> return */
-    qcirc_free(qcirc_monly); qcirc_monly = NULL;
+    qcirc_base_free(qcirc_monly); qcirc_monly = NULL;
     *qcirc_mixed_out = NULL;
     *qcirc_monly_out = NULL;
     
@@ -330,7 +330,7 @@ bool qcirc_decompose(QCirc* qcirc_in, void** qcirc_uonly_out, void** qcirc_mixed
   monly_flg = true;
   while (qgate != NULL) {
     if (kind_is_measurement(qgate->kind) == false) monly_flg = false;
-    if (!(qcirc_append_gate(qcirc_monly, qgate->kind, qgate->qid, qgate->para, qgate->c, qgate->ctrl)))
+    if (!(qcirc_base_append_gate(qcirc_monly, qgate->kind, qgate->qid, qgate->para, qgate->c, qgate->ctrl)))
       ERR_RETURN(ERROR_QCIRC_APPEND_GATE, false);
     qgate = qgate->next;
   }
@@ -347,7 +347,7 @@ bool qcirc_decompose(QCirc* qcirc_in, void** qcirc_uonly_out, void** qcirc_mixed
   SUC_RETURN(true);
 }
 
-bool qcirc_set_phase_list(QCirc* qcirc, double* phase_list)
+bool qcirc_base_set_phase_list(QCircBase* qcirc, double* phase_list)
 {
   QGate*	gate = NULL;
   int		cnt;
@@ -367,7 +367,7 @@ bool qcirc_set_phase_list(QCirc* qcirc, double* phase_list)
   SUC_RETURN(true);
 }
 
-void qcirc_free(QCirc* qcirc)
+void qcirc_base_free(QCircBase* qcirc)
 {
   QGate* qgate = NULL;
   

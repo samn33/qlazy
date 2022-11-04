@@ -1086,7 +1086,7 @@ class TestMPState_operate(unittest.TestCase):
         mps_actual = MPState(qubit_num=4)
         pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
         mps_expect.cx(3,2).cy(3,0).cz(3,1)
-        mps_actual.operate(pp=pp, ctrl=3)
+        mps_actual.operate(pp=pp, qctrl=3)
         ans = equal_mpstates(mps_expect, mps_actual)
         self.assertEqual(ans,True)
 

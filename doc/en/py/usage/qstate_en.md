@@ -228,10 +228,10 @@ then perform 'operate' method with 'pp' option.
     >>> qs.operate(pp=pp)
 	
 Controlled pauli product can be operated by specifying the control
-qubit id in the 'ctrl' option of the 'operate' method as follows.
+qubit id in the 'qctrl' option of the 'operate' method as follows.
 
 	>>> pp = PauliProduct(pauli_str="XYZ", qid=[0,1,2])
-	>>> qs.operate(pp=pp, ctlr=3)
+	>>> qs.operate(pp=pp, qctlr=3)
 
 
 ## Display of quantum state vector

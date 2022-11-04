@@ -1267,7 +1267,7 @@ class TestQState_operate(unittest.TestCase):
         qs_actual = QState(qubit_num=4)
         pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
         qs_expect.cx(3,2).cy(3,0).cz(3,1)
-        qs_actual.operate(pp=pp, ctrl=3)
+        qs_actual.operate(pp=pp, qctrl=3)
         ans = equal_qstates(qs_expect, qs_actual)
         self.assertEqual(ans,True)
         

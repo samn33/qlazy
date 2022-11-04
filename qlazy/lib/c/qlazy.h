@@ -354,13 +354,13 @@ typedef struct _QGate {
   struct _QGate*        next;
 } QGate;
 
-typedef struct _QCirc {
+typedef struct _QCircBase {
   int           qubit_num;
   int           cmem_num;
   int           gate_num;
   QGate*        first;
   QGate*        last;
-} QCirc;
+} QCircBase;
 
 typedef struct _CMem {
   int	        cmem_num;
@@ -539,7 +539,7 @@ bool     qstate_tensor_product(QState* qstate_0, QState* qstate_1, void** qstate
 bool     qstate_expect_value(QState* qstate, ObservableBase* observ, double* value);
 bool     qstate_apply_matrix(QState* qstate, int qnum, int* qid,
 			     double* real, double *imag, int row, int col);
-bool     qstate_operate_qcirc(QState* qstate, CMem* cmem, QCirc* qcirc, int shots,
+bool     qstate_operate_qcirc(QState* qstate, CMem* cmem, QCircBase* qcirc, int shots,
 			      char* mchar_shots, bool out_state);
 void	 qstate_free(QState* qstate);
 
@@ -598,7 +598,7 @@ bool	stabilizer_get_pauli_fac(Stabilizer* stab, int gene_id, ComplexAxis* pauli_
 bool	stabilizer_operate_qgate(Stabilizer* stab, Kind kind, int q0, int q1);
 bool    stabilizer_get_rank(Stabilizer* stab, int* rank_out);
 bool	stabilizer_measure(Stabilizer* stab, int q, double* prob_out, int* mval_out);
-bool    stabilizer_operate_qcirc(Stabilizer* stab, CMem* cmem, QCirc* qcirc);
+bool    stabilizer_operate_qcirc(Stabilizer* stab, CMem* cmem, QCircBase* qcirc);
 void	stabilizer_free(Stabilizer* stab);
 
 /* qgate.c */
@@ -608,19 +608,19 @@ bool qgate_get_measurement_attributes(void** qgate_inout, GBank* gbank,
 				      int* mnum_out, int* qid_out, int* cid_out, bool* last_out);
 
 /* qcirc.c */
-bool qcirc_init(void** qcirc_out);
-bool qcirc_copy(QCirc* qcirc, void** qcirc_out);
-bool qcirc_merge(QCirc* qcirc_L, QCirc* qcirc_R, void** qcirc_out);
-bool qcirc_is_equal(QCirc* qcirc_L, QCirc* qcirc_R, bool* ans);
-bool qcirc_is_unitary_only(QCirc* qcirc, bool* ans);
-bool qcirc_is_measurement_only(QCirc* qcirc, bool* ans);
-bool qcirc_kind_first(QCirc* qcirc, Kind* kind);
-bool qcirc_append_gate(QCirc* qcirc, Kind kind, int* qid, double* para, int c, int ctrl);
-bool qcirc_pop_gate(QCirc* qcirc, Kind* kind, int* qid, double* para, int* c, int* ctrl);
-bool qcirc_decompose(QCirc* qcirc_in, void** qcirc_uonly_out, void** qcirc_mixed_out,
-		     void** qcirc_monly_out);
-bool qcirc_set_phase_list(QCirc* qcirc, double* phase_list);
-void qcirc_free(QCirc* qcirc);
+bool qcirc_base_init(void** qcirc_out);
+bool qcirc_base_copy(QCircBase* qcirc, void** qcirc_out);
+bool qcirc_base_merge(QCircBase* qcirc_L, QCircBase* qcirc_R, void** qcirc_out);
+bool qcirc_base_is_equal(QCircBase* qcirc_L, QCircBase* qcirc_R, bool* ans);
+bool qcirc_base_is_unitary_only(QCircBase* qcirc, bool* ans);
+bool qcirc_base_is_measurement_only(QCircBase* qcirc, bool* ans);
+bool qcirc_base_kind_first(QCircBase* qcirc, Kind* kind);
+bool qcirc_base_append_gate(QCircBase* qcirc, Kind kind, int* qid, double* para, int c, int ctrl);
+bool qcirc_base_pop_gate(QCircBase* qcirc, Kind* kind, int* qid, double* para, int* c, int* ctrl);
+bool qcirc_base_decompose(QCircBase* qcirc_in, void** qcirc_uonly_out, void** qcirc_mixed_out,
+			  void** qcirc_monly_out);
+bool qcirc_base_set_phase_list(QCircBase* qcirc, double* phase_list);
+void qcirc_base_free(QCircBase* qcirc);
 
 /* cmem.c */
 bool cmem_init(int cmem_num, void** cmem_out);
@@ -652,8 +652,8 @@ bool qstate_operate_unitary4_gpu(COMPLEX* camp_out, COMPLEX* camp_in, COMPLEX* U
 				 int qubit_num, int state_num, int m, int n);
 bool qstate_operate_controlled_gate_gpu(QState* qstate, COMPLEX* U, int m, int n);
 bool qstate_operate_unitary_gpu(QState* qstate, COMPLEX* U, int dim, int m, int n);
-bool qstate_operate_qcirc_gpu(QState* qstate, CMem* cmem, QCirc* qcirc, bool measure_update);
-bool qstate_operate_measure_gpu(QState* qstate, CMem* cmem, QCirc* qcirc, int shots,
+bool qstate_operate_qcirc_gpu(QState* qstate, CMem* cmem, QCircBase* qcirc, bool measure_update);
+bool qstate_operate_measure_gpu(QState* qstate, CMem* cmem, QCircBase* qcirc, int shots,
 				char* mchar_shots, bool out_state);
 bool qstate_update_host_memory(QState* qstate);
 bool qstate_update_device_memory(QState* qstate);

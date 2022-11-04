@@ -7,7 +7,6 @@ from qlazy.util import read_config_ini
 from qlazy.gpu import is_gpu_available, is_gpu_supported_lib, gpu_preparation
 from qlazy.QCirc import QCirc
 from qlazy.Observable import Observable
-from qlazy.ParametricQCirc import ParametricQCirc
 
 BACKEND_DEVICES = {'qlazy': ['qstate_simulator',
                              'stabilizer_simulator',
@@ -240,7 +239,7 @@ class Backend:
 
         Parameters
         ----------
-        qcirc : instance of QCirc or ParametricQCirc
+        qcirc : instance of QCirc
             quantum circuit.
         shots : int, default 1
             number of measurements.
@@ -276,7 +275,7 @@ class Backend:
         Counter({'00': 100})
 
         """
-        if not isinstance(qcirc, (QCirc, ParametricQCirc)):
+        if not isinstance(qcirc, QCirc):
             raise TypeError("qcirc must be QCirc or ParamtricQCirc.")
         if not isinstance(shots, int):
             raise TypeError("shots must be int.")
@@ -357,7 +356,7 @@ class Backend:
 
         Parameters
         ----------
-        qcirc : instance of QCirc or ParametricQCirc
+        qcirc : instance of QCirc
             quantum circuit.
         observable : instance of Observable
             obserbable considerd.
@@ -384,7 +383,7 @@ class Backend:
         >>> 0.0074
 
         """
-        if not isinstance(qcirc, (QCirc, ParametricQCirc)):
+        if not isinstance(qcirc, QCirc):
             raise TypeError("qcirc must be QCirc or ParamtricQCirc.")
         if not isinstance(observable, Observable):
             raise TypeError("observable must be Observable.")

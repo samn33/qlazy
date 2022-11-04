@@ -89,10 +89,10 @@ then perform 'operate' method with 'pp' option.
     >>> mps.operate(pp=pp)
 
 Controlled pauli product can be operated by specifying the control
-qubit id in the 'ctrl' option of the 'operate' method as follows.
+qubit id in the 'qctrl' option of the 'operate' method as follows.
 
 	>>> pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
-	>>> mps.operate(pp=pp, ctrl=3)
+	>>> mps.operate(pp=pp, qctrl=3)
 
 ### Memory release
 
