@@ -55,12 +55,12 @@ def __braket_add_qgate(qc_braket, kind, q0, q1, angle, product):
     elif kind == cfg.CONTROLLED_H:
         pi_2 = 0.5 * np.pi
         pi_4 = 0.25 * np.pi
-        qc_braket.ry(1, angle=-pi_4).cnot(0, 1).rz(1, angle=-pi_2)
-        qc_braket.cnot(0, 1).rz(1, angle=pi_2).ry(1, angle=pi_4)
+        qc_braket.ry(q1, angle=-pi_4).cnot(q0, q1).rz(q1, angle=-pi_2)
+        qc_braket.cnot(q0, 1).rz(q1, angle=pi_2).ry(q1, angle=pi_4)
         if product == 'braket_ionq':
-            qc_braket.rz(0, angle=pi_2)
+            qc_braket.rz(q0, angle=pi_2)
         else:
-            qc_braket.phaseshift(0, angle=pi_2)
+            qc_braket.phaseshift(q0, angle=pi_2)
 
     # 2-qubit, 1-parameters gate
     elif kind == cfg.CONTROLLED_RZ:

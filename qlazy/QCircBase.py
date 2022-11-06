@@ -1290,8 +1290,6 @@ class QCircBase(ctypes.Structure):
         ----------
         qid : list of int
             qubit id list to measure.
-        cid : list of int
-            classical register id list to store measured result.
 
         Returns
         -------

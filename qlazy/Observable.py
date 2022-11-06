@@ -164,7 +164,7 @@ class Observable:
 
         return ans
 
-    def __neq__(self, ob):
+    def __ne__(self, ob):
         """
         Parameters
         ----------
