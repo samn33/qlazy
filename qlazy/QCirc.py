@@ -156,8 +156,9 @@ class QCirc(QCircBase):
 
         ans = False
         if super().is_equal(qc) is True:
-            if self.tag_list == qc.tag_list and self.fac_list == qc.fac_list:
-                ans = True
+            ans = True
+            # if self.tag_list == qc.tag_list and self.fac_list == qc.fac_list:
+            #     ans = True
         return ans
 
     def dump(self, file_path):
@@ -317,7 +318,7 @@ class QCirc(QCircBase):
 
     # add 1-qubit gate
 
-    def rx(self, q0, phase=cfg.DEF_PHASE, ctrl=None, tag=None):
+    def rx(self, q0, phase=cfg.DEF_PHASE, ctrl=None, tag=None, fac=1.0):
         """
         add RX gate (rotation around X-axis).
 
@@ -340,10 +341,10 @@ class QCirc(QCircBase):
         """
         qid = [q0, -1]
         para = [phase, 0.0, 0.0]
-        self.append_gate(kind=cfg.ROTATION_X, qid=qid, para=para, ctrl=ctrl, tag=tag, fac=1.0)
+        self.append_gate(kind=cfg.ROTATION_X, qid=qid, para=para, ctrl=ctrl, tag=tag, fac=fac)
         return self
 
-    def ry(self, q0, phase=cfg.DEF_PHASE, ctrl=None, tag=None):
+    def ry(self, q0, phase=cfg.DEF_PHASE, ctrl=None, tag=None, fac=1.0):
         """
         add RY gate (rotation around Y-axis).
 
@@ -365,11 +366,11 @@ class QCirc(QCircBase):
         qid = [q0, -1]
         para = [phase, 0.0, 0.0]
         self.append_gate(kind=cfg.PHASE_SHIFT_S_, qid=qid, ctrl=ctrl)
-        self.append_gate(kind=cfg.ROTATION_X, qid=qid, para=para, ctrl=ctrl, tag=tag, fac=1.0)
+        self.append_gate(kind=cfg.ROTATION_X, qid=qid, para=para, ctrl=ctrl, tag=tag, fac=fac)
         self.append_gate(kind=cfg.PHASE_SHIFT_S, qid=qid, ctrl=ctrl)
         return self
 
-    def rz(self, q0, phase=cfg.DEF_PHASE, ctrl=None, tag=None):
+    def rz(self, q0, phase=cfg.DEF_PHASE, ctrl=None, tag=None, fac=1.0):
         """
         add RZ gate (rotation around Z-axis).
 
@@ -392,10 +393,10 @@ class QCirc(QCircBase):
         """
         qid = [q0, -1]
         para = [phase, 0.0, 0.0]
-        self.append_gate(kind=cfg.ROTATION_Z, qid=qid, para=para, ctrl=ctrl, tag=tag, fac=1.0)
+        self.append_gate(kind=cfg.ROTATION_Z, qid=qid, para=para, ctrl=ctrl, tag=tag, fac=fac)
         return self
 
-    def p(self, q0, phase=cfg.DEF_PHASE, ctrl=None, tag=None):
+    def p(self, q0, phase=cfg.DEF_PHASE, ctrl=None, tag=None, fac=1.0):
         """
         add P gate (phase shift gate).
 
@@ -424,12 +425,12 @@ class QCirc(QCircBase):
         """
         qid = [q0, -1]
         para = [phase, 0.0, 0.0]
-        self.append_gate(kind=cfg.ROTATION_Z, qid=qid, para=para, ctrl=ctrl, tag=tag, fac=1.0)
+        self.append_gate(kind=cfg.ROTATION_Z, qid=qid, para=para, ctrl=ctrl, tag=tag, fac=fac)
         return self
 
     # add 2-qubit gate
 
-    def cp(self, q0, q1, phase=cfg.DEF_PHASE, ctrl=None, tag=None):
+    def cp(self, q0, q1, phase=cfg.DEF_PHASE, ctrl=None, tag=None, fac=1.0):
         """
         add CP gate (controlled P gate).
 
@@ -452,12 +453,12 @@ class QCirc(QCircBase):
         """
         qid = [q0, q1]
         para = [phase, 0.0, 0.0]
-        self.append_gate(kind=cfg.CONTROLLED_RZ, qid=qid, para=para, ctrl=ctrl, tag=tag, fac=1.0)
+        self.append_gate(kind=cfg.CONTROLLED_RZ, qid=qid, para=para, ctrl=ctrl, tag=tag, fac=fac)
         para = [phase/2, 0.0, 0.0]
-        self.append_gate(kind=cfg.ROTATION_Z, qid=qid, para=para, ctrl=ctrl, tag=tag, fac=0.5)
+        self.append_gate(kind=cfg.ROTATION_Z, qid=qid, para=para, ctrl=ctrl, tag=tag, fac=0.5*fac)
         return self
 
-    def crx(self, q0, q1, phase=cfg.DEF_PHASE, ctrl=None, tag=None):
+    def crx(self, q0, q1, phase=cfg.DEF_PHASE, ctrl=None, tag=None, fac=1.0):
         """
         add CRX gate (controlled RX gate).
 
@@ -482,11 +483,11 @@ class QCirc(QCircBase):
         """
         para = [phase, 0.0, 0.0]
         self.append_gate(kind=cfg.HADAMARD, qid=[q1, -1], ctrl=ctrl)
-        self.append_gate(kind=cfg.CONTROLLED_RZ, qid=[q0, q1], para=para, ctrl=ctrl, tag=tag, fac=1.0)
+        self.append_gate(kind=cfg.CONTROLLED_RZ, qid=[q0, q1], para=para, ctrl=ctrl, tag=tag, fac=fac)
         self.append_gate(kind=cfg.HADAMARD, qid=[q1, -1], ctrl=ctrl)
         return self
 
-    def cry(self, q0, q1, phase=cfg.DEF_PHASE, ctrl=None, tag=None):
+    def cry(self, q0, q1, phase=cfg.DEF_PHASE, ctrl=None, tag=None, fac=1.0):
         """
         add CRY gate (controlled RY gate).
 
@@ -516,7 +517,7 @@ class QCirc(QCircBase):
         self.append_gate(cfg.ROTATION_Z, qid=[q0, q1], para=para, ctrl=ctrl)
         para = [phase, 0.0, 0.0]
         self.append_gate(cfg.HADAMARD, qid=[q1, -1], ctrl=ctrl)
-        self.append_gate(cfg.CONTROLLED_RZ, qid=[q0, q1], para=para, ctrl=ctrl, tag=tag, fac=1.0)
+        self.append_gate(cfg.CONTROLLED_RZ, qid=[q0, q1], para=para, ctrl=ctrl, tag=tag, fac=fac)
         self.append_gate(cfg.HADAMARD, qid=[q1, -1], ctrl=ctrl)
 
         # cs gate
@@ -527,7 +528,7 @@ class QCirc(QCircBase):
 
         return self
 
-    def crz(self, q0, q1, phase=cfg.DEF_PHASE, ctrl=None, tag=None):
+    def crz(self, q0, q1, phase=cfg.DEF_PHASE, ctrl=None, tag=None, fac=1.0):
         """
         add CRZ gate (controlled RZ gate).
 
@@ -552,10 +553,10 @@ class QCirc(QCircBase):
         """
         qid = [q0, q1]
         para = [phase, 0.0, 0.0]
-        self.append_gate(kind=cfg.CONTROLLED_RZ, qid=qid, para=para, ctrl=ctrl, tag=tag, fac=1.0)
+        self.append_gate(kind=cfg.CONTROLLED_RZ, qid=qid, para=para, ctrl=ctrl, tag=tag, fac=fac)
         return self
 
-    def rxx(self, q0, q1, phase=cfg.DEF_PHASE, ctrl=None, tag=None):
+    def rxx(self, q0, q1, phase=cfg.DEF_PHASE, ctrl=None, tag=None, fac=1.0):
         """
         add Rxx gate (controlled RZ gate).
 
@@ -582,13 +583,13 @@ class QCirc(QCircBase):
         self.append_gate(kind=cfg.HADAMARD, qid=[q0, -1], ctrl=ctrl)
         self.append_gate(kind=cfg.HADAMARD, qid=[q1, -1], ctrl=ctrl)
         self.append_gate(kind=cfg.CONTROLLED_X, qid=[q0, q1], ctrl=ctrl)
-        self.append_gate(kind=cfg.ROTATION_Z, qid=[q1, -1], para=para, ctrl=ctrl, tag=tag, fac=1.0)
+        self.append_gate(kind=cfg.ROTATION_Z, qid=[q1, -1], para=para, ctrl=ctrl, tag=tag, fac=fac)
         self.append_gate(kind=cfg.CONTROLLED_X, qid=[q0, q1], ctrl=ctrl)
         self.append_gate(kind=cfg.HADAMARD, qid=[q0, -1], ctrl=ctrl)
         self.append_gate(kind=cfg.HADAMARD, qid=[q1, -1], ctrl=ctrl)
         return self
 
-    def ryy(self, q0, q1, phase=cfg.DEF_PHASE, ctrl=None, tag=None):
+    def ryy(self, q0, q1, phase=cfg.DEF_PHASE, ctrl=None, tag=None, fac=1.0):
         """
         add Ryy gate (controlled RZ gate).
 
@@ -615,13 +616,13 @@ class QCirc(QCircBase):
         self.append_gate(kind=cfg.ROTATION_X, qid=[q0, -1], para=[0.5, 0.0, 0.0], ctrl=ctrl)
         self.append_gate(kind=cfg.ROTATION_X, qid=[q1, -1], para=[0.5, 0.0, 0.0], ctrl=ctrl)
         self.append_gate(kind=cfg.CONTROLLED_X, qid=[q0, q1], ctrl=ctrl)
-        self.append_gate(kind=cfg.ROTATION_Z, qid=[q1, -1], para=para, ctrl=ctrl, tag=tag, fac=1.0)
+        self.append_gate(kind=cfg.ROTATION_Z, qid=[q1, -1], para=para, ctrl=ctrl, tag=tag, fac=fac)
         self.append_gate(kind=cfg.CONTROLLED_X, qid=[q0, q1], ctrl=ctrl)
         self.append_gate(kind=cfg.ROTATION_X, qid=[q0, -1], para=[-0.5, 0.0, 0.0], ctrl=ctrl)
         self.append_gate(kind=cfg.ROTATION_X, qid=[q1, -1], para=[-0.5, 0.0, 0.0], ctrl=ctrl)
         return self
 
-    def rzz(self, q0, q1, phase=cfg.DEF_PHASE, ctrl=None, tag=None):
+    def rzz(self, q0, q1, phase=cfg.DEF_PHASE, ctrl=None, tag=None, fac=1.0):
         """
         add Rzz gate (controlled RZ gate).
 
@@ -646,9 +647,93 @@ class QCirc(QCircBase):
         """
         para = [phase, 0.0, 0.0]
         self.append_gate(kind=cfg.CONTROLLED_X, qid=[q0, q1], ctrl=ctrl)
-        self.append_gate(kind=cfg.ROTATION_Z, qid=[q1, -1], para=para, ctrl=ctrl, tag=tag, fac=1.0)
+        self.append_gate(kind=cfg.ROTATION_Z, qid=[q1, -1], para=para, ctrl=ctrl, tag=tag, fac=fac)
         self.append_gate(kind=cfg.CONTROLLED_X, qid=[q0, q1], ctrl=ctrl)
         return self
+
+    def add_control(self, qctrl=None):
+        """
+        add control qubit to quantum circuit
+
+        Parameters
+        ----------
+        qctrl : int
+            control qubit id
+
+        Returns
+        -------
+        qc_out : instance of QCirc
+            quantum circuit after adding control qubit
+
+        """
+        gates = self.get_gates()
+        for g in gates:
+            if qctrl in g['qid']:
+                raise ValueError("qctrl={} is not allowed because it is already used.".format(qctrl))
+
+        qc = self.clone()
+        qc_out = QCirc()
+        gid = 0
+        while True:
+            kind = qc.kind_first()
+            if kind is None:
+                break
+
+            (kind, qid, para, c, ctrl) = qc.pop_gate()
+
+            self.__add_controlled_gate(qc_out, kind, qid, para, c, ctrl, gid, qctrl)
+            gid += 1
+            
+        return qc_out
+
+    def __add_controlled_gate(self, qc, kind, qid, para, c, ctrl, gid, qctrl):
+
+        # 1-qubit gate
+        if kind == cfg.PAULI_X:
+            qc.cx(qctrl, qid[0], ctrl=ctrl)
+        elif kind == cfg.PAULI_Z:
+            qc.cz(qctrl, qid[0], ctrl=ctrl)
+        elif kind == cfg.HADAMARD:
+            qc.ch(qctrl, qid[0], ctrl=ctrl)
+        elif kind == cfg.PHASE_SHIFT_S:
+            qc.cs(qctrl, qid[0], ctrl=ctrl)
+        elif kind == cfg.PHASE_SHIFT_S_:
+            qc.cs_dg(qctrl, qid[0], ctrl=ctrl)
+        elif kind == cfg.PHASE_SHIFT_T:
+            qc.ct(qctrl, qid[0], ctrl=ctrl)
+        elif kind == cfg.PHASE_SHIFT_T_:
+            qc.ct_dg(qctrl, qid[0], ctrl=ctrl)
+        elif kind == cfg.ROTATION_X:
+            qc.crx(qctrl, qid[0], phase=para[0], ctrl=ctrl, tag=self.tag_list[gid], fac=1.0)
+        elif kind == cfg.ROTATION_Z:
+            qc.crz(qctrl, qid[0], phase=para[0], ctrl=ctrl, tag=self.tag_list[gid], fac=1.0)
+
+        # 2-qubit gate
+        elif kind == cfg.CONTROLLED_X:
+            qc.ccx(qctrl, qid[0], qid[1], ctrl=ctrl)
+        elif kind == cfg.CONTROLLED_Z:
+            qc.h(qid[1], ctrl=ctrl)
+            qc.ccx(qctrl, qid[0], qid[1], ctrl=ctrl)
+            qc.h(qid[1], ctrl=ctrl)
+        elif kind == cfg.CONTROLLED_H:
+            q0, q1 = qid[0], qid[1]
+            qc.cry(qctrl, q1, phase=-0.25, ctrl=ctrl).ccx(qctrl, q0, q1, ctrl=ctrl).crz(qctrl, q1, phase=-0.5, ctrl=ctrl)
+            qc.ccx(qctrl, q0, q1, ctrl=ctrl).crz(qctrl, q1, phase=0.5, ctrl=ctrl).cry(qctrl, q1, phase=0.25, ctrl=ctrl)
+            qc.crz(qctrl, q0, phase=0.5, ctrl=ctrl)
+        elif kind == cfg.CONTROLLED_RZ:
+            qc.crz(qctrl, qid[1], phase=para[0]/2.0, ctrl=ctrl, tag=self.tag_list[gid], fac=0.5)
+            qc.ccx(qctrl, qid[0], qid[1], ctrl=ctrl)
+            qc.crz(qctrl, qid[1], phase=-para[0]/2.0, ctrl=ctrl, tag=self.tag_list[gid], fac=-0.5)
+            qc.ccx(qctrl, qid[0], qid[1], ctrl=ctrl)
+
+        # non-unitary gate
+        elif kind == cfg.MEASURE:
+            qc.measure(qid=[qid[0]], cid=[c])
+        elif kind == cfg.RESET:
+            qc.reset(qid=[qid[0]])
+        else:
+            raise ValueError("not supported quantum gate.")
+
 
 # c-library for qstate
 from qlazy.lib.qcirc_base_c import qcirc_base_set_phase_list

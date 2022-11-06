@@ -4,13 +4,15 @@
 ### Added
 - get current version name from VERSION file when building the codes
 - support parametric quantum circuit
+- add_controll method of QCirc class to add controlled qubit
+- expect method of Backend class to get an expectation value
 - VQE example using parametric quantum circuit
 - QAOA example using parametric quantum circuit
-- expect method of Backend class to get an expectation value
 ### Changed
 - random generation algorithm of C codes to 'Mersenne Twister'
 ### Fixed
 - run method of qulacs backend
+- run method of amazon_braket backend
 
 ## [0.3.2] - 2022-09-11
 ### Added

@@ -9,6 +9,8 @@ from qlazy.config import *
 
 EPS = 1.0e-6
 
+EPS = 1.e-6
+
 def equal_or_not(qs_A, qs_B):
 
     fid = qs_A.fidelity(qs_B)
@@ -27,6 +29,27 @@ def valid_or_not(qc):
     circ_B = Circuit.from_qasm(qasm_B)
     ans = circ_A.verify_equality(circ_B)
     return ans
+
+def check_controlled_qcirc(qc_U, qubit_num, verbose=False):
+
+    bk = Backend()
+    qc_0_cU = qc_U.add_control(qctrl=qubit_num)
+    qc_1_cU = QCirc().x(qubit_num) + qc_0_cU
+
+    qs = QState(qubit_num)
+    qs_0_cU = bk.run(qcirc=qc_0_cU, out_state=True).qstate
+
+    qs_U = bk.run(qcirc=qc_U, out_state=True).qstate
+    qs_1_cU = bk.run(qcirc=qc_1_cU, out_state=True).qstate
+
+    if verbose is True:
+        qc_U.show()
+        qc_0_cU.show()
+    
+    fid_A = qs_0_cU.fidelity(qs, qid=list(range(qubit_num)))
+    fid_B = qs_1_cU.fidelity(qs_U, qid=list(range(qubit_num)))
+
+    return fid_A, fid_B
 
 class MyQCirc(QCirc):
 
@@ -936,7 +959,7 @@ class TestQCirc_generate_random_gates(unittest.TestCase):
         """test get_gates, add_gates
         """
         qc = QCirc.generate_random_gates(qubit_num=3, gate_num=1000,
-                                                   prob={'h':5, 'cx':3, 't':2})
+                                         prob={'h':5, 'cx':3, 't':2})
         stats = qc.get_stats()
         self.assertEqual(round(stats['gate_freq']['h'] / 100.), 5)
         self.assertEqual(round(stats['gate_freq']['cx'] / 100.), 3)
@@ -987,7 +1010,7 @@ class TestQCirc_using_tag(unittest.TestCase):
         qs_A = bk.run(qcirc=qc_A, out_state=True).qstate
         qs_B = bk.run(qcirc=qc_B, out_state=True).qstate
 
-        self.assertEqual(qc_A != qc_B, True)
+        self.assertEqual(qc_A == qc_B, True)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
         
     def test_2(self):
@@ -1053,6 +1076,345 @@ class TestQCirc_using_tag(unittest.TestCase):
         self.assertEqual(qc_A == qc_B, True)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
     
+#
+# add control qubit
+#
+
+class TestQCirc_add_control(unittest.TestCase):
+    """ test 'QCirc' : 'add_controll'
+    """
+
+    def test_add_control_x(self):
+        """test 'x'
+        """
+        qc_U = QCirc().x(0)
+        qubit_num = qc_U.qubit_num
+        fid_A, fid_B = check_controlled_qcirc(qc_U, qubit_num)
+        self.assertEqual(abs(fid_A - 1.0) < EPS , True)
+        self.assertEqual(abs(fid_B - 1.0) < EPS , True)
+    
+    def test_add_control_y(self):
+        """test 'y'
+        """
+        qc_U = QCirc().y(0)
+        qubit_num = qc_U.qubit_num
+        fid_A, fid_B = check_controlled_qcirc(qc_U, qubit_num)
+        self.assertEqual(abs(fid_A - 1.0) < EPS , True)
+        self.assertEqual(abs(fid_B - 1.0) < EPS , True)
+    
+    def test_add_control_z(self):
+        """test 'z'
+        """
+        qc_U = QCirc().h(0).z(0)
+        qubit_num = qc_U.qubit_num
+        fid_A, fid_B = check_controlled_qcirc(qc_U, qubit_num)
+        self.assertEqual(abs(fid_A - 1.0) < EPS , True)
+        self.assertEqual(abs(fid_B - 1.0) < EPS , True)
+    
+    def test_add_control_h(self):
+        """test 'h'
+        """
+        qc_U = QCirc().h(0)
+        qubit_num = qc_U.qubit_num
+        fid_A, fid_B = check_controlled_qcirc(qc_U, qubit_num)
+        self.assertEqual(abs(fid_A - 1.0) < EPS , True)
+        self.assertEqual(abs(fid_B - 1.0) < EPS , True)
+    
+    def test_add_control_xr(self):
+        """test 'xr'
+        """
+        qc_U = QCirc().xr(0)
+        qubit_num = qc_U.qubit_num
+        fid_A, fid_B = check_controlled_qcirc(qc_U, qubit_num)
+        self.assertEqual(abs(fid_A - 1.0) < EPS , True)
+        self.assertEqual(abs(fid_B - 1.0) < EPS , True)
+    
+    def test_add_control_xr_dg(self):
+        """test 'xr_dg'
+        """
+        qc_U = QCirc().xr_dg(0)
+        qubit_num = qc_U.qubit_num
+        fid_A, fid_B = check_controlled_qcirc(qc_U, qubit_num)
+        self.assertEqual(abs(fid_A - 1.0) < EPS , True)
+        self.assertEqual(abs(fid_B - 1.0) < EPS , True)
+    
+    def test_add_control_s(self):
+        """test 's'
+        """
+        qc_U = QCirc().h(0).s(0)
+        qubit_num = qc_U.qubit_num
+        fid_A, fid_B = check_controlled_qcirc(qc_U, qubit_num)
+        self.assertEqual(abs(fid_A - 1.0) < EPS , True)
+        self.assertEqual(abs(fid_B - 1.0) < EPS , True)
+    
+    def test_add_control_s_dg(self):
+        """test 's_dg'
+        """
+        qc_U = QCirc().h(0).s_dg(0)
+        qubit_num = qc_U.qubit_num
+        fid_A, fid_B = check_controlled_qcirc(qc_U, qubit_num)
+        self.assertEqual(abs(fid_A - 1.0) < EPS , True)
+        self.assertEqual(abs(fid_B - 1.0) < EPS , True)
+    
+    def test_add_control_t(self):
+        """test 't'
+        """
+        qc_U = QCirc().h(0).t(0)
+        qubit_num = qc_U.qubit_num
+        fid_A, fid_B = check_controlled_qcirc(qc_U, qubit_num)
+        self.assertEqual(abs(fid_A - 1.0) < EPS , True)
+        self.assertEqual(abs(fid_B - 1.0) < EPS , True)
+    
+    def test_add_control_t_dg(self):
+        """test 't_dg'
+        """
+        qc_U = QCirc().h(0).t_dg(0)
+        qubit_num = qc_U.qubit_num
+        fid_A, fid_B = check_controlled_qcirc(qc_U, qubit_num)
+        self.assertEqual(abs(fid_A - 1.0) < EPS , True)
+        self.assertEqual(abs(fid_B - 1.0) < EPS , True)
+    
+    def test_add_control_rx(self):
+        """test 'rx'
+        """
+        qc_U = QCirc().rx(0, phase=0.7)
+        qubit_num = qc_U.qubit_num
+        fid_A, fid_B = check_controlled_qcirc(qc_U, qubit_num)
+        self.assertEqual(abs(fid_A - 1.0) < EPS , True)
+        self.assertEqual(abs(fid_B - 1.0) < EPS , True)
+    
+    def test_add_control_ry(self):
+        """test 'ry'
+        """
+        qc_U = QCirc().ry(0, phase=0.7)
+        qubit_num = qc_U.qubit_num
+        fid_A, fid_B = check_controlled_qcirc(qc_U, qubit_num)
+        self.assertEqual(abs(fid_A - 1.0) < EPS , True)
+        self.assertEqual(abs(fid_B - 1.0) < EPS , True)
+    
+    def test_add_control_rz(self):
+        """test 'rz'
+        """
+        qc_U = QCirc().h(0).rz(0, phase=0.7)
+        qubit_num = qc_U.qubit_num
+        fid_A, fid_B = check_controlled_qcirc(qc_U, qubit_num)
+        self.assertEqual(abs(fid_A - 1.0) < EPS , True)
+        self.assertEqual(abs(fid_B - 1.0) < EPS , True)
+    
+    def test_add_control_p(self):
+        """test 'p'
+        """
+        qc_U = QCirc().h(0).p(0, phase=0.7)
+        qubit_num = qc_U.qubit_num
+        fid_A, fid_B = check_controlled_qcirc(qc_U, qubit_num)
+        self.assertEqual(abs(fid_A - 1.0) < EPS , True)
+        self.assertEqual(abs(fid_B - 1.0) < EPS , True)
+    
+    def test_add_control_cx(self):
+        """test 'cx'
+        """
+        qc_U = QCirc().h(0).cx(0,1)
+        qubit_num = qc_U.qubit_num
+        fid_A, fid_B = check_controlled_qcirc(qc_U, qubit_num)
+        self.assertEqual(abs(fid_A - 1.0) < EPS , True)
+        self.assertEqual(abs(fid_B - 1.0) < EPS , True)
+    
+    def test_add_control_cy(self):
+        """test 'cy'
+        """
+        qc_U = QCirc().h(0).cy(0,1)
+        qubit_num = qc_U.qubit_num
+        fid_A, fid_B = check_controlled_qcirc(qc_U, qubit_num)
+        self.assertEqual(abs(fid_A - 1.0) < EPS , True)
+        self.assertEqual(abs(fid_B - 1.0) < EPS , True)
+    
+    def test_add_control_cz(self):
+        """test 'cz'
+        """
+        qc_U = QCirc().h(0).cz(0,1)
+        qubit_num = qc_U.qubit_num
+        fid_A, fid_B = check_controlled_qcirc(qc_U, qubit_num)
+        self.assertEqual(abs(fid_A - 1.0) < EPS , True)
+        self.assertEqual(abs(fid_B - 1.0) < EPS , True)
+    
+    def test_add_control_cxr(self):
+        """test 'cxr'
+        """
+        qc_U = QCirc().h(0).cxr(0,1)
+        qubit_num = qc_U.qubit_num
+        fid_A, fid_B = check_controlled_qcirc(qc_U, qubit_num)
+        self.assertEqual(abs(fid_A - 1.0) < EPS , True)
+        self.assertEqual(abs(fid_B - 1.0) < EPS , True)
+    
+    def test_add_control_cxr_dg(self):
+        """test 'cxr_dg'
+        """
+        qc_U = QCirc().h(0).cxr_dg(0,1)
+        qubit_num = qc_U.qubit_num
+        fid_A, fid_B = check_controlled_qcirc(qc_U, qubit_num)
+        self.assertEqual(abs(fid_A - 1.0) < EPS , True)
+        self.assertEqual(abs(fid_B - 1.0) < EPS , True)
+    
+    def test_add_control_ch(self):
+        """test 'ch'
+        """
+        qc_U = QCirc().h(0).ch(0,1)
+        qubit_num = qc_U.qubit_num
+        fid_A, fid_B = check_controlled_qcirc(qc_U, qubit_num)
+        self.assertEqual(abs(fid_A - 1.0) < EPS , True)
+        self.assertEqual(abs(fid_B - 1.0) < EPS , True)
+    
+    def test_add_control_cs(self):
+        """test 'cs'
+        """
+        qc_U = QCirc().h(0).cs(0,1)
+        qubit_num = qc_U.qubit_num
+        fid_A, fid_B = check_controlled_qcirc(qc_U, qubit_num)
+        self.assertEqual(abs(fid_A - 1.0) < EPS , True)
+        self.assertEqual(abs(fid_B - 1.0) < EPS , True)
+    
+    def test_add_control_cs_dg(self):
+        """test 'cs_dg'
+        """
+        qc_U = QCirc().h(0).cs_dg(0,1)
+        qubit_num = qc_U.qubit_num
+        fid_A, fid_B = check_controlled_qcirc(qc_U, qubit_num)
+        self.assertEqual(abs(fid_A - 1.0) < EPS , True)
+        self.assertEqual(abs(fid_B - 1.0) < EPS , True)
+    
+    def test_add_control_ct(self):
+        """test 'ct'
+        """
+        qc_U = QCirc().h(0).ct(0,1)
+        qubit_num = qc_U.qubit_num
+        fid_A, fid_B = check_controlled_qcirc(qc_U, qubit_num)
+        self.assertEqual(abs(fid_A - 1.0) < EPS , True)
+        self.assertEqual(abs(fid_B - 1.0) < EPS , True)
+    
+    def test_add_control_ct_dg(self):
+        """test 'ct_dg'
+        """
+        qc_U = QCirc().h(0).ct_dg(0,1)
+        qubit_num = qc_U.qubit_num
+        fid_A, fid_B = check_controlled_qcirc(qc_U, qubit_num)
+        self.assertEqual(abs(fid_A - 1.0) < EPS , True)
+        self.assertEqual(abs(fid_B - 1.0) < EPS , True)
+    
+    def test_add_control_sw(self):
+        """test 'sw'
+        """
+        qc_U = QCirc().x(0).sw(0,1)
+        qubit_num = qc_U.qubit_num
+        fid_A, fid_B = check_controlled_qcirc(qc_U, qubit_num)
+        self.assertEqual(abs(fid_A - 1.0) < EPS , True)
+        self.assertEqual(abs(fid_B - 1.0) < EPS , True)
+    
+    def test_add_control_cp(self):
+        """test 'cp'
+        """
+        qc_U = QCirc().h(0).cp(0,1, phase=0.7)
+        qubit_num = qc_U.qubit_num
+        fid_A, fid_B = check_controlled_qcirc(qc_U, qubit_num)
+        self.assertEqual(abs(fid_A - 1.0) < EPS , True)
+        self.assertEqual(abs(fid_B - 1.0) < EPS , True)
+    
+    def test_add_control_crx(self):
+        """test 'crx'
+        """
+        qc_U = QCirc().crx(0,1, phase=0.7)
+        qubit_num = qc_U.qubit_num
+        fid_A, fid_B = check_controlled_qcirc(qc_U, qubit_num)
+        self.assertEqual(abs(fid_A - 1.0) < EPS , True)
+        self.assertEqual(abs(fid_B - 1.0) < EPS , True)
+    
+    def test_add_control_cry(self):
+        """test 'cry'
+        """
+        qc_U = QCirc().cry(0,1, phase=0.7)
+        qubit_num = qc_U.qubit_num
+        fid_A, fid_B = check_controlled_qcirc(qc_U, qubit_num)
+        self.assertEqual(abs(fid_A - 1.0) < EPS , True)
+        self.assertEqual(abs(fid_B - 1.0) < EPS , True)
+    
+    def test_add_control_crz(self):
+        """test 'crz'
+        """
+        qc_U = QCirc().h(0).crz(0,1, phase=0.7)
+        qubit_num = qc_U.qubit_num
+        fid_A, fid_B = check_controlled_qcirc(qc_U, qubit_num)
+        self.assertEqual(abs(fid_A - 1.0) < EPS , True)
+        self.assertEqual(abs(fid_B - 1.0) < EPS , True)
+    
+    def test_add_control_rxx(self):
+        """test 'rxx'
+        """
+        qc_U = QCirc().rxx(0,1, phase=0.7)
+        qubit_num = qc_U.qubit_num
+        fid_A, fid_B = check_controlled_qcirc(qc_U, qubit_num)
+        self.assertEqual(abs(fid_A - 1.0) < EPS , True)
+        self.assertEqual(abs(fid_B - 1.0) < EPS , True)
+    
+    def test_add_control_ryy(self):
+        """test 'ryy'
+        """
+        qc_U = QCirc().ryy(0,1, phase=0.7)
+        qubit_num = qc_U.qubit_num
+        fid_A, fid_B = check_controlled_qcirc(qc_U, qubit_num)
+        self.assertEqual(abs(fid_A - 1.0) < EPS , True)
+        self.assertEqual(abs(fid_B - 1.0) < EPS , True)
+    
+    def test_add_control_rzz(self):
+        """test 'rzz'
+        """
+        qc_U = QCirc().h(0).h(1).rzz(0,1, phase=0.7)
+        qubit_num = qc_U.qubit_num
+        fid_A, fid_B = check_controlled_qcirc(qc_U, qubit_num)
+        self.assertEqual(abs(fid_A - 1.0) < EPS , True)
+        self.assertEqual(abs(fid_B - 1.0) < EPS , True)
+    
+    def test_add_control_ccx(self):
+        """test 'ccx'
+        """
+        qc_U = QCirc().h(0).h(1).h(2).ccx(0,1,2)
+        qubit_num = qc_U.qubit_num
+        fid_A, fid_B = check_controlled_qcirc(qc_U, qubit_num)
+        self.assertEqual(abs(fid_A - 1.0) < EPS , True)
+        self.assertEqual(abs(fid_B - 1.0) < EPS , True)
+    
+    def test_add_control_csw(self):
+        """test 'csw'
+        """
+        qc_U = QCirc().h(0).h(1).h(2).csw(0,1,2)
+        qubit_num = qc_U.qubit_num
+        fid_A, fid_B = check_controlled_qcirc(qc_U, qubit_num)
+        self.assertEqual(abs(fid_A - 1.0) < EPS , True)
+        self.assertEqual(abs(fid_B - 1.0) < EPS , True)
+    
+    def test_add_control_parametric(self):
+        """test 'parametric'
+        """
+        qc_A = QCirc().h(0).h(1).cx(0,1).crx(0,1, tag='foo').rz(1, tag='bar')
+        qubit_num = qc_A.qubit_num
+        qc_cA = qc_A.add_control(qctrl=qubit_num)
+        qc_cA.set_params({'foo':0.7, 'bar':0.9})
+
+        qc_B = QCirc().h(0).h(1).cx(0,1).crx(0,1, phase=0.7).rz(1, phase=0.9)
+        qubit_num = qc_B.qubit_num
+        qc_cB = qc_B.add_control(qctrl=qubit_num)
+        
+        self.assertEqual(qc_cA == qc_cB , True)
+    
+    def test_add_control_random(self):
+        """test 'random'
+        """
+        qc_U = QCirc.generate_random_gates(qubit_num=5, gate_num=100,
+                                           phase=(0.1, 0.3, 0.7),
+                                           prob={'h':7, 'cx':5, 'rx':3, 'crz':3})
+        qubit_num = qc_U.qubit_num
+        fid_A, fid_B = check_controlled_qcirc(qc_U, qubit_num)
+        self.assertEqual(abs(fid_A - 1.0) < EPS , True)
+        self.assertEqual(abs(fid_B - 1.0) < EPS , True)
+
 #
 # inheritance
 #

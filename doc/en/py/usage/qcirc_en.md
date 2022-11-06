@@ -44,7 +44,7 @@ You can get the supporting products list as follows.
 You can get the devices list that can be used in each product as follows.
 
 	>>> print(Backend.devices('ibmq'))
-    ['aer_simulator', 'qasm_simulator', 'least_busy', 'ibmq_armonk', 'ibmq_bogota', 'ibmq_lima', 'ibmq_belem', 'ibmq_quito', 'ibmq_manila']
+    ['aer_simulator', 'least_busy', 'ibmq_armonk', 'ibmq_bogota', 'ibmq_lima', 'ibmq_belem', 'ibmq_quito', 'ibmq_manila']
 
 ### Creating quantum circuit
 
@@ -839,6 +839,47 @@ Then, if you want to change the parameters to 0.4,0.5, do as follows,
     >>> bk.run(qcirc=qc, ...)
 
 There is no need to create another quantum circuit.
+
+### Adding control qubit
+
+When you want to add a control qubit to your quantum circuit, use the
+'add_control' method.  Suppose you have a following quantum circuit,
+
+    >>> qc = QCirc().x(1).z(2)
+    >>> qc.show()
+    q[0] ---
+    q[1] -X-
+    q[2] -Z-
+
+to add the 0th qubit as a control qubit, set 0 to the 'qctrl' option
+of the 'add_control' method as follows.
+
+    >>> qc_ctrl = qc.add_controll(qctrl=0)
+    >>> qc_ctrl.show()
+    q[0] -*-*-
+    q[1] -X-|-
+    q[2] ---Z-
+
+This is a very simple example, so you may not feel so much profit.
+Here are some more complicated example.
+
+    >>> qc = QCirc().crz(0,1, phase=0.3)
+    >>> qc.show()
+    q[0] -*-------
+    q[1] -RZ(0.3)-
+
+For such quantum circuit, to add the 2nd qubit as a control qubit, set
+2 to the 'qctrl' option as follows.
+
+    >>> qc_ctrl = qc.add_controll(qctrl=2)
+    >>> qc_ctrl.show()
+    q[0] ------------*-------RZ(0.25)-X---*--------RZ(-0.25)-X--------------------------------*-------RZ
+    q[1] -RZ(0.15)-H-RZ(0.5)-H--------|-H-RZ(-0.5)-H---------|-H-RZ(0.5)-H--------RZ(-0.15)-H-RZ(0.5)-H-
+    q[2] -*---------------------------*----------------------*---*-------RZ(0.25)-*---------------------
+    
+    (0.25)-X---*--------RZ(-0.25)-X--------------------
+    -------|-H-RZ(-0.5)-H---------|-H-RZ(0.5)-H--------
+    -------*----------------------*---*-------RZ(0.25)-
 
 
 ## Supported backend
