@@ -611,6 +611,7 @@ bool qgate_get_measurement_attributes(void** qgate_inout, GBank* gbank,
 bool qcirc_base_init(void** qcirc_out);
 bool qcirc_base_copy(QCircBase* qcirc, void** qcirc_out);
 bool qcirc_base_merge(QCircBase* qcirc_L, QCircBase* qcirc_R, void** qcirc_out);
+bool qcirc_base_merge_mutable(QCircBase* qcirc_mut, QCircBase* qcirc);
 bool qcirc_base_is_equal(QCircBase* qcirc_L, QCircBase* qcirc_R, bool* ans);
 bool qcirc_base_is_unitary_only(QCircBase* qcirc, bool* ans);
 bool qcirc_base_is_measurement_only(QCircBase* qcirc, bool* ans);

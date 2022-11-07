@@ -58,6 +58,16 @@ def qcirc_base_merge(qc_L, qc_R):
 
     return c_qcirc
 
+def qcirc_base_merge_mutable(qc_mut, qc):
+    """ merge QCirc objects (mutable) """
+
+    lib.qcirc_base_merge.restype = ctypes.c_bool
+    lib.qcirc_base_merge.argtypes = [ctypes.POINTER(QCircBase), ctypes.POINTER(QCircBase)]
+    ret = lib.qcirc_base_merge_mutable(ctypes.byref(qc_mut), ctypes.byref(qc))
+
+    if ret is False:
+        raise ValueError("can't merge QCirc objects.")
+
 def qcirc_base_is_equal(qc_L, qc_R):
     """ determine if 2 QCirc objects are equal or not """
 

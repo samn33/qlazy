@@ -113,7 +113,7 @@ class QCirc(QCircBase):
 
     def merge(self, qc):
         """
-        merge quantum circuit.
+        merge two quantum circuits.
 
         Parameters
         ----------
@@ -123,7 +123,7 @@ class QCirc(QCircBase):
         Returns
         -------
         qcirc : instance of QCirc
-            quantum circuit (result)
+            new quantum circuit (merge result)
 
         """
         if not isinstance(qc, self.__class__):
@@ -135,6 +135,33 @@ class QCirc(QCircBase):
         qcirc.phase_list = self.phase_list[:] + qc.phase_list[:]
         qcirc.params = dict(self.params, **qc.params)
         return qcirc
+
+    def merge_mutable(self, qc):
+        """
+        merge a quantum circuit with another one.
+
+        Parameters
+        ----------
+        qc : instance of QCirc
+            quantum circuit (merged)
+
+        Returns
+        -------
+        None
+
+        Notes
+        -----
+        This method changes original quantum circuit.
+
+        """
+        if not isinstance(qc, self.__class__):
+            raise TypeError("quantum circuit is not {}.".format(self.__class__))
+
+        super().merge_mutable(qc)
+        self.tag_list.extend(qc.tag_list)
+        self.fac_list.extend(qc.fac_list)
+        self.phase_list.extend(qc.phase_list)
+        self.params.update(**qc.params)
 
     def is_equal(self, qc):
         """

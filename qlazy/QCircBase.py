@@ -143,8 +143,8 @@ class QCircBase(ctypes.Structure):
 
     def __iadd__(self, qc):
 
-        qcirc = self.merge(qc)
-        return qcirc
+        self.merge_mutable(qc)
+        return self
 
     def __mul__(self, other):
 
@@ -584,7 +584,7 @@ class QCircBase(ctypes.Structure):
 
     def merge(self, qc):
         """
-        merge quantum circuit.
+        merge two quantum circuits.
 
         Parameters
         ----------
@@ -594,12 +594,32 @@ class QCircBase(ctypes.Structure):
         Returns
         -------
         qcirc : instance of QCirc
-            quantum circuit (result)
+            new quantum circuit (merge result)
 
         """
         obj = qcirc_base_merge(self, qc)
         qcirc = ctypes.cast(obj.value, ctypes.POINTER(self.__class__)).contents
         return qcirc
+
+    def merge_mutable(self, qc):
+        """
+        merge a quantum circuit with another one.
+
+        Parameters
+        ----------
+        qc : instance of QCirc
+            quantum circuit (merged)
+
+        Returns
+        -------
+        None
+
+        Notes
+        -----
+        This method changes original quantum circuit.
+
+        """
+        qcirc_base_merge_mutable(self, qc)
 
     def multiple(self, other):
         """
@@ -2204,5 +2224,6 @@ class QCircBase(ctypes.Structure):
 
 # c-library for qstate
 from qlazy.lib.qcirc_base_c import (qcirc_base_init, qcirc_base_copy, qcirc_base_merge,
-                                    qcirc_base_is_equal, qcirc_base_append_gate,
-                                    qcirc_base_kind_first, qcirc_base_pop_gate, qcirc_base_free)
+                                    qcirc_base_merge_mutable, qcirc_base_is_equal,
+                                    qcirc_base_append_gate, qcirc_base_kind_first,
+                                    qcirc_base_pop_gate, qcirc_base_free)

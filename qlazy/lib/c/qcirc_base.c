@@ -80,6 +80,26 @@ bool qcirc_base_merge(QCircBase* qcirc_L, QCircBase* qcirc_R, void** qcirc_out)
   SUC_RETURN(true);
 }
 
+bool qcirc_base_merge_mutable(QCircBase* qcirc_mut, QCircBase* qcirc)
+{
+  QGate* gate  = NULL;
+
+  if ((qcirc_mut == NULL) || (qcirc == NULL)) ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
+
+  if (qcirc_mut->qubit_num < qcirc->qubit_num) qcirc_mut->qubit_num = qcirc->qubit_num;
+  if (qcirc_mut->cmem_num < qcirc->cmem_num) qcirc_mut->cmem_num = qcirc->cmem_num;
+
+  /* append gate */
+  gate = qcirc->first;
+  while (gate != NULL) {
+    if (!(qcirc_base_append_gate(qcirc_mut, gate->kind, gate->qid, gate->para, gate->c, gate->ctrl)))
+      ERR_RETURN(ERROR_QCIRC_APPEND_GATE, NULL);
+    gate = gate->next;
+  }
+
+  SUC_RETURN(true);
+}
+
 bool qcirc_base_is_equal(QCircBase* qcirc_L, QCircBase* qcirc_R, bool* ans)
 {
   QGate*        gate_L = NULL;
