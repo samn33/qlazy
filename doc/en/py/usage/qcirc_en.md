@@ -512,11 +512,10 @@ you can concatenate those as follows,
 
 then you will get a following circuit.
 
-    q[0] --H---*------
-               |
-    q[1] ------X---M
-                   |
-    c[0] ----------*--
+    q[0] -H-*-M-
+    q[1] ---X-|-
+    c  =/=====v=
+        1     0
 
 In addition, it is also possible to concatenate using an increment
 operator.
@@ -524,6 +523,16 @@ operator.
     >>> qc = qc_A
     >>> qc += qc_B
     >>> qc += qc_C
+
+Moreover, if you want to concatenate the same quantum circuits
+repeatedly, you can use '*' operator as follows,
+
+    >>> qc_A = QCirc().h(0).cx(0,1)
+	>>> qc = qc_A * 3
+	>>> qc.show()
+    q[0] -H-*-H-*-H-*-
+    q[1] ---X---X---X-
+
 
 ### Statistical information of quantum circuit
 
@@ -702,13 +711,11 @@ that can calculate ZX-Calculus, so when using this function, the
 Here is a simple example.  Let's make sure that 
 
     --H--*--H--
-         |
     --H--X--H--
 
 and
 
     ---X---
-       |
     ---*---
 
 is equivalent (This is a useful formula to know).

@@ -137,66 +137,28 @@ class QCircBase(ctypes.Structure):
         return self.to_string()
 
     def __add__(self, qc):
-        """
-        Parameters
-        ----------
-        qc : instance of QCirc
-            quantum circuit (merged)
 
-        Returns
-        -------
-        qcirc : instance of QCirc
-            quantum circuit (result)
-
-        """
         qcirc = self.merge(qc)
         return qcirc
 
     def __iadd__(self, qc):
-        """
-        Parameters
-        ----------
-        qc : instance of QCirc
-            quantum circuit (merged)
 
-        Returns
-        -------
-        qcirc : instance of QCirc
-            quantum circuit (result)
-
-        """
         qcirc = self.merge(qc)
         return qcirc
 
+    def __mul__(self, other):
+
+        return self.multiple(other)
+        
+    __rmul__ = __mul__
+        
     def __eq__(self, qc):
-        """
-        Parameters
-        ----------
-        qc : instance of QCirc
-            quantum circuit (merged)
 
-        Returns
-        -------
-        ans : bool
-            equal or not
-
-        """
         ans = self.is_equal(qc)
         return ans
 
     def __ne__(self, qc):
-        """
-        Parameters
-        ----------
-        qc : instance of QCirc
-            quantum circuit (merged)
 
-        Returns
-        -------
-        ans : bool
-            equal or not
-
-        """
         ans = not self.is_equal(qc)
         return ans
 
@@ -638,6 +600,31 @@ class QCircBase(ctypes.Structure):
         obj = qcirc_base_merge(self, qc)
         qcirc = ctypes.cast(obj.value, ctypes.POINTER(self.__class__)).contents
         return qcirc
+
+    def multiple(self, other):
+        """
+        integer multiple for quantum circuit
+
+        Parameters
+        ----------
+        other : instance of QCirc / int
+            quantum circuit / number
+
+        Returns
+        -------
+        qc : instance of QCirc
+            quantum circuit after multiplication
+
+        """
+        if isinstance(other, int) and other > 0:
+            qc = self.clone()
+            qc_out = self.clone()
+            for i in range(other-1):
+                qc_out = qc_out.merge(qc)
+        else:
+            raise TypeError("Can't multiple QCirc with {} (type:{})".format(other, type(other)))
+        
+        return qc_out
 
     def is_equal(self, qc):
         """

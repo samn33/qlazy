@@ -2,12 +2,13 @@
 
 ## [0.3.3] - 2022-xx-xx
 ### Added
-- get current version name from VERSION file when building the codes
 - support parametric quantum circuit
-- add_controll method of QCirc class to add controlled qubit
+- add_controll method of QCirc class to add controll qubit
+- '*' operator for quantum circuit to concatenate repeatedly
 - expect method of Backend class to get an expectation value
 - VQE example using parametric quantum circuit
 - QAOA example using parametric quantum circuit
+- get current version name from VERSION file when building the codes
 ### Changed
 - random generation algorithm of C codes to 'Mersenne Twister'
 ### Fixed
