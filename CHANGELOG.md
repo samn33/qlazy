@@ -1,6 +1,6 @@
 # Change Log
 
-## [0.3.3] - 2022-11-13
+## [0.3.3] - 2022-11-14
 ### Added
 - support parametric quantum circuit
 - '*' operator for quantum circuit to concatenate repeatedly
@@ -15,6 +15,7 @@
 ### Fixed
 - run method of qulacs backend
 - run method of amazon_braket backend
+- run method of qstate_gpu_simulator
 
 ## [0.3.2] - 2022-09-11
 ### Added
