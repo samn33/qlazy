@@ -29,6 +29,7 @@ class QCirc(QCircBase):
         self.tag_list = []
         self.fac_list = []
         self.phase_list = []
+        self.gphase_list = []
         self.params = {}
 
     def clone(self):
@@ -49,6 +50,7 @@ class QCirc(QCircBase):
         qcirc.tag_list = self.tag_list[:]
         qcirc.fac_list = self.fac_list[:]
         qcirc.phase_list = self.phase_list[:]
+        qcirc.gphase_list = self.gphase_list[:]
         qcirc.params = dict(self.params)
         return qcirc
 
@@ -133,6 +135,7 @@ class QCirc(QCircBase):
         qcirc.tag_list = self.tag_list[:] + qc.tag_list[:]
         qcirc.fac_list = self.fac_list[:] + qc.fac_list[:]
         qcirc.phase_list = self.phase_list[:] + qc.phase_list[:]
+        qcirc.gphase_list = self.gphase_list[:] + qc.gphase_list[:]
         qcirc.params = dict(self.params, **qc.params)
         return qcirc
 
@@ -161,6 +164,7 @@ class QCirc(QCircBase):
         self.tag_list.extend(qc.tag_list)
         self.fac_list.extend(qc.fac_list)
         self.phase_list.extend(qc.phase_list)
+        self.gphase_list.extend(qc.gphase_list)
         self.params.update(**qc.params)
 
     def is_equal(self, qc):
@@ -184,9 +188,105 @@ class QCirc(QCircBase):
         ans = False
         if super().is_equal(qc) is True:
             ans = True
-            # if self.tag_list == qc.tag_list and self.fac_list == qc.fac_list:
-            #     ans = True
         return ans
+
+    def remap(self, qid=None, cid=None):
+        """
+        remap qubit id and cmem id of quantum circuit
+
+        Parameters
+        ----------
+        qid : list (int)
+            list of qubit id (quantum register)
+        cid : list (int)
+            list of cmem id (classical memory or classical register)
+
+        Returns
+        -------
+        qcirc : instance of QCirc
+            new quantum circuit after remapping
+
+        Examples
+        --------
+        >>> qc = QCirc().h(0).cx(0,1).measure(qid=[0,1], cid=[0,1])
+        >>> qc.show()
+        q[0] -H-*-M---
+        q[1] ---X-|-M-
+        c  =/=====v=v=
+        2         0 1
+        >>> qc_new1 = qc.remap(qid=[1,0], cid=[1,0])
+        >>> qc_new1.show()
+        q[0] ---X---M-
+        q[1] -H-*-M-|-
+        c  =/=====v=v=
+        2         1 0
+        >>> qc_new2 = qc.remap(qid=[2,1], cid=[1,0])
+        >>> qc_new2.show()
+        q[0] ---------
+        q[1] ---X---M-
+        q[2] -H-*-M-|-
+        c  =/=====v=v=
+        2         1 0
+
+        Notes
+        -----
+        Length of the qid must be equal to qubit_num of the original quantum circut.
+        Length of cid must be equal to cmem_num of the original quantum circut.
+        Elements of the qid and the cid must not be duplicated. 
+
+        """
+        if qid is None and cid is None:
+            return self.clone()
+        elif qid is None:
+            qid = list(range(self.qubit_num))
+        elif cid is None:
+            cid = list(range(self.cmem_num))
+
+        # check qid
+
+        if all([isinstance(q, int) and q>=0 for q in qid]):
+            pass
+        else:
+            raise TypeError("qid must be a list of zero or more integer.")
+
+        if len(qid) != self.qubit_num:
+            raise ValueError("length of qid must be equal to the qubit number of the quantum circuit:{}.".format(self.qubit_num))
+
+        if len(set(qid)) != len(qid):
+            raise ValueError("elements of qid must not be duplicated.")
+
+        # check cid
+
+        if all([isinstance(c, int) and c>=0 for c in cid]):
+            pass
+        else:
+            raise TypeError("cid must be a list of zero or more integer.")
+
+        if len(cid) != self.cmem_num:
+            raise ValueError("length of cid must be equal to the cmem number of the quantum circuit:{}.".fomat(self.cmem_num))
+
+        if len(set(cid)) != len(cid):
+            raise ValueError("elements of cid must not be duplicated.")
+
+        qcirc = QCirc()
+
+        gates = self.get_gates()
+        for g in gates:
+            if g['qid'] is not None:
+                g['qid'] = [qid[q] for i,q in enumerate(g['qid'])]
+            if g['cid'] is not None:
+                g['cid'] = [cid[c] for i,c in enumerate(g['cid'])]
+            if g['ctrl'] is not None:
+                g['ctrl'] = cid[g['ctrl']]
+
+        qcirc.add_gates(gates)
+        qcirc.tag_list = self.tag_list[:]
+        qcirc.phase_list = self.phase_list[:]
+        qcirc.gphase_list = self.gphase_list[:]
+        qcirc.fac_list = self.fac_list[:]
+        qcirc.params = dict(self.params)
+        
+        return qcirc
 
     def dump(self, file_path):
         """
@@ -202,7 +302,7 @@ class QCirc(QCircBase):
         None
 
         """
-        obj = (self.get_gates(), self.tag_list, self.fac_list, self.phase_list, self.params)
+        obj = (self.get_gates(), self.tag_list, self.phase_list, self.gphase_list, self.fac_list, self.params)
         with open(file_path, mode='wb') as f:
             pickle.dump(obj, f)
 
@@ -239,11 +339,12 @@ class QCirc(QCircBase):
 
         """
         with open(file_path, mode='rb') as f:
-            gates, tag_list, fac_list, phase_list, params = pickle.load(f)
+            gates, tag_list, phase_list, gphase_list, fac_list, params = pickle.load(f)
         qcirc = cls().add_gates(gates)
         qcirc.tag_list = tag_list
-        qcirc.fac_list = fac_list
         qcirc.phase_list = phase_list
+        qcirc.gphase_list = gphase_list
+        qcirc.fac_list = fac_list
         qcirc.params = params
         return qcirc
 
@@ -278,9 +379,12 @@ class QCirc(QCircBase):
         # phase_list
         if para is not None:
             phase = para[0]
+            gphase = para[1]
         else:
             phase = 0.0
+            gphase = 0.0
         self.phase_list.append(phase)
+        self.gphase_list.append(gphase)
         
         # tag_lsit
         if tag is None or isinstance(tag, str):
@@ -337,6 +441,8 @@ class QCirc(QCircBase):
             if tag in params.keys():
                 self.params[tag] = params[tag]
                 self.phase_list[i] = self.fac_list[i] * self.params[tag]
+                if self.gphase_list[i] != 0.0: # for the p gate
+                    self.gphase_list[i] = self.phase_list[i] / 2.0
 
         if len(self.phase_list) != self.gate_num:
             raise ValueError("phase_list length is not same as gate_num")
@@ -451,7 +557,7 @@ class QCirc(QCircBase):
 
         """
         qid = [q0, -1]
-        para = [phase, 0.0, 0.0]
+        para = [phase, phase/2.0, 0.0]
         self.append_gate(kind=cfg.ROTATION_Z, qid=qid, para=para, ctrl=ctrl, tag=tag, fac=fac)
         return self
 
@@ -734,6 +840,8 @@ class QCirc(QCircBase):
             qc.crx(qctrl, qid[0], phase=para[0], ctrl=ctrl, tag=self.tag_list[gid], fac=1.0)
         elif kind == cfg.ROTATION_Z:
             qc.crz(qctrl, qid[0], phase=para[0], ctrl=ctrl, tag=self.tag_list[gid], fac=1.0)
+            if self.gphase_list[gid] != 0.0: # for the p gate
+                qc.rz(qctrl, phase=self.gphase_list[gid])
 
         # 2-qubit gate
         elif kind == cfg.CONTROLLED_X:

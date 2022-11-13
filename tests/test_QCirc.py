@@ -1416,6 +1416,55 @@ class TestQCirc_add_control(unittest.TestCase):
         self.assertEqual(abs(fid_B - 1.0) < EPS , True)
 
 #
+# remap
+#
+
+class TestQCirc_remap(unittest.TestCase):
+    """ test 'QCirc' : remap
+    """
+
+    def test_remap_1(self):
+        """test 'remap_1'
+        """
+        qc = QCirc().h(1).cx(0,1).crx(1,2, phase=0.7).measure(qid=[0,1], cid=[0,1])
+        qc_remap = qc.remap(qid=[3,2,1], cid=[1,0])
+        qc_expect = QCirc().h(2).cx(3,2).crx(2,1, phase=0.7).measure(qid=[3,2], cid=[1,0])
+        self.assertEqual(qc_remap, qc_expect)
+
+    def test_remap_2(self):
+        """test 'remap_2'
+        """
+        qc = QCirc().h(1).cx(0,1).crx(1,2, phase=0.7)
+        qc_remap = qc.remap(qid=[3,2,1])
+        qc_expect = QCirc().h(2).cx(3,2).crx(2,1, phase=0.7)
+        self.assertEqual(qc_remap, qc_expect)
+
+    def test_remap_3(self):
+        """test 'remap_3'
+        """
+        qc = QCirc().measure(qid=[0,1], cid=[0,1])
+        qc_remap = qc.remap(qid=[2,1], cid=[1,0])
+        qc_expect = QCirc().measure(qid=[2,1], cid=[1,0])
+        self.assertEqual(qc_remap, qc_expect)
+
+    def test_remap_4(self):
+        """test 'remap_4'
+        """
+        qc = QCirc().h(2).cx(1,2).crx(2,3, phase=0.7).measure(qid=[1,2], cid=[0,1])
+        qc_remap = qc.remap(qid=[3,2,1,0], cid=[1,0])
+        qc_expect = QCirc().h(1).cx(2,1).crx(1,0, phase=0.7).measure(qid=[2,1], cid=[1,0])
+        self.assertEqual(qc_remap, qc_expect)
+
+    def test_remap_5(self):
+        """test 'remap_5'
+        """
+        qc = QCirc().h(2).cx(1,2).crx(2,3, tag='foo').measure(qid=[1,2], cid=[0,1])
+        qc.set_params({'foo':0.7})
+        qc_remap = qc.remap(qid=[3,2,1,0], cid=[1,0])
+        qc_expect = QCirc().h(1).cx(2,1).crx(1,0, phase=0.7).measure(qid=[2,1], cid=[1,0])
+        self.assertEqual(qc_remap, qc_expect)
+
+#
 # inheritance
 #
 
