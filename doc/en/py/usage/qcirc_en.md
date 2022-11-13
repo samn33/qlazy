@@ -805,7 +805,7 @@ to create a large quantum circuit.
 
 ### Parametric quantum circuit
 
-When you want to execute the quantum circuit repeatedly while changing
+If you want to execute the quantum circuit repeatedly while changing
 the parameters contained in the quantum circuit, you can use
 parametric quantum circut.
 
@@ -847,9 +847,9 @@ Then, if you want to change the parameters to 0.4,0.5, do as follows,
 
 There is no need to create another quantum circuit.
 
-### Adding control qubit
+### Adding a control qubit
 
-When you want to add a control qubit to your quantum circuit, use the
+If you want to add a control qubit to your quantum circuit, use the
 'add_control' method.  Suppose you have a following quantum circuit,
 
     >>> qc = QCirc().x(1).z(2)
@@ -858,7 +858,7 @@ When you want to add a control qubit to your quantum circuit, use the
     q[1] -X-
     q[2] -Z-
 
-to add the 0th qubit as a control qubit, set 0 to the 'qctrl' option
+to add the 0th qubit as a control qubit, set 0 in the 'qctrl' option
 of the 'add_control' method as follows.
 
     >>> qc_ctrl = qc.add_controll(qctrl=0)
@@ -876,7 +876,7 @@ Here are some more complicated example.
     q[1] -RZ(0.3)-
 
 For such quantum circuit, to add the 2nd qubit as a control qubit, set
-2 to the 'qctrl' option as follows.
+2 in the 'qctrl' option as follows.
 
     >>> qc_ctrl = qc.add_controll(qctrl=2)
     >>> qc_ctrl.show()
@@ -887,6 +887,42 @@ For such quantum circuit, to add the 2nd qubit as a control qubit, set
     (0.25)-X---*--------RZ(-0.25)-X--------------------
     -------|-H-RZ(-0.5)-H---------|-H-RZ(0.5)-H--------
     -------*----------------------*---*-------RZ(0.25)-
+
+### Remapping the qubit id and the classical bit id
+
+If you want to change the qubit id and the classical bit id of the
+created quantum circuit, you can use 'remap' method.  Suppose you have
+the following quantum circuit.
+
+    >>> qc = QCirc().h(0).cx(0,1).measure(qid=[0,1], cid=[0,1])
+    >>> qc.show()
+    q[0] -H-*-M---
+    q[1] ---X-|-M-
+    c  =/=====v=v=
+    2         0 1
+
+When you change the qubit id [0,1] of this to [1,0] and the classical
+bit id [0 ,1] to [1,0], set [1,0] in the 'qid' option and set [1,0] in
+the 'cid' option of 'remap' method.
+
+    >>> qc_new1 = qc.remap(qid=[1,0], cid=[1,0])
+    >>> qc_new1.show()
+    q[0] ---X---M-
+    q[1] -H-*-M-|-
+    c  =/=====v=v=
+    2         1 0
+
+This allows you to get a new quantum circuit 'qc_new1'.  In addition,
+the quantum circuit where the quantum bit id is changed to [2,1] and
+the classical bit id to [1,0] can be created as follows.
+
+    >>> qc_new2 = qc.remap(qid=[2,1], cid=[1,0])
+    >>> qc_new2.show()
+    q[0] ---------
+    q[1] ---X---M-
+    q[2] -H-*-M-|-
+    c  =/=====v=v=
+    2         1 0
 
 
 ## Supported backend

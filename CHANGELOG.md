@@ -1,10 +1,11 @@
 # Change Log
 
-## [0.3.3] - 2022-xx-xx
+## [0.3.3] - 2022-11-13
 ### Added
 - support parametric quantum circuit
-- add_controll method of QCirc class to add controll qubit
 - '*' operator for quantum circuit to concatenate repeatedly
+- add_control method of QCirc class to add control qubit
+- remap method of QCirc to remap the qubit id and cmem (classical register) id
 - expect method of Backend class to get an expectation value
 - VQE example using parametric quantum circuit
 - QAOA example using parametric quantum circuit

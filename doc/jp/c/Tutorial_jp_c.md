@@ -5,12 +5,13 @@ Command Line Tool
 
 まず、簡単な使用例を示します。以下のようなファイル(foo.qc)を用意し、
 
+    $ cat foo.qc
     init 2
     h 0
     cx 0 1
     m
 
-を実行すると、
+以下のように実行すると、
 
     $ qlazy -qc foo.qc
     direction of measurement: z-axis
