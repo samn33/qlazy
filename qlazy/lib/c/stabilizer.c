@@ -40,7 +40,6 @@ bool stabilizer_init(int gene_num, int qubit_num, unsigned int seed, void** stab
   int		matrix_size = gene_num * qubit_num * 2;
   int		i;
 
-  //  srand(seed);
   init_genrand(seed);
 
   if ((qubit_num < 1) || (gene_num < 1))

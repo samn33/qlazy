@@ -340,9 +340,6 @@ class DensOp(ctypes.Structure):
         elm[1][1] = +0.5000+0.0000*i : 0.2500 |++++
 
         """
-        # de_part = self.partial(qid=qid)
-        # densop_print(de_part, nonzero)
-
         de_part = self.partial(qid=qid)
         mat = de_part.get_elm()
         for i in range(de_part.row):
