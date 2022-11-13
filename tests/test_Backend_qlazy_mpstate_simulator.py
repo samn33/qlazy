@@ -882,8 +882,8 @@ class TestBackend_expect_mps_simulator(unittest.TestCase):
         qc = QCirc().h(0).h(1).h(2).h(3)
         expval_1 = bk.expect(qcirc=qc, observable=ob, precise=True)
         expval_2 = bk.expect(qcirc=qc, observable=ob, shots=10000)
-        self.assertEqual(expval_1.imag == 0.0, True)
-        self.assertEqual(expval_2.imag == 0.0, True)
+        self.assertEqual(abs(expval_1.imag) < EPS, True)
+        self.assertEqual(abs(expval_2.imag) < EPS, True)
         self.assertEqual(abs(expval_1.real - expval_2.real) < 0.05, True)
         
     def test_2(self):
@@ -894,8 +894,8 @@ class TestBackend_expect_mps_simulator(unittest.TestCase):
         qc = QCirc().h(0).h(1).h(2).h(3)
         expval_1 = bk.expect(qcirc=qc, observable=ob, precise=True)
         expval_2 = bk.expect(qcirc=qc, observable=ob, shots=10000)
-        self.assertEqual(expval_1.imag == 0.0, True)
-        self.assertEqual(expval_2.imag == 0.0, True)
+        self.assertEqual(abs(expval_1.imag) < EPS, True)
+        self.assertEqual(abs(expval_2.imag) < EPS, True)
         self.assertEqual(abs(expval_1.real - expval_2.real) < 0.05, True)
         
     def test_3(self):
@@ -906,8 +906,8 @@ class TestBackend_expect_mps_simulator(unittest.TestCase):
         qc = QCirc().h(0).h(1).h(2).h(3)
         expval_1 = bk.expect(qcirc=qc, observable=ob, precise=True)
         expval_2 = bk.expect(qcirc=qc, observable=ob, shots=10000)
-        self.assertEqual(expval_1.imag == 0.0, True)
-        self.assertEqual(expval_2.imag == 0.0, True)
+        self.assertEqual(abs(expval_1.imag) < EPS, True)
+        self.assertEqual(abs(expval_2.imag) < EPS, True)
         self.assertEqual(abs(expval_1.real - expval_2.real) < 0.05, True)
 
 #

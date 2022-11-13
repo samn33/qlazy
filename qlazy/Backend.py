@@ -335,7 +335,7 @@ class Backend:
             qc.measure(qid=qid, cid=cid)
             fac = wpp['weight'] * wpp['pp'].factor  # complex (imaginary is zero, maybe)
 
-            result = self.run(qcirc=qc, shots=shots)
+            result = self.run(qcirc=qc, shots=shots, cid=cid)
             freq = result.frequency
             
             n_even = 0
@@ -395,6 +395,8 @@ class Backend:
         if precise is True:
             if self.product == 'qlazy':
                 if self.device == 'qstate_simulator':
+                    expval = self._get_expectation_value_by_calculation(qcirc, observable, state='qstate')
+                elif self.device == 'qstate_gpu_simulator':
                     expval = self._get_expectation_value_by_calculation(qcirc, observable, state='qstate')
                 elif self.device == 'mps_simulator':
                     expval = self._get_expectation_value_by_calculation(qcirc, observable, state='mpstate')

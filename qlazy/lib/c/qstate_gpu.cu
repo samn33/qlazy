@@ -310,12 +310,9 @@ bool qstate_operate_unitary_gpu(QState* qstate, COMPLEX* U, int dim, int m, int 
 static bool _qstate_get_measured_char_gpu(QState* qstate, int mnum, int* qid, char* mchar)
 /* not update qstate, get measured char only */
 {
-  double		r	     = 0.0;
-  int                   idx, up;
-  int			blocksize    = BLOCKSIZE;
-  dim3			block (blocksize, 1, 1);
-  dim3			grid ((qstate->state_num + block.x - 1) / block.x, 1, 1);
-  int			i;
+  double	r = 0.0;
+  int           idx, up;
+  int		i;
 
   if (qstate == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
 
@@ -502,7 +499,7 @@ bool qstate_operate_measure_gpu(QState* qstate, CMem* cmem, QCircBase* qcirc,
   int			j,k;
   int			blocksize     = BLOCKSIZE;
   dim3			block (blocksize, 1, 1);
-  dim3			grid ((qstate->state_num + block.x - 1) / block.x, 1, 1);
+  dim3			grid ((shots + block.x - 1) / block.x, 1, 1);
 
   if ((qstate == NULL) || (cmem == NULL) || (qcirc == NULL) ||
       (shots < 1) || (mchar_shots == NULL) )

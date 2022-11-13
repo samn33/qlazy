@@ -5,6 +5,7 @@ import numpy as np
 import sys
 
 from qlazy import QCirc, Backend, PauliProduct
+from qlazy.Observable import X,Y,Z
 from qlazy.util import *
 
 EPS = 1.0e-6
