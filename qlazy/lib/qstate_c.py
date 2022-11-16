@@ -386,7 +386,7 @@ def qstate_apply_matrix(qs, matrix=None, qid=None):
 
 
 def qstate_operate_qgate(qs, kind=None, qid=None, phase=cfg.DEF_PHASE,
-                         phase1=cfg.DEF_PHASE, phase2=cfg.DEF_PHASE):
+                         gphase=cfg.DEF_GPHASE, factor=cfg.DEF_FACTOR):
     """ operate quantum gate to the quantum state """
 
     # error check
@@ -403,8 +403,8 @@ def qstate_operate_qgate(qs, kind=None, qid=None, phase=cfg.DEF_PHASE,
                                          ctypes.c_double, ctypes.c_double,
                                          ctypes.c_double, IntArray]
     ret = lib.qstate_operate_qgate(ctypes.byref(qs), ctypes.c_int(kind),
-                                   ctypes.c_double(phase), ctypes.c_double(phase1),
-                                   ctypes.c_double(phase2), qid_array)
+                                   ctypes.c_double(phase), ctypes.c_double(gphase),
+                                   ctypes.c_double(factor), qid_array)
 
     if ret is False:
         raise ValueError("can't operate quantum gate to the quantum state vector.")

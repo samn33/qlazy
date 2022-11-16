@@ -746,8 +746,8 @@ static bool _densop_operate_unitary(DensOp* densop, COMPLEX* U, int dim, int m, 
   SUC_RETURN(true);
 }
 
-bool densop_operate_qgate(DensOp* densop, Kind kind, double alpha, double beta,
-			  double gamma, int* qubit_id)
+bool densop_operate_qgate(DensOp* densop, Kind kind, double para_phase, double para_gphase,
+			  double para_factor, int* qubit_id)
 {
   int		q0  = qubit_id[0];
   int		q1  = qubit_id[1];
@@ -760,7 +760,7 @@ bool densop_operate_qgate(DensOp* densop, Kind kind, double alpha, double beta,
       (kind == MEASURE_Y) || (kind == MEASURE_Z) || (kind == MEASURE_BELL))
     SUC_RETURN(true);
   else {
-    if (!(gbank_get_unitary(densop->gbank, kind, alpha, beta, gamma, &dim, (void**)&U)))
+    if (!(gbank_get_unitary(densop->gbank, kind, para_phase, para_gphase, para_factor, &dim, (void**)&U)))
       ERR_RETURN(ERROR_GBANK_GET_UNITARY,false);
     if (!(_densop_operate_unitary(densop, U, dim, q0, q1)))
       ERR_RETURN(ERROR_INVALID_ARGUMENT,false);

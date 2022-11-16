@@ -21,7 +21,7 @@ def __mps_operate_qcirc(mps, cmem, qcirc, shots, cid):
             break
         (kind, qid, para, c, ctrl) = qcirc_unitary.pop_gate()
         if ctrl is None or (ctrl is not None and cmem.bits[ctrl] == 1):
-            phase = para[0]
+            phase = para[0] * para[2]
             if get_qgate_qubit_num(kind) == 1:
                 mps.operate_1qubit_gate(cfg.GATE_STRING[kind], qid[0], phase)
             elif get_qgate_qubit_num(kind) == 2:

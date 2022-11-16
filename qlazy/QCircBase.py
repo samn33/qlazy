@@ -44,7 +44,7 @@ def append_qc_canvas(qc_canvas, gates, qubit_num, cmem_num): # for show method
         if get_qgate_param_num(g['kind']) == 0:
             g_label = cfg.GATE_LABEL[g['kind']] + '-'
         else:
-            g_label = cfg.GATE_LABEL[g['kind']] + '(' + str(g['para'][0]) + ')-'
+            g_label = cfg.GATE_LABEL[g['kind']] + '(' + str(g['para'][0]*g['para'][2]) + ')-'
             
         if get_qgate_qubit_num(g['kind']) == 1 or is_reset_gate(g['kind']):
             qc_canvas[g['qid'][0]] += g_label
@@ -195,7 +195,7 @@ class QCircBase(ctypes.Structure):
             if para_num == 0:
                 para_str = ""
             else:
-                para_str = ",".join(map(str, [para[i] for i in range(para_num)]))
+                para_str = "{}".format(para[0]*para[2])
                 para_str = "(" + para_str+ ")"
 
             if c is None:
@@ -438,6 +438,7 @@ class QCircBase(ctypes.Structure):
                 term_num = 1
 
             para_num = get_qgate_param_num(kind)
+            para[0] *= para[2]
             para_frac = [Fraction(str(p)) for p in para]
 
             gate_str = cfg.GATE_STRING_QASM[kind]
@@ -730,6 +731,8 @@ class QCircBase(ctypes.Structure):
             - kind: gate name
             - qid: qubit id
             - phase: phase parameter (non-zero only for rotation gates)
+            - para: [phase, gphase, factor]
+              * gphase means global phase used only when adding control to p gate
             - cid: classical register id (set only for measurement gate)
             - ctrl: classical register id to control gate operation
 
@@ -748,7 +751,7 @@ class QCircBase(ctypes.Structure):
             else:
                 cid = [c]
             gates.append({'kind': cfg.GATE_STRING[kind], 'qid': qid,
-                          'phase': para[0], 'cid': cid, 'ctrl': ctrl})
+                          'para': para, 'cid': cid, 'ctrl': ctrl})
 
         return gates
 
@@ -778,7 +781,7 @@ class QCircBase(ctypes.Structure):
         for g in gates:
             kind = cfg.GATE_KIND[g['kind']]
             qid = g['qid']
-            para = [g['phase'], 0.0, 0.0]
+            para = g['para']
             if g['cid'] is None:
                 c = None
             else:
@@ -1418,7 +1421,7 @@ class QCircBase(ctypes.Structure):
 
         """
         qid = [q0, -1]
-        para = [0.5, 0.0, 0.0]
+        para = [0.5, 0.0, 1.0]
         self.append_gate(kind=cfg.ROTATION_X, qid=qid, para=para, ctrl=ctrl)
         return self
 
@@ -1441,7 +1444,7 @@ class QCircBase(ctypes.Structure):
 
         """
         qid = [q0, -1]
-        para = [-0.5, 0.0, 0.0]
+        para = [-0.5, 0.0, 1.0]
         self.append_gate(kind=cfg.ROTATION_X, qid=qid, para=para, ctrl=ctrl)
         return self
 
@@ -1549,7 +1552,7 @@ class QCircBase(ctypes.Structure):
 
         """
         qid = [q0, -1]
-        para = [phase, 0.0, 0.0]
+        para = [phase, 0.0, 1.0]
         self.append_gate(kind=cfg.ROTATION_X, qid=qid, para=para, ctrl=ctrl)
         return self
 
@@ -1574,7 +1577,7 @@ class QCircBase(ctypes.Structure):
         """
 
         qid = [q0, -1]
-        para = [phase, 0.0, 0.0]
+        para = [phase, 0.0, 1.0]
         self.append_gate(kind=cfg.PHASE_SHIFT_S_, qid=qid, ctrl=ctrl)
         self.append_gate(kind=cfg.ROTATION_X, qid=qid, para=para, ctrl=ctrl)
         self.append_gate(kind=cfg.PHASE_SHIFT_S, qid=qid, ctrl=ctrl)
@@ -1600,7 +1603,7 @@ class QCircBase(ctypes.Structure):
 
         """
         qid = [q0, -1]
-        para = [phase, 0.0, 0.0]
+        para = [phase, 0.0, 1.0]
         self.append_gate(kind=cfg.ROTATION_Z, qid=qid, para=para, ctrl=ctrl)
         return self
 
@@ -1630,7 +1633,7 @@ class QCircBase(ctypes.Structure):
 
         """
         qid = [q0, -1]
-        para = [phase, 0.0, 0.0]
+        para = [phase, 0.0, 1.0]
         self.append_gate(kind=cfg.ROTATION_Z, qid=qid, para=para, ctrl=ctrl)
         return self
 
@@ -1726,11 +1729,11 @@ class QCircBase(ctypes.Structure):
             quantum circuit after adding
 
         """
-        para = [0.5, 0.0, 0.0]
+        para = [0.5, 0.0, 1.0]
         self.append_gate(kind=cfg.HADAMARD, qid=[q1, -1], ctrl=ctrl)
         self.append_gate(kind=cfg.CONTROLLED_RZ, qid=[q0, q1], para=para, ctrl=ctrl)
         self.append_gate(kind=cfg.HADAMARD, qid=[q1, -1], ctrl=ctrl)
-        para = [0.25, 0.0, 0.0]
+        para = [0.25, 0.0, 1.0]
         self.append_gate(kind=cfg.ROTATION_Z, qid=[q0, q1], para=para, ctrl=ctrl)
         return self
 
@@ -1753,11 +1756,11 @@ class QCircBase(ctypes.Structure):
             quantum circuit after adding
 
         """
-        para = [-0.5, 0.0, 0.0]
+        para = [-0.5, 0.0, 1.0]
         self.append_gate(kind=cfg.HADAMARD, qid=[q1, -1], ctrl=ctrl)
         self.append_gate(kind=cfg.CONTROLLED_RZ, qid=[q0, q1], para=para, ctrl=ctrl)
         self.append_gate(kind=cfg.HADAMARD, qid=[q1, -1], ctrl=ctrl)
-        para = [-0.25, 0.0, 0.0]
+        para = [-0.25, 0.0, 1.0]
         self.append_gate(kind=cfg.ROTATION_Z, qid=[q0, q1], para=para, ctrl=ctrl)
         return self
 
@@ -1804,9 +1807,9 @@ class QCircBase(ctypes.Structure):
 
         """
         qid = [q0, q1]
-        para = [0.5, 0.0, 0.0]
+        para = [0.5, 0.0, 1.0]
         self.append_gate(kind=cfg.CONTROLLED_RZ, qid=qid, para=para, ctrl=ctrl)
-        para = [0.25, 0.0, 0.0]
+        para = [0.25, 0.0, 1.0]
         self.append_gate(kind=cfg.ROTATION_Z, qid=qid, para=para, ctrl=ctrl)
         return self
 
@@ -1830,9 +1833,9 @@ class QCircBase(ctypes.Structure):
 
         """
         qid = [q0, q1]
-        para = [-0.5, 0.0, 0.0]
+        para = [-0.5, 0.0, 1.0]
         self.append_gate(kind=cfg.CONTROLLED_RZ, qid=qid, para=para, ctrl=ctrl)
-        para = [-0.25, 0.0, 0.0]
+        para = [-0.25, 0.0, 1.0]
         self.append_gate(kind=cfg.ROTATION_Z, qid=qid, para=para, ctrl=ctrl)
         return self
 
@@ -1856,9 +1859,9 @@ class QCircBase(ctypes.Structure):
 
         """
         qid = [q0, q1]
-        para = [0.25, 0.0, 0.0]
+        para = [0.25, 0.0, 1.0]
         self.append_gate(kind=cfg.CONTROLLED_RZ, qid=qid, para=para, ctrl=ctrl)
-        para = [0.125, 0.0, 0.0]
+        para = [0.125, 0.0, 1.0]
         self.append_gate(kind=cfg.ROTATION_Z, qid=qid, para=para, ctrl=ctrl)
         return self
 
@@ -1882,9 +1885,9 @@ class QCircBase(ctypes.Structure):
 
         """
         qid = [q0, q1]
-        para = [-0.25, 0.0, 0.0]
+        para = [-0.25, 0.0, 1.0]
         self.append_gate(kind=cfg.CONTROLLED_RZ, qid=qid, para=para, ctrl=ctrl)
-        para = [-0.125, 0.0, 0.0]
+        para = [-0.125, 0.0, 1.0]
         self.append_gate(kind=cfg.ROTATION_Z, qid=qid, para=para, ctrl=ctrl)
         return self
 
@@ -1932,9 +1935,9 @@ class QCircBase(ctypes.Structure):
 
         """
         qid = [q0, q1]
-        para = [phase, 0.0, 0.0]
+        para = [phase, 0.0, 1.0]
         self.append_gate(kind=cfg.CONTROLLED_RZ, qid=qid, para=para, ctrl=ctrl)
-        para = [phase/2, 0.0, 0.0]
+        para = [phase/2, 0.0, 1.0]
         self.append_gate(kind=cfg.ROTATION_Z, qid=qid, para=para, ctrl=ctrl)
         return self
 
@@ -1959,7 +1962,7 @@ class QCircBase(ctypes.Structure):
             quantum circuit after adding
 
         """
-        para = [phase, 0.0, 0.0]
+        para = [phase, 0.0, 1.0]
         self.append_gate(kind=cfg.HADAMARD, qid=[q1, -1], ctrl=ctrl)
         self.append_gate(kind=cfg.CONTROLLED_RZ, qid=[q0, q1], para=para, ctrl=ctrl)
         self.append_gate(kind=cfg.HADAMARD, qid=[q1, -1], ctrl=ctrl)
@@ -1987,19 +1990,19 @@ class QCircBase(ctypes.Structure):
 
         """
         # cs_dg gate
-        para = [-0.5, 0.0, 0.0]
+        para = [-0.5, 0.0, 1.0]
         self.append_gate(kind=cfg.CONTROLLED_RZ, qid=[q0, q1], para=para, ctrl=ctrl)
-        para = [-0.25, 0.0, 0.0]
+        para = [-0.25, 0.0, 1.0]
         self.append_gate(cfg.ROTATION_Z, qid=[q0, q1], para=para, ctrl=ctrl)
-        para = [phase, 0.0, 0.0]
+        para = [phase, 0.0, 1.0]
         self.append_gate(cfg.HADAMARD, qid=[q1, -1], ctrl=ctrl)
         self.append_gate(cfg.CONTROLLED_RZ, qid=[q0, q1], para=para, ctrl=ctrl)
         self.append_gate(cfg.HADAMARD, qid=[q1, -1], ctrl=ctrl)
 
         # cs gate
-        para = [0.5, 0.0, 0.0]
+        para = [0.5, 0.0, 1.0]
         self.append_gate(kind=cfg.CONTROLLED_RZ, qid=[q0, q1], para=para, ctrl=ctrl)
-        para = [0.25, 0.0, 0.0]
+        para = [0.25, 0.0, 1.0]
         self.append_gate(kind=cfg.ROTATION_Z, qid=[q0, q1], para=para, ctrl=ctrl)
 
         return self
@@ -2026,7 +2029,7 @@ class QCircBase(ctypes.Structure):
 
         """
         qid = [q0, q1]
-        para = [phase, 0.0, 0.0]
+        para = [phase, 0.0, 1.0]
         self.append_gate(kind=cfg.CONTROLLED_RZ, qid=qid, para=para, ctrl=ctrl)
         return self
 
@@ -2051,7 +2054,7 @@ class QCircBase(ctypes.Structure):
             quantum circuit after adding
 
         """
-        para=[phase, 0.0, 0.0]
+        para=[phase, 0.0, 1.0]
         self.append_gate(kind=cfg.HADAMARD, qid=[q0, -1], ctrl=ctrl)
         self.append_gate(kind=cfg.HADAMARD, qid=[q1, -1], ctrl=ctrl)
         self.append_gate(kind=cfg.CONTROLLED_X, qid=[q0, q1], ctrl=ctrl)
@@ -2082,14 +2085,14 @@ class QCircBase(ctypes.Structure):
             quantum circuit after adding
 
         """
-        para = [phase, 0.0, 0.0]
-        self.append_gate(kind=cfg.ROTATION_X, qid=[q0, -1], para=[0.5, 0.0, 0.0], ctrl=ctrl)
-        self.append_gate(kind=cfg.ROTATION_X, qid=[q1, -1], para=[0.5, 0.0, 0.0], ctrl=ctrl)
+        para = [phase, 0.0, 1.0]
+        self.append_gate(kind=cfg.ROTATION_X, qid=[q0, -1], para=[0.5, 0.0, 1.0], ctrl=ctrl)
+        self.append_gate(kind=cfg.ROTATION_X, qid=[q1, -1], para=[0.5, 0.0, 1.0], ctrl=ctrl)
         self.append_gate(kind=cfg.CONTROLLED_X, qid=[q0, q1], ctrl=ctrl)
         self.append_gate(kind=cfg.ROTATION_Z, qid=[q1, -1], para=para, ctrl=ctrl)
         self.append_gate(kind=cfg.CONTROLLED_X, qid=[q0, q1], ctrl=ctrl)
-        self.append_gate(kind=cfg.ROTATION_X, qid=[q0, -1], para=[-0.5, 0.0, 0.0], ctrl=ctrl)
-        self.append_gate(kind=cfg.ROTATION_X, qid=[q1, -1], para=[-0.5, 0.0, 0.0], ctrl=ctrl)
+        self.append_gate(kind=cfg.ROTATION_X, qid=[q0, -1], para=[-0.5, 0.0, 1.0], ctrl=ctrl)
+        self.append_gate(kind=cfg.ROTATION_X, qid=[q1, -1], para=[-0.5, 0.0, 1.0], ctrl=ctrl)
         return self
 
     def rzz(self, q0, q1, phase=cfg.DEF_PHASE, ctrl=None):
@@ -2113,7 +2116,7 @@ class QCircBase(ctypes.Structure):
             quantum circuit after adding
 
         """
-        para = [phase, 0.0, 0.0]
+        para = [phase, 0.0, 1.0]
         self.append_gate(kind=cfg.CONTROLLED_X, qid=[q0, q1], ctrl=ctrl)
         self.append_gate(kind=cfg.ROTATION_Z, qid=[q1, -1], para=para, ctrl=ctrl)
         self.append_gate(kind=cfg.CONTROLLED_X, qid=[q0, q1], ctrl=ctrl)

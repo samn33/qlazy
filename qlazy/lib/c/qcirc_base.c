@@ -206,8 +206,7 @@ bool qcirc_base_append_gate(QCircBase* qcirc, Kind kind, int* qid, double* para,
   qgate->kind = kind;
   for (i=0; i<qid_size; i++) qgate->qid[i] = qid[i];
   for (i=qid_size; i<2; i++) qgate->qid[i] = -1;
-  for (i=0; i<para_size; i++) qgate->para[i] = para[i];
-  for (i=para_size; i<3; i++) qgate->para[i] = 0.0;
+  for (i=0; i<3; i++) qgate->para[i] = para[i];
   qgate->c = c;
   qgate->ctrl = ctrl;
 
@@ -300,7 +299,7 @@ bool qcirc_base_pop_gate(QCircBase* qcirc, Kind* kind, int* qid, double* para, i
 }
 
 bool qcirc_base_decompose(QCircBase* qcirc_in, void** qcirc_uonly_out, void** qcirc_mixed_out,
-		     void** qcirc_monly_out)
+			  void** qcirc_monly_out)
 {
   QCircBase*	qcirc_uonly = NULL; /* unitary only */
   QCircBase*	qcirc_monly = NULL; /* measurement only */

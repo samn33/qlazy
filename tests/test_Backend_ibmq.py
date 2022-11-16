@@ -463,6 +463,22 @@ class TestBackend_3_qubit(unittest.TestCase):
         self.assertEqual(value < EPS, True)
 
 #
+# add control
+#
+
+class TestBackend_add_control(unittest.TestCase):
+    """ test 'Backend' : add_control
+    """
+
+    def test_add_control(self):
+        """test add_control
+        """
+        qc = QCirc().h(0).h(1).cp(0,1, phase=0.3).rx(0, phase=0.2).rx(1, phase=0.1).measure(qid=[0,1], cid=[0,1])
+        qs = QState(qubit_num=2).h(0).h(1).cp(0,1, phase=0.3).rx(0, phase=0.2).rx(1, phase=0.1)
+        value = evaluate(qc, qs)
+        self.assertEqual(value < EPS, True)
+
+#
 # operate
 #
 

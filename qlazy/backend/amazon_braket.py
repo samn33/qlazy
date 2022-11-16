@@ -106,7 +106,7 @@ def __convert_to_braket_circuit(qc_qlazy, product):
         if kind in (cfg.MEASURE, cfg.RESET):
             continue
 
-        angle = para[0] * np.pi
+        angle = para[0] * para[2] * np.pi
         q0, q1 = qid[0], qid[1]
         __braket_add_qgate(qc_braket, kind, q0, q1, angle, product)
 

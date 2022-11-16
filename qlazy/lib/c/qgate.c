@@ -271,8 +271,8 @@ bool qgate_get_next_unitary(void** qgate_inout, GBank* gbank, int* dim, int* q0,
     ERR_RETURN(ERROR_CANT_ALLOC_MEMORY, false);
 
   /* get 1st unitary matrix */
-  if (!(gbank_get_unitary(gbank, qgate->kind, qgate->para[0], 0.0, 0.0,
-			  &dim_tmp, (void**)&U_tmp))) {
+  if (!(gbank_get_unitary(gbank, qgate->kind, qgate->para[0], qgate->para[1],
+			  qgate->para[2], &dim_tmp, (void**)&U_tmp))) {
     ERR_RETURN(ERROR_GBANK_GET_UNITARY, false);
   }
 
@@ -295,7 +295,7 @@ bool qgate_get_next_unitary(void** qgate_inout, GBank* gbank, int* dim, int* q0,
     else break;
   
     qgate = qgate->next;
-    if (!(gbank_get_unitary(gbank, qgate->kind, qgate->para[0], 0.0, 0.0,
+    if (!(gbank_get_unitary(gbank, qgate->kind, qgate->para[0], qgate->para[1], qgate->para[2],
 			    &dim_tmp, (void**)&U_tmp))) {
       ERR_RETURN(ERROR_GBANK_GET_UNITARY, false);
     }

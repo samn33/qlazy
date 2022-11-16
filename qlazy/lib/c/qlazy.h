@@ -40,6 +40,7 @@
 #define TOKEN_STRLEN	   1024     /* max token string length */
 #define TOKEN_NUM	   100      /* max token number of each line */
 #define MAX_ERR_MSG_LENGTH 1024	    /* max string length of err message  */
+#define TAG_LEN            1024     /* max length of tag for QGate */
 
 #define DEF_QUBIT_NUM		5
 #define DEF_QC_STEPS		100
@@ -345,11 +346,12 @@ typedef struct _QC {
 } QC;
 
 typedef struct _QGate {
-  Kind			kind;    /* kind of qgate */
-  int			qid[2];	 /* array of qubit id */
-  double		para[3]; /* array of gate parameters (ex: phases of rotation gate)*/
-  int			c;       /* classical register id for storing measurement result (0 or 1) */
-  int			ctrl;    /* classical register id for controlling quantum gate */
+  Kind			kind;          /* kind of qgate */
+  int			qid[2];	       /* array of qubit id */
+  double		para[3];       /* array of gate parameters (phases, gphase, factor) */
+  int			c;             /* classical register id for storing measurement result (0 or 1) */
+  int			ctrl;          /* classical register id for controlling quantum gate */
+  char                  tag[TAG_LEN];  /* tag for parametric quantum circuit */
   struct _QGate*        prev;
   struct _QGate*        next;
 } QGate;
@@ -509,8 +511,8 @@ void	 qc_free(QC* qc);
 
 /* gbank.c */
 bool	 gbank_init(void** gbank_out);
-bool     gbank_get_unitary(GBank* gbank, Kind kind, double phase, double phase1,
-			   double phase2, int* dim_out, void** matrix_out);
+bool     gbank_get_unitary(GBank* gbank, Kind kind, double para_phase, double para_gphase,
+			   double para_factor, int* dim_out, void** matrix_out);
 
 /* qstate.c */
 bool	 qstate_init(int qubit_num, void** qstate_out, bool use_gpu);
@@ -530,8 +532,8 @@ bool	 qstate_measure_stats(QState* qstate, int shot_num, double angle, double ph
 			      int qubit_num, int* qubit_id, void** mdata_out);
 bool     qstate_measure_bell_stats(QState* qstate, int shot_num, int qubit_num,
 				   int* qubit_id, void** mdata_out);
-bool	 qstate_operate_qgate(QState* qstate, Kind kind, double alpha, double beta,
-			      double gamma, int* qubit_id);
+bool	 qstate_operate_qgate(QState* qstate, Kind kind, double phase, double gphase,
+			      double factor, int* qubit_id);
 bool     qstate_evolve(QState* qstate, ObservableBase* observ, double time, int iter);
 bool     qstate_inner_product(QState* qstate_0, QState* qstate_1, double* real,
 			      double* imag);
@@ -583,8 +585,8 @@ bool     densop_apply_matrix(DensOp* densop, int qnum_part, int* qid,
 bool     densop_probability(DensOp* densop, int qnum_part, int* qid,
 			    MatrixType mtype, double* real, double* imag, int row, int col,
 			    double* prob_out);
-bool     densop_operate_qgate(DensOp* densop, Kind kind, double alpha, double beta,
-			      double gamma, int* qubit_id);
+bool     densop_operate_qgate(DensOp* densop, Kind kind, double phase, double gphase,
+			      double factor, int* qubit_id);
 bool     densop_tensor_product(DensOp* densop_0, DensOp* densop_1, void** densop_out);
 void     densop_free(DensOp* densop);
 

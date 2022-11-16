@@ -357,66 +357,6 @@ static bool _gbank_get_phase_shift(double phase, double unit, void** matrix_out)
   SUC_RETURN(true);
 }
 
-static bool _gbank_get_rotation_u1(double phase, double unit, void** matrix_out)
-{
-  COMPLEX* matrix = NULL;
-  
-  if (!(_gbank_get_phase_shift(phase, unit, (void**)&matrix)))
-    ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
-
-  *matrix_out = matrix;
-  
-  SUC_RETURN(true);
-}
-
-static bool _gbank_get_rotation_u2(double phase, double phase1, double unit,
-				   void** matrix_out)
-{
-  COMPLEX*	matrix = NULL;
-  double	alpha;
-  double	beta;
-  
-  alpha  = phase * unit;
-  beta   = phase1 * unit;
-  
-  if (!(matrix = (COMPLEX*)malloc(sizeof(COMPLEX) * 4)))
-    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY, false);
-
-  matrix[IDX2(0, 0)] = 1.0 / sqrt(2.0);
-  matrix[IDX2(0, 1)] = -cexp(1.0 * COMP_I * alpha) / sqrt(2.0);
-  matrix[IDX2(1, 0)] = cexp(1.0 * COMP_I * beta) / sqrt(2.0);
-  matrix[IDX2(1, 1)] = cexp(1.0 * COMP_I * (alpha + beta)) / sqrt(2.0);
-
-  *matrix_out = matrix;
-  
-  SUC_RETURN(true);
-}
-
-static bool _gbank_get_rotation_u3(double phase, double phase1, double phase2,
-				   double unit, void** matrix_out)
-{
-  COMPLEX*	matrix = NULL;
-  double	alpha;
-  double	beta;
-  double	gamma;
-  
-  alpha  = phase * unit;
-  beta   = phase1 * unit;
-  gamma  = phase2 * unit;
-  
-  if (!(matrix = (COMPLEX*)malloc(sizeof(COMPLEX) * 4)))
-    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY, false);
-
-  matrix[IDX2(0, 0)] = cos(gamma / 2.0);
-  matrix[IDX2(0, 1)] = -cexp(1.0 * COMP_I * alpha) * sin(gamma / 2.0);
-  matrix[IDX2(1, 0)] = cexp(1.0 * COMP_I * beta) * sin(gamma / 2.0);
-  matrix[IDX2(1, 1)] = cexp(1.0 * COMP_I * (alpha + beta)) * cos(gamma / 2.0);
-
-  *matrix_out = matrix;
-  
-  SUC_RETURN(true);
-}
-
 static bool _gbank_get_ctr_phase_shift(double phase, double unit, void** matrix_out)
 {
   COMPLEX*	matrix = NULL;
@@ -436,74 +376,6 @@ static bool _gbank_get_ctr_phase_shift(double phase, double unit, void** matrix_
 
   *matrix_out = matrix;
 
-  SUC_RETURN(true);
-}
-
-static bool _gbank_get_ctr_u1(double phase, double unit, void** matrix_out)
-{
-  COMPLEX* matrix = NULL;
-  
-  if (!(_gbank_get_ctr_phase_shift(phase, unit, (void**)&matrix)))
-    ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
-
-  *matrix_out = matrix;
-  
-  SUC_RETURN(true);
-}
-
-static bool _gbank_get_ctr_u2(double phase, double phase1, double unit,
-			      void** matrix_out)
-{
-  COMPLEX*	matrix = NULL;
-  double	alpha;
-  double	beta;
-  int           i;
-  
-  alpha  = phase * unit;
-  beta   = phase1 * unit;
-  
-  if (!(matrix = (COMPLEX*)malloc(sizeof(COMPLEX) * 16)))
-    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY, false);
-
-  for (i=0; i<16; i++) matrix[i] = 0.0 + 0.0 * COMP_I;
-  matrix[IDX4(0, 0)] = 1.0 + 0.0 * COMP_I;
-  matrix[IDX4(1, 1)] = 1.0 + 0.0 * COMP_I;
-  matrix[IDX4(2, 2)] = 1.0 / sqrt(2.0);
-  matrix[IDX4(2, 3)] = -cexp(1.0 * COMP_I * alpha) / sqrt(2.0);
-  matrix[IDX4(3, 2)] = cexp(1.0 * COMP_I * beta) / sqrt(2.0);
-  matrix[IDX4(3, 3)] = cexp(1.0 * COMP_I * (alpha + beta)) / sqrt(2.0);
-  
-  *matrix_out = matrix;
-  
-  SUC_RETURN(true);
-}
-
-static bool _gbank_get_ctr_u3(double phase, double phase1, double phase2,
-			      double unit, void** matrix_out)
-{
-  COMPLEX*	matrix = NULL;
-  double	alpha;
-  double	beta;
-  double	gamma;
-  int           i;
-  
-  alpha  = phase * unit;
-  beta   = phase1 * unit;
-  gamma  = phase2 * unit;
-  
-  if (!(matrix = (COMPLEX*)malloc(sizeof(COMPLEX) * 16)))
-    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY, false);
-
-  for (i=0; i<16; i++) matrix[i] = 0.0 + 0.0 * COMP_I;
-  matrix[IDX4(0, 0)] = 1.0 + 0.0 * COMP_I;
-  matrix[IDX4(1, 1)] = 1.0 + 0.0 * COMP_I;
-  matrix[IDX4(2, 2)] = cos(gamma / 2.0);
-  matrix[IDX4(2, 3)] = -cexp(1.0 * COMP_I * alpha) * sin(gamma / 2.0);
-  matrix[IDX4(3, 2)] = cexp(1.0 * COMP_I * beta) * sin(gamma / 2.0);
-  matrix[IDX4(3, 3)] = cexp(1.0 * COMP_I * (alpha + beta)) * cos(gamma / 2.0);
-  
-  *matrix_out = matrix;
-  
   SUC_RETURN(true);
 }
 
@@ -701,11 +573,12 @@ static bool _gbank_get(GBank* gbank, Kind kind, void** matrix_out)
   SUC_RETURN(true);
 }
 
-bool gbank_get_unitary(GBank* gbank, Kind kind, double phase, double phase1,
-		       double phase2, int* dim_out, void** matrix_out)
+bool gbank_get_unitary(GBank* gbank, Kind kind, double para_phase, double para_gphase,
+		       double para_factor, int* dim_out, void** matrix_out)
 {
   COMPLEX*	matrix = NULL;
   int		dim    = 0;
+  double        phase = para_phase * para_factor;
   
   if (gbank == NULL)
     ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
@@ -751,24 +624,6 @@ bool gbank_get_unitary(GBank* gbank, Kind kind, double phase, double phase1,
     /* 1-qubit gate (1-parameter) */
     dim = 2;
     if (!(_gbank_get_phase_shift(phase, M_PI, (void**)&matrix)))
-      ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
-    break;
-  case ROTATION_U1:
-    /* 1-qubit gate (1-parameter) */
-    dim = 2;
-    if (!(_gbank_get_rotation_u1(phase, M_PI, (void**)&matrix)))
-      ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
-    break;
-  case ROTATION_U2:
-    /* 1-qubit gate (2-parameter) */
-    dim = 2;
-    if (!(_gbank_get_rotation_u2(phase, phase1, M_PI, (void**)&matrix)))
-      ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
-    break;
-  case ROTATION_U3:
-    /* 1-qubit gate (3-parameter) */
-    dim = 2;
-    if (!(_gbank_get_rotation_u3(phase, phase1, phase2, M_PI, (void**)&matrix)))
       ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
     break;
 
@@ -831,24 +686,6 @@ bool gbank_get_unitary(GBank* gbank, Kind kind, double phase, double phase1,
     /* 2-qubit gate (1-parameter) */
     dim = 4;
     if (!(_gbank_get_rotation_zz(phase, M_PI, (void**)&matrix)))
-      ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
-    break;
-  case CONTROLLED_U1:
-    /* 2-qubit gate (1-parameter) */
-    dim = 4;
-    if (!(_gbank_get_ctr_u1(phase, M_PI, (void**)&matrix)))
-      ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
-    break;
-  case CONTROLLED_U2:
-    /* 2-qubit gate (2-parameter) */
-    dim = 4;
-    if (!(_gbank_get_ctr_u2(phase, phase1, M_PI, (void**)&matrix)))
-      ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
-    break;
-  case CONTROLLED_U3:
-    /* 2-qubit gate (3-parameter) */
-    dim = 4;
-    if (!(_gbank_get_ctr_u3(phase, phase1, phase2, M_PI, (void**)&matrix)))
       ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
     break;
 

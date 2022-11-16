@@ -120,7 +120,7 @@ def __run_all(qcirc_in=None, shots=1, cid=None, backend=None, proc='CPU', out_st
         (kind, qid, para, c, ctrl) = qcirc.pop_gate()
         if ctrl is None or (ctrl is not None and cmem[ctrl] == 1):
             __qulacs_operate_qgate(qstate, qubit_num, kind=kind, qid=qid,
-                                   phase=para[0], phase1=para[1], phase2=para[2])
+                                   para_phase=para[0], para_gphase=para[1], para_factor=para[2])
 
     if kind is None:
 
@@ -191,7 +191,7 @@ def __run_all(qcirc_in=None, shots=1, cid=None, backend=None, proc='CPU', out_st
                 (kind, qid, para, c, ctrl) = qcirc_tmp.pop_gate()
                 if (ctrl is None or (ctrl is not None and cmem[ctrl] == 1)):
                     __qulacs_operate_qgate(qstate_tmp, qubit_num, kind=kind, qid=qid,
-                                           phase=para[0], phase1=para[1], phase2=para[2])
+                                           para_phase=para[0], para_gphase=para[1], para_factor=para[2])
 
         if len(cmem) > 0:
             mval = ''.join(map(str, [cmem[i] for i in cid]))
@@ -334,7 +334,7 @@ def __get_CU3(q0, q1, phase, phase1, phase2):
     gate.add_control_qubit(q0, 1)
     return gate
 
-def __qulacs_operate_qgate(qstate, qubit_num, kind, qid, phase, phase1, phase2):
+def __qulacs_operate_qgate(qstate, qubit_num, kind, qid, para_phase, para_gphase, para_factor):
 
     if __is_supported_qgate(kind) is False:
         raise ValueError("not supported quantum gate")
@@ -345,37 +345,21 @@ def __qulacs_operate_qgate(qstate, qubit_num, kind, qid, phase, phase1, phase2):
     para_num = get_qgate_param_num(kind)
     gate_function_name = GateFunctionName[kind]
 
-    phase = phase * np.pi
-    phase1 = phase1 * np.pi
-    phase2 = phase2 * np.pi
+    phase = para_phase * para_factor * np.pi
 
     # the sign-definition of rotation gate on qulacs
     if (kind in (cfg.ROTATION_X, cfg.ROTATION_Y, cfg.ROTATION_Z,
                  cfg.CONTROLLED_RX, cfg.CONTROLLED_RY, cfg.CONTROLLED_RZ)):
         phase = -phase
-    # the argument-order-definition of U2 gate on qulacs
-    elif kind in (cfg.ROTATION_U2, cfg.CONTROLLED_U2):
-        phase1, phase = phase, phase1
-    # the argument-order-definition of U3 gate on qulacs
-    elif kind in (cfg.ROTATION_U3, cfg.CONTROLLED_U3):
-        phase2, phase = phase, phase2
 
     if term_num == 1 and para_num == 0:
         circ.add_gate(eval(gate_function_name)(qid[0]))
     elif term_num == 1 and para_num == 1:
         circ.add_gate(eval(gate_function_name)(qid[0], phase))
-    elif term_num == 1 and para_num == 2:
-        circ.add_gate(eval(gate_function_name)(qid[0], phase, phase1))
-    elif term_num == 1 and para_num == 3:
-        circ.add_gate(eval(gate_function_name)(qid[0], phase, phase1, phase2))
     elif term_num == 2 and para_num == 0:
         circ.add_gate(eval(gate_function_name)(qid[0], qid[1]))
     elif term_num == 2 and para_num == 1:
         circ.add_gate(eval(gate_function_name)(qid[0], qid[1], phase))
-    elif term_num == 2 and para_num == 2:
-        circ.add_gate(eval(gate_function_name)(qid[0], qid[1], phase, phase1))
-    elif term_num == 2 and para_num == 3:
-        circ.add_gate(eval(gate_function_name)(qid[0], qid[1], phase, phase1, phase2))
     else:
         raise ValueError("not supported terminal or parameter-number")
 

@@ -446,7 +446,7 @@ def densop_probability(de, matrix=None, qid=None, matrix_type=None):
         raise ValueError("can't calculate probability.")
 
 def densop_operate_qgate(de, kind=None, qid=None, phase=cfg.DEF_PHASE,
-                         phase1=cfg.DEF_PHASE, phase2=cfg.DEF_PHASE):
+                         gphase=cfg.DEF_GPHASE, factor=cfg.DEF_FACTOR):
     """ operate quantum gate to the density operator """
 
     # error check
@@ -457,14 +457,14 @@ def densop_operate_qgate(de, kind=None, qid=None, phase=cfg.DEF_PHASE,
         qubit_id[i] = q
     IntArray = ctypes.c_int * 2
     qid_array = IntArray(*qubit_id)
-
+    
     lib.densop_operate_qgate.restype = ctypes.c_bool
     lib.densop_operate_qgate.argtypes = [ctypes.POINTER(DensOp), ctypes.c_int,
                                          ctypes.c_double, ctypes.c_double,
                                          ctypes.c_double, IntArray]
     ret = lib.densop_operate_qgate(ctypes.byref(de), ctypes.c_int(kind),
-                                   ctypes.c_double(phase), ctypes.c_double(phase1),
-                                   ctypes.c_double(phase2), qid_array)
+                                   ctypes.c_double(phase), ctypes.c_double(gphase),
+                                   ctypes.c_double(factor), qid_array)
 
     if ret is False:
         raise ValueError("can't operate the quantum gate.")

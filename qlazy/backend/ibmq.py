@@ -52,8 +52,7 @@ def run(qcirc=None, shots=1, cid=None, backend=None, out_state=False):
             qc.reset(qubit_reg[qid[0]])
 
         else:
-            __ibmq_add_qgate(qc, kind, qid, para[0] * np.pi, para[1] * np.pi, para[2] * np.pi,
-                             ctrl, cmem_reg)
+            __ibmq_add_qgate(qc, kind, qid, para[0], para[1], para[2], ctrl, cmem_reg)
 
     # set backend
     if backend.device == 'aer_simulator':
@@ -110,7 +109,9 @@ def run(qcirc=None, shots=1, cid=None, backend=None, out_state=False):
 
     return result
 
-def __ibmq_add_qgate(qc, kind, qid, phase, phase1, phase2, ctrl, cmem_reg):
+def __ibmq_add_qgate(qc, kind, qid, para_phase, para_gphase, para_factor, ctrl, cmem_reg):
+
+    phase = para_phase * para_factor * np.pi
 
     # 1-qubit, 0-parameter gate
     if kind == cfg.PAULI_X:
@@ -204,27 +205,6 @@ def __ibmq_add_qgate(qc, kind, qid, phase, phase1, phase2, ctrl, cmem_reg):
         else:
             qc.p(phase, qid[0]).c_if(cmem_reg[ctrl], 1)
 
-    elif kind == cfg.ROTATION_U1:
-        if ctrl is None:
-            qc.p(phase, qid[0])
-        else:
-            qc.p(phase, qid[0]).c_if(cmem_reg[ctrl], 1)
-
-    # 1-qubit, 2-parameter gate
-    elif kind == cfg.ROTATION_U2:
-        if ctrl is None:
-            qc.u(0.5 * np.pi, phase1, phase, qid[0])
-        else:
-            qc.u(0.5 * np.pi, phase1, phase, qid[0]).c_if(cmem_reg[ctrl], 1)
-
-    # 1-qubit, 3-parameter gate
-    elif kind == cfg.ROTATION_U3:
-        if ctrl is None:
-            qc.u(phase2, phase1, phase, qid[0])
-        else:
-            qc.u(phase2, phase1, phase, qid[0]).c_if(cmem_reg[ctrl], 1)
-
-    # 2-qubit, 0-parameters gate
     elif kind == cfg.CONTROLLED_X:
         if ctrl is None:
             qc.cx(qid[0], qid[1])
@@ -319,26 +299,6 @@ def __ibmq_add_qgate(qc, kind, qid, phase, phase1, phase2, ctrl, cmem_reg):
             qc.crz(phase, qid[0], qid[1])
         else:
             qc.crz(phase, qid[0], qid[1]).c_if(cmem_reg[ctrl], 1)
-
-    elif kind == cfg.CONTROLLED_U1:
-        if ctrl is None:
-            qc.cp(phase, qid[0], qid[1])
-        else:
-            qc.cp(phase, qid[0], qid[1]).c_if(cmem_reg[ctrl], 1)
-
-    # 2-qubit, 2-parameters gate
-    elif kind == cfg.CONTROLLED_U2:
-        if ctrl is None:
-            qc.cu(0.5 * np.pi, phase1, phase, 0, qid[0], qid[1])
-        else:
-            qc.cu(0.5 * np.pi, phase1, phase, 0, qid[0], qid[1]).c_if(cmem_reg[ctrl], 1)
-
-    # 2-qubit, 3-parameters gate
-    elif kind == cfg.CONTROLLED_U3:
-        if ctrl is None:
-            qc.cu(phase2, phase1, phase, 0, qid[0], qid[1])
-        else:
-            qc.cu(phase2, phase1, phase, 0, qid[0], qid[1]).c_if(cmem_reg[ctrl], 1)
 
     else:
         raise ValueError("unknown gate")

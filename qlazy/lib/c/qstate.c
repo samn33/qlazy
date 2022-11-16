@@ -980,13 +980,13 @@ static bool _qstate_transform_basis(QState* qstate, double angle, double phase, 
   if (qstate == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
   
   qubit_id[0] = n;
-  if (!(qstate_operate_qgate(qstate, ROTATION_Z, phs, 0.0, 0.0, qubit_id)))
+  if (!(qstate_operate_qgate(qstate, ROTATION_Z, phs, 0.0, 1.0, qubit_id)))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
-  if (!(qstate_operate_qgate(qstate, HADAMARD, 0.0, 0.0, 0.0, qubit_id)))
+  if (!(qstate_operate_qgate(qstate, HADAMARD, 0.0, 0.0, 1.0, qubit_id)))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
-  if (!(qstate_operate_qgate(qstate, ROTATION_Z, ang, 0.0, 0.0, qubit_id)))
+  if (!(qstate_operate_qgate(qstate, ROTATION_Z, ang, 0.0, 1.0, qubit_id)))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
-  if (!(qstate_operate_qgate(qstate, HADAMARD, 0.0, 0.0, 0.0, qubit_id)))
+  if (!(qstate_operate_qgate(qstate, ROTATION_Z, ang, 0.0, 1.0, qubit_id)))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
 #ifdef USE_GPU
@@ -1012,13 +1012,13 @@ static bool _qstate_transform_basis_inv(QState* qstate, double angle, double pha
   if (qstate == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
   
   qubit_id[0] = n;
-  if (!(qstate_operate_qgate(qstate, HADAMARD, 0.0, 0.0, 0.0, qubit_id)))
+  if (!(qstate_operate_qgate(qstate, HADAMARD, 0.0, 0.0, 1.0, qubit_id)))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
-  if (!(qstate_operate_qgate(qstate, ROTATION_Z, ang, 0.0, 0.0, qubit_id)))
+  if (!(qstate_operate_qgate(qstate, ROTATION_Z, ang, 0.0, 1.0, qubit_id)))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
-  if (!(qstate_operate_qgate(qstate, HADAMARD, 0.0, 0.0, 0.0, qubit_id)))
+  if (!(qstate_operate_qgate(qstate, HADAMARD, 0.0, 0.0, 1.0, qubit_id)))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
-  if (!(qstate_operate_qgate(qstate, ROTATION_Z, phs, 0.0, 0.0, qubit_id)))
+  if (!(qstate_operate_qgate(qstate, ROTATION_Z, phs, 0.0, 1.0, qubit_id)))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
 #ifdef USE_GPU
@@ -1059,7 +1059,6 @@ static bool _qstate_get_measured_char(QState* qstate, int mnum, int* qid, char* 
     qstate->prob_updated = true;
   }
 
-  //r = rand() / (double)RAND_MAX;
   r = genrand_real1();
   idx = 0;
   for (i=0; i<qstate->qubit_num; i++) {
@@ -1198,13 +1197,13 @@ bool qstate_measure_bell_stats(QState* qstate, int shot_num, int qubit_num,
 
   /* equivalent transform to bell-basis */
   /* CX 0 1 */
-  if (!(qstate_operate_qgate(qstate, CONTROLLED_X, 0.0, 0.0, 0.0, qubit_id)))
+  if (!(qstate_operate_qgate(qstate, CONTROLLED_X, 0.0, 0.0, 1.0, qubit_id)))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
   /* H 0 */
-  if (!(qstate_operate_qgate(qstate, HADAMARD, 0.0, 0.0, 0.0, qubit_id)))
+  if (!(qstate_operate_qgate(qstate, HADAMARD, 0.0, 0.0, 1.0, qubit_id)))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
   /* CX 0 1 */
-  if (!(qstate_operate_qgate(qstate, CONTROLLED_X, 0.0, 0.0, 0.0, qubit_id)))
+  if (!(qstate_operate_qgate(qstate, CONTROLLED_X, 0.0, 0.0, 1.0, qubit_id)))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
   /* execute Bell-mesurement */
@@ -1213,13 +1212,13 @@ bool qstate_measure_bell_stats(QState* qstate, int shot_num, int qubit_num,
 
   /* equivalent transform to bell-basis (inverse) */
   /* CX 0 1 */
-  if (!(qstate_operate_qgate(qstate, CONTROLLED_X, 0.0, 0.0, 0.0, qubit_id)))
+  if (!(qstate_operate_qgate(qstate, CONTROLLED_X, 0.0, 0.0, 1.0, qubit_id)))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
   /* H 0 */
-  if (!(qstate_operate_qgate(qstate, HADAMARD, 0.0, 0.0, 0.0, qubit_id)))
+  if (!(qstate_operate_qgate(qstate, HADAMARD, 0.0, 0.0, 1.0, qubit_id)))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
   /* CX 0 1 */
-  if (!(qstate_operate_qgate(qstate, CONTROLLED_X, 0.0, 0.0, 0.0, qubit_id)))
+  if (!(qstate_operate_qgate(qstate, CONTROLLED_X, 0.0, 0.0, 1.0, qubit_id)))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
 #ifdef USE_GPU
@@ -1233,8 +1232,8 @@ bool qstate_measure_bell_stats(QState* qstate, int shot_num, int qubit_num,
   SUC_RETURN(true);
 }
 
-bool qstate_operate_qgate(QState* qstate, Kind kind, double alpha, double beta,
-			  double gamma, int* qubit_id)
+bool qstate_operate_qgate(QState* qstate, Kind kind, double phase, double gphase,
+			  double factor, int* qubit_id)
 {
   int		q0  = qubit_id[0];
   int		q1  = qubit_id[1];
@@ -1249,7 +1248,7 @@ bool qstate_operate_qgate(QState* qstate, Kind kind, double alpha, double beta,
     SUC_RETURN(true);
   }
 
-  if (!(gbank_get_unitary(qstate->gbank, kind, alpha, beta, gamma, &dim, (void**)&U)))
+  if (!(gbank_get_unitary(qstate->gbank, kind, phase, gphase, factor, &dim, (void**)&U)))
     ERR_RETURN(ERROR_GBANK_GET_UNITARY,false);
   
   if (kind_is_controlled(kind) == true) {
@@ -1285,12 +1284,12 @@ static bool _qstate_evolve_spro(QState* qstate, SPro* spro, double time)
     /* operate G: G=H (if PauliX), G=Rx(-0.5) (if PauliY), G=I (if PauliZ) */
     if (spro->spin_type[now] == SIGMA_X) {
       qubit_id[0] = now;
-      if (!(qstate_operate_qgate(qstate, HADAMARD, 0.0, 0.0, 0.0, qubit_id)))
+      if (!(qstate_operate_qgate(qstate, HADAMARD, 0.0, 0.0, 1.0, qubit_id)))
 	ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
     }
     else if (spro->spin_type[now] == SIGMA_Y) {
       qubit_id[0] = now;
-      if (!(qstate_operate_qgate(qstate, ROTATION_X, -0.5, 0.0, 0.0, qubit_id)))
+      if (!(qstate_operate_qgate(qstate, ROTATION_X, -0.5, 0.0, 1.0, qubit_id)))
 	ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
     }
     else if (spro->spin_type[now] == SIGMA_Z) {
@@ -1304,7 +1303,7 @@ static bool _qstate_evolve_spro(QState* qstate, SPro* spro, double time)
       if ((spro->spin_type[pre] != NONE) && (spro->spin_type[now] != NONE)) {
 	qubit_id[0] = pre;
 	qubit_id[1] = now;
-	if (!(qstate_operate_qgate(qstate, CONTROLLED_X, 0.0, 0.0, 0.0, qubit_id)))
+	if (!(qstate_operate_qgate(qstate, CONTROLLED_X, 0.0, 0.0, 1.0, qubit_id)))
 	  ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
       }
     }
@@ -1314,7 +1313,7 @@ static bool _qstate_evolve_spro(QState* qstate, SPro* spro, double time)
   /* operate Rz(-2.0*t) */
   now = spro->spin_num-1;
   qubit_id[0] = now;
-  if (!(qstate_operate_qgate(qstate, ROTATION_Z, -2.0*time, 0.0, 0.0, qubit_id)))
+  if (!(qstate_operate_qgate(qstate, ROTATION_Z, -2.0*time, 0.0, 1.0, qubit_id)))
     ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
   pre = now; now--;
@@ -1329,19 +1328,19 @@ static bool _qstate_evolve_spro(QState* qstate, SPro* spro, double time)
       if ((spro->spin_type[pre] != NONE) && (spro->spin_type[now] != NONE)) {
 	qubit_id[0] = now;
 	qubit_id[1] = pre;
-	if (!(qstate_operate_qgate(qstate, CONTROLLED_X, 0.0, 0.0, 0.0, qubit_id)))
+	if (!(qstate_operate_qgate(qstate, CONTROLLED_X, 0.0, 0.0, 1.0, qubit_id)))
 	  ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
       }
     }
     /* operate G+: G+=H (if PauliX), G+=Rx(+0.5) (if PauliY), G+=I (if PauliZ) */
     if (spro->spin_type[pre] == SIGMA_X) {
       qubit_id[0] = pre;
-      if (!(qstate_operate_qgate(qstate, HADAMARD, 0.0, 0.0, 0.0, qubit_id)))
+      if (!(qstate_operate_qgate(qstate, HADAMARD, 0.0, 0.0, 1.0, qubit_id)))
 	ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
     }
     else if (spro->spin_type[pre] == SIGMA_Y) {
       qubit_id[0] = pre;
-      if (!(qstate_operate_qgate(qstate, ROTATION_X, 0.5, 0.0, 0.0, qubit_id)))
+      if (!(qstate_operate_qgate(qstate, ROTATION_X, 0.5, 0.0, 1.0, qubit_id)))
 	ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
     }
     else if (spro->spin_type[pre] == SIGMA_Z) {
@@ -1429,19 +1428,19 @@ static QState* _qstate_apply_spro(QState* qstate, SPro* spro)
       ;
     }
     else if (spro->spin_type[i] == SIGMA_X) {
-      if (!(qstate_operate_qgate(qstate_ob, PAULI_X, 0.0, 0.0, 0.0, qubit_id))) {
+      if (!(qstate_operate_qgate(qstate_ob, PAULI_X, 0.0, 0.0, 1.0, qubit_id))) {
 	qstate_free(qstate_ob); qstate_ob = NULL;
 	ERR_RETURN(ERROR_INVALID_ARGUMENT,NULL);
       }
     }
     else if (spro->spin_type[i] == SIGMA_Y) {
-      if (!(qstate_operate_qgate(qstate_ob, PAULI_Y, 0.0, 0.0, 0.0, qubit_id))) {
+      if (!(qstate_operate_qgate(qstate_ob, PAULI_Y, 0.0, 0.0, 1.0, qubit_id))) {
 	qstate_free(qstate_ob); qstate_ob = NULL;
 	ERR_RETURN(ERROR_INVALID_ARGUMENT,NULL);
       }
     }
     else if (spro->spin_type[i] == SIGMA_Z) {
-      if (!(qstate_operate_qgate(qstate_ob, PAULI_Z, 0.0, 0.0, 0.0, qubit_id))) {
+      if (!(qstate_operate_qgate(qstate_ob, PAULI_Z, 0.0, 0.0, 1.0, qubit_id))) {
 	qstate_free(qstate_ob); qstate_ob = NULL;
 	ERR_RETURN(ERROR_INVALID_ARGUMENT,NULL);
       }

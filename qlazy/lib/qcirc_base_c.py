@@ -89,7 +89,7 @@ def qcirc_base_append_gate(qcirc, kind, qid, para, c, ctrl):
     """ append gate to the QCirc objects """
 
     if para is None:
-        para = [0.0, 0.0, 0.0]
+        para = [0.0, 0.0, 1.0]  # [phase, gphase, factor]
     if c is None:
         c = -1
     if ctrl is None:

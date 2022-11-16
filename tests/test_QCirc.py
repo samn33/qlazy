@@ -7,8 +7,6 @@ from pyzx import Circuit
 from qlazy import QState, QCirc, Backend, PauliProduct
 from qlazy.config import *
 
-EPS = 1.0e-6
-
 EPS = 1.e-6
 
 def equal_or_not(qs_A, qs_B):
@@ -30,9 +28,13 @@ def valid_or_not(qc):
     ans = circ_A.verify_equality(circ_B)
     return ans
 
+def get_backend():
+
+    return Backend()
+
 def check_controlled_qcirc(qc_U, qubit_num, verbose=False):
 
-    bk = Backend()
+    bk = get_backend()
     qc_0_cU = qc_U.add_control(qctrl=qubit_num)
     qc_1_cU = QCirc().x(qubit_num) + qc_0_cU
 
@@ -183,7 +185,7 @@ class TestQCirc_pop_gate(unittest.TestCase):
         (kind, qid, para, c, ctrl) = qc.pop_gate()
         self.assertEqual(kind, HADAMARD)
         self.assertEqual(qid, [0,-1])
-        self.assertEqual(para, [0.0,0.0,0.0])
+        self.assertEqual(para, [0.0,0.0,1.0])
         self.assertEqual(c, None)
         self.assertEqual(ctrl, None)
         self.assertEqual(qc.qubit_num, 3)
@@ -200,7 +202,7 @@ class TestQCirc_pop_gate(unittest.TestCase):
         (kind, qid, para, c, ctrl) = qc.pop_gate()
         self.assertEqual(kind, HADAMARD)
         self.assertEqual(qid, [5,-1])
-        self.assertEqual(para, [0.0,0.0,0.0])
+        self.assertEqual(para, [0.0,0.0,1.0])
         self.assertEqual(c, None)
         self.assertEqual(ctrl, 6)
         self.assertEqual(qc.qubit_num, 3)
@@ -219,7 +221,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """test x
         """
         qc = QCirc().x(0)
-        bk = Backend()
+        bk = get_backend()
         qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).x(0)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
@@ -229,7 +231,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """test y
         """
         qc = QCirc().y(0)
-        bk = Backend()
+        bk = get_backend()
         qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).y(0)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
@@ -239,7 +241,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """test z
         """
         qc = QCirc().z(0)
-        bk = Backend()
+        bk = get_backend()
         qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).z(0)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
@@ -249,7 +251,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """test xr
         """
         qc = QCirc().xr(0)
-        bk = Backend()
+        bk = get_backend()
         qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).xr(0)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
@@ -259,7 +261,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """test xr_dg
         """
         qc = QCirc().xr_dg(0)
-        bk = Backend()
+        bk = get_backend()
         qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).xr_dg(0)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
@@ -269,7 +271,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """test h
         """
         qc = QCirc().h(0)
-        bk = Backend()
+        bk = get_backend()
         qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).h(0)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
@@ -279,7 +281,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """test s
         """
         qc = QCirc().s(0)
-        bk = Backend()
+        bk = get_backend()
         qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).s(0)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
@@ -289,7 +291,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """test s_dg
         """
         qc = QCirc().s_dg(0)
-        bk = Backend()
+        bk = get_backend()
         qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).s_dg(0)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
@@ -299,7 +301,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """test t
         """
         qc = QCirc().t(0)
-        bk = Backend()
+        bk = get_backend()
         qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).t(0)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
@@ -309,7 +311,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """test t_dg
         """
         qc = QCirc().t_dg(0)
-        bk = Backend()
+        bk = get_backend()
         qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).t_dg(0)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
@@ -319,7 +321,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """test p
         """
         qc = QCirc().p(0, phase=0.1)
-        bk = Backend()
+        bk = get_backend()
         qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).p(0, phase=0.1)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
@@ -329,17 +331,17 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """test rx
         """
         qc = QCirc().rx(0, phase=0.1)
-        bk = Backend()
+        bk = get_backend()
         qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).rx(0, phase=0.1)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
         self.assertEqual(valid_or_not(qc), True)
-        
+       
     def test_ry(self):
         """test ry
         """
         qc = QCirc().ry(0, phase=0.1)
-        bk = Backend()
+        bk = get_backend()
         qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).ry(0, phase=0.1)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
@@ -349,7 +351,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """test rz
         """
         qc = QCirc().rz(0, phase=0.1)
-        bk = Backend()
+        bk = get_backend()
         qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).rz(0, phase=0.1)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
@@ -359,7 +361,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """test cx
         """
         qc = QCirc().cx(0,1)
-        bk = Backend()
+        bk = get_backend()
         qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).cx(0,1)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
@@ -369,7 +371,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """test cy
         """
         qc = QCirc().cy(0,1)
-        bk = Backend()
+        bk = get_backend()
         qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).cy(0,1)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
@@ -379,7 +381,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """test cz
         """
         qc = QCirc().cz(0,1)
-        bk = Backend()
+        bk = get_backend()
         qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).cz(0,1)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
@@ -389,7 +391,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """test cxr
         """
         qc = QCirc().cxr(0,1)
-        bk = Backend()
+        bk = get_backend()
         qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).cxr(0,1)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
@@ -399,7 +401,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """test cxr (2)
         """
         qc = QCirc().h(0).cxr(0,1)
-        bk = Backend()
+        bk = get_backend()
         qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).h(0).cxr(0,1)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
@@ -409,7 +411,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """test cxr_dg
         """
         qc = QCirc().cxr_dg(0,1)
-        bk = Backend()
+        bk = get_backend()
         qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).cxr_dg(0,1)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
@@ -419,7 +421,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """test ch
         """
         qc = QCirc().ch(0,1)
-        bk = Backend()
+        bk = get_backend()
         qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).ch(0,1)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
@@ -429,7 +431,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """test cs
         """
         qc = QCirc().cs(0,1)
-        bk = Backend()
+        bk = get_backend()
         qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).cs(0,1)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
@@ -439,7 +441,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """test cs_dg
         """
         qc = QCirc().cs_dg(0,1)
-        bk = Backend()
+        bk = get_backend()
         qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).cs_dg(0,1)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
@@ -449,7 +451,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """test ct
         """
         qc = QCirc().ct(0,1)
-        bk = Backend()
+        bk = get_backend()
         qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).ct(0,1)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
@@ -459,7 +461,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """test ct_dg
         """
         qc = QCirc().ct_dg(0,1)
-        bk = Backend()
+        bk = get_backend()
         qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).ct_dg(0,1)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
@@ -469,7 +471,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """test cp
         """
         qc = QCirc().cp(0,1, phase=0.1)
-        bk = Backend()
+        bk = get_backend()
         qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).cp(0,1, phase=0.1)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
@@ -479,7 +481,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """test crx
         """
         qc = QCirc().crx(0,1, phase=0.1)
-        bk = Backend()
+        bk = get_backend()
         qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).crx(0,1, phase=0.1)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
@@ -489,7 +491,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """test cry
         """
         qc = QCirc().cry(0,1, phase=0.1)
-        bk = Backend()
+        bk = get_backend()
         qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).cry(0,1, phase=0.1)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
@@ -499,7 +501,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """test crz
         """
         qc = QCirc().crz(0,1, phase=0.1)
-        bk = Backend()
+        bk = get_backend()
         qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).crz(0,1, phase=0.1)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
@@ -509,7 +511,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """test rxx
         """
         qc = QCirc().rxx(0,1, phase=0.1)
-        bk = Backend()
+        bk = get_backend()
         qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).rxx(0,1, phase=0.1)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
@@ -519,17 +521,17 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """test ryy
         """
         qc = QCirc().ryy(0,1, phase=0.1)
-        bk = Backend()
+        bk = get_backend()
         qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).ryy(0,1, phase=0.1)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
         self.assertEqual(valid_or_not(qc), True)
-    
+   
     def test_rzz(self):
         """test rzz
         """
         qc = QCirc().rzz(0,1, phase=0.1)
-        bk = Backend()
+        bk = get_backend()
         qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).rzz(0,1, phase=0.1)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
@@ -539,7 +541,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """test sw
         """
         qc = QCirc().sw(0,1)
-        bk = Backend()
+        bk = get_backend()
         qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).sw(0,1)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
@@ -549,7 +551,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """test ccx
         """
         qc = QCirc().ccx(0,1,2)
-        bk = Backend()
+        bk = get_backend()
         qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).ccx(0,1,2)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
@@ -559,7 +561,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """test csw
         """
         qc = QCirc().csw(0,1,2)
-        bk = Backend()
+        bk = get_backend()
         qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).csw(0,1,2)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
@@ -569,7 +571,7 @@ class TestQCirc_to_qasm(unittest.TestCase):
         """test many unitary gates
         """
         qc = QCirc().h(0).cx(0,1).crx(1,0, phase=0.1).csw(0,1,2)
-        bk = Backend()
+        bk = get_backend()
         qs_A = bk.run(qcirc=qc, out_state=True).qstate
         qs_B = QState(qubit_num=qc.qubit_num).h(0).cx(0,1).crx(1,0, phase=0.1).csw(0,1,2)
         self.assertEqual(equal_or_not(qs_A, qs_B), True)
@@ -1006,7 +1008,7 @@ class TestQCirc_using_tag(unittest.TestCase):
         qc_B = QCirc().h(0).rz(0, tag='foo').cx(0,1).crz(0,1, tag='bar')
         qc_B.set_params({'foo': 0.2, 'bar': 0.3})
 
-        bk = Backend()
+        bk = get_backend()
         qs_A = bk.run(qcirc=qc_A, out_state=True).qstate
         qs_B = bk.run(qcirc=qc_B, out_state=True).qstate
 
@@ -1020,7 +1022,7 @@ class TestQCirc_using_tag(unittest.TestCase):
         qc_B = QCirc().h(0).rz(0, tag='foo').cx(0,1).crz(0,1, tag='bar')
         qc_B.set_params({'foo': 0.2, 'bar': 0.3})
 
-        bk = Backend()
+        bk = get_backend()
         qs_A = bk.run(qcirc=qc_A, out_state=True).qstate
         qs_B = bk.run(qcirc=qc_B, out_state=True).qstate
 
@@ -1035,7 +1037,7 @@ class TestQCirc_using_tag(unittest.TestCase):
         qc_B.set_params({'bar': 0.3})
         qc_B.set_params({'foo': 0.2})
 
-        bk = Backend()
+        bk = get_backend()
         qs_A = bk.run(qcirc=qc_A, out_state=True).qstate
         qs_B = bk.run(qcirc=qc_B, out_state=True).qstate
 
@@ -1052,7 +1054,7 @@ class TestQCirc_using_tag(unittest.TestCase):
         qc_B.set_params({'bar': 0.6})
         qc_B.set_params({'foo': 0.2, 'bar': 0.3})
 
-        bk = Backend()
+        bk = get_backend()
         qs_A = bk.run(qcirc=qc_A, out_state=True).qstate
         qs_B = bk.run(qcirc=qc_B, out_state=True).qstate
 
@@ -1069,7 +1071,7 @@ class TestQCirc_using_tag(unittest.TestCase):
         qc_A.x(2).crx(0, 2, tag='foo')
         qc_B.x(2).crx(0, 2, tag='foo')
 
-        bk = Backend()
+        bk = get_backend()
         qs_A = bk.run(qcirc=qc_A, out_state=True).qstate
         qs_B = bk.run(qcirc=qc_B, out_state=True).qstate
 
@@ -1390,19 +1392,19 @@ class TestQCirc_add_control(unittest.TestCase):
         self.assertEqual(abs(fid_A - 1.0) < EPS , True)
         self.assertEqual(abs(fid_B - 1.0) < EPS , True)
     
-    def test_add_control_parametric(self):
-        """test 'parametric'
-        """
-        qc_A = QCirc().h(0).h(1).cx(0,1).crx(0,1, tag='foo').rz(1, tag='bar')
-        qubit_num = qc_A.qubit_num
-        qc_cA = qc_A.add_control(qctrl=qubit_num)
-        qc_cA.set_params({'foo':0.7, 'bar':0.9})
-
-        qc_B = QCirc().h(0).h(1).cx(0,1).crx(0,1, phase=0.7).rz(1, phase=0.9)
-        qubit_num = qc_B.qubit_num
-        qc_cB = qc_B.add_control(qctrl=qubit_num)
-        
-        self.assertEqual(qc_cA == qc_cB , True)
+#    def test_add_control_parametric(self):
+#        """test 'parametric'
+#        """
+#        qc_A = QCirc().h(0).h(1).cx(0,1).crx(0,1, tag='foo').rz(1, tag='bar')
+#        qubit_num = qc_A.qubit_num
+#        qc_cA = qc_A.add_control(qctrl=qubit_num)
+#        qc_cA.set_params({'foo':0.7, 'bar':0.9})
+#
+#        qc_B = QCirc().h(0).h(1).cx(0,1).crx(0,1, phase=0.7).rz(1, phase=0.9)
+#        qubit_num = qc_B.qubit_num
+#        qc_cB = qc_B.add_control(qctrl=qubit_num)
+#        
+#        self.assertEqual(qc_cA == qc_cB , True)
     
     def test_add_control_random(self):
         """test 'random'
