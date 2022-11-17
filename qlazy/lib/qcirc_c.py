@@ -6,78 +6,78 @@ import pathlib
 
 import qlazy.config as cfg
 from qlazy.util import get_lib_ext
-from qlazy.QCircBase import QCircBase
+from qlazy.QCirc import QCirc
 
 lib = ctypes.CDLL(str(pathlib.Path(__file__).with_name('libqlz.'+get_lib_ext())))
 libc = ctypes.CDLL(find_library("c"), mode=ctypes.RTLD_GLOBAL)
 
-def qcirc_base_init():
+def qcirc_init():
     """ initialize QCirc object """
 
     qcirc = None
     c_qcirc = ctypes.c_void_p(qcirc)
 
-    lib.qcirc_base_init.restype = ctypes.c_bool
-    lib.qcirc_base_init.argtypes = [ctypes.POINTER(ctypes.c_void_p)]
-    ret = lib.qcirc_base_init(c_qcirc)
+    lib.qcirc_init.restype = ctypes.c_bool
+    lib.qcirc_init.argtypes = [ctypes.POINTER(ctypes.c_void_p)]
+    ret = lib.qcirc_init(c_qcirc)
 
     if ret is False:
         raise ValueError("can't initialize QCirc object.")
 
     return c_qcirc
 
-def qcirc_base_copy(qc):
+def qcirc_copy(qc):
     """ copy QCirc object """
 
     qcirc = None
     c_qcirc = ctypes.c_void_p(qcirc)
 
-    lib.qcirc_base_copy.restype = ctypes.c_bool
-    lib.qcirc_base_copy.argtypes = [ctypes.POINTER(QCircBase),
+    lib.qcirc_copy.restype = ctypes.c_bool
+    lib.qcirc_copy.argtypes = [ctypes.POINTER(QCirc),
                                     ctypes.POINTER(ctypes.c_void_p)]
-    ret = lib.qcirc_base_copy(ctypes.byref(qc), c_qcirc)
+    ret = lib.qcirc_copy(ctypes.byref(qc), c_qcirc)
 
     if ret is False:
         raise ValueError("can't copy QCirc object.")
 
     return c_qcirc
 
-def qcirc_base_merge(qc_L, qc_R):
+def qcirc_merge(qc_L, qc_R):
     """ merge QCirc objects """
 
     qcirc = None
     c_qcirc = ctypes.c_void_p(qcirc)
 
-    lib.qcirc_base_merge.restype = ctypes.c_bool
-    lib.qcirc_base_merge.argtypes = [ctypes.POINTER(QCircBase), ctypes.POINTER(QCircBase),
+    lib.qcirc_merge.restype = ctypes.c_bool
+    lib.qcirc_merge.argtypes = [ctypes.POINTER(QCirc), ctypes.POINTER(QCirc),
                                      ctypes.POINTER(ctypes.c_void_p)]
-    ret = lib.qcirc_base_merge(ctypes.byref(qc_L), ctypes.byref(qc_R), c_qcirc)
+    ret = lib.qcirc_merge(ctypes.byref(qc_L), ctypes.byref(qc_R), c_qcirc)
 
     if ret is False:
         raise ValueError("can't merge QCirc objects.")
 
     return c_qcirc
 
-def qcirc_base_merge_mutable(qc_mut, qc):
+def qcirc_merge_mutable(qc_mut, qc):
     """ merge QCirc objects (mutable) """
 
-    lib.qcirc_base_merge.restype = ctypes.c_bool
-    lib.qcirc_base_merge.argtypes = [ctypes.POINTER(QCircBase), ctypes.POINTER(QCircBase)]
-    ret = lib.qcirc_base_merge_mutable(ctypes.byref(qc_mut), ctypes.byref(qc))
+    lib.qcirc_merge.restype = ctypes.c_bool
+    lib.qcirc_merge.argtypes = [ctypes.POINTER(QCirc), ctypes.POINTER(QCirc)]
+    ret = lib.qcirc_merge_mutable(ctypes.byref(qc_mut), ctypes.byref(qc))
 
     if ret is False:
         raise ValueError("can't merge QCirc objects.")
 
-def qcirc_base_is_equal(qc_L, qc_R):
+def qcirc_is_equal(qc_L, qc_R):
     """ determine if 2 QCirc objects are equal or not """
 
     ans = True
     c_ans = ctypes.c_bool(ans)
 
-    lib.qcirc_base_is_equal.restype = ctypes.c_bool
-    lib.qcirc_base_is_equal.argtypes = [ctypes.POINTER(QCircBase), ctypes.POINTER(QCircBase),
+    lib.qcirc_is_equal.restype = ctypes.c_bool
+    lib.qcirc_is_equal.argtypes = [ctypes.POINTER(QCirc), ctypes.POINTER(QCirc),
                                         ctypes.POINTER(ctypes.c_bool)]
-    ret = lib.qcirc_base_is_equal(ctypes.byref(qc_L), ctypes.byref(qc_R), ctypes.byref(c_ans))
+    ret = lib.qcirc_is_equal(ctypes.byref(qc_L), ctypes.byref(qc_R), ctypes.byref(c_ans))
 
     if ret is False:
         raise ValueError("can't determine equal or not.")
@@ -85,7 +85,7 @@ def qcirc_base_is_equal(qc_L, qc_R):
     ans = c_ans.value
     return ans
 
-def qcirc_base_append_gate(qcirc, kind, qid, para, c, ctrl):
+def qcirc_append_gate(qcirc, kind, qid, para, c, ctrl):
     """ append gate to the QCirc objects """
 
     if para is None:
@@ -102,24 +102,24 @@ def qcirc_base_append_gate(qcirc, kind, qid, para, c, ctrl):
     c_qid = IntArray(*qid)
     c_para = DoubleArray(*para)
 
-    lib.qcirc_base_append_gate.restype = ctypes.c_bool
-    lib.qcirc_base_append_gate.argtypes = [ctypes.POINTER(QCircBase), ctypes.c_int, IntArray,
+    lib.qcirc_append_gate.restype = ctypes.c_bool
+    lib.qcirc_append_gate.argtypes = [ctypes.POINTER(QCirc), ctypes.c_int, IntArray,
                                            DoubleArray, ctypes.c_int, ctypes.c_int]
-    ret = lib.qcirc_base_append_gate(ctypes.byref(qcirc), ctypes.c_int(kind), c_qid, c_para,
+    ret = lib.qcirc_append_gate(ctypes.byref(qcirc), ctypes.c_int(kind), c_qid, c_para,
                                      ctypes.c_int(c), ctypes.c_int(ctrl))
 
     if ret is False:
         raise ValueError("can't append quantum gate.")
 
-def qcirc_base_kind_first(qc):
+def qcirc_kind_first(qc):
     """ get 1st gate kind of the quantum circuit """
 
     kind = 0
     c_kind = ctypes.c_int(kind)
 
-    lib.qcirc_base_kind_first.restype = ctypes.c_bool
-    lib.qcirc_base_kind_first.argtypes = [ctypes.POINTER(QCircBase), ctypes.POINTER(ctypes.c_int)]
-    ret = lib.qcirc_base_kind_first(ctypes.byref(qc), ctypes.byref(c_kind))
+    lib.qcirc_kind_first.restype = ctypes.c_bool
+    lib.qcirc_kind_first.argtypes = [ctypes.POINTER(QCirc), ctypes.POINTER(ctypes.c_int)]
+    ret = lib.qcirc_kind_first(ctypes.byref(qc), ctypes.byref(c_kind))
 
     if ret is False:
         raise ValueError("can't get 1st gate kind.")
@@ -131,7 +131,7 @@ def qcirc_base_kind_first(qc):
 
     return kind
 
-def qcirc_base_pop_gate(qc):
+def qcirc_pop_gate(qc):
     """ pop gate of the quantum circuit """
 
     kind = 0
@@ -147,13 +147,13 @@ def qcirc_base_pop_gate(qc):
     ctrl = -1
     c_ctrl = ctypes.c_int(ctrl)
 
-    lib.qcirc_base_pop_gate.restype = ctypes.c_bool
-    lib.qcirc_base_pop_gate.argtypes = [ctypes.POINTER(QCircBase), ctypes.POINTER(ctypes.c_int),
+    lib.qcirc_pop_gate.restype = ctypes.c_bool
+    lib.qcirc_pop_gate.argtypes = [ctypes.POINTER(QCirc), ctypes.POINTER(ctypes.c_int),
                                         ctypes.POINTER(ctypes.c_int),
                                         ctypes.POINTER(ctypes.c_double),
                                         ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_int)]
 
-    ret = lib.qcirc_base_pop_gate(ctypes.byref(qc), ctypes.byref(c_kind), c_qid, c_para,
+    ret = lib.qcirc_pop_gate(ctypes.byref(qc), ctypes.byref(c_kind), c_qid, c_para,
                                   ctypes.byref(c_c), ctypes.byref(c_ctrl))
 
     if ret is False:
@@ -172,22 +172,22 @@ def qcirc_base_pop_gate(qc):
 
     return (kind, qid, para, c, ctrl)
 
-def qcirc_base_set_phase_list(qcirc, phase_list):
+def qcirc_set_phase_list(qcirc, phase_list):
     """ set phase list """
 
     phase_num = len(phase_list)
     DoubleArray = ctypes.c_double * phase_num
     c_phase_list = DoubleArray(*phase_list)
 
-    lib.qcirc_base_set_phase_list.restype = ctypes.c_bool
-    lib.qcirc_base_set_phase_list.argtypes = [ctypes.POINTER(QCircBase), DoubleArray]
-    ret = lib.qcirc_base_set_phase_list(ctypes.byref(qcirc), c_phase_list)
+    lib.qcirc_set_phase_list.restype = ctypes.c_bool
+    lib.qcirc_set_phase_list.argtypes = [ctypes.POINTER(QCirc), DoubleArray]
+    ret = lib.qcirc_set_phase_list(ctypes.byref(qcirc), c_phase_list)
 
     if ret is False:
         raise ValueError("can't set phase list.")
 
-def qcirc_base_free(qcirc):
+def qcirc_free(qcirc):
     """ free memory of the QCirc object """
 
-    lib.qcirc_base_free.argtypes = [ctypes.POINTER(QCircBase)]
-    lib.qcirc_base_free(ctypes.byref(qcirc))
+    lib.qcirc_free.argtypes = [ctypes.POINTER(QCirc)]
+    lib.qcirc_free(ctypes.byref(qcirc))

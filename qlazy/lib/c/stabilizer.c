@@ -758,7 +758,7 @@ bool stabilizer_measure(Stabilizer* stab, int q, double* prob_out, int* mval_out
   SUC_RETURN(true);
 }
 
-bool stabilizer_operate_qcirc(Stabilizer* stab, CMem* cmem, QCircBase* qcirc)
+bool stabilizer_operate_qcirc(Stabilizer* stab, CMem* cmem, QCirc* qcirc)
 {
   QGate*        qgate = NULL;   /* quantum gate in quantum circuit */
   MData*	mdata = NULL;   /* output measurement data */

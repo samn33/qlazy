@@ -375,7 +375,7 @@ static bool _qstate_measure_gpu(QState* qstate, int mnum, int* qid,
   SUC_RETURN(true);
 }
 
-bool qstate_operate_qcirc_gpu(QState* qstate, CMem* cmem, QCircBase* qcirc, bool measure_update)
+bool qstate_operate_qcirc_gpu(QState* qstate, CMem* cmem, QCirc* qcirc, bool measure_update)
 /* one shot qcirc execution */
 {
   QGate*		qgate	      = NULL;	/* quantum gate in quantum circuit */
@@ -478,7 +478,7 @@ bool qstate_operate_qcirc_gpu(QState* qstate, CMem* cmem, QCircBase* qcirc, bool
   SUC_RETURN(true);
 }
 
-bool qstate_operate_measure_gpu(QState* qstate, CMem* cmem, QCircBase* qcirc,
+bool qstate_operate_measure_gpu(QState* qstate, CMem* cmem, QCirc* qcirc,
 				int shots, char* mchar_shots, bool out_state)
 /* qcirc execution and get measurement data (suppose that qcirc includes only measurements) */
 {
@@ -503,7 +503,7 @@ bool qstate_operate_measure_gpu(QState* qstate, CMem* cmem, QCircBase* qcirc,
   if ((qstate == NULL) || (cmem == NULL) || (qcirc == NULL) ||
       (shots < 1) || (mchar_shots == NULL) )
     ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
-  qcirc_base_is_measurement_only(qcirc, &ans);
+  qcirc_is_measurement_only(qcirc, &ans);
   if (ans == false) ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
 
   /* memory allocation */
