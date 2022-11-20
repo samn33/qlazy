@@ -1,5 +1,5 @@
 /*
- *  qcirc_base.c
+ *  qcirc.c
  */
 
 #include "qlazy.h"
@@ -17,6 +17,9 @@ bool qcirc_init(void** qcirc_out)
   qcirc->first = NULL;
   qcirc->last = NULL;
 
+  if (!(tagtable_init(TAG_TABLE_SIZE, (void**)&(qcirc->tag_table))))
+    ERR_RETURN(ERROR_TAGTABLE_INIT, false);
+
   *qcirc_out = qcirc;
   
   SUC_RETURN(true);
@@ -31,11 +34,17 @@ bool qcirc_copy(QCirc* qcirc_in, void** qcirc_out)
 
   if (!(qcirc_init((void**)&qcirc))) ERR_RETURN(ERROR_QCIRC_INIT, false);
 
+  /* copy gates */
   gate = qcirc_in->first;
   while (gate != NULL) {
-    if (!(qcirc_append_gate(qcirc, gate->kind, gate->qid, gate->para, gate->c, gate->ctrl)))
+    if (!(qcirc_append_gate(qcirc, gate->kind, gate->qid, gate->para, gate->c, gate->ctrl, gate->tag)))
       ERR_RETURN(ERROR_QCIRC_APPEND_GATE, false);
     gate = gate->next;
+  }
+
+  /* copy tag table */
+  if (!(tagtable_merge(qcirc->tag_table, qcirc_in->tag_table))) {
+      ERR_RETURN(ERROR_TAGTABLE_MERGE, false);
   }
 
   *qcirc_out = qcirc;
@@ -62,17 +71,23 @@ bool qcirc_merge(QCirc* qcirc_L, QCirc* qcirc_R, void** qcirc_out)
   /* append left */
   gate = qcirc_L->first;
   while (gate != NULL) {
-    if (!(qcirc_append_gate(qcirc, gate->kind, gate->qid, gate->para, gate->c, gate->ctrl)))
+    if (!(qcirc_append_gate(qcirc, gate->kind, gate->qid, gate->para, gate->c, gate->ctrl, gate->tag)))
       ERR_RETURN(ERROR_QCIRC_APPEND_GATE, NULL);
     gate = gate->next;
+  }
+  if (!(tagtable_merge(qcirc->tag_table, qcirc_L->tag_table))) {
+      ERR_RETURN(ERROR_TAGTABLE_MERGE, false);
   }
 
   /* append right */
   gate = qcirc_R->first;
   while (gate != NULL) {
-    if (!(qcirc_append_gate(qcirc, gate->kind, gate->qid, gate->para, gate->c, gate->ctrl)))
+    if (!(qcirc_append_gate(qcirc, gate->kind, gate->qid, gate->para, gate->c, gate->ctrl, gate->tag)))
       ERR_RETURN(ERROR_QCIRC_APPEND_GATE, NULL);
     gate = gate->next;
+  }
+  if (!(tagtable_merge(qcirc->tag_table, qcirc_R->tag_table))) {
+      ERR_RETURN(ERROR_TAGTABLE_MERGE, false);
   }
 
   *qcirc_out = qcirc;
@@ -92,11 +107,16 @@ bool qcirc_merge_mutable(QCirc* qcirc_mut, QCirc* qcirc)
   /* append gate */
   gate = qcirc->first;
   while (gate != NULL) {
-    if (!(qcirc_append_gate(qcirc_mut, gate->kind, gate->qid, gate->para, gate->c, gate->ctrl)))
+    if (!(qcirc_append_gate(qcirc_mut, gate->kind, gate->qid, gate->para, gate->c, gate->ctrl, gate->tag)))
       ERR_RETURN(ERROR_QCIRC_APPEND_GATE, NULL);
     gate = gate->next;
   }
 
+  /* merge tag table */
+  if (!(tagtable_merge(qcirc_mut->tag_table, qcirc->tag_table))) {
+      ERR_RETURN(ERROR_TAGTABLE_MERGE, false);
+  }
+  
   SUC_RETURN(true);
 }
 
@@ -177,7 +197,7 @@ bool qcirc_is_measurement_only(QCirc* qcirc, bool* ans)
   SUC_RETURN(true);
 }
 
-bool qcirc_append_gate(QCirc* qcirc, Kind kind, int* qid, double* para, int c, int ctrl)
+bool qcirc_append_gate(QCirc* qcirc, Kind kind, int* qid, double* para, int c, int ctrl, char* tag)
 {
   QGate* qgate = NULL;
   int qid_size = 0;
@@ -187,11 +207,11 @@ bool qcirc_append_gate(QCirc* qcirc, Kind kind, int* qid, double* para, int c, i
   if (qcirc == NULL ||
       (kind_is_measurement(kind) == false &&
        kind_is_reset(kind) == false && kind_is_unitary(kind) == false)) {
-    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+    ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
   }
   /* bell measurement is not supported */
   if (kind == MEASURE_BELL) {
-    ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
+    ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
   }
 
   /* set qgate */
@@ -209,6 +229,22 @@ bool qcirc_append_gate(QCirc* qcirc, Kind kind, int* qid, double* para, int c, i
   for (i=0; i<3; i++) qgate->para[i] = para[i];
   qgate->c = c;
   qgate->ctrl = ctrl;
+
+  if (tag == NULL) {
+    strcpy(qgate->tag, "");
+  }
+  else if (strlen(tag) > TAG_STRLEN) {
+    ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
+  }
+  else {
+    strcpy(qgate->tag, tag);
+  }
+
+  /* set tag table */
+  if (strlen(qgate->tag) > 0) {
+    if (!(tagtable_set_phase(qcirc->tag_table, qgate->tag, para[0])))
+      ERR_RETURN(ERROR_TAGTABLE_SET_PHASE, false);
+  }
 
   /* update qubit_num, cmem_num, gate_num */
   for (i=0; i<qid_size; i++) qcirc->qubit_num = MAX(qcirc->qubit_num, qgate->qid[i] + 1);
@@ -267,7 +303,8 @@ static void _qcirc_update(QCirc* qcirc)
   qcirc->gate_num = gate_num;
 }
 
-bool qcirc_pop_gate(QCirc* qcirc, Kind* kind, int* qid, double* para, int* c, int* ctrl)
+bool qcirc_pop_gate(QCirc* qcirc, Kind* kind, int* qid, double* para, int* c, int* ctrl,
+		    char* tag, int* taglen)
 {
   QGate*	ori_first;
   int		q_max = -1;
@@ -282,6 +319,8 @@ bool qcirc_pop_gate(QCirc* qcirc, Kind* kind, int* qid, double* para, int* c, in
   memcpy(para, qcirc->first->para, sizeof(double) * 3);
   *c = qcirc->first->c;
   *ctrl = qcirc->first->ctrl;
+  strcpy(tag, qcirc->first->tag);
+  *taglen = strlen(tag);
 
   /* free first gate (original) */
   ori_first = qcirc->first;
@@ -299,7 +338,7 @@ bool qcirc_pop_gate(QCirc* qcirc, Kind* kind, int* qid, double* para, int* c, in
 }
 
 bool qcirc_decompose(QCirc* qcirc_in, void** qcirc_uonly_out, void** qcirc_mixed_out,
-			  void** qcirc_monly_out)
+		     void** qcirc_monly_out)
 {
   QCirc*	qcirc_uonly = NULL; /* unitary only */
   QCirc*	qcirc_monly = NULL; /* measurement only */
@@ -319,7 +358,7 @@ bool qcirc_decompose(QCirc* qcirc_in, void** qcirc_uonly_out, void** qcirc_mixed
   while (qgate != NULL) {
     if (kind_is_unitary(qgate->kind) == true) {
       uonly_flg = true;
-      if (!(qcirc_append_gate(qcirc_uonly, qgate->kind, qgate->qid, qgate->para, qgate->c, qgate->ctrl)))
+      if (!(qcirc_append_gate(qcirc_uonly, qgate->kind, qgate->qid, qgate->para, qgate->c, qgate->ctrl, qgate->tag)))
 	ERR_RETURN(ERROR_QCIRC_APPEND_GATE, false);
       *qcirc_uonly_out = qcirc_uonly;
     }
@@ -349,7 +388,7 @@ bool qcirc_decompose(QCirc* qcirc_in, void** qcirc_uonly_out, void** qcirc_mixed
   monly_flg = true;
   while (qgate != NULL) {
     if (kind_is_measurement(qgate->kind) == false) monly_flg = false;
-    if (!(qcirc_append_gate(qcirc_monly, qgate->kind, qgate->qid, qgate->para, qgate->c, qgate->ctrl)))
+    if (!(qcirc_append_gate(qcirc_monly, qgate->kind, qgate->qid, qgate->para, qgate->c, qgate->ctrl, qgate->tag)))
       ERR_RETURN(ERROR_QCIRC_APPEND_GATE, false);
     qgate = qgate->next;
   }
@@ -366,23 +405,61 @@ bool qcirc_decompose(QCirc* qcirc_in, void** qcirc_uonly_out, void** qcirc_mixed
   SUC_RETURN(true);
 }
 
-bool qcirc_set_phase_list(QCirc* qcirc, double* phase_list)
+/* set the tag and the phase */
+bool qcirc_set_tag_phase(QCirc* qcirc, char* tag, double phase)
 {
-  QGate*	gate = NULL;
-  int		cnt;
+  double phs;
 
   if (qcirc == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
-  
-  gate = qcirc->first;
-  cnt = 0;
-  while (gate != NULL) {
-    if (phase_list[cnt] != 0.0) {
-      gate->para[0] = phase_list[cnt];
-    }
-    gate = gate->next;
-    cnt++;
+
+  /* check tag existance */
+  if (!(qcirc_get_tag_phase(qcirc, tag, &phs)))
+    ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
+
+  if (strlen(tag) > 0) {
+    if (!(tagtable_set_phase(qcirc->tag_table, tag, phase)))
+      ERR_RETURN(ERROR_TAGTABLE_SET_PHASE, false);
+  }
+  else {
+    ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
   }
   
+  SUC_RETURN(true);
+}
+
+/* get a phase for the tag */
+bool qcirc_get_tag_phase(QCirc* qcirc, char* tag, double* phase)
+{
+  if (qcirc == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
+
+  if (strlen(tag) > 0) {
+    if (!(tagtable_get_phase(qcirc->tag_table, tag, phase)))
+      ERR_RETURN(ERROR_TAGTABLE_GET_PHASE, false);
+  }
+  else {
+    ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
+  }
+  
+  SUC_RETURN(true);
+}
+
+bool qcirc_update_phases(QCirc* qcirc)
+{
+  QGate*	gate = NULL;
+  double	phase;
+ 
+  if (qcirc == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
+   
+  gate = qcirc->first;
+  while (gate != NULL) {
+    if (strlen(gate->tag) > 0) {
+      if (!(tagtable_get_phase(qcirc->tag_table, gate->tag, &phase)))
+	ERR_RETURN(ERROR_TAGTABLE_GET_PHASE, false);
+      gate->para[0] = phase;
+    }
+    gate = gate->next;
+  }
+   
   SUC_RETURN(true);
 }
 

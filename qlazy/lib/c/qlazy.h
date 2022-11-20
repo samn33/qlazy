@@ -40,7 +40,8 @@
 #define TOKEN_STRLEN	   1024     /* max token string length */
 #define TOKEN_NUM	   100      /* max token number of each line */
 #define MAX_ERR_MSG_LENGTH 1024	    /* max string length of err message  */
-#define TAG_LEN            1024     /* max length of tag for QGate */
+#define TAG_STRLEN         64       /* max length of tag for QGate */
+#define TAG_TABLE_SIZE     64
 
 #define DEF_QUBIT_NUM		5
 #define DEF_QC_STEPS		100
@@ -182,6 +183,12 @@ typedef enum _ErrCode {
   ERROR_QCIRC_DECOMPOSE,
   ERROR_CMEM_INIT,
   ERROR_CMEM_COPY,
+  ERROR_TAGTABLE_INIT,
+  ERROR_TAGTABLE_COPY,
+  ERROR_TAGTABLE_MERGE,
+  ERROR_TAGTABLE_MERGE_MUTABLE,
+  ERROR_TAGTABLE_SET_PHASE,
+  ERROR_TAGTABLE_GET_PHASE,
 
   /* qlazy interactive mode */
   ERROR_NEED_TO_INITIALIZE,
@@ -345,23 +352,37 @@ typedef struct _QC {
   CImage*       cimage;
 } QC;
 
+typedef struct _Element {
+  bool                  active;
+  char			tag[TAG_STRLEN];
+  double		phase;
+  struct _Element*	next;
+} Element;
+
+typedef struct _TagTable {
+  int			table_size;
+  int			data_num;
+  struct _Element**	table;
+} TagTable;
+
 typedef struct _QGate {
-  Kind			kind;          /* kind of qgate */
-  int			qid[2];	       /* array of qubit id */
-  double		para[3];       /* array of gate parameters (phases, gphase, factor) */
-  int			c;             /* classical register id for storing measurement result (0 or 1) */
-  int			ctrl;          /* classical register id for controlling quantum gate */
-  char                  tag[TAG_LEN];  /* tag for parametric quantum circuit */
+  Kind			kind;            /* kind of qgate */
+  int			qid[2];	         /* array of qubit id */
+  double		para[3];         /* array of gate parameters (phases, gphase, factor) */
+  int			c;               /* classical register id for storing measurement result (0 or 1) */
+  int			ctrl;            /* classical register id for controlling quantum gate */
+  char                  tag[TAG_STRLEN]; /* tag for parametric quantum circuit */
   struct _QGate*        prev;
   struct _QGate*        next;
 } QGate;
 
 typedef struct _QCirc {
-  int           qubit_num;
-  int           cmem_num;
-  int           gate_num;
-  QGate*        first;
-  QGate*        last;
+  int	        qubit_num;
+  int	        cmem_num;
+  int		gate_num;
+  QGate*	first;
+  QGate*	last;
+  TagTable*     tag_table;
 } QCirc;
 
 typedef struct _CMem {
@@ -618,11 +639,14 @@ bool qcirc_is_equal(QCirc* qcirc_L, QCirc* qcirc_R, bool* ans);
 bool qcirc_is_unitary_only(QCirc* qcirc, bool* ans);
 bool qcirc_is_measurement_only(QCirc* qcirc, bool* ans);
 bool qcirc_kind_first(QCirc* qcirc, Kind* kind);
-bool qcirc_append_gate(QCirc* qcirc, Kind kind, int* qid, double* para, int c, int ctrl);
-bool qcirc_pop_gate(QCirc* qcirc, Kind* kind, int* qid, double* para, int* c, int* ctrl);
+bool qcirc_append_gate(QCirc* qcirc, Kind kind, int* qid, double* para, int c, int ctrl, char* tag);
+bool qcirc_pop_gate(QCirc* qcirc, Kind* kind, int* qid, double* para, int* c, int* ctrl,
+		    char* tag, int* taglen);
 bool qcirc_decompose(QCirc* qcirc_in, void** qcirc_uonly_out, void** qcirc_mixed_out,
 		     void** qcirc_monly_out);
-bool qcirc_set_phase_list(QCirc* qcirc, double* phase_list);
+bool qcirc_set_tag_phase(QCirc* qcirc, char* tag, double phase);
+bool qcirc_get_tag_phase(QCirc* qcirc, char* tag, double* phase);
+bool qcirc_update_phases(QCirc* qcirc);
 void qcirc_free(QCirc* qcirc);
 
 /* cmem.c */
@@ -641,6 +665,13 @@ double genrand_real1(void);
 double genrand_real2(void);
 double genrand_real3(void);
 double genrand_res53(void);
+
+/* tagtable.c */
+bool tagtable_init(int table_size, void** tt_out);
+bool tagtable_merge(TagTable* tt, TagTable* tt_in);
+bool tagtable_set_phase(TagTable* tt, char* tag, double phase);
+bool tagtable_get_phase(TagTable* tt, char* tag, double* phase);
+void tagtable_free(TagTable* tt);
 
 #ifdef USE_GPU
 

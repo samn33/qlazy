@@ -85,7 +85,7 @@ def qcirc_is_equal(qc_L, qc_R):
     ans = c_ans.value
     return ans
 
-def qcirc_append_gate(qcirc, kind, qid, para, c, ctrl):
+def qcirc_append_gate(qcirc, kind, qid, para, c, ctrl, tag):
     """ append gate to the QCirc objects """
 
     if para is None:
@@ -94,6 +94,8 @@ def qcirc_append_gate(qcirc, kind, qid, para, c, ctrl):
         c = -1
     if ctrl is None:
         ctrl = -1
+    if tag is None:
+        tag = ""
 
     qid_num = len(qid)
     para_num = len(para)
@@ -101,12 +103,14 @@ def qcirc_append_gate(qcirc, kind, qid, para, c, ctrl):
     DoubleArray = ctypes.c_double * para_num
     c_qid = IntArray(*qid)
     c_para = DoubleArray(*para)
+    c_tag = tag.encode('utf-8')
 
     lib.qcirc_append_gate.restype = ctypes.c_bool
     lib.qcirc_append_gate.argtypes = [ctypes.POINTER(QCirc), ctypes.c_int, IntArray,
-                                           DoubleArray, ctypes.c_int, ctypes.c_int]
+                                      DoubleArray, ctypes.c_int, ctypes.c_int,
+                                      ctypes.c_char_p]
     ret = lib.qcirc_append_gate(ctypes.byref(qcirc), ctypes.c_int(kind), c_qid, c_para,
-                                     ctypes.c_int(c), ctypes.c_int(ctrl))
+                                ctypes.c_int(c), ctypes.c_int(ctrl), c_tag)
 
     if ret is False:
         raise ValueError("can't append quantum gate.")
@@ -146,15 +150,20 @@ def qcirc_pop_gate(qc):
     c_c = ctypes.c_int(c)
     ctrl = -1
     c_ctrl = ctypes.c_int(ctrl)
+    tag = '0' * cfg.TAG_STRLEN
+    c_tag = tag.encode('utf-8')
+    taglen = 0
+    c_taglen = ctypes.c_int(taglen)
 
     lib.qcirc_pop_gate.restype = ctypes.c_bool
     lib.qcirc_pop_gate.argtypes = [ctypes.POINTER(QCirc), ctypes.POINTER(ctypes.c_int),
-                                        ctypes.POINTER(ctypes.c_int),
-                                        ctypes.POINTER(ctypes.c_double),
-                                        ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_int)]
+                                   ctypes.POINTER(ctypes.c_int),
+                                   ctypes.POINTER(ctypes.c_double),
+                                   ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_int),
+                                   ctypes.c_char_p, ctypes.POINTER(ctypes.c_int)]
 
     ret = lib.qcirc_pop_gate(ctypes.byref(qc), ctypes.byref(c_kind), c_qid, c_para,
-                                  ctypes.byref(c_c), ctypes.byref(c_ctrl))
+                             ctypes.byref(c_c), ctypes.byref(c_ctrl), c_tag, ctypes.byref(c_taglen))
 
     if ret is False:
         raise ValueError("can't pop gate.")
@@ -170,21 +179,54 @@ def qcirc_pop_gate(qc):
     if ctrl == -1:
         ctrl = None
 
-    return (kind, qid, para, c, ctrl)
+    tag = c_tag.decode('utf-8')
+    taglen = c_taglen.value
+    if taglen == 0:
+        tag = ""
+    else:
+        tag = tag[:taglen]
 
-def qcirc_set_phase_list(qcirc, phase_list):
-    """ set phase list """
+    return (kind, qid, para, c, ctrl, tag)
 
-    phase_num = len(phase_list)
-    DoubleArray = ctypes.c_double * phase_num
-    c_phase_list = DoubleArray(*phase_list)
+def qcirc_set_params(qcirc, params):
+    """ set params """
 
-    lib.qcirc_set_phase_list.restype = ctypes.c_bool
-    lib.qcirc_set_phase_list.argtypes = [ctypes.POINTER(QCirc), DoubleArray]
-    ret = lib.qcirc_set_phase_list(ctypes.byref(qcirc), c_phase_list)
+    lib.qcirc_set_tag_phase.restype = ctypes.c_bool
+    lib.qcirc_set_tag_phase.argtypes = [ctypes.POINTER(QCirc), ctypes.c_char_p, ctypes.c_double]
+    
+    for tag, phase in params.items():
+        c_tag = tag.encode('utf-8')
+        c_phase = ctypes.c_double(phase)
+        ret = lib.qcirc_set_tag_phase(ctypes.byref(qcirc), c_tag, c_phase)
+        if ret is False:
+            raise ValueError("can't set tag:{}, phase:{}.".format(tag, phase))
+        
+    lib.qcirc_update_phases.restype = ctypes.c_bool
+    lib.qcirc_update_phases.argtypes = [ctypes.POINTER(QCirc)]
+
+    ret = lib.qcirc_update_phases(ctypes.byref(qcirc))
 
     if ret is False:
-        raise ValueError("can't set phase list.")
+        raise ValueError("can't update phases.")
+
+def qcirc_get_param(qcirc, tag):
+    """ get param (= phase) """
+
+    lib.qcirc_get_tag_phase.restype = ctypes.c_bool
+    lib.qcirc_get_tag_phase.argtypes = [ctypes.POINTER(QCirc), ctypes.c_char_p,
+                                        ctypes.POINTER(ctypes.c_double)]
+
+    c_tag = tag.encode('utf-8')
+    phase = 0.0
+    c_phase = ctypes.c_double(phase)
+    ret = lib.qcirc_get_tag_phase(ctypes.byref(qcirc), c_tag, ctypes.byref(c_phase))
+
+    if ret is False:
+        raise ValueError("can't get param (= phase) for the tag: {}.".format(tag))
+
+    phase = c_phase.value
+
+    return phase
 
 def qcirc_free(qcirc):
     """ free memory of the QCirc object """

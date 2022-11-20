@@ -234,6 +234,19 @@ void error_msg(ErrCode err)
     fprintf(stderr, "ERROR: qcirc decompose failure !\n");
     break;
 
+  case ERROR_TAGTABLE_INIT:
+    fprintf(stderr, "ERROR: tagtable init failure !\n");
+    break;
+  case ERROR_TAGTABLE_MERGE:
+    fprintf(stderr, "ERROR: tagtable merge failure !\n");
+    break;
+  case ERROR_TAGTABLE_SET_PHASE:
+    fprintf(stderr, "ERROR: tagtable set phase failure !\n");
+    break;
+  case ERROR_TAGTABLE_GET_PHASE:
+    fprintf(stderr, "ERROR: tagtable get phase failure !\n");
+    break;
+
   case ERROR_NEED_TO_INITIALIZE:
     fprintf(stderr, "ERROR: need to initialize !\n");
     break;

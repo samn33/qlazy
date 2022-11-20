@@ -81,7 +81,7 @@ def __convert_to_braket_circuit(qc_qlazy, product):
         if kind is None:
             break
 
-        (kind, qid, para, c, ctrl) = qc_qlazy_tmp.pop_gate()
+        (kind, qid, para, c, ctrl, tag) = qc_qlazy_tmp.pop_gate()
 
         # qid[0]th-qubit has measured and store c-th classical register
         if kind in (cfg.MEASURE, cfg.RESET):
@@ -101,7 +101,7 @@ def __convert_to_braket_circuit(qc_qlazy, product):
         if kind is None:
             break
 
-        (kind, qid, para, c, ctrl) = qc_qlazy_tmp.pop_gate()
+        (kind, qid, para, c, ctrl, tag) = qc_qlazy_tmp.pop_gate()
 
         if kind in (cfg.MEASURE, cfg.RESET):
             continue

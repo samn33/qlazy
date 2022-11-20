@@ -40,7 +40,7 @@ def run(qcirc=None, shots=1, cid=None, backend=None, out_state=False):
         if kind is None:
             break
 
-        (kind, qid, para, c, ctrl) = qcirc_tmp.pop_gate()
+        (kind, qid, para, c, ctrl, tag) = qcirc_tmp.pop_gate()
 
         if kind == cfg.MEASURE:
             exist_measurement = True

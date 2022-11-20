@@ -107,6 +107,8 @@ class QCirc(ctypes.Structure):
         first gate of the quantum circuit.
     last: object
         last gate of the quantum circuit.
+    tag_table: object
+        tag table..
 
     """
     _fields_ = [
@@ -115,6 +117,7 @@ class QCirc(ctypes.Structure):
         ('gate_num', ctypes.c_int),
         ('first', ctypes.c_void_p),
         ('last', ctypes.c_void_p),
+        ('tag_table', ctypes.c_void_p),
     ]
 
     def __new__(cls, **kwargs):
@@ -182,7 +185,7 @@ class QCirc(ctypes.Structure):
             if kind is None:
                 break
 
-            (kind, qid, para, c, ctrl) = qc.pop_gate()
+            (kind, qid, para, c, ctrl, tag) = qc.pop_gate()
             term_num = get_qgate_qubit_num(kind)
             if kind in (cfg.MEASURE, cfg.RESET):
                 term_num = 1
@@ -208,8 +211,13 @@ class QCirc(ctypes.Structure):
             else:
                 ctrl_str = ", ctrl = {}".format(ctrl)
 
-            qcirc_str += ("{0:}{2:} {1:} {3:}{4:}\n"
-                          .format(gate_str, qid_str, para_str, c_str, ctrl_str))
+            if tag is None or tag == "":
+                tag_str = ""
+            else:
+                tag_str = "    #" + tag
+            
+            qcirc_str += ("{0:}{2:} {1:} {3:}{4:}{5:}\n"
+                          .format(gate_str, qid_str, para_str, c_str, ctrl_str, tag_str))
 
         return qcirc_str.strip()
 
@@ -432,7 +440,8 @@ class QCirc(ctypes.Structure):
             if kind is None:
                 break
 
-            (kind, qid, para, c, ctrl) = qc.pop_gate()
+            # (kind, qid, para, c, ctrl) = qc.pop_gate()
+            (kind, qid, para, c, ctrl, tag) = qc.pop_gate()
             term_num = get_qgate_qubit_num(kind)
             if kind in (cfg.MEASURE, cfg.RESET):
                 term_num = 1
@@ -533,7 +542,7 @@ class QCirc(ctypes.Structure):
             if kind is None:
                 break
 
-            (kind, qid, para, c, ctrl) = qc.pop_gate()
+            (kind, qid, para, c, ctrl, tag) = qc.pop_gate()
             gate = {'kind': kind, 'qid': qid, 'para': para, 'c': c, 'ctrl': ctrl}
             if ((get_qgate_qubit_num(kind) == 1 or is_reset_gate(kind)) and ctrl is None):
                 if qid[0] in qids:
@@ -744,7 +753,7 @@ class QCirc(ctypes.Structure):
             if kind is None:
                 break
 
-            (kind, qid, para, c, ctrl) = qc.pop_gate()
+            (kind, qid, para, c, ctrl, tag) = qc.pop_gate()
             qid = [q for q in qid if q >= 0]
             if c is None:
                 cid = None
@@ -1148,10 +1157,9 @@ class QCirc(ctypes.Structure):
             - ctrl ... classical register id to controll the gate
 
         """
-        (kind, qid, para, c, ctrl) = qcirc_pop_gate(self)
-        return (kind, qid, para, c, ctrl)
+        (kind, qid, para, c, ctrl, tag) = qcirc_pop_gate(self)
+        return (kind, qid, para, c, ctrl, tag)
 
-    # def append_gate(self, kind=None, qid=None, para=None, c=None, ctrl=None, **kwargs):
     def append_gate(self, kind=None, qid=None, para=None, c=None, ctrl=None, tag=None):
         """
         append gate to the end of the circuit.
@@ -1202,7 +1210,8 @@ class QCirc(ctypes.Structure):
         if ctrl is not None and isinstance(ctrl, int) is not True:
             raise TypeError("ctrl must be int.")
 
-        qcirc_append_gate(self, kind, qid, para, c, ctrl)
+        # qcirc_append_gate(self, kind, qid, para, c, ctrl)
+        qcirc_append_gate(self, kind, qid, para, c, ctrl, tag)
 
     def split_unitary_non_unitary(self):
         """
@@ -1224,8 +1233,8 @@ class QCirc(ctypes.Structure):
             kind_ori = qc_non_unitary.kind_first()
             if kind_ori is None or kind_ori is cfg.MEASURE or kind_ori is cfg.RESET:
                 break
-            (kind, qid, para, c, ctrl) = qc_non_unitary.pop_gate()
-            qc_unitary.append_gate(kind, qid, para, c, ctrl)
+            (kind, qid, para, c, ctrl, tag) = qc_non_unitary.pop_gate()
+            qc_unitary.append_gate(kind, qid, para, c, ctrl, tag)
 
         qc_pair = (qc_unitary, qc_non_unitary)
         return qc_pair
@@ -1252,7 +1261,7 @@ class QCirc(ctypes.Structure):
             kind = qcirc.kind_first()
             if kind is None:
                 break
-            (kind, qid, para, c, ctrl) = qcirc.pop_gate()
+            (kind, qid, para, c, ctrl, tag) = qcirc.pop_gate()
             if kind is not cfg.MEASURE:
                 ans = False
                 break
@@ -2335,11 +2344,6 @@ class QCirc(ctypes.Structure):
                 g['ctrl'] = cid[g['ctrl']]
 
         qcirc.add_gates(gates)
-        # qcirc.tag_list = self.tag_list[:]
-        # qcirc.phase_list = self.phase_list[:]
-        # qcirc.gphase_list = self.gphase_list[:]
-        # qcirc.fac_list = self.fac_list[:]
-        # qcirc.params = dict(self.params)
         
         return qcirc
 
@@ -2375,24 +2379,35 @@ class QCirc(ctypes.Structure):
         if not isinstance(params, dict):
             raise TypeError("params must be dict.")
 
-        if set(params.keys()) > set(self.params.keys()):
-            raise ValueError("unknown tags are specified.")
+        qcirc_set_params(self, params)
 
-        #
-        # change the implementation
-        #
+    def get_param(self, tag):
+        """
+        get parameter (= phase) for the tag
+    
+        Parameters
+        ----------
+        tag : str
+            tag of phase parameter for parametric quantum circuit.
+    
+        Returns
+        -------
+        phase : float
+            rotation angle (unit of angle is PI radian) for the tag.
+    
+        Examples
+        --------
+        >>> qc = QCirc().h(0).rz(0, tag='foo').rx(0, tag='bar')
+        >>> qc.set_params(params={'foo': 0.2, 'bar': 0.4})
+        >>> print(qc.get_param('foo'))
+        0.2
 
-        # for i, tag in enumerate(self.tag_list):
-        #     if tag in params.keys():
-        #         self.params[tag] = params[tag]
-        #         self.phase_list[i] = self.fac_list[i] * self.params[tag]
-        #         if self.gphase_list[i] != 0.0: # for the p gate
-        #             self.gphase_list[i] = self.phase_list[i] / 2.0
-        # 
-        # if len(self.phase_list) != self.gate_num:
-        #     raise ValueError("phase_list length is not same as gate_num")
-        # 
-        # qcirc_set_phase_list(self, self.phase_list)
+        """
+        if not isinstance(tag, str):
+            raise TypeError("tag must be str.")
+
+        phase = qcirc_get_param(self, tag)
+        return phase
 
     def add_control(self, qctrl=None):
         """
@@ -2422,7 +2437,7 @@ class QCirc(ctypes.Structure):
             if kind is None:
                 break
     
-            (kind, qid, para, c, ctrl) = qc.pop_gate()
+            (kind, qid, para, c, ctrl, tag) = qc.pop_gate()
     
             self.__add_controll_gate(qc_out, kind, qid, para, c, ctrl, gid, qctrl)
             gid += 1
@@ -2447,13 +2462,9 @@ class QCirc(ctypes.Structure):
         elif kind == cfg.PHASE_SHIFT_T_:
             qc.ct_dg(qctrl, qid[0], ctrl=ctrl)
         elif kind == cfg.ROTATION_X:
-            # qc.crx(qctrl, qid[0], phase=para[0], ctrl=ctrl, tag=self.tag_list[gid], fac=para[2])
             qc.crx(qctrl, qid[0], phase=para[0], ctrl=ctrl, tag="hoge", fac=para[2])
         elif kind == cfg.ROTATION_Z:
-            # qc.crz(qctrl, qid[0], phase=para[0], ctrl=ctrl, tag=self.tag_list[gid], fac=para[2])
             qc.crz(qctrl, qid[0], phase=para[0], ctrl=ctrl, tag="hoge", fac=para[2])
-            # if self.gphase_list[gid] != 0.0: # for the p gate
-            #     qc.rz(qctrl, phase=self.gphase_list[gid])
             if para[1] != 0.0: # for the p gate
                 qc.rz(qctrl, phase=para[1])
     
@@ -2470,10 +2481,8 @@ class QCirc(ctypes.Structure):
             qc.ccx(qctrl, q0, q1, ctrl=ctrl).crz(qctrl, q1, phase=0.5, ctrl=ctrl).cry(qctrl, q1, phase=0.25, ctrl=ctrl)
             qc.crz(qctrl, q0, phase=0.5, ctrl=ctrl)
         elif kind == cfg.CONTROLLED_RZ:
-            # qc.crz(qctrl, qid[1], phase=para[0], ctrl=ctrl, tag=self.tag_list[gid], fac=0.5*para[2])
             qc.crz(qctrl, qid[1], phase=para[0], ctrl=ctrl, tag="hoge", fac=0.5*para[2])
             qc.ccx(qctrl, qid[0], qid[1], ctrl=ctrl)
-            # qc.crz(qctrl, qid[1], phase=para[0], ctrl=ctrl, tag=self.tag_list[gid], fac=-0.5*para[2])
             qc.crz(qctrl, qid[1], phase=para[0], ctrl=ctrl, tag="hoge", fac=-0.5*para[2])
             qc.ccx(qctrl, qid[0], qid[1], ctrl=ctrl)
     
@@ -2489,4 +2498,5 @@ class QCirc(ctypes.Structure):
 from qlazy.lib.qcirc_c import (qcirc_init, qcirc_copy, qcirc_merge,
                                qcirc_merge_mutable, qcirc_is_equal,
                                qcirc_append_gate, qcirc_kind_first,
-                               qcirc_pop_gate, qcirc_free)
+                               qcirc_pop_gate, qcirc_set_params, qcirc_get_param,
+                               qcirc_free)

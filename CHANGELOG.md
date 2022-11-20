@@ -1,5 +1,7 @@
 # Change Log
 
+## [0.3.4] - 2022-xx-xx
+
 ## [0.3.3] - 2022-11-14
 ### Added
 - support parametric quantum circuit

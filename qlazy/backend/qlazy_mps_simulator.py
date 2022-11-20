@@ -19,7 +19,7 @@ def __mps_operate_qcirc(mps, cmem, qcirc, shots, cid):
         kind = qcirc_unitary.kind_first()
         if kind is None:
             break
-        (kind, qid, para, c, ctrl) = qcirc_unitary.pop_gate()
+        (kind, qid, para, c, ctrl, tag) = qcirc_unitary.pop_gate()
         if ctrl is None or (ctrl is not None and cmem.bits[ctrl] == 1):
             phase = para[0] * para[2]
             if get_qgate_qubit_num(kind) == 1:
@@ -41,7 +41,7 @@ def __mps_operate_qcirc(mps, cmem, qcirc, shots, cid):
             kind = qcirc_non_unitary.kind_first()
             if kind is None:
                 break
-            (kind, qid, para, c, ctrl) = qcirc_non_unitary.pop_gate()
+            (kind, qid, para, c, ctrl, tag) = qcirc_non_unitary.pop_gate()
             if ctrl is None or (ctrl is not None and cmem.bits[ctrl] == 1):
                 q_list.append(qid[0])
                 c_list.append(c)
@@ -70,7 +70,7 @@ def __mps_operate_qcirc(mps, cmem, qcirc, shots, cid):
                 kind = qc_tmp.kind_first()
                 if kind is None:
                     break
-                (kind, qid, para, c, ctrl) = qc_tmp.pop_gate()
+                (kind, qid, para, c, ctrl, tag) = qc_tmp.pop_gate()
                 if ctrl is None or (ctrl is not None and cmem.bits[ctrl] == 1):
                     phase = para[0]
                     if is_measurement_gate(kind) is True:

@@ -117,7 +117,7 @@ def __run_all(qcirc_in=None, shots=1, cid=None, backend=None, proc='CPU', out_st
         if kind is None or kind is cfg.MEASURE or kind is cfg.RESET:
             break
 
-        (kind, qid, para, c, ctrl) = qcirc.pop_gate()
+        (kind, qid, para, c, ctrl, tag) = qcirc.pop_gate()
         if ctrl is None or (ctrl is not None and cmem[ctrl] == 1):
             __qulacs_operate_qgate(qstate, qubit_num, kind=kind, qid=qid,
                                    para_phase=para[0], para_gphase=para[1], para_factor=para[2])
@@ -146,7 +146,7 @@ def __run_all(qcirc_in=None, shots=1, cid=None, backend=None, proc='CPU', out_st
             kind =qcirc.kind_first()
             if kind is None:
                 break
-            (kind, qid, para, c, ctrl) = qcirc.pop_gate()
+            (kind, qid, para, c, ctrl, tag) = qcirc.pop_gate()
             q_list.append(qid[0])
 
         frequency, qstate = __qulacs_measure_shots(qstate, q_list, shots)
@@ -178,17 +178,17 @@ def __run_all(qcirc_in=None, shots=1, cid=None, backend=None, proc='CPU', out_st
                 break
 
             if kind == cfg.MEASURE:
-                (kind, qid, para, c, ctrl) = qcirc_tmp.pop_gate()
+                (kind, qid, para, c, ctrl, tag) = qcirc_tmp.pop_gate()
                 mval = __qulacs_measure(qstate_tmp, qubit_num, qid[0])
                 if c is not None:
                     cmem[c] = mval
 
             elif kind == cfg.RESET:
-                (kind, qid, para, c, ctrl) = qcirc_tmp.pop_gate()
+                (kind, qid, para, c, ctrl, tag) = qcirc_tmp.pop_gate()
                 __qulacs_reset(qstate_tmp, qubit_num, qid[0])
 
             else:
-                (kind, qid, para, c, ctrl) = qcirc_tmp.pop_gate()
+                (kind, qid, para, c, ctrl, tag) = qcirc_tmp.pop_gate()
                 if (ctrl is None or (ctrl is not None and cmem[ctrl] == 1)):
                     __qulacs_operate_qgate(qstate_tmp, qubit_num, kind=kind, qid=qid,
                                            para_phase=para[0], para_gphase=para[1], para_factor=para[2])
