@@ -71,6 +71,8 @@ bool tagtable_set_phase(TagTable* tt, char* tag, double phase)
   int		hash = 0;
   Element*	pos  = NULL;
 
+  if (tt == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
+
   hash = _tag_to_hash(tt, tag);
   
   pos = tt->table[hash];
@@ -102,6 +104,8 @@ bool tagtable_get_phase(TagTable* tt, char* tag, double* phase)
   int		hash = 0;
   Element*	pos  = NULL;
 
+  if (tt == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
+
   hash = _tag_to_hash(tt, tag);
   
   pos = tt->table[hash];
@@ -115,6 +119,64 @@ bool tagtable_get_phase(TagTable* tt, char* tag, double* phase)
   }
 
   ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
+}
+
+bool tagtable_get_tags(TagTable* tt, void** tag_array_out, int* tag_num, int* tag_strlen)
+/*
+  The tag_array_out is an array of pointers of char,
+  and the tag_array_out[0] is allocated as an continuous 1-dim array buffer.
+*/
+{
+  int		i;
+  int		k_pos;
+  Element*	now	  = NULL;
+  char**	tag_array = NULL;
+  char*		buff	  = NULL;
+  int		counter	  = 0;
+
+  if (tt == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
+  
+  if (!(tag_array = (char**)malloc(sizeof(char*) * tt->data_num)))
+    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,NULL);
+
+  if (!(buff = (char*)malloc(sizeof(char) * TAG_STRLEN * tt->data_num)))
+    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY,NULL);
+
+  k_pos = 0;
+  for (i=0; i<tt->data_num; i++) {
+    tag_array[i] = &buff[k_pos];
+    k_pos += TAG_STRLEN;
+  }
+    
+  for (i=0; i<tt->table_size; i++) {
+    now = tt->table[i];
+    while (now->active == true) {
+      //      printf("* tag_len = %d, tag = %s\n", (int)strlen(now->tag), now->tag); // debug
+      strcpy(tag_array[counter], now->tag);
+      now = now->next;
+      counter++;
+    }
+  }
+
+  *tag_array_out = tag_array;
+  *tag_num = tt->data_num;
+  *tag_strlen = TAG_STRLEN;
+  
+  SUC_RETURN(true);
+}
+
+/* for debug */
+void tagtable_print_data(TagTable* tt)
+{
+  Element* now = NULL;
+  
+  for (int i=0; i<tt->table_size; i++) {
+    now = tt->table[i];
+    while (now->active == true) {
+      printf("tag, phase = %s, %f\n", now->tag, now->phase);
+      now = now->next;
+    }
+  }
 }
 
 void tagtable_free(TagTable* tt)

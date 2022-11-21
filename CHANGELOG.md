@@ -1,6 +1,8 @@
 # Change Log
 
 ## [0.3.4] - 2022-xx-xx
+### Added
+- get_params method of QCirc class
 
 ## [0.3.3] - 2022-11-14
 ### Added

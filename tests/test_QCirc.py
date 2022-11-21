@@ -1081,14 +1081,22 @@ class TestQCirc_using_tag(unittest.TestCase):
     def test_6(self):
         """test 5
         """
-        qc = QCirc().h(0).rz(0, tag='foo').cx(0,1).crz(0,1, tag='bar')
+        qc = QCirc().h(0).rz(0, tag='foo').cx(0,1).crz(0,1, tag='bar').p(1, tag='hoge')
         qc.set_params({'foo': 0.2, 'bar': 0.3})
-        self.assertEqual(qc.get_param('foo'), 0.2)
-        self.assertEqual(qc.get_param('bar'), 0.3)
+        self.assertEqual(qc.get_tag_phase('foo'), 0.2)
+        self.assertEqual(qc.get_tag_phase('bar'), 0.3)
+        self.assertEqual(qc.get_tag_phase('hoge'), 0.0)
 
         qc.set_params({'foo': 0.4, 'bar': 0.5})
-        self.assertEqual(qc.get_param('foo'), 0.4)
-        self.assertEqual(qc.get_param('bar'), 0.5)
+        self.assertEqual(qc.get_tag_phase('foo'), 0.4)
+        self.assertEqual(qc.get_tag_phase('bar'), 0.5)
+        self.assertEqual(qc.get_tag_phase('hoge'), 0.0)
+
+        qc.set_params({'hoge': 0.6})
+        self.assertEqual(qc.get_tag_phase('foo'), 0.4)
+        self.assertEqual(qc.get_tag_phase('bar'), 0.5)
+        self.assertEqual(qc.get_tag_phase('hoge'), 0.6)
+        self.assertEqual(qc.get_params(), {'foo': 0.4, 'bar': 0.5, 'hoge': 0.6})
 
 #
 # add control qubit

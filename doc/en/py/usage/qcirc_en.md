@@ -847,6 +847,12 @@ Then, if you want to change the parameters to 0.4,0.5, do as follows,
 
 There is no need to create another quantum circuit.
 
+The value of the set parameters can be obtained by the 'get_params'
+method as follows.
+
+    >>> print(qc.get_params())
+	>>> {'foo': 0.4, 'bar': 0.5}
+
 ### Adding a control qubit
 
 If you want to add a control qubit to your quantum circuit, use the

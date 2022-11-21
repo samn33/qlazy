@@ -443,6 +443,46 @@ bool qcirc_get_tag_phase(QCirc* qcirc, char* tag, double* phase)
   SUC_RETURN(true);
 }
 
+bool qcirc_get_tag_info(QCirc* qcirc, int* tag_num, int* tag_strlen)
+{
+  char** tag_array = NULL;
+
+  if (qcirc == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
+
+  if (!(tagtable_get_tags(qcirc->tag_table, (void**)&tag_array, tag_num, tag_strlen)))
+    ERR_RETURN(ERROR_TAGTABLE_GET_TAGS, false);
+
+  free(tag_array[0]); tag_array[0] = NULL;
+  free(tag_array); tag_array = NULL;
+
+  SUC_RETURN(true);
+}
+
+bool qcirc_get_tag_buf(QCirc* qcirc, char* tag_buf)
+/* suppose that the tag_buf memory is already allocated */
+{
+  char**	tag_array = NULL;
+  int		tag_num;
+  int		tag_strlen;
+  int           i, pos;
+  
+  if (qcirc == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT, false);
+
+  if (!(tagtable_get_tags(qcirc->tag_table, (void**)&tag_array, &tag_num, &tag_strlen)))
+    ERR_RETURN(ERROR_TAGTABLE_GET_TAGS, false);
+
+  pos = 0;
+  for (i=0; i<tag_num; i++) {
+    strcpy(tag_buf+pos, tag_array[i]);
+    pos += (strlen(tag_array[i]) + 1);
+  }
+
+  free(tag_array[0]); tag_array[0] = NULL;
+  free(tag_array); tag_array = NULL;
+
+  SUC_RETURN(true);
+}
+
 bool qcirc_update_phases(QCirc* qcirc)
 {
   QGate*	gate = NULL;

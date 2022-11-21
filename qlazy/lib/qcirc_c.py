@@ -209,8 +209,8 @@ def qcirc_set_params(qcirc, params):
     if ret is False:
         raise ValueError("can't update phases.")
 
-def qcirc_get_param(qcirc, tag):
-    """ get param (= phase) """
+def qcirc_get_tag_phase(qcirc, tag):
+    """ get phase for the tag """
 
     lib.qcirc_get_tag_phase.restype = ctypes.c_bool
     lib.qcirc_get_tag_phase.argtypes = [ctypes.POINTER(QCirc), ctypes.c_char_p,
@@ -227,6 +227,42 @@ def qcirc_get_param(qcirc, tag):
     phase = c_phase.value
 
     return phase
+
+def qcirc_get_tag_list(qcirc):
+    """ get tag_list """
+
+    tag_num = 0
+    c_tag_num = ctypes.c_int(tag_num)
+    tag_strlen = 0
+    c_tag_strlen = ctypes.c_int(tag_strlen)
+
+    lib.qcirc_get_tag_info.restype = ctypes.c_bool
+    lib.qcirc_get_tag_info.argtypes = [ctypes.POINTER(QCirc), ctypes.POINTER(ctypes.c_int),
+                                       ctypes.POINTER(ctypes.c_int)]
+
+    ret = lib.qcirc_get_tag_info(ctypes.byref(qcirc), c_tag_num, c_tag_strlen)
+    if ret is False:
+        raise ValueError("can't get tag info.")
+
+    tag_num = c_tag_num.value
+    tag_strlen = c_tag_strlen.value
+
+    tag_buf = '0' * tag_num * tag_strlen
+    c_tag_buf = tag_buf.encode('utf-8')
+    
+    lib.qcirc_get_tag_buf.restype = ctypes.c_bool
+    lib.qcirc_get_tag_buf.argtypes = [ctypes.POINTER(QCirc), ctypes.POINTER(ctypes.c_char)]
+
+    ret = lib.qcirc_get_tag_buf(ctypes.byref(qcirc), c_tag_buf)
+    if ret is False:
+        raise ValueError("can't get tag info.")
+
+    tag_byte_list = c_tag_buf.split(b'\x00')
+    tag_list = []
+    for i in range(tag_num):
+        tag_list.append(tag_byte_list[i].decode('utf-8'))
+
+    return tag_list
 
 def qcirc_free(qcirc):
     """ free memory of the QCirc object """

@@ -246,6 +246,9 @@ void error_msg(ErrCode err)
   case ERROR_TAGTABLE_GET_PHASE:
     fprintf(stderr, "ERROR: tagtable get phase failure !\n");
     break;
+  case ERROR_TAGTABLE_GET_TAGS:
+    fprintf(stderr, "ERROR: tagtable get tags failure !\n");
+    break;
 
   case ERROR_NEED_TO_INITIALIZE:
     fprintf(stderr, "ERROR: need to initialize !\n");

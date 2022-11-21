@@ -184,11 +184,10 @@ typedef enum _ErrCode {
   ERROR_CMEM_INIT,
   ERROR_CMEM_COPY,
   ERROR_TAGTABLE_INIT,
-  ERROR_TAGTABLE_COPY,
   ERROR_TAGTABLE_MERGE,
-  ERROR_TAGTABLE_MERGE_MUTABLE,
   ERROR_TAGTABLE_SET_PHASE,
   ERROR_TAGTABLE_GET_PHASE,
+  ERROR_TAGTABLE_GET_TAGS,
 
   /* qlazy interactive mode */
   ERROR_NEED_TO_INITIALIZE,
@@ -646,6 +645,8 @@ bool qcirc_decompose(QCirc* qcirc_in, void** qcirc_uonly_out, void** qcirc_mixed
 		     void** qcirc_monly_out);
 bool qcirc_set_tag_phase(QCirc* qcirc, char* tag, double phase);
 bool qcirc_get_tag_phase(QCirc* qcirc, char* tag, double* phase);
+bool qcirc_get_tag_info(QCirc* qcirc, int* tag_num, int* tag_strlen);
+bool qcirc_get_tag_buf(QCirc* qcirc, char* tag_buf);
 bool qcirc_update_phases(QCirc* qcirc);
 void qcirc_free(QCirc* qcirc);
 
@@ -671,6 +672,8 @@ bool tagtable_init(int table_size, void** tt_out);
 bool tagtable_merge(TagTable* tt, TagTable* tt_in);
 bool tagtable_set_phase(TagTable* tt, char* tag, double phase);
 bool tagtable_get_phase(TagTable* tt, char* tag, double* phase);
+bool tagtable_get_tags(TagTable* tt, void** tag_array_out, int* tag_num, int* tag_strlen);
+void tagtable_print_data(TagTable* tt);
 void tagtable_free(TagTable* tt);
 
 #ifdef USE_GPU

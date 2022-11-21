@@ -2381,7 +2381,7 @@ class QCirc(ctypes.Structure):
 
         qcirc_set_params(self, params)
 
-    def get_param(self, tag):
+    def get_tag_phase(self, tag):
         """
         get parameter (= phase) for the tag
     
@@ -2399,15 +2399,46 @@ class QCirc(ctypes.Structure):
         --------
         >>> qc = QCirc().h(0).rz(0, tag='foo').rx(0, tag='bar')
         >>> qc.set_params(params={'foo': 0.2, 'bar': 0.4})
-        >>> print(qc.get_param('foo'))
+        >>> print(qc.get_tag_phase('foo'))
         0.2
 
         """
         if not isinstance(tag, str):
             raise TypeError("tag must be str.")
 
-        phase = qcirc_get_param(self, tag)
+        phase = qcirc_get_tag_phase(self, tag)
         return phase
+
+    def get_params(self):
+        """
+        get parameters for each tag
+    
+        Parameters
+        ----------
+        None
+    
+        Returns
+        -------
+        params : dict
+            tag and phase dictionary
+            ex) {'tag1': phase1, 'tag2': phase2, ...}
+    
+        Examples
+        --------
+        >>> qc = QCirc().h(0).rz(0, tag='foo').rx(0, tag='bar')
+        >>> qc.set_params(params={'foo': 0.2, 'bar': 0.4})
+        >>> print(qc.get_params())
+        {'foo': 0.2, 'bar': 0.4}
+
+        """
+        tag_list = qcirc_get_tag_list(self)
+
+        if len(tag_list) == 0:
+            params = None
+        else:
+            params = {tag:self.get_tag_phase(tag) for tag in tag_list}
+
+        return params
 
     def add_control(self, qctrl=None):
         """
@@ -2498,5 +2529,6 @@ class QCirc(ctypes.Structure):
 from qlazy.lib.qcirc_c import (qcirc_init, qcirc_copy, qcirc_merge,
                                qcirc_merge_mutable, qcirc_is_equal,
                                qcirc_append_gate, qcirc_kind_first,
-                               qcirc_pop_gate, qcirc_set_params, qcirc_get_param,
+                               qcirc_pop_gate, qcirc_set_params,
+                               qcirc_get_tag_phase, qcirc_get_tag_list,
                                qcirc_free)
