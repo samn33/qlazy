@@ -10,12 +10,7 @@ import tensornetwork as tn
 from tensornetwork import FiniteMPS
 
 import qlazy.config as cfg
-
-def gray_code(n):
-    """ gray code generator (for mcx method) """
-
-    for k in range(2**n):
-        yield k^(k>>1)
+from qlazy.QuantumObject import QuantumObject
 
 class MDataMPState:
     """ Measured Data for MPState
@@ -40,7 +35,7 @@ class MDataMPState:
         self.qubit_num = qubit_num
 
 
-class MPState(FiniteMPS):
+class MPState(FiniteMPS, QuantumObject):
     """ Matrix Product State
 
     Attributes
@@ -677,7 +672,7 @@ class MPState(FiniteMPS):
 
     # 1-qubit gate
 
-    def x(self, q0):
+    def x(self, q0, **kwargs):
         """
         operate X gate.
 
@@ -694,7 +689,7 @@ class MPState(FiniteMPS):
         self.operate_1qubit_gate('x', q0)
         return self
 
-    def y(self, q0):
+    def y(self, q0, **kwargs):
         """
         operate Y gate.
 
@@ -711,7 +706,7 @@ class MPState(FiniteMPS):
         self.operate_1qubit_gate('y', q0)
         return self
 
-    def z(self, q0):
+    def z(self, q0, **kwargs):
         """
         operate Z gate.
 
@@ -728,7 +723,7 @@ class MPState(FiniteMPS):
         self.operate_1qubit_gate('z', q0)
         return self
 
-    def xr(self, q0):
+    def xr(self, q0, **kwargs):
         """
         operate root X gate.
 
@@ -763,7 +758,7 @@ class MPState(FiniteMPS):
         self.operate_1qubit_gate('xr_dg', q0)
         return self
 
-    def h(self, q0):
+    def h(self, q0, **kwargs):
         """
         operate H gate (hadamard gate).
 
@@ -780,7 +775,7 @@ class MPState(FiniteMPS):
         self.operate_1qubit_gate('h', q0)
         return self
 
-    def s(self, q0):
+    def s(self, q0, **kwargs):
         """
         operate S gate.
 
@@ -797,7 +792,7 @@ class MPState(FiniteMPS):
         self.operate_1qubit_gate('s', q0)
         return self
 
-    def s_dg(self, q0):
+    def s_dg(self, q0, **kwargs):
         """
         operate S dagger gate (hermitian conjugate of S gate).
 
@@ -814,7 +809,7 @@ class MPState(FiniteMPS):
         self.operate_1qubit_gate('s_dg', q0)
         return self
 
-    def t(self, q0):
+    def t(self, q0, **kwargs):
         """
         operate T gate.
 
@@ -831,7 +826,7 @@ class MPState(FiniteMPS):
         self.operate_1qubit_gate('t', q0)
         return self
 
-    def t_dg(self, q0):
+    def t_dg(self, q0, **kwargs):
         """
         operate T dagger gate (hermitian conjugate of T gate).
 
@@ -848,7 +843,7 @@ class MPState(FiniteMPS):
         self.operate_1qubit_gate('t_dg', q0)
         return self
 
-    def rx(self, q0, phase=0.0):
+    def rx(self, q0, phase=0.0, **kwargs):
         """
         operate RX gate (rotation around X-axis).
 
@@ -867,7 +862,7 @@ class MPState(FiniteMPS):
         self.operate_1qubit_gate('rx', q0, para=phase)
         return self
 
-    def ry(self, q0, phase=0.0):
+    def ry(self, q0, phase=0.0, **kwargs):
         """
         operate RY gate (rotation around Y-axis).
 
@@ -886,7 +881,7 @@ class MPState(FiniteMPS):
         self.operate_1qubit_gate('ry', q0, para=phase)
         return self
 
-    def rz(self, q0, phase=0.0):
+    def rz(self, q0, phase=0.0, **kwargs):
         """
         operate RZ gate (rotation around Z-axis).
 
@@ -905,7 +900,7 @@ class MPState(FiniteMPS):
         self.operate_1qubit_gate('rz', q0, para=phase)
         return self
 
-    def p(self, q0, phase=0.0):
+    def p(self, q0, phase=0.0, **kwargs):
         """
         operate P gate (phase shift gate).
 
@@ -932,7 +927,7 @@ class MPState(FiniteMPS):
 
     # 2-qubit gate
 
-    def cx(self, q0, q1):
+    def cx(self, q0, q1, **kwargs):
         """
         operate CX gate (controlled X gate, controlled NOT gate, CNOT gate).
 
@@ -951,7 +946,7 @@ class MPState(FiniteMPS):
         self.operate_2qubit_gate('cx', q0, q1)
         return self
 
-    def cy(self, q0, q1):
+    def cy(self, q0, q1, **kwargs):
         """
         operate CY gate (controlled X gate).
 
@@ -970,7 +965,7 @@ class MPState(FiniteMPS):
         self.operate_2qubit_gate('cy', q0, q1)
         return self
 
-    def cz(self, q0, q1):
+    def cz(self, q0, q1, **kwargs):
         """
         operate CZ gate (controlled Z gate).
 
@@ -989,7 +984,7 @@ class MPState(FiniteMPS):
         self.operate_2qubit_gate('cz', q0, q1)
         return self
 
-    def cxr(self, q0, q1):
+    def cxr(self, q0, q1, **kwargs):
         """
         operate CXR gate (controlled root X gate).
 
@@ -1008,7 +1003,7 @@ class MPState(FiniteMPS):
         self.operate_2qubit_gate('cxr', q0, q1)
         return self
 
-    def cxr_dg(self, q0, q1):
+    def cxr_dg(self, q0, q1, **kwargs):
         """
         operate CXR dagger gate (controlled XR dagger gate).
 
@@ -1027,7 +1022,7 @@ class MPState(FiniteMPS):
         self.operate_2qubit_gate('cxr_dg', q0, q1)
         return self
 
-    def ch(self, q0, q1):
+    def ch(self, q0, q1, **kwargs):
         """
         operate CH gate (controlled H gate).
 
@@ -1046,7 +1041,7 @@ class MPState(FiniteMPS):
         self.operate_2qubit_gate('ch', q0, q1)
         return self
 
-    def cs(self, q0, q1):
+    def cs(self, q0, q1, **kwargs):
         """
         operate CS gate (controlled S gate).
 
@@ -1065,7 +1060,7 @@ class MPState(FiniteMPS):
         self.operate_2qubit_gate('cs', q0, q1)
         return self
 
-    def cs_dg(self, q0, q1):
+    def cs_dg(self, q0, q1, **kwargs):
         """
         operate CS dagger gate (controlled S dagger gate).
 
@@ -1084,7 +1079,7 @@ class MPState(FiniteMPS):
         self.operate_2qubit_gate('cs_dg', q0, q1)
         return self
 
-    def ct(self, q0, q1):
+    def ct(self, q0, q1, **kwargs):
         """
         operate CT gate (controlled T gate).
 
@@ -1103,7 +1098,7 @@ class MPState(FiniteMPS):
         self.operate_2qubit_gate('ct', q0, q1)
         return self
 
-    def ct_dg(self, q0, q1):
+    def ct_dg(self, q0, q1, **kwargs):
         """
         operate CT dagger gate (controlled T dagger gate).
 
@@ -1122,7 +1117,7 @@ class MPState(FiniteMPS):
         self.operate_2qubit_gate('ct_dg', q0, q1)
         return self
 
-    def sw(self, q0, q1):
+    def sw(self, q0, q1, **kwargs):
         """
         swap gate
 
@@ -1141,7 +1136,7 @@ class MPState(FiniteMPS):
         self.operate_2qubit_gate('sw', q0, q1)
         return self
 
-    def cp(self, q0, q1, phase=0.0):
+    def cp(self, q0, q1, phase=0.0, **kwargs):
         """
         operate CP gate (controlled P gate).
 
@@ -1160,7 +1155,7 @@ class MPState(FiniteMPS):
         self.operate_2qubit_gate('cp', q0, q1, para=phase)
         return self
 
-    def crx(self, q0, q1, phase=0.0):
+    def crx(self, q0, q1, phase=0.0, **kwargs):
         """
         operate CRX gate (controlled RX gate).
 
@@ -1181,7 +1176,7 @@ class MPState(FiniteMPS):
         self.operate_2qubit_gate('crx', q0, q1, para=phase)
         return self
 
-    def cry(self, q0, q1, phase=0.0):
+    def cry(self, q0, q1, phase=0.0, **kwargs):
         """
         operate CRY gate (controlled RY gate).
 
@@ -1202,7 +1197,7 @@ class MPState(FiniteMPS):
         self.operate_2qubit_gate('cry', q0, q1, para=phase)
         return self
 
-    def crz(self, q0, q1, phase=0.0):
+    def crz(self, q0, q1, phase=0.0, **kwargs):
         """
         operate CRZ gate (controlled RZ gate).
 
@@ -1223,7 +1218,7 @@ class MPState(FiniteMPS):
         self.operate_2qubit_gate('crz', q0, q1, para=phase)
         return self
 
-    def rxx(self, q0, q1, phase=0.0):
+    def rxx(self, q0, q1, phase=0.0, **kwargs):
         """
         operate Rxx gate.
 
@@ -1244,7 +1239,7 @@ class MPState(FiniteMPS):
         self.operate_2qubit_gate('rxx', q0, q1, para=phase)
         return self
 
-    def ryy(self, q0, q1, phase=0.0):
+    def ryy(self, q0, q1, phase=0.0, **kwargs):
         """
         operate Ryy gate.
 
@@ -1265,7 +1260,7 @@ class MPState(FiniteMPS):
         self.operate_2qubit_gate('ryy', q0, q1, para=phase)
         return self
 
-    def rzz(self, q0, q1, phase=0.0):
+    def rzz(self, q0, q1, phase=0.0, **kwargs):
         """
         operate Rxx gate.
 
@@ -1286,98 +1281,6 @@ class MPState(FiniteMPS):
         self.operate_2qubit_gate('rzz', q0, q1, para=phase)
         return self
 
-    # 3-qubit gate
-
-    def ccx(self, q0, q1, q2):
-        """
-        operate CCX gate (toffoli gate, controlled controlled X gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id (control qubit).
-        q1 : int
-            qubit id (control qubit).
-        q2 : int
-            qubit id (target qubit).
-
-        Returns
-        -------
-        self : instance of QState
-
-        """
-        self.cxr(q1, q2).cx(q0, q1).cxr_dg(q1, q2).cx(q0, q1).cxr(q0, q2)
-        return self
-
-    def csw(self, q0, q1, q2):
-        """
-        operate CSW gate (fredkin gate, controlled swap gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id (control qubit).
-        q1 : int
-            qubit id (swap qubit).
-        q2 : int
-            qubit id (swap qubit).
-
-        Returns
-        -------
-        self : instance of QState
-
-        """
-        self.cx(q2, q1).ccx(q0, q1, q2).cx(q2, q1)
-        return self
-
-    # other gate
-
-    def mcx(self, qid=None):
-        """
-        operate MCX gate (multi-controlled X gate).
-
-        Parameters
-        ----------
-        qid : list of int
-            qubit id list [control, control, ... , control, target]
-
-        Returns
-        -------
-        self : instance of QState
-
-        """
-        if qid is None:
-            raise ValueError("qid must be set.")
-
-        # controled and target register
-        qid_ctr = qid[:-1]
-        qid_tar = qid[-1]
-
-        # hadamard
-        self.h(qid_tar)
-
-        # controlled-RZ(psi), psi=pi/(2**(bitnum-1))
-        bitnum = len(qid_ctr)
-        psi = 1.0/(2**(bitnum-1)) # unit=pi(radian)
-        gray_pre = 0
-        for gray in gray_code(bitnum):
-            if gray == 0:
-                continue
-            msb = len(str(bin(gray)))-3
-            chb = len(str(bin(gray^gray_pre)))-3
-            if gray != 1:
-                if chb == msb:
-                    chb -= 1
-                self.cx(qid_ctr[chb], qid_ctr[msb])
-            self.cp(qid_ctr[msb], qid_tar, phase=psi)
-            psi = -psi
-            gray_pre = gray
-
-        # hadamard
-        self.h(qid_tar)
-
-        return self
-    
     def __probability(self, q):
 
         z_gate = self.__get_gate_array('z')

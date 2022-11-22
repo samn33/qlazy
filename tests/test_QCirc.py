@@ -17,6 +17,14 @@ def equal_or_not(qs_A, qs_B):
     else:
         return False
 
+def equal_vectors(vec_0, vec_1):
+
+    inpro = abs(np.dot(np.conjugate(vec_0), vec_1))
+    if abs(inpro - 1.0) < EPS:
+        return True
+    else:
+        return False
+
 def valid_or_not(qc):
 
     bk = Backend(product='ibmq', device='aer_simulator')
@@ -590,6 +598,47 @@ class TestQCirc_to_qasm(unittest.TestCase):
         actual = qc.to_qasm()
         expect = """OPENQASM 2.0;\ninclude "qelib1.inc";\nqreg q[2];\nreset q[0];\nreset q[1];"""
         self.assertEqual(actual, expect)
+
+class TestQCirc_n_qubit(unittest.TestCase):
+    """ test 'QCirc' : n-qubit gate
+    """
+
+    def test_mcx_1(self):
+        """test 'mcx' gate (for 3-qubit)
+        """
+        bk = Backend()
+        qc = QCirc().x(0).x(1).mcx([0,1,2])
+        qs = bk.run(qcirc=qc, out_state=True).qstate
+        actual = qs.amp
+        expect = np.array([0j, 0j, 0j, 0j, 0j, 0j, 0j, (1+0j)])
+        ans = equal_vectors(actual, expect)
+        self.assertEqual(ans,True)
+
+    def test_mcx_2(self):
+        """test 'mcx' gate (for 4-qubit)
+        """
+        bk = Backend()
+        qc = QCirc().x(0).x(1).x(2).mcx([0,1,2,3])
+        qs = bk.run(qcirc=qc, out_state=True).qstate
+        actual = qs.amp
+        expect = np.array([0j, 0j, 0j, 0j, 0j, 0j, 0j, 0j,
+                           0j, 0j, 0j, 0j, 0j, 0j, 0j, (1+0j)])
+        ans = equal_vectors(actual, expect)
+        self.assertEqual(ans,True)
+
+    def test_mcx_3(self):
+        """test 'mcx' gate (for 5-qubit)
+        """
+        bk = Backend()
+        qc = QCirc().x(0).x(1).x(2).x(3).mcx([0,1,2,3,4])
+        qs = bk.run(qcirc=qc, out_state=True).qstate
+        actual = qs.amp
+        expect = np.array([0j, 0j, 0j, 0j, 0j, 0j, 0j, 0j,
+                           0j, 0j, 0j, 0j, 0j, 0j, 0j, 0j,
+                           0j, 0j, 0j, 0j, 0j, 0j, 0j, 0j,
+                           0j, 0j, 0j, 0j, 0j, 0j, 0j, (1+0j)])
+        ans = equal_vectors(actual, expect)
+        self.assertEqual(ans,True)
 
 #
 # import OpenQASM

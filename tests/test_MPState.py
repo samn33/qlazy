@@ -675,7 +675,7 @@ class TestMPState_n_qubit(unittest.TestCase):
     """ test 'MPState' : n-qubit gate
     """
 
-    def test_mcx_3(self):
+    def test_mcx_1(self):
         """test 'mcx' gate (for 3-qubit)
         """
         mps = MPState(qubit_num=3).x(0).x(1).mcx([0,1,2])
@@ -684,7 +684,7 @@ class TestMPState_n_qubit(unittest.TestCase):
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans, True)
 
-    def test_mcx_4(self):
+    def test_mcx_2(self):
         """test 'mcx' gate (for 4-qubit)
         """
         mps = MPState(qubit_num=4).x(0).x(1).x(2).mcx([0,1,2,3])
@@ -694,7 +694,7 @@ class TestMPState_n_qubit(unittest.TestCase):
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans,True)
     
-    def test_mcx_5(self):
+    def test_mcx_3(self):
         """test 'mcx' gate (for 5-qubit)
         """
         mps = QState(qubit_num=5).x(0).x(1).x(2).x(3).mcx([0,1,2,3,4])

@@ -10,6 +10,7 @@ import pickle
 import qlazy.config as cfg
 from qlazy.util import (is_clifford_gate, is_non_clifford_gate, is_measurement_gate,
                         is_reset_gate, get_qgate_qubit_num, get_qgate_param_num)
+from qlazy.QuantumObject import QuantumObject
 
 def string_to_args(s):  # for from_qasm
     """ convert string to args """
@@ -92,7 +93,7 @@ def append_qc_canvas(qc_canvas, gates, qubit_num, cmem_num): # for show method
         else:
             qc_canvas[i] += (' ' * (canvas_len - len(qc_canvas[i])))
 
-class QCirc(ctypes.Structure):
+class QCirc(ctypes.Structure, QuantumObject):
     """ Quantum Circuit
 
     Attributes
@@ -2149,57 +2150,6 @@ class QCirc(ctypes.Structure):
         self.append_gate(kind=cfg.CONTROLLED_X, qid=[q0, q1], ctrl=ctrl)
         self.append_gate(kind=cfg.ROTATION_Z, qid=[q1, -1], para=para, ctrl=ctrl, tag=tag)
         self.append_gate(kind=cfg.CONTROLLED_X, qid=[q0, q1], ctrl=ctrl)
-        return self
-
-    # 3-qubit gate
-
-    def ccx(self, q0, q1, q2, ctrl=None):
-        """
-        add CCX gate (toffoli gate, controlled controlled X gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id (control qubit).
-        q1 : int
-            qubit id (control qubit).
-        q2 : int
-            qubit id (target qubit).
-        ctrl : int
-            address of classical memory to control gate operation.
-
-        Returns
-        -------
-        self : instance of QCirc
-            quantum circuit after adding
-
-        """
-        self.cxr(q1, q2, ctrl=ctrl).cx(q0, q1, ctrl=ctrl).cxr_dg(q1, q2, ctrl=ctrl)
-        self.cx(q0, q1, ctrl=ctrl).cxr(q0, q2, ctrl=ctrl)
-        return self
-
-    def csw(self, q0, q1, q2, ctrl=None):
-        """
-        add CSW gate (fredkin gate, controlled swap gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id (control qubit).
-        q1 : int
-            qubit id (swap qubit).
-        q2 : int
-            qubit id (swap qubit).
-        ctrl : int
-            address of classical memory to control gate operation.
-
-        Returns
-        -------
-        self : instance of QCirc
-            quantum circuit after adding
-
-        """
-        self.cx(q2, q1, ctrl=ctrl).ccx(q0, q1, q2, ctrl=ctrl).cx(q2, q1, ctrl=ctrl)
         return self
 
     def operate(self, pp=None, ctrl=None, qctrl=None):

@@ -1543,7 +1543,7 @@ class TestDensOp_n_qubit(unittest.TestCase):
     """ test 'DensOp' : n-qubit gate
     """
 
-    def test_mcx_3(self):
+    def test_mcx_1(self):
         """test 'mcx' gate (3-qubit)
         """
         mat = make_densop_matrix(VECTORS_8, PROBS_8)
@@ -1554,7 +1554,7 @@ class TestDensOp_n_qubit(unittest.TestCase):
         ans = equal_densops(actual, expect)
         self.assertEqual(ans,True)
 
-    def test_mcx_4(self):
+    def test_mcx_2(self):
         """test 'mcx' gate (4-qubit)
         """
         mat = make_densop_matrix(VECTORS_16, PROBS_16)

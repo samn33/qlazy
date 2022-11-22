@@ -5,10 +5,10 @@ import random
 import numpy as np
 
 import qlazy.config as cfg
-from qlazy.lib.qstate_mcx import qstate_mcx
 from qlazy.gpu import is_gpu_supported_lib
+from qlazy.QuantumObject import QuantumObject
 
-class QState(ctypes.Structure):
+class QState(ctypes.Structure, QuantumObject):
     """ Quantum State
 
     Attributes
@@ -738,7 +738,7 @@ class QState(ctypes.Structure):
 
     # 1-qubit gate
 
-    def x(self, q0):
+    def x(self, q0, **kwargs):
         """
         operate X gate.
 
@@ -755,7 +755,7 @@ class QState(ctypes.Structure):
         qstate_operate_qgate(self, kind=cfg.PAULI_X, phase=cfg.DEF_PHASE, qid=[q0])
         return self
 
-    def y(self, q0):
+    def y(self, q0, **kwargs):
         """
         operate Y gate.
 
@@ -772,7 +772,7 @@ class QState(ctypes.Structure):
         qstate_operate_qgate(self, kind=cfg.PAULI_Y, phase=cfg.DEF_PHASE, qid=[q0])
         return self
 
-    def z(self, q0):
+    def z(self, q0, **kwargs):
         """
         operate Z gate.
 
@@ -789,7 +789,7 @@ class QState(ctypes.Structure):
         qstate_operate_qgate(self, kind=cfg.PAULI_Z, phase=cfg.DEF_PHASE, qid=[q0])
         return self
 
-    def xr(self, q0):
+    def xr(self, q0, **kwargs):
         """
         operate root X gate.
 
@@ -806,7 +806,7 @@ class QState(ctypes.Structure):
         qstate_operate_qgate(self, kind=cfg.ROOT_PAULI_X, phase=cfg.DEF_PHASE, qid=[q0])
         return self
 
-    def xr_dg(self, q0):
+    def xr_dg(self, q0, **kwargs):
         """
         operate root X dagger gate
         (hermmitian conjugate of root X gate).
@@ -824,7 +824,7 @@ class QState(ctypes.Structure):
         qstate_operate_qgate(self, kind=cfg.ROOT_PAULI_X_, phase=cfg.DEF_PHASE, qid=[q0])
         return self
 
-    def h(self, q0):
+    def h(self, q0, **kwargs):
         """
         operate H gate (hadamard gate).
 
@@ -841,7 +841,7 @@ class QState(ctypes.Structure):
         qstate_operate_qgate(self, kind=cfg.HADAMARD, phase=cfg.DEF_PHASE, qid=[q0])
         return self
 
-    def s(self, q0):
+    def s(self, q0, **kwargs):
         """
         operate S gate.
 
@@ -858,7 +858,7 @@ class QState(ctypes.Structure):
         qstate_operate_qgate(self, kind=cfg.PHASE_SHIFT_S, phase=cfg.DEF_PHASE, qid=[q0])
         return self
 
-    def s_dg(self, q0):
+    def s_dg(self, q0, **kwargs):
         """
         operate S dagger gate (hermitian conjugate of S gate).
 
@@ -875,7 +875,7 @@ class QState(ctypes.Structure):
         qstate_operate_qgate(self, kind=cfg.PHASE_SHIFT_S_, phase=cfg.DEF_PHASE, qid=[q0])
         return self
 
-    def t(self, q0):
+    def t(self, q0, **kwargs):
         """
         operate T gate.
 
@@ -892,7 +892,7 @@ class QState(ctypes.Structure):
         qstate_operate_qgate(self, kind=cfg.PHASE_SHIFT_T, phase=cfg.DEF_PHASE, qid=[q0])
         return self
 
-    def t_dg(self, q0):
+    def t_dg(self, q0, **kwargs):
         """
         operate T dagger gate (hermitian conjugate of T gate).
 
@@ -909,7 +909,7 @@ class QState(ctypes.Structure):
         qstate_operate_qgate(self, kind=cfg.PHASE_SHIFT_T_, phase=cfg.DEF_PHASE, qid=[q0])
         return self
 
-    def rx(self, q0, phase=cfg.DEF_PHASE):
+    def rx(self, q0, phase=cfg.DEF_PHASE, **kwargs):
         """
         operate RX gate (rotation around X-axis).
 
@@ -928,7 +928,7 @@ class QState(ctypes.Structure):
         qstate_operate_qgate(self, kind=cfg.ROTATION_X, phase=phase, qid=[q0])
         return self
 
-    def ry(self, q0, phase=cfg.DEF_PHASE):
+    def ry(self, q0, phase=cfg.DEF_PHASE, **kwargs):
         """
         operate RY gate (rotation around Y-axis).
 
@@ -947,7 +947,7 @@ class QState(ctypes.Structure):
         qstate_operate_qgate(self, kind=cfg.ROTATION_Y, phase=phase, qid=[q0])
         return self
 
-    def rz(self, q0, phase=cfg.DEF_PHASE):
+    def rz(self, q0, phase=cfg.DEF_PHASE, **kwargs):
         """
         operate RZ gate (rotation around Z-axis).
 
@@ -966,7 +966,7 @@ class QState(ctypes.Structure):
         qstate_operate_qgate(self, kind=cfg.ROTATION_Z, phase=phase, qid=[q0])
         return self
 
-    def p(self, q0, phase=cfg.DEF_PHASE):
+    def p(self, q0, phase=cfg.DEF_PHASE, **kwargs):
         """
         operate P gate (phase shift gate).
 
@@ -993,7 +993,7 @@ class QState(ctypes.Structure):
 
     # 2-qubit gate
 
-    def cx(self, q0, q1):
+    def cx(self, q0, q1, **kwargs):
         """
         operate CX gate (controlled X gate, controlled NOT gate, CNOT gate).
 
@@ -1012,7 +1012,7 @@ class QState(ctypes.Structure):
         qstate_operate_qgate(self, kind=cfg.CONTROLLED_X, phase=cfg.DEF_PHASE, qid=[q0, q1])
         return self
 
-    def cy(self, q0, q1):
+    def cy(self, q0, q1, **kwargs):
         """
         operate CY gate (controlled X gate).
 
@@ -1031,7 +1031,7 @@ class QState(ctypes.Structure):
         qstate_operate_qgate(self, kind=cfg.CONTROLLED_Y, phase=cfg.DEF_PHASE, qid=[q0, q1])
         return self
 
-    def cz(self, q0, q1):
+    def cz(self, q0, q1, **kwargs):
         """
         operate CZ gate (controlled Z gate).
 
@@ -1050,7 +1050,7 @@ class QState(ctypes.Structure):
         qstate_operate_qgate(self, kind=cfg.CONTROLLED_Z, phase=cfg.DEF_PHASE, qid=[q0, q1])
         return self
 
-    def cxr(self, q0, q1):
+    def cxr(self, q0, q1, **kwargs):
         """
         operate CXR gate (controlled root X gate).
 
@@ -1069,7 +1069,7 @@ class QState(ctypes.Structure):
         qstate_operate_qgate(self, kind=cfg.CONTROLLED_XR, phase=cfg.DEF_PHASE, qid=[q0, q1])
         return self
 
-    def cxr_dg(self, q0, q1):
+    def cxr_dg(self, q0, q1, **kwargs):
         """
         operate CXR dagger gate (controlled XR dagger gate).
 
@@ -1088,7 +1088,7 @@ class QState(ctypes.Structure):
         qstate_operate_qgate(self, kind=cfg.CONTROLLED_XR_, phase=cfg.DEF_PHASE, qid=[q0, q1])
         return self
 
-    def ch(self, q0, q1):
+    def ch(self, q0, q1, **kwargs):
         """
         operate CH gate (controlled H gate).
 
@@ -1107,7 +1107,7 @@ class QState(ctypes.Structure):
         qstate_operate_qgate(self, kind=cfg.CONTROLLED_H, phase=cfg.DEF_PHASE, qid=[q0, q1])
         return self
 
-    def cs(self, q0, q1):
+    def cs(self, q0, q1, **kwargs):
         """
         operate CS gate (controlled S gate).
 
@@ -1126,7 +1126,7 @@ class QState(ctypes.Structure):
         qstate_operate_qgate(self, kind=cfg.CONTROLLED_S, phase=cfg.DEF_PHASE, qid=[q0, q1])
         return self
 
-    def cs_dg(self, q0, q1):
+    def cs_dg(self, q0, q1, **kwargs):
         """
         operate CS dagger gate (controlled S dagger gate).
 
@@ -1145,7 +1145,7 @@ class QState(ctypes.Structure):
         qstate_operate_qgate(self, kind=cfg.CONTROLLED_S_, phase=cfg.DEF_PHASE, qid=[q0, q1])
         return self
 
-    def ct(self, q0, q1):
+    def ct(self, q0, q1, **kwargs):
         """
         operate CT gate (controlled T gate).
 
@@ -1164,7 +1164,7 @@ class QState(ctypes.Structure):
         qstate_operate_qgate(self, kind=cfg.CONTROLLED_T, phase=cfg.DEF_PHASE, qid=[q0, q1])
         return self
 
-    def ct_dg(self, q0, q1):
+    def ct_dg(self, q0, q1, **kwargs):
         """
         operate CT dagger gate (controlled T dagger gate).
 
@@ -1183,7 +1183,7 @@ class QState(ctypes.Structure):
         qstate_operate_qgate(self, kind=cfg.CONTROLLED_T_, phase=cfg.DEF_PHASE, qid=[q0, q1])
         return self
 
-    def sw(self, q0, q1):
+    def sw(self, q0, q1, **kwargs):
         """
         swap gate
 
@@ -1202,7 +1202,7 @@ class QState(ctypes.Structure):
         qstate_operate_qgate(self, kind=cfg.SWAP_QUBITS, phase=cfg.DEF_PHASE, qid=[q0, q1])
         return self
 
-    def cp(self, q0, q1, phase=cfg.DEF_PHASE):
+    def cp(self, q0, q1, phase=cfg.DEF_PHASE, **kwargs):
         """
         operate CP gate (controlled P gate).
 
@@ -1221,7 +1221,7 @@ class QState(ctypes.Structure):
         qstate_operate_qgate(self, kind=cfg.CONTROLLED_P, phase=phase, qid=[q0, q1])
         return self
 
-    def crx(self, q0, q1, phase=cfg.DEF_PHASE):
+    def crx(self, q0, q1, phase=cfg.DEF_PHASE, **kwargs):
         """
         operate CRX gate (controlled RX gate).
 
@@ -1242,7 +1242,7 @@ class QState(ctypes.Structure):
         qstate_operate_qgate(self, kind=cfg.CONTROLLED_RX, phase=phase, qid=[q0, q1])
         return self
 
-    def cry(self, q0, q1, phase=cfg.DEF_PHASE):
+    def cry(self, q0, q1, phase=cfg.DEF_PHASE, **kwargs):
         """
         operate CRY gate (controlled RY gate).
 
@@ -1263,7 +1263,7 @@ class QState(ctypes.Structure):
         qstate_operate_qgate(self, kind=cfg.CONTROLLED_RY, phase=phase, qid=[q0, q1])
         return self
 
-    def crz(self, q0, q1, phase=cfg.DEF_PHASE):
+    def crz(self, q0, q1, phase=cfg.DEF_PHASE, **kwargs):
         """
         operate CRZ gate (controlled RZ gate).
 
@@ -1284,7 +1284,7 @@ class QState(ctypes.Structure):
         qstate_operate_qgate(self, kind=cfg.CONTROLLED_RZ, phase=phase, qid=[q0, q1])
         return self
 
-    def rxx(self, q0, q1, phase=cfg.DEF_PHASE):
+    def rxx(self, q0, q1, phase=cfg.DEF_PHASE, **kwargs):
         """
         operate Rxx gate.
 
@@ -1305,7 +1305,7 @@ class QState(ctypes.Structure):
         qstate_operate_qgate(self, kind=cfg.ROTATION_XX, phase=phase, qid=[q0, q1])
         return self
 
-    def ryy(self, q0, q1, phase=cfg.DEF_PHASE):
+    def ryy(self, q0, q1, phase=cfg.DEF_PHASE, **kwargs):
         """
         operate Ryy gate.
 
@@ -1326,7 +1326,7 @@ class QState(ctypes.Structure):
         qstate_operate_qgate(self, kind=cfg.ROTATION_YY, phase=phase, qid=[q0, q1])
         return self
 
-    def rzz(self, q0, q1, phase=cfg.DEF_PHASE):
+    def rzz(self, q0, q1, phase=cfg.DEF_PHASE, **kwargs):
         """
         operate Rxx gate.
 
@@ -1345,69 +1345,6 @@ class QState(ctypes.Structure):
 
         """
         qstate_operate_qgate(self, kind=cfg.ROTATION_ZZ, phase=phase, qid=[q0, q1])
-        return self
-
-    # 3-qubit gate
-
-    def ccx(self, q0, q1, q2):
-        """
-        operate CCX gate (toffoli gate, controlled controlled X gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id (control qubit).
-        q1 : int
-            qubit id (control qubit).
-        q2 : int
-            qubit id (target qubit).
-
-        Returns
-        -------
-        self : instance of QState
-
-        """
-        self.cxr(q1, q2).cx(q0, q1).cxr_dg(q1, q2).cx(q0, q1).cxr(q0, q2)
-        return self
-
-    def csw(self, q0, q1, q2):
-        """
-        operate CSW gate (fredkin gate, controlled swap gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id (control qubit).
-        q1 : int
-            qubit id (swap qubit).
-        q2 : int
-            qubit id (swap qubit).
-
-        Returns
-        -------
-        self : instance of QState
-
-        """
-        self.cx(q2, q1).ccx(q0, q1, q2).cx(q2, q1)
-        return self
-
-    # other gate
-
-    def mcx(self, qid=None):
-        """
-        operate MCX gate (multi-controlled X gate).
-
-        Parameters
-        ----------
-        qid : list of int
-            qubit id list [control, control, ... , control, target]
-
-        Returns
-        -------
-        self : instance of QState
-
-        """
-        qstate_mcx(self, qid)
         return self
 
     # measurement
