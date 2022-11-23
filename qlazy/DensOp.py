@@ -1744,66 +1744,6 @@ class DensOp(ctypes.Structure, QuantumObject):
         densop_operate_qgate(self, kind=cfg.ROTATION_ZZ, phase=phase, qid=[q0, q1])
         return self
 
-    def operate(self, pp=None, ctrl=None, qctrl=None):
-        """
-        operate unitary operator to density operator.
-
-        Parameters
-        ----------
-        pp : instance of PauliProduct
-            pauli product to operate
-        ctrl : int
-            contoroll qubit id for controlled pauli product
-            (this option will be removed near future)
-        qctrl : int
-            contoroll qubit id for controlled pauli product
-
-        Returns
-        -------
-        self : instance of DensOp
-            density operator after operation
-
-        """
-        pauli_list = pp.pauli_list
-        qid = pp.qid
-        factor = pp.factor
-
-        if ctrl is None:
-            ctrl = qctrl
-
-        if ctrl is None:
-            for q, pauli in zip(qid, pauli_list):
-                if pauli == 'X':
-                    self.x(q)
-                elif pauli == 'Y':
-                    self.y(q)
-                elif pauli == 'Z':
-                    self.z(q)
-                else:
-                    continue
-        else:
-            if ctrl in qid:
-                raise ValueError("controll and target qubit id conflict")
-
-            for q, pauli in zip(qid, pauli_list):
-                if pauli == 'X':
-                    self.cx(ctrl, q)
-                elif pauli == 'Y':
-                    self.cy(ctrl, q)
-                elif pauli == 'Z':
-                    self.cz(ctrl, q)
-                else:
-                    continue
-
-            if factor == -1.+0.j:
-                self.z(ctrl)
-            elif factor == 0.+1.j:
-                self.s(ctrl)
-            elif factor == 0.-1.j:
-                self.s_dg(ctrl)
-
-        return self
-
     def __del__(self):
 
         densop_free(self)
