@@ -10,7 +10,7 @@ import pickle
 import qlazy.config as cfg
 from qlazy.util import (is_clifford_gate, is_non_clifford_gate, is_measurement_gate,
                         is_reset_gate, get_qgate_qubit_num, get_qgate_param_num)
-from qlazy.QuantumObject import QuantumObject
+from qlazy.QObject import QObject
 
 def string_to_args(s):  # for from_qasm
     """ convert string to args """
@@ -93,7 +93,7 @@ def append_qc_canvas(qc_canvas, gates, qubit_num, cmem_num): # for show method
         else:
             qc_canvas[i] += (' ' * (canvas_len - len(qc_canvas[i])))
 
-class QCirc(ctypes.Structure, QuantumObject):
+class QCirc(ctypes.Structure, QObject):
     """ Quantum Circuit
 
     Attributes
@@ -441,7 +441,6 @@ class QCirc(ctypes.Structure, QuantumObject):
             if kind is None:
                 break
 
-            # (kind, qid, para, c, ctrl) = qc.pop_gate()
             (kind, qid, para, c, ctrl, tag) = qc.pop_gate()
             term_num = get_qgate_qubit_num(kind)
             if kind in (cfg.MEASURE, cfg.RESET):
@@ -1227,6 +1226,7 @@ class QCirc(ctypes.Structure, QuantumObject):
         qc_pair : tupple of (QCirc, Qcirc)
             former part includes only unitary gates and later part
             includes non-unitary gate (measure or reset) first
+
         """
         qc_unitary = self.__class__()
         qc_non_unitary = self.clone()
@@ -1252,6 +1252,7 @@ class QCirc(ctypes.Structure, QuantumObject):
         -------
         ans : bool
             True if all gates are measurement, False if otherwise
+
         """
         if self.kind_first() is None:
             return False
@@ -1272,884 +1273,178 @@ class QCirc(ctypes.Structure, QuantumObject):
 
         qcirc_free(self)
 
-    # non-unitary gate
-
-    def measure(self, qid, cid):
-        """
-        add measurement gate (Z-basis).
-
-        Parameters
-        ----------
-        qid : list of int
-            qubit id list to measure.
-        cid : list of int
-            classical register id list to store measured result.
-
-        Returns
-        -------
-        self : instance of QCirc
-            quantum circuit after adding
-
-        """
-        if qid is None:
-            raise ValueError("qid must be specified.")
-        if cid is None:
-            raise ValueError("cid must be specified.")
-        if len(qid) != len(cid):
-            raise ValueError("length of qid and cid must be same.")
-        for q, c in zip(qid, cid):
-            qid = [q, -1]
-            self.append_gate(kind=cfg.MEASURE, qid=qid, c=c)
-
-        return self
-
-    def reset(self, qid):
-        """
-        add reset gate.
-
-        Parameters
-        ----------
-        qid : list of int
-            qubit id list to measure.
-
-        Returns
-        -------
-        self : instance of QCirc
-            quantum circuit after adding
-
-        Notes
-        -----
-        'cid' must be 'None' or same length as 'qid'
-
-        """
-        for q in qid:
-            qid = [q, -1]
-            self.append_gate(kind=cfg.RESET, qid=qid)
-        return self
-
-    # add 1-qubit gate
-
-    def x(self, q0, ctrl=None):
-        """
-        add X gate.
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id.
-        ctrl : int
-            address of classical memory to control gate operation.
-
-        Returns
-        -------
-        self : instance of QCirc
-            quantum circuit after adding
-
-        """
-        qid = [q0, -1]
-        self.append_gate(kind=cfg.PAULI_X, qid=qid, ctrl=ctrl)
-        return self
-
-    def y(self, q0, ctrl=None):
-        """
-        add Y gate.
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id.
-        ctrl : int
-            address of classical memory to control gate operation.
-
-        Returns
-        -------
-        self : instance of QCirc
-            quantum circuit after adding
-
-        """
-        qid = [q0, -1]
-        self.append_gate(kind=cfg.PAULI_Z, qid=qid, ctrl=ctrl)
-        self.append_gate(kind=cfg.PAULI_X, qid=qid, ctrl=ctrl)
-        return self
-
-    def z(self, q0, ctrl=None):
-        """
-        add Z gate.
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id.
-        ctrl : int
-            address of classical memory to control gate operation.
-
-        Returns
-        -------
-        self : instance of QCirc
-            quantum circuit after adding
-
-        """
-        qid = [q0, -1]
-        self.append_gate(kind=cfg.PAULI_Z, qid=qid, ctrl=ctrl)
-        return self
-
-    def h(self, q0, ctrl=None):
-        """
-        add H gate (hadamard gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id.
-        ctrl : int
-            address of classical memory to control gate operation.
-
-        Returns
-        -------
-        self : instance of QCirc
-            quantum circuit after adding
-
-        """
-        qid = [q0, -1]
-        self.append_gate(kind=cfg.HADAMARD, qid=qid, ctrl=ctrl)
-        return self
-
-    def xr(self, q0, ctrl=None):
-        """
-        add root X gate.
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id.
-        ctrl : int
-            address of classical memory to control gate operation.
-
-        Returns
-        -------
-        self : instance of QCirc
-            quantum circuit after adding
-
-        """
-        qid = [q0, -1]
-        para = [0.5, 0.0, 1.0]
-        self.append_gate(kind=cfg.ROTATION_X, qid=qid, para=para, ctrl=ctrl)
-        return self
-
-    def xr_dg(self, q0, ctrl=None):
-        """
-        add root X dagger gate
-        (hermmitian conjugate of root X gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id.
-        ctrl : int
-            address of classical memory to control gate operation.
-
-        Returns
-        -------
-        self : instance of QCirc
-            quantum circuit after adding
-
-        """
-        qid = [q0, -1]
-        para = [-0.5, 0.0, 1.0]
-        self.append_gate(kind=cfg.ROTATION_X, qid=qid, para=para, ctrl=ctrl)
-        return self
-
-    def s(self, q0, ctrl=None):
-        """
-        add S gate.
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id.
-        ctrl : int
-            address of classical memory to control gate operation.
-
-        Returns
-        -------
-        self : instance of QCirc
-            quantum circuit after adding
-
-        """
-        qid = [q0, -1]
-        self.append_gate(kind=cfg.PHASE_SHIFT_S, qid=qid, ctrl=ctrl)
-        return self
-
-    def s_dg(self, q0, ctrl=None):
-        """
-        add S dagger gate (hermitian conjugate of S gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id.
-        ctrl : int
-            address of classical memory to control gate operation.
-
-        Returns
-        -------
-        self : instance of QCirc
-            quantum circuit after adding
-
-        """
-        qid = [q0, -1]
-        self.append_gate(kind=cfg.PHASE_SHIFT_S_, qid=qid, ctrl=ctrl)
-        return self
-
-    def t(self, q0, ctrl=None):
-        """
-        add T gate.
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id.
-        ctrl : int
-            address of classical memory to control gate operation.
-
-        Returns
-        -------
-        self : instance of QCirc
-            quantum circuit after adding
-
-        """
-        qid = [q0, -1]
-        self.append_gate(kind=cfg.PHASE_SHIFT_T, qid=qid, ctrl=ctrl)
-        return self
-
-    def t_dg(self, q0, ctrl=None):
-        """
-        add T dagger gate (hermitian conjugate of T gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id.
-        ctrl : int
-            address of classical memory to control gate operation.
-
-        Returns
-        -------
-        self : instance of QCirc
-            quantum circuit after adding
-
-        """
-        qid = [q0, -1]
-        self.append_gate(kind=cfg.PHASE_SHIFT_T_, qid=qid, ctrl=ctrl)
-        return self
-
-    def rx(self, q0, phase=cfg.DEF_PHASE, ctrl=None, tag=None, fac=1.0):
-        """
-        add RX gate (rotation around X-axis).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id.
-        phase : float
-            rotation angle (unit of angle is PI radian).
-        ctrl : int
-            address of classical memory to control gate operation.
-        tag : str
-            tag of phase parameter for parametric quantum circuit.
-
-        Returns
-        -------
-        self : instance of QCirc
-            quantum circuit after adding
-
-        """
-        qid = [q0, -1]
-        para = [phase, 0.0, fac]
-        self.append_gate(kind=cfg.ROTATION_X, qid=qid, para=para, ctrl=ctrl, tag=tag)
-        return self
-
-    def ry(self, q0, phase=cfg.DEF_PHASE, ctrl=None, tag=None, fac=1.0):
-        """
-        add RY gate (rotation around Y-axis).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id.
-        phase : float
-            rotation angle (unit of angle is PI radian).
-        ctrl : int
-            address of classical memory to control gate operation.
-
-        Returns
-        -------
-        self : instance of QCirc
-            quantum circuit after adding
-
-        """
-        qid = [q0, -1]
-        para = [phase, 0.0, fac]
-        self.append_gate(kind=cfg.PHASE_SHIFT_S_, qid=qid, ctrl=ctrl)
-        self.append_gate(kind=cfg.ROTATION_X, qid=qid, para=para, ctrl=ctrl, tag=tag)
-        self.append_gate(kind=cfg.PHASE_SHIFT_S, qid=qid, ctrl=ctrl)
-        return self
-
-    def rz(self, q0, phase=cfg.DEF_PHASE, ctrl=None, tag=None, fac=1.0):
-        """
-        add RZ gate (rotation around Z-axis).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id.
-        phase : float
-            rotation angle (unit of angle is PI radian).
-        ctrl : int
-            address of classical memory to control gate operation.
-        tag : str
-            tag of phase parameter for parametric quantum circuit.
-
-        Returns
-        -------
-        self : instance of QCirc
-            quantum circuit after adding
-
-        """
-        qid = [q0, -1]
-        para = [phase, 0.0, fac]
-        self.append_gate(kind=cfg.ROTATION_Z, qid=qid, para=para, ctrl=ctrl, tag=tag)
-        return self
-
-    def p(self, q0, phase=cfg.DEF_PHASE, ctrl=None, tag=None, fac=1.0):
-        """
-        add P gate (phase shift gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id.
-        phase : float
-            rotation angle (unit of angle is PI radian).
-        ctrl : int
-            address of classical memory to control gate operation.
-        tag : str
-            tag of phase parameter for parametric quantum circuit.
-
-        Returns
-        -------
-        self : instance of QCirc
-            quantum circuit after adding
-
-        Notes
-        -----
-        matrix expression is following...
-        | 1.0 0.0             |
-        | 0.0 exp(i*phase*PI) |
-
-        """
-        qid = [q0, -1]
-        para = [phase, phase/2.0, fac]
-        self.append_gate(kind=cfg.ROTATION_Z, qid=qid, para=para, ctrl=ctrl, tag=tag)
-        return self
-    
-    # add 2-qubit gate
-
-    def cx(self, q0, q1, ctrl=None):
-        """
-        add CX gate (controlled X gate, controlled NOT gate, CNOT gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id (control qubit).
-        q1 : int
-            qubit id (target qubit).
-        ctrl : int
-            address of classical memory to control gate operation.
-
-        Returns
-        -------
-        self : instance of QCirc
-            quantum circuit after adding
-
-        """
-        qid = [q0, q1]
-        self.append_gate(kind=cfg.CONTROLLED_X, qid=qid, ctrl=ctrl)
-        return self
-
-    def cy(self, q0, q1, ctrl=None):
-        """
-        operate CY gate (controlled X gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id (control qubit).
-        q1 : int
-            qubit id (target qubit).
-        ctrl : int
-            address of classical memory to control gate operation.
-
-        Returns
-        -------
-        self : instance of QCirc
-            quantum circuit after adding
-
-        """
-        qid = [q0, q1]
-        self.append_gate(kind=cfg.CONTROLLED_Z, qid=qid, ctrl=ctrl)
-        self.append_gate(kind=cfg.CONTROLLED_X, qid=qid, ctrl=ctrl)
-        self.append_gate(kind=cfg.PHASE_SHIFT_S, qid=qid, ctrl=ctrl)
-        return self
-
-    def cz(self, q0, q1, ctrl=None):
-        """
-        add CZ gate (controlled Z gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id (control qubit).
-        q1 : int
-            qubit id (target qubit).
-        ctrl : int
-            address of classical memory to control gate operation.
-
-        Returns
-        -------
-        self : instance of QCirc
-            quantum circuit after adding
-
-        """
-        qid = [q0, q1]
-        self.append_gate(kind=cfg.CONTROLLED_Z, qid=qid, ctrl=ctrl)
-        return self
-
-    def cxr(self, q0, q1, ctrl=None):
-        """
-        add CXR gate (controlled root X gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id (control qubit).
-        q1 : int
-            qubit id (target qubit).
-        ctrl : int
-            address of classical memory to control gate operation.
-
-        Returns
-        -------
-        self : instance of QCirc
-            quantum circuit after adding
-
-        """
-        para = [0.5, 0.0, 1.0]
-        self.append_gate(kind=cfg.HADAMARD, qid=[q1, -1], ctrl=ctrl)
-        self.append_gate(kind=cfg.CONTROLLED_RZ, qid=[q0, q1], para=para, ctrl=ctrl)
-        self.append_gate(kind=cfg.HADAMARD, qid=[q1, -1], ctrl=ctrl)
-        para = [0.25, 0.0, 1.0]
-        self.append_gate(kind=cfg.ROTATION_Z, qid=[q0, q1], para=para, ctrl=ctrl)
-        return self
-
-    def cxr_dg(self, q0, q1, ctrl=None):
-        """
-        add CXR dagger gate (controlled XR dagger gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id (control qubit).
-        q1 : int
-            qubit id (target qubit).
-        ctrl : int
-            address of classical memory to control gate operation.
-
-        Returns
-        -------
-        self : instance of QCirc
-            quantum circuit after adding
-
-        """
-        para = [-0.5, 0.0, 1.0]
-        self.append_gate(kind=cfg.HADAMARD, qid=[q1, -1], ctrl=ctrl)
-        self.append_gate(kind=cfg.CONTROLLED_RZ, qid=[q0, q1], para=para, ctrl=ctrl)
-        self.append_gate(kind=cfg.HADAMARD, qid=[q1, -1], ctrl=ctrl)
-        para = [-0.25, 0.0, 1.0]
-        self.append_gate(kind=cfg.ROTATION_Z, qid=[q0, q1], para=para, ctrl=ctrl)
-        return self
-
-    def ch(self, q0, q1, ctrl=None):
-        """
-        add CH gate (controlled H gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id (control qubit).
-        q1 : int
-            qubit id (target qubit).
-        ctrl : int
-            address of classical memory to control gate operation.
-
-        Returns
-        -------
-        self : instance of QCirc
-            quantum circuit after adding
-
-        """
-        qid = [q0, q1]
-        self.append_gate(kind=cfg.CONTROLLED_H, qid=qid, ctrl=ctrl)
-        return self
-
-    def cs(self, q0, q1, ctrl=None):
-        """
-        add CS gate (controlled S gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id (control qubit).
-        q1 : int
-            qubit id (target qubit).
-        ctrl : int
-            address of classical memory to control gate operation.
-
-        Returns
-        -------
-        self : instance of QCirc
-            quantum circuit after adding
-
-        """
-        qid = [q0, q1]
-        para = [0.5, 0.0, 1.0]
-        self.append_gate(kind=cfg.CONTROLLED_RZ, qid=qid, para=para, ctrl=ctrl)
-        para = [0.25, 0.0, 1.0]
-        self.append_gate(kind=cfg.ROTATION_Z, qid=qid, para=para, ctrl=ctrl)
-        return self
-
-    def cs_dg(self, q0, q1, ctrl=None):
-        """
-        add CS dagger gate (controlled S dagger gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id (control qubit).
-        q1 : int
-            qubit id (target qubit).
-        ctrl : int
-            address of classical memory to control gate operation.
-
-        Returns
-        -------
-        self : instance of QCirc
-            quantum circuit after adding
-
-        """
-        qid = [q0, q1]
-        para = [-0.5, 0.0, 1.0]
-        self.append_gate(kind=cfg.CONTROLLED_RZ, qid=qid, para=para, ctrl=ctrl)
-        para = [-0.25, 0.0, 1.0]
-        self.append_gate(kind=cfg.ROTATION_Z, qid=qid, para=para, ctrl=ctrl)
-        return self
-
-    def ct(self, q0, q1, ctrl=None):
-        """
-        add CT gate (controlled T gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id (control qubit).
-        q1 : int
-            qubit id (target qubit).
-        ctrl : int
-            address of classical memory to control gate operation.
-
-        Returns
-        -------
-        self : instance of QCirc
-            quantum circuit after adding
-
-        """
-        qid = [q0, q1]
-        para = [0.25, 0.0, 1.0]
-        self.append_gate(kind=cfg.CONTROLLED_RZ, qid=qid, para=para, ctrl=ctrl)
-        para = [0.125, 0.0, 1.0]
-        self.append_gate(kind=cfg.ROTATION_Z, qid=qid, para=para, ctrl=ctrl)
-        return self
-
-    def ct_dg(self, q0, q1, ctrl=None):
-        """
-        add CT dagger gate (controlled T dagger gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id (control qubit).
-        q1 : int
-            qubit id (target qubit).
-        ctrl : int
-            address of classical memory to control gate operation.
-
-        Returns
-        -------
-        self : instance of QCirc
-            quantum circuit after adding
-
-        """
-        qid = [q0, q1]
-        para = [-0.25, 0.0, 1.0]
-        self.append_gate(kind=cfg.CONTROLLED_RZ, qid=qid, para=para, ctrl=ctrl)
-        para = [-0.125, 0.0, 1.0]
-        self.append_gate(kind=cfg.ROTATION_Z, qid=qid, para=para, ctrl=ctrl)
-        return self
-
-    def sw(self, q0, q1, ctrl=None):
-        """
-        add swap gate
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id
-        q1 : int
-            qubit id
-        ctrl : int
-            address of classical memory to control gate operation.
-
-        Returns
-        -------
-        self : instance of QCirc
-            quantum circuit after adding
-
-        """
-        self.append_gate(kind=cfg.CONTROLLED_X, qid=[q0, q1], ctrl=ctrl)
-        self.append_gate(kind=cfg.CONTROLLED_X, qid=[q1, q0], ctrl=ctrl)
-        self.append_gate(kind=cfg.CONTROLLED_X, qid=[q0, q1], ctrl=ctrl)
-        return self
-
-    def cp(self, q0, q1, phase=cfg.DEF_PHASE, ctrl=None, tag=None, fac=1.0):
-        """
-        add CP gate (controlled P gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id (control qubit).
-        q1 : int
-            qubit id (target qubit).
-        ctrl : int
-            address of classical memory to control gate operation.
-        tag : str
-            tag of phase parameter for parametric quantum circuit.
-
-        Returns
-        -------
-        self : instance of QCirc
-            quantum circuit after adding
-
-        """
-        qid = [q0, q1]
-        para = [phase, 0.0, fac]
-        self.append_gate(kind=cfg.CONTROLLED_RZ, qid=qid, para=para, ctrl=ctrl, tag=tag)
-        para = [phase, 0.0, 0.5*fac]
-        self.append_gate(kind=cfg.ROTATION_Z, qid=qid, para=para, ctrl=ctrl, tag=tag)
-        return self
-
-    def crx(self, q0, q1, phase=cfg.DEF_PHASE, ctrl=None, tag=None, fac=1.0):
-        """
-        add CRX gate (controlled RX gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id (control qubit).
-        q1 : int
-            qubit id (target qubit).
-        phase : float
-            rotation angle (unit of angle is PI radian).
-        ctrl : int
-            address of classical memory to control gate operation.
-        tag : str
-            tag of phase parameter for parametric quantum circuit.
-
-        Returns
-        -------
-        self : instance of QCirc
-            quantum circuit after adding
-
-        """
-        para = [phase, 0.0, fac]
-        self.append_gate(kind=cfg.HADAMARD, qid=[q1, -1], ctrl=ctrl)
-        self.append_gate(kind=cfg.CONTROLLED_RZ, qid=[q0, q1], para=para, ctrl=ctrl, tag=tag)
-        self.append_gate(kind=cfg.HADAMARD, qid=[q1, -1], ctrl=ctrl)
-        return self
-
-    def cry(self, q0, q1, phase=cfg.DEF_PHASE, ctrl=None, tag=None, fac=1.0):
-        """
-        add CRY gate (controlled RY gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id (control qubit).
-        q1 : int
-            qubit id (target qubit).
-        phase : float
-            rotation angle (unit of angle is PI radian).
-        ctrl : int
-            address of classical memory to control gate operation.
-        tag : str
-            tag of phase parameter for parametric quantum circuit.
-
-        Returns
-        -------
-        self : instance of QCirc
-            quantum circuit after adding
-
-        """
-        # cs_dg gate
-        para = [-0.5, 0.0, 1.0]
-        self.append_gate(kind=cfg.CONTROLLED_RZ, qid=[q0, q1], para=para, ctrl=ctrl)
-        para = [-0.25, 0.0, 1.0]
-        self.append_gate(cfg.ROTATION_Z, qid=[q0, q1], para=para, ctrl=ctrl)
-        para = [phase, 0.0, fac]
-        self.append_gate(cfg.HADAMARD, qid=[q1, -1], ctrl=ctrl)
-        self.append_gate(cfg.CONTROLLED_RZ, qid=[q0, q1], para=para, ctrl=ctrl, tag=tag)
-        self.append_gate(cfg.HADAMARD, qid=[q1, -1], ctrl=ctrl)
-
-        # cs gate
-        para = [0.5, 0.0, 1.0]
-        self.append_gate(kind=cfg.CONTROLLED_RZ, qid=[q0, q1], para=para, ctrl=ctrl)
-        para = [0.25, 0.0, 1.0]
-        self.append_gate(kind=cfg.ROTATION_Z, qid=[q0, q1], para=para, ctrl=ctrl)
-
-        return self
-
-    def crz(self, q0, q1, phase=cfg.DEF_PHASE, ctrl=None, tag=None, fac=1.0):
-        """
-        add CRZ gate (controlled RZ gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id (control qubit).
-        q1 : int
-            qubit id (target qubit).
-        phase : float
-            rotation angle (unit of angle is PI radian).
-        ctrl : int
-            address of classical memory to control gate operation.
-        tag : str
-            tag of phase parameter for parametric quantum circuit.
-
-        Returns
-        -------
-        self : instance of QCirc
-            quantum circuit after adding
-
-        """
-        qid = [q0, q1]
-        para = [phase, 0.0, fac]
-        self.append_gate(kind=cfg.CONTROLLED_RZ, qid=qid, para=para, ctrl=ctrl, tag=tag)
-        return self
-
-    def rxx(self, q0, q1, phase=cfg.DEF_PHASE, ctrl=None, tag=None, fac=1.0):
-        """
-        add Rxx gate (controlled RZ gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id (control qubit).
-        q1 : int
-            qubit id (target qubit).
-        phase : float
-            rotation angle (unit of angle is PI radian).
-        ctrl : int
-            address of classical memory to control gate operation.
-        tag : str
-            tag of phase parameter for parametric quantum circuit.
-
-        Returns
-        -------
-        self : instance of QCirc
-            quantum circuit after adding
-
-        """
-        para=[phase, 0.0, fac]
-        self.append_gate(kind=cfg.HADAMARD, qid=[q0, -1], ctrl=ctrl)
-        self.append_gate(kind=cfg.HADAMARD, qid=[q1, -1], ctrl=ctrl)
-        self.append_gate(kind=cfg.CONTROLLED_X, qid=[q0, q1], ctrl=ctrl)
-        self.append_gate(kind=cfg.ROTATION_Z, qid=[q1, -1], para=para, ctrl=ctrl, tag=tag)
-        self.append_gate(kind=cfg.CONTROLLED_X, qid=[q0, q1], ctrl=ctrl)
-        self.append_gate(kind=cfg.HADAMARD, qid=[q0, -1], ctrl=ctrl)
-        self.append_gate(kind=cfg.HADAMARD, qid=[q1, -1], ctrl=ctrl)
-        return self
-
-    def ryy(self, q0, q1, phase=cfg.DEF_PHASE, ctrl=None, tag=None, fac=1.0):
-        """
-        add Ryy gate (controlled RZ gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id (control qubit).
-        q1 : int
-            qubit id (target qubit).
-        phase : float
-            rotation angle (unit of angle is PI radian).
-        ctrl : int
-            address of classical memory to control gate operation.
-        tag : str
-            tag of phase parameter for parametric quantum circuit.
-
-        Returns
-        -------
-        self : instance of QCirc
-            quantum circuit after adding
-
-        """
-        para = [phase, 0.0, fac]
-        self.append_gate(kind=cfg.ROTATION_X, qid=[q0, -1], para=[0.5, 0.0, 1.0], ctrl=ctrl)
-        self.append_gate(kind=cfg.ROTATION_X, qid=[q1, -1], para=[0.5, 0.0, 1.0], ctrl=ctrl)
-        self.append_gate(kind=cfg.CONTROLLED_X, qid=[q0, q1], ctrl=ctrl)
-        self.append_gate(kind=cfg.ROTATION_Z, qid=[q1, -1], para=para, ctrl=ctrl, tag=tag)
-        self.append_gate(kind=cfg.CONTROLLED_X, qid=[q0, q1], ctrl=ctrl)
-        self.append_gate(kind=cfg.ROTATION_X, qid=[q0, -1], para=[-0.5, 0.0, 1.0], ctrl=ctrl)
-        self.append_gate(kind=cfg.ROTATION_X, qid=[q1, -1], para=[-0.5, 0.0, 1.0], ctrl=ctrl)
-        return self
-
-    def rzz(self, q0, q1, phase=cfg.DEF_PHASE, ctrl=None, tag=None, fac=1.0):
-        """
-        add Rzz gate (controlled RZ gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id (control qubit).
-        q1 : int
-            qubit id (target qubit).
-        phase : float
-            rotation angle (unit of angle is PI radian).
-        ctrl : int
-            address of classical memory to control gate operation.
-        tag : str
-            tag of phase parameter for parametric quantum circuit.
-
-        Returns
-        -------
-        self : instance of QCirc
-            quantum circuit after adding
-
-        """
-        para = [phase, 0.0, fac]
-        self.append_gate(kind=cfg.CONTROLLED_X, qid=[q0, q1], ctrl=ctrl)
-        self.append_gate(kind=cfg.ROTATION_Z, qid=[q1, -1], para=para, ctrl=ctrl, tag=tag)
-        self.append_gate(kind=cfg.CONTROLLED_X, qid=[q0, q1], ctrl=ctrl)
+    # operate gate
+
+    def operate_gate(self, kind=None, qid=None, cid=None,
+                     phase=0.0, gphase=0.0, fac=1.0, tag=None, ctrl=None):
+
+        if kind == cfg.RESET:
+            for q in qid:
+                qid = [q, -1]
+                self.append_gate(kind=cfg.RESET, qid=qid)
+
+        elif kind == cfg.MEASURE:
+            if qid is None:
+                raise ValueError("qid must be specified.")
+            if cid is None:
+                raise ValueError("cid must be specified.")
+            if len(qid) != len(cid):
+                raise ValueError("length of qid and cid must be same.")
+            for q, c in zip(qid, cid):
+                qid = [q, -1]
+                self.append_gate(kind=cfg.MEASURE, qid=qid, c=c)
+
+        elif (kind in (cfg.PAULI_X, cfg.PAULI_Z, cfg.HADAMARD, cfg.PHASE_SHIFT_S, cfg.PHASE_SHIFT_S_,
+                       cfg.PHASE_SHIFT_T, cfg.PHASE_SHIFT_T_)):
+            self.append_gate(kind=kind, qid=qid, ctrl=ctrl)
+
+        elif (kind in (cfg.ROTATION_X, cfg.ROTATION_Z)):
+            para = [phase, 0.0, fac]
+            self.append_gate(kind=kind, qid=qid, para=para, ctrl=ctrl, tag=tag)
+
+        elif kind == cfg.CONTROLLED_RZ:
+            para = [phase, 0.0, fac]
+            self.append_gate(kind=kind, qid=qid, para=para, ctrl=ctrl, tag=tag)
+
+        elif (kind in (cfg.CONTROLLED_X, cfg.CONTROLLED_Z, cfg.CONTROLLED_H, )):
+            self.append_gate(kind=kind, qid=qid, ctrl=ctrl)
+
+        elif kind ==cfg.PAULI_Y:
+            self.append_gate(kind=cfg.PAULI_Z, qid=qid, ctrl=ctrl)
+            self.append_gate(kind=cfg.PAULI_X, qid=qid, ctrl=ctrl)
+
+        elif kind == cfg.ROOT_PAULI_X:
+            para = [0.5, 0.0, 1.0]
+            self.append_gate(kind=cfg.ROTATION_X, qid=qid, para=para, ctrl=ctrl)
+
+        elif kind == cfg.ROOT_PAULI_X_:
+            para = [-0.5, 0.0, 1.0]
+            self.append_gate(kind=cfg.ROTATION_X, qid=qid, para=para, ctrl=ctrl)
+
+        elif kind == cfg.ROTATION_Y:
+            para = [phase, 0.0, fac]
+            self.append_gate(kind=cfg.PHASE_SHIFT_S_, qid=qid, ctrl=ctrl)
+            self.append_gate(kind=cfg.ROTATION_X, qid=qid, para=para, ctrl=ctrl, tag=tag)
+            self.append_gate(kind=cfg.PHASE_SHIFT_S, qid=qid, ctrl=ctrl)
+
+        elif kind == cfg.PHASE_SHIFT:
+            para = [phase, phase/2.0, fac]
+            self.append_gate(kind=cfg.ROTATION_Z, qid=qid, para=para, ctrl=ctrl, tag=tag)
+
+        elif kind == cfg.CONTROLLED_Y:
+            self.append_gate(kind=cfg.CONTROLLED_Z, qid=qid, ctrl=ctrl)
+            self.append_gate(kind=cfg.CONTROLLED_X, qid=qid, ctrl=ctrl)
+            self.append_gate(kind=cfg.PHASE_SHIFT_S, qid=qid, ctrl=ctrl)
+
+        elif kind == cfg.CONTROLLED_XR:
+            q0, q1 = qid[0], qid[1]
+            para = [0.5, 0.0, 1.0]
+            self.append_gate(kind=cfg.HADAMARD, qid=[q1, -1], ctrl=ctrl)
+            self.append_gate(kind=cfg.CONTROLLED_RZ, qid=[q0, q1], para=para, ctrl=ctrl)
+            self.append_gate(kind=cfg.HADAMARD, qid=[q1, -1], ctrl=ctrl)
+            para = [0.25, 0.0, 1.0]
+            self.append_gate(kind=cfg.ROTATION_Z, qid=[q0, q1], para=para, ctrl=ctrl)
+
+        elif kind == cfg.CONTROLLED_XR_:
+            q0, q1 = qid[0], qid[1]
+            para = [-0.5, 0.0, 1.0]
+            self.append_gate(kind=cfg.HADAMARD, qid=[q1, -1], ctrl=ctrl)
+            self.append_gate(kind=cfg.CONTROLLED_RZ, qid=[q0, q1], para=para, ctrl=ctrl)
+            self.append_gate(kind=cfg.HADAMARD, qid=[q1, -1], ctrl=ctrl)
+            para = [-0.25, 0.0, 1.0]
+            self.append_gate(kind=cfg.ROTATION_Z, qid=[q0, q1], para=para, ctrl=ctrl)
+
+        elif kind == cfg.CONTROLLED_S:
+            para = [0.5, 0.0, 1.0]
+            self.append_gate(kind=cfg.CONTROLLED_RZ, qid=qid, para=para, ctrl=ctrl)
+            para = [0.25, 0.0, 1.0]
+            self.append_gate(kind=cfg.ROTATION_Z, qid=qid, para=para, ctrl=ctrl)
+
+        elif kind == cfg.CONTROLLED_S_:
+            para = [-0.5, 0.0, 1.0]
+            self.append_gate(kind=cfg.CONTROLLED_RZ, qid=qid, para=para, ctrl=ctrl)
+            para = [-0.25, 0.0, 1.0]
+            self.append_gate(kind=cfg.ROTATION_Z, qid=qid, para=para, ctrl=ctrl)
+
+        elif kind == cfg.CONTROLLED_T:
+            para = [0.25, 0.0, 1.0]
+            self.append_gate(kind=cfg.CONTROLLED_RZ, qid=qid, para=para, ctrl=ctrl)
+            para = [0.125, 0.0, 1.0]
+            self.append_gate(kind=cfg.ROTATION_Z, qid=qid, para=para, ctrl=ctrl)
+
+        elif kind == cfg.CONTROLLED_T_:
+            para = [-0.25, 0.0, 1.0]
+            self.append_gate(kind=cfg.CONTROLLED_RZ, qid=qid, para=para, ctrl=ctrl)
+            para = [-0.125, 0.0, 1.0]
+            self.append_gate(kind=cfg.ROTATION_Z, qid=qid, para=para, ctrl=ctrl)
+
+        elif kind == cfg.SWAP_QUBITS:
+            q0, q1 = qid[0], qid[1]
+            self.append_gate(kind=cfg.CONTROLLED_X, qid=[q0, q1], ctrl=ctrl)
+            self.append_gate(kind=cfg.CONTROLLED_X, qid=[q1, q0], ctrl=ctrl)
+            self.append_gate(kind=cfg.CONTROLLED_X, qid=[q0, q1], ctrl=ctrl)
+
+        elif kind == cfg.CONTROLLED_P:
+            para = [phase, 0.0, fac]
+            self.append_gate(kind=cfg.CONTROLLED_RZ, qid=qid, para=para, ctrl=ctrl, tag=tag)
+            para = [phase, 0.0, 0.5*fac]
+            self.append_gate(kind=cfg.ROTATION_Z, qid=qid, para=para, ctrl=ctrl, tag=tag)
+
+        elif kind == cfg.CONTROLLED_RX:
+            q0, q1 = qid[0], qid[1]
+            para = [phase, 0.0, fac]
+            self.append_gate(kind=cfg.HADAMARD, qid=[q1, -1], ctrl=ctrl)
+            self.append_gate(kind=cfg.CONTROLLED_RZ, qid=[q0, q1], para=para, ctrl=ctrl, tag=tag)
+            self.append_gate(kind=cfg.HADAMARD, qid=[q1, -1], ctrl=ctrl)
+
+        elif kind == cfg.CONTROLLED_RY:
+            q0, q1 = qid[0], qid[1]
+            # cs_dg gate
+            para = [-0.5, 0.0, 1.0]
+            self.append_gate(kind=cfg.CONTROLLED_RZ, qid=[q0, q1], para=para, ctrl=ctrl)
+            para = [-0.25, 0.0, 1.0]
+            self.append_gate(cfg.ROTATION_Z, qid=[q0, q1], para=para, ctrl=ctrl)
+            para = [phase, 0.0, fac]
+            self.append_gate(cfg.HADAMARD, qid=[q1, -1], ctrl=ctrl)
+            self.append_gate(cfg.CONTROLLED_RZ, qid=[q0, q1], para=para, ctrl=ctrl, tag=tag)
+            self.append_gate(cfg.HADAMARD, qid=[q1, -1], ctrl=ctrl)
+            # cs gate
+            para = [0.5, 0.0, 1.0]
+            self.append_gate(kind=cfg.CONTROLLED_RZ, qid=[q0, q1], para=para, ctrl=ctrl)
+            para = [0.25, 0.0, 1.0]
+            self.append_gate(kind=cfg.ROTATION_Z, qid=[q0, q1], para=para, ctrl=ctrl)
+
+        elif kind == cfg.ROTATION_XX:
+            q0, q1 = qid[0], qid[1]
+            para=[phase, 0.0, fac]
+            self.append_gate(kind=cfg.HADAMARD, qid=[q0, -1], ctrl=ctrl)
+            self.append_gate(kind=cfg.HADAMARD, qid=[q1, -1], ctrl=ctrl)
+            self.append_gate(kind=cfg.CONTROLLED_X, qid=[q0, q1], ctrl=ctrl)
+            self.append_gate(kind=cfg.ROTATION_Z, qid=[q1, -1], para=para, ctrl=ctrl, tag=tag)
+            self.append_gate(kind=cfg.CONTROLLED_X, qid=[q0, q1], ctrl=ctrl)
+            self.append_gate(kind=cfg.HADAMARD, qid=[q0, -1], ctrl=ctrl)
+            self.append_gate(kind=cfg.HADAMARD, qid=[q1, -1], ctrl=ctrl)
+
+        elif kind == cfg.ROTATION_YY:
+            q0, q1 = qid[0], qid[1]
+            para = [phase, 0.0, fac]
+            self.append_gate(kind=cfg.ROTATION_X, qid=[q0, -1], para=[0.5, 0.0, 1.0], ctrl=ctrl)
+            self.append_gate(kind=cfg.ROTATION_X, qid=[q1, -1], para=[0.5, 0.0, 1.0], ctrl=ctrl)
+            self.append_gate(kind=cfg.CONTROLLED_X, qid=[q0, q1], ctrl=ctrl)
+            self.append_gate(kind=cfg.ROTATION_Z, qid=[q1, -1], para=para, ctrl=ctrl, tag=tag)
+            self.append_gate(kind=cfg.CONTROLLED_X, qid=[q0, q1], ctrl=ctrl)
+            self.append_gate(kind=cfg.ROTATION_X, qid=[q0, -1], para=[-0.5, 0.0, 1.0], ctrl=ctrl)
+            self.append_gate(kind=cfg.ROTATION_X, qid=[q1, -1], para=[-0.5, 0.0, 1.0], ctrl=ctrl)
+
+        elif kind == cfg.ROTATION_ZZ:
+            q0, q1 = qid[0], qid[1]
+            para = [phase, 0.0, fac]
+            self.append_gate(kind=cfg.CONTROLLED_X, qid=[q0, q1], ctrl=ctrl)
+            self.append_gate(kind=cfg.ROTATION_Z, qid=[q1, -1], para=para, ctrl=ctrl, tag=tag)
+            self.append_gate(kind=cfg.CONTROLLED_X, qid=[q0, q1], ctrl=ctrl)
+
+        else:
+            raise ValueError("gate: {} is not supported.".format(cfg.GATE_STRING[kind]))
         return self
 
     def remap(self, qid=None, cid=None):

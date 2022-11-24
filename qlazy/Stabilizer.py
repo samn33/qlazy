@@ -5,6 +5,8 @@ import random
 from collections import Counter
 
 import qlazy.config as cfg
+from qlazy.util import is_clifford_gate, get_qgate_qubit_num
+from qlazy.QObject import QObject
 
 class MDataStabilizer:
     """ Measured Data for Stabilizer
@@ -29,7 +31,7 @@ class MDataStabilizer:
         self.qid = qid
         self.qubit_num = qubit_num
 
-class Stabilizer(ctypes.Structure):
+class Stabilizer(ctypes.Structure, QObject):
     """ Stabilizer State
 
     Attributes
@@ -168,26 +170,6 @@ class Stabilizer(ctypes.Structure):
         gene_list = s.rstrip().split('\n')
         for i, gene_str in enumerate(gene_list):
             print("g[{0:{digits}d}]:{1:}".format(i, gene_str, digits=digits))
-
-    def reset(self):
-        """
-        reset to initial generators which are all identity.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        self : instance of Stabilizer
-            stabilizer state.
-
-        """
-        for i in range(self.gene_num):
-            for j in range(self.qubit_num):
-                self.set_pauli_op(i, j, 'I')
-            self.set_pauli_fac(i, '+1')
-        return self
 
     def clone(self):
         """
@@ -363,161 +345,31 @@ class Stabilizer(ctypes.Structure):
 
         return pauli_op_str
 
-    # 1-qubit gate
+    # operate gate
 
-    def x(self, q):
-        """
-        operate X gate.
+    def operate_gate(self, kind=None, qid=None, **kwargs):
 
-        Parameters
-        ----------
-        q : int
-            qubit id.
-
-        Returns
-        -------
-        self : instans of Stabilizer
-
-        """
-        stabilizer_operate_qgate(self, cfg.PAULI_X, q, 0)
-        return self
-
-    def y(self, q):
-        """
-        operate Y gate.
-
-        Parameters
-        ----------
-        q : int
-            qubit id.
-
-        Returns
-        -------
-        self : instans of Stabilizer
-
-        """
-        stabilizer_operate_qgate(self, cfg.PAULI_Y, q, 0)
-        return self
-
-    def z(self, q):
-        """
-        operate Z gate.
-
-        Parameters
-        ----------
-        q : int
-            qubit id.
-
-        Returns
-        -------
-        self : instans of Stabilizer
-
-        """
-        stabilizer_operate_qgate(self, cfg.PAULI_Z, q, 0)
-        return self
-
-    def h(self, q):
-        """
-        operate H gate.
-
-        Parameters
-        ----------
-        q : int
-            qubit id.
-
-        Returns
-        -------
-        self : instans of Stabilizer
-
-        """
-        stabilizer_operate_qgate(self, cfg.HADAMARD, q, 0)
-        return self
-
-    def s(self, q):
-        """
-        operate S gate.
-
-        Parameters
-        ----------
-        q : int
-            qubit id.
-
-        Returns
-        -------
-        self : instans of Stabilizer
-
-        """
-        stabilizer_operate_qgate(self, cfg.PHASE_SHIFT_S, q, 0)
-        return self
-
-    def s_dg(self, q):
-        """
-        operate S dagger gate.
-
-        Parameters
-        ----------
-        q : int
-            qubit id.
-
-        Returns
-        -------
-        self : instans of Stabilizer
-
-        """
-        stabilizer_operate_qgate(self, cfg.PHASE_SHIFT_S_, q, 0)
-        return self
-
-    # 2-qubit gate
-
-    def cx(self, q0, q1):
-        """
-        operate CX (CNOT) gate.
-
-        Parameters
-        ----------
-        q : int
-            qubit id.
-
-        Returns
-        -------
-        self : instans of Stabilizer
-
-        """
-        stabilizer_operate_qgate(self, cfg.CONTROLLED_X, q0, q1)
-        return self
-
-    def cz(self, q0, q1):
-        """
-        operate CZ gate.
-
-        Parameters
-        ----------
-        q : int
-            qubit id.
-
-        Returns
-        -------
-        self : instans of Stabilizer
-
-        """
-        stabilizer_operate_qgate(self, cfg.CONTROLLED_Z, q0, q1)
-        return self
-
-    def cy(self, q0, q1):
-        """
-        operate CY gate.
-
-        Parameters
-        ----------
-        q : int
-            qubit id.
-
-        Returns
-        -------
-        self : instans of Stabilizer
-
-        """
-        self.cz(q0, q1).cx(q0, q1).s(q0)
+        if kind == cfg.RESET:
+            if qid is not None:
+                raise ValueError("qid is not supported.")
+            for i in range(self.gene_num):
+                for j in range(self.qubit_num):
+                    self.set_pauli_op(i, j, 'I')
+                self.set_pauli_fac(i, '+1')
+        elif kind == cfg.CONTROLLED_Y:
+            q0, q1 = qid[0], qid[1]
+            self.cz(q0, q1).cx(q0, q1).s(q0)
+        elif is_clifford_gate(kind):
+            if get_qgate_qubit_num(kind) == 1:
+                q0 = qid[0]
+                stabilizer_operate_qgate(self, kind, q0, 0)
+            elif get_qgate_qubit_num(kind) == 2:
+                q0, q1 = qid[0], qid[1]
+                stabilizer_operate_qgate(self, kind, q0, q1)
+            else:
+                raise ValueError("length of qid must be 1 or 2.")
+        else:
+            raise ValueError("gate: {} is not supported.".format(cfg.GATE_STRING[kind]))
         return self
 
     # measurement

@@ -10,7 +10,8 @@ import tensornetwork as tn
 from tensornetwork import FiniteMPS
 
 import qlazy.config as cfg
-from qlazy.QuantumObject import QuantumObject
+from qlazy.util import is_unitary_gate, get_qgate_qubit_num
+from qlazy.QObject import QObject
 
 class MDataMPState:
     """ Measured Data for MPState
@@ -35,7 +36,7 @@ class MDataMPState:
         self.qubit_num = qubit_num
 
 
-class MPState(FiniteMPS, QuantumObject):
+class MPState(FiniteMPS, QObject):
     """ Matrix Product State
 
     Attributes
@@ -670,615 +671,79 @@ class MPState(FiniteMPS, QuantumObject):
 
         return self
 
-    # 1-qubit gate
-
-    def x(self, q0, **kwargs):
+    def reset_qubits(self, qid=None):
         """
-        operate X gate.
+        reset to |00..0> state.
 
         Parameters
         ----------
-        q0 : int
-            qubit id.
+        qid : list, default - qubit id's list for all of the qubits
+            qubit id's list to reset.
 
         Returns
         -------
         self : instance of MPState
-
-        """
-        self.operate_1qubit_gate('x', q0)
-        return self
-
-    def y(self, q0, **kwargs):
-        """
-        operate Y gate.
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id.
-
-        Returns
-        -------
-        self : instance of MPState
-
-        """
-        self.operate_1qubit_gate('y', q0)
-        return self
-
-    def z(self, q0, **kwargs):
-        """
-        operate Z gate.
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id.
-
-        Returns
-        -------
-        self : instance of MPState
-
-        """
-        self.operate_1qubit_gate('z', q0)
-        return self
-
-    def xr(self, q0, **kwargs):
-        """
-        operate root X gate.
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id.
-
-        Returns
-        -------
-        self : instance of MPState
-
-        """
-        self.operate_1qubit_gate('xr', q0)
-        return self
-
-    def xr_dg(self, q0):
-        """
-        operate root X dagger gate
-        (hermmitian conjugate of root X gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id.
-
-        Returns
-        -------
-        self : instance of MPState
-
-        """
-        self.operate_1qubit_gate('xr_dg', q0)
-        return self
-
-    def h(self, q0, **kwargs):
-        """
-        operate H gate (hadamard gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id.
-
-        Returns
-        -------
-        self : instance of MPState
-
-        """
-        self.operate_1qubit_gate('h', q0)
-        return self
-
-    def s(self, q0, **kwargs):
-        """
-        operate S gate.
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id.
-
-        Returns
-        -------
-        self : instance of MPState
-
-        """
-        self.operate_1qubit_gate('s', q0)
-        return self
-
-    def s_dg(self, q0, **kwargs):
-        """
-        operate S dagger gate (hermitian conjugate of S gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id.
-
-        Returns
-        -------
-        self : instance of MPState
-
-        """
-        self.operate_1qubit_gate('s_dg', q0)
-        return self
-
-    def t(self, q0, **kwargs):
-        """
-        operate T gate.
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id.
-
-        Returns
-        -------
-        self : instance of MPState
-
-        """
-        self.operate_1qubit_gate('t', q0)
-        return self
-
-    def t_dg(self, q0, **kwargs):
-        """
-        operate T dagger gate (hermitian conjugate of T gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id.
-
-        Returns
-        -------
-        self : instance of MPState
-
-        """
-        self.operate_1qubit_gate('t_dg', q0)
-        return self
-
-    def rx(self, q0, phase=0.0, **kwargs):
-        """
-        operate RX gate (rotation around X-axis).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id.
-        phase : float
-            rotation angle (unit of angle is PI radian).
-
-        Returns
-        -------
-        self : instance of QState
-
-        """
-        self.operate_1qubit_gate('rx', q0, para=phase)
-        return self
-
-    def ry(self, q0, phase=0.0, **kwargs):
-        """
-        operate RY gate (rotation around Y-axis).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id.
-        phase : float
-            rotation angle (unit of angle is PI radian).
-
-        Returns
-        -------
-        self : instance of QState
-
-        """
-        self.operate_1qubit_gate('ry', q0, para=phase)
-        return self
-
-    def rz(self, q0, phase=0.0, **kwargs):
-        """
-        operate RZ gate (rotation around Z-axis).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id.
-        phase : float
-            rotation angle (unit of angle is PI radian).
-
-        Returns
-        -------
-        self : instance of QState
-
-        """
-        self.operate_1qubit_gate('rz', q0, para=phase)
-        return self
-
-    def p(self, q0, phase=0.0, **kwargs):
-        """
-        operate P gate (phase shift gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id.
-        phase : float
-            rotation angle (unit of angle is PI radian).
-
-        Returns
-        -------
-        self : instance of QState
+            matrix product state.
 
         Notes
         -----
-        matrix expression is following...
-        | 1.0 0.0             |
-        | 0.0 exp(i*phase*PI) |
+        If 'qid' is set, specified qubits are reset after
+        measurement. So if the specified qubits are entangled with the
+        remaining qubits, output quantum state is probabilistic. If no
+        qubits are set, all qubits are zero reset.
 
         """
-        self.operate_1qubit_gate('p', q0, para=phase)
+        if qid is None or qid == []:
+            qid = list(range(self.__qubit_num))
+
+        proj_gate = [np.array([[1.+0.j, 0.+0.j],
+                               [0.+0.j, 0.+0.j]]),
+                     np.array([[0.+0.j, 0.+0.j],
+                               [0.+0.j, 1.+0.j]])]
+
+        self.canonicalize(normalize=True)
+
+        for q in qid:
+            self.position(q)
+            prob = self.__probability(q=q)
+            if abs(prob[0] - 1.0) < cfg.EPS:
+                measured_value = 0
+                continue
+            elif abs(prob[1] - 1.0) < cfg.EPS:
+                measured_value = 1
+                self.x(q)
+                continue
+
+            if random.random() < prob[0]:
+                measured_value = 0
+                self.apply_one_site_gate(gate=proj_gate[measured_value], site=q)
+                self.canonicalize(normalize=True)
+            else:
+                measured_value = 1
+                self.apply_one_site_gate(gate=proj_gate[measured_value], site=q)
+                self.canonicalize(normalize=True)
+                self.x(q)
+
         return self
 
-    # 2-qubit gate
-
-    def cx(self, q0, q1, **kwargs):
-        """
-        operate CX gate (controlled X gate, controlled NOT gate, CNOT gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id (control qubit).
-        q1 : int
-            qubit id (target qubit).
-
-        Returns
-        -------
-        self : instance of QState
-
-        """
-        self.operate_2qubit_gate('cx', q0, q1)
-        return self
-
-    def cy(self, q0, q1, **kwargs):
-        """
-        operate CY gate (controlled X gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id (control qubit).
-        q1 : int
-            qubit id (target qubit).
-
-        Returns
-        -------
-        self : instance of QState
-
-        """
-        self.operate_2qubit_gate('cy', q0, q1)
-        return self
-
-    def cz(self, q0, q1, **kwargs):
-        """
-        operate CZ gate (controlled Z gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id (control qubit).
-        q1 : int
-            qubit id (target qubit).
-
-        Returns
-        -------
-        self : instance of QState
-
-        """
-        self.operate_2qubit_gate('cz', q0, q1)
-        return self
-
-    def cxr(self, q0, q1, **kwargs):
-        """
-        operate CXR gate (controlled root X gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id (control qubit).
-        q1 : int
-            qubit id (target qubit).
-
-        Returns
-        -------
-        self : instance of QState
-
-        """
-        self.operate_2qubit_gate('cxr', q0, q1)
-        return self
-
-    def cxr_dg(self, q0, q1, **kwargs):
-        """
-        operate CXR dagger gate (controlled XR dagger gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id (control qubit).
-        q1 : int
-            qubit id (target qubit).
-
-        Returns
-        -------
-        self : instance of QState
-
-        """
-        self.operate_2qubit_gate('cxr_dg', q0, q1)
-        return self
-
-    def ch(self, q0, q1, **kwargs):
-        """
-        operate CH gate (controlled H gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id (control qubit).
-        q1 : int
-            qubit id (target qubit).
-
-        Returns
-        -------
-        self : instance of QState
-
-        """
-        self.operate_2qubit_gate('ch', q0, q1)
-        return self
-
-    def cs(self, q0, q1, **kwargs):
-        """
-        operate CS gate (controlled S gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id (control qubit).
-        q1 : int
-            qubit id (target qubit).
-
-        Returns
-        -------
-        self : instance of QState
-
-        """
-        self.operate_2qubit_gate('cs', q0, q1)
-        return self
-
-    def cs_dg(self, q0, q1, **kwargs):
-        """
-        operate CS dagger gate (controlled S dagger gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id (control qubit).
-        q1 : int
-            qubit id (target qubit).
-
-        Returns
-        -------
-        self : instance of QState
-
-        """
-        self.operate_2qubit_gate('cs_dg', q0, q1)
-        return self
-
-    def ct(self, q0, q1, **kwargs):
-        """
-        operate CT gate (controlled T gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id (control qubit).
-        q1 : int
-            qubit id (target qubit).
-
-        Returns
-        -------
-        self : instance of QState
-
-        """
-        self.operate_2qubit_gate('ct', q0, q1)
-        return self
-
-    def ct_dg(self, q0, q1, **kwargs):
-        """
-        operate CT dagger gate (controlled T dagger gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id (control qubit).
-        q1 : int
-            qubit id (target qubit).
-
-        Returns
-        -------
-        self : instance of QState
-
-        """
-        self.operate_2qubit_gate('ct_dg', q0, q1)
-        return self
-
-    def sw(self, q0, q1, **kwargs):
-        """
-        swap gate
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id
-        q1 : int
-            qubit id
-
-        Returns
-        -------
-        self : instance of QState
-
-        """
-        self.operate_2qubit_gate('sw', q0, q1)
-        return self
-
-    def cp(self, q0, q1, phase=0.0, **kwargs):
-        """
-        operate CP gate (controlled P gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id (control qubit).
-        q1 : int
-            qubit id (target qubit).
-
-        Returns
-        -------
-        self : instance of QState
-
-        """
-        self.operate_2qubit_gate('cp', q0, q1, para=phase)
-        return self
-
-    def crx(self, q0, q1, phase=0.0, **kwargs):
-        """
-        operate CRX gate (controlled RX gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id (control qubit).
-        q1 : int
-            qubit id (target qubit).
-        phase : float
-            rotation angle (unit of angle is PI radian).
-
-        Returns
-        -------
-        self : instance of QState
-
-        """
-        self.operate_2qubit_gate('crx', q0, q1, para=phase)
-        return self
-
-    def cry(self, q0, q1, phase=0.0, **kwargs):
-        """
-        operate CRY gate (controlled RY gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id (control qubit).
-        q1 : int
-            qubit id (target qubit).
-        phase : float
-            rotation angle (unit of angle is PI radian).
-
-        Returns
-        -------
-        self : instance of QState
-
-        """
-        self.operate_2qubit_gate('cry', q0, q1, para=phase)
-        return self
-
-    def crz(self, q0, q1, phase=0.0, **kwargs):
-        """
-        operate CRZ gate (controlled RZ gate).
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id (control qubit).
-        q1 : int
-            qubit id (target qubit).
-        phase : float
-            rotation angle (unit of angle is PI radian).
-
-        Returns
-        -------
-        self : instance of QState
-
-        """
-        self.operate_2qubit_gate('crz', q0, q1, para=phase)
-        return self
-
-    def rxx(self, q0, q1, phase=0.0, **kwargs):
-        """
-        operate Rxx gate.
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id (control qubit).
-        q1 : int
-            qubit id (target qubit).
-        phase : float
-            rotation angle (unit of angle is PI radian).
-
-        Returns
-        -------
-        self : instance of QState
-
-        """
-        self.operate_2qubit_gate('rxx', q0, q1, para=phase)
-        return self
-
-    def ryy(self, q0, q1, phase=0.0, **kwargs):
-        """
-        operate Ryy gate.
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id (control qubit).
-        q1 : int
-            qubit id (target qubit).
-        phase : float
-            rotation angle (unit of angle is PI radian).
-
-        Returns
-        -------
-        self : instance of QState
-
-        """
-        self.operate_2qubit_gate('ryy', q0, q1, para=phase)
-        return self
-
-    def rzz(self, q0, q1, phase=0.0, **kwargs):
-        """
-        operate Rxx gate.
-
-        Parameters
-        ----------
-        q0 : int
-            qubit id (control qubit).
-        q1 : int
-            qubit id (target qubit).
-        phase : float
-            rotation angle (unit of angle is PI radian).
-
-        Returns
-        -------
-        self : instance of QState
-
-        """
-        self.operate_2qubit_gate('rzz', q0, q1, para=phase)
+    # operate gate
+
+    def operate_gate(self, kind=None, qid=None, phase=0.0, **kwargs):
+
+        gstr = cfg.GATE_STRING[kind]
+        if kind == cfg.RESET:
+            self.reset_qubits(qid)
+        elif is_unitary_gate(kind):
+            if get_qgate_qubit_num(kind) == 1:
+                q0 = qid[0]
+                self.operate_1qubit_gate(gstr, q0, para=phase)
+            elif get_qgate_qubit_num(kind) == 2:
+                q0, q1 = qid[0], qid[1]
+                self.operate_2qubit_gate(gstr, q0, q1, para=phase)
+            else:
+                raise ValueError("length of qid must be 1 or 2.")
+        else:
+            raise ValueError("gate: {} is not supported.".format(cfg.GATE_STRING[kind]))
         return self
 
     def __probability(self, q):
@@ -1433,61 +898,6 @@ class MPState(FiniteMPS, QuantumObject):
         mval = md.last
         return mval
         
-    def reset(self, qid=None):
-        """
-        reset to |00..0> state.
-
-        Parameters
-        ----------
-        qid : list, default - qubit id's list for all of the qubits
-            qubit id's list to reset.
-
-        Returns
-        -------
-        self : instance of MPState
-            matrix product state.
-
-        Notes
-        -----
-        If 'qid' is set, specified qubits are reset after
-        measurement. So if the specified qubits are entangled with the
-        remaining qubits, output quantum state is probabilistic. If no
-        qubits are set, all qubits are zero reset.
-
-        """
-        if qid is None or qid == []:
-            qid = list(range(self.__qubit_num))
-
-        proj_gate = [np.array([[1.+0.j, 0.+0.j],
-                               [0.+0.j, 0.+0.j]]),
-                     np.array([[0.+0.j, 0.+0.j],
-                               [0.+0.j, 1.+0.j]])]
-
-        self.canonicalize(normalize=True)
-
-        for q in qid:
-            self.position(q)
-            prob = self.__probability(q=q)
-            if abs(prob[0] - 1.0) < cfg.EPS:
-                measured_value = 0
-                continue
-            elif abs(prob[1] - 1.0) < cfg.EPS:
-                measured_value = 1
-                self.x(q)
-                continue
-
-            if random.random() < prob[0]:
-                measured_value = 0
-                self.apply_one_site_gate(gate=proj_gate[measured_value], site=q)
-                self.canonicalize(normalize=True)
-            else:
-                measured_value = 1
-                self.apply_one_site_gate(gate=proj_gate[measured_value], site=q)
-                self.canonicalize(normalize=True)
-                self.x(q)
-
-        return self
-
     def expect(self, observable=None):
         """
         get the expectation value for observable under the matrix product state.

@@ -164,6 +164,19 @@ def get_qgate_param_num(kind=None):
 
     raise ValueError("unknown quantum gate.")
 
+def is_unitary_gate(kind=None):
+    """ is the gate unitary? """
+
+    return (kind in (cfg.PAULI_X, cfg.PAULI_Y, cfg.PAULI_Z, cfg.ROOT_PAULI_X,
+                     cfg.ROOT_PAULI_X_, cfg.HADAMARD, cfg.PHASE_SHIFT_S, cfg.PHASE_SHIFT_S_,
+                     cfg.PHASE_SHIFT_T, cfg.PHASE_SHIFT_T_, cfg.PHASE_SHIFT, cfg.ROTATION_X,
+                     cfg.ROTATION_Y, cfg.ROTATION_Z, cfg.CONTROLLED_X, cfg.CONTROLLED_Y,
+                     cfg.CONTROLLED_Z, cfg.CONTROLLED_XR, cfg.CONTROLLED_XR_,
+                     cfg.CONTROLLED_H, cfg.CONTROLLED_S, cfg.CONTROLLED_S_,
+                     cfg.CONTROLLED_T, cfg.CONTROLLED_T_, cfg.SWAP_QUBITS, cfg.CONTROLLED_P,
+                     cfg.CONTROLLED_RX, cfg.CONTROLLED_RY, cfg.CONTROLLED_RZ,
+                     cfg.ROTATION_XX, cfg.ROTATION_YY, cfg.ROTATION_ZZ))
+
 def is_clifford_gate(kind):
     """ is the gate clifford? """
 
