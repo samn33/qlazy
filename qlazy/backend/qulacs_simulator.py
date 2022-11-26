@@ -70,23 +70,26 @@ GateFunctionName = {
     cfg.CONTROLLED_U3:'__get_CU3',
 }
 
-def run_cpu(qcirc=None, shots=1, cid=None, backend=None, out_state=False):
+def run_cpu(qcirc=None, shots=1, cid=None, backend=None, out_state=False, init=None):
     """ run the quantum circuit (CPU) """
 
     return __run_all(qcirc_in=qcirc, shots=shots, cid=cid, backend=backend, proc='CPU',
-                     out_state=out_state)
+                     out_state=out_state, init=init)
 
-def run_gpu(qcirc=None, shots=1, cid=None, backend=None, out_state=False):
+def run_gpu(qcirc=None, shots=1, cid=None, backend=None, out_state=False, init=None):
     """ run the quantum circuit (GPU) """
 
     return __run_all(qcirc_in=qcirc, shots=shots, cid=cid, backend=backend, proc='GPU',
-                     out_state=out_state)
+                     out_state=out_state, init=init)
 
-def __run_all(qcirc_in=None, shots=1, cid=None, backend=None, proc='CPU', out_state=False):
+def __run_all(qcirc_in=None, shots=1, cid=None, backend=None, proc='CPU', out_state=False, init=None):
 
     if qcirc_in is None:
         raise ValueError("quantum circuit must be specified.")
     qcirc = qcirc_in.clone()
+
+    if init is not None:
+        raise ValueError("init option is not supported.")
     
     qubit_num = qcirc.qubit_num
     cmem_num = qcirc.cmem_num

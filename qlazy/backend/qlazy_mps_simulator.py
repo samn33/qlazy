@@ -92,7 +92,8 @@ def __mps_operate_qcirc(mps, cmem, qcirc, shots, cid):
         
     return frequency
 
-def run(qcirc=None, shots=1, cid=None, backend=None, out_state=False, max_truncation_err=cfg.EPS):
+def run(qcirc=None, shots=1, cid=None, backend=None, out_state=False, max_truncation_err=cfg.EPS,
+        init=None):
     """ run the quantum circuit """
 
     if qcirc is None:
@@ -101,7 +102,12 @@ def run(qcirc=None, shots=1, cid=None, backend=None, out_state=False, max_trunca
     qubit_num = qcirc.qubit_num
     cmem_num = qcirc.cmem_num
 
-    mps = MPState(qubit_num=qubit_num)
+    if init is None:
+        mps = MPState(qubit_num=qubit_num)
+    else:
+        if init.qubit_num != qcirc.qubit_num:
+            raise ValueError("initial state and quantum circuit have different qubit number.")
+        mps = init.clone()
 
     if cmem_num > 0:
         cmem = CMem(cmem_num)

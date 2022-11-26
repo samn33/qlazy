@@ -2,7 +2,8 @@
 
 ## [0.3.4] - 2022-xx-xx
 ### Added
-- get_params method of QCirc class
+- get_params method of QCirc class to get the parameters of parametric quantum circuit
+- init option of run/expect method of Backend class to set the inital quantum state
 
 ## [0.3.3] - 2022-11-14
 ### Added

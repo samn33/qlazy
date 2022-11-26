@@ -24,7 +24,7 @@ class QObject:
 
         Returns
         -------
-        self : instance of QState
+        self : instance of QObject
 
         """
         self.operate_gate(kind=cfg.PAULI_X, qid=[q0], ctrl=ctrl)
@@ -41,7 +41,7 @@ class QObject:
 
         Returns
         -------
-        self : instance of QState
+        self : instance of QObject
 
         """
         self.operate_gate(kind=cfg.PAULI_Y, qid=[q0], ctrl=ctrl)
@@ -58,7 +58,7 @@ class QObject:
 
         Returns
         -------
-        self : instance of QState
+        self : instance of QObject
 
         """
         self.operate_gate(kind=cfg.PAULI_Z, qid=[q0], ctrl=ctrl)
@@ -75,7 +75,7 @@ class QObject:
 
         Returns
         -------
-        self : instance of QState
+        self : instance of QObject
 
         """
         self.operate_gate(kind=cfg.ROOT_PAULI_X, qid=[q0], ctrl=ctrl)
@@ -93,7 +93,7 @@ class QObject:
 
         Returns
         -------
-        self : instance of QState
+        self : instance of QObject
 
         """
         self.operate_gate(kind=cfg.ROOT_PAULI_X_, qid=[q0], ctrl=ctrl)
@@ -110,7 +110,7 @@ class QObject:
 
         Returns
         -------
-        self : instance of QState
+        self : instance of QObject
 
         """
         self.operate_gate(kind=cfg.HADAMARD, qid=[q0], ctrl=ctrl)
@@ -127,7 +127,7 @@ class QObject:
 
         Returns
         -------
-        self : instance of QState
+        self : instance of QObject
 
         """
         self.operate_gate(kind=cfg.PHASE_SHIFT_S, qid=[q0], ctrl=ctrl)
@@ -144,7 +144,7 @@ class QObject:
 
         Returns
         -------
-        self : instance of QState
+        self : instance of QObject
 
         """
         self.operate_gate(kind=cfg.PHASE_SHIFT_S_, qid=[q0], ctrl=ctrl)
@@ -161,7 +161,7 @@ class QObject:
 
         Returns
         -------
-        self : instance of QState
+        self : instance of QObject
 
         """
         self.operate_gate(kind=cfg.PHASE_SHIFT_T, qid=[q0], ctrl=ctrl)
@@ -178,7 +178,7 @@ class QObject:
 
         Returns
         -------
-        self : instance of QState
+        self : instance of QObject
 
         """
         self.operate_gate(kind=cfg.PHASE_SHIFT_T_, qid=[q0], ctrl=ctrl)
@@ -197,7 +197,7 @@ class QObject:
 
         Returns
         -------
-        self : instance of QState
+        self : instance of QObject
 
         """
         self.operate_gate(kind=cfg.ROTATION_X, qid=[q0], phase=phase, gphase=gphase, fac=fac, tag=tag, ctrl=ctrl)
@@ -216,7 +216,7 @@ class QObject:
 
         Returns
         -------
-        self : instance of QState
+        self : instance of QObject
 
         """
         self.operate_gate(kind=cfg.ROTATION_Y, qid=[q0], phase=phase, gphase=gphase, fac=fac, tag=tag, ctrl=ctrl)
@@ -235,7 +235,7 @@ class QObject:
 
         Returns
         -------
-        self : instance of QState
+        self : instance of QObject
 
         """
         self.operate_gate(kind=cfg.ROTATION_Z, qid=[q0], phase=phase, gphase=gphase, fac=fac, tag=tag, ctrl=ctrl)
@@ -254,7 +254,7 @@ class QObject:
 
         Returns
         -------
-        self : instance of QState
+        self : instance of QObject
 
         Notes
         -----
@@ -281,7 +281,7 @@ class QObject:
 
         Returns
         -------
-        self : instance of QState
+        self : instance of QObject
 
         """
         self.operate_gate(kind=cfg.CONTROLLED_X, qid=[q0, q1], ctrl=ctrl)
@@ -300,7 +300,7 @@ class QObject:
 
         Returns
         -------
-        self : instance of QState
+        self : instance of QObject
 
         """
         self.operate_gate(kind=cfg.CONTROLLED_Y, qid=[q0, q1], ctrl=ctrl)
@@ -319,7 +319,7 @@ class QObject:
 
         Returns
         -------
-        self : instance of QState
+        self : instance of QObject
 
         """
         self.operate_gate(kind=cfg.CONTROLLED_Z, qid=[q0, q1], ctrl=ctrl)
@@ -338,7 +338,7 @@ class QObject:
 
         Returns
         -------
-        self : instance of QState
+        self : instance of QObject
 
         """
         self.operate_gate(kind=cfg.CONTROLLED_XR, qid=[q0, q1], ctrl=ctrl)
@@ -357,7 +357,7 @@ class QObject:
 
         Returns
         -------
-        self : instance of QState
+        self : instance of QObject
 
         """
         self.operate_gate(kind=cfg.CONTROLLED_XR_, qid=[q0, q1], ctrl=ctrl)
@@ -376,7 +376,7 @@ class QObject:
 
         Returns
         -------
-        self : instance of QState
+        self : instance of QObject
 
         """
         self.operate_gate(kind=cfg.CONTROLLED_H, qid=[q0, q1], ctrl=ctrl)
@@ -395,7 +395,7 @@ class QObject:
 
         Returns
         -------
-        self : instance of QState
+        self : instance of QObject
 
         """
         self.operate_gate(kind=cfg.CONTROLLED_S, qid=[q0, q1], ctrl=ctrl)
@@ -414,7 +414,7 @@ class QObject:
 
         Returns
         -------
-        self : instance of QState
+        self : instance of QObject
 
         """
         self.operate_gate(kind=cfg.CONTROLLED_S_, qid=[q0, q1], ctrl=ctrl)
@@ -433,7 +433,7 @@ class QObject:
 
         Returns
         -------
-        self : instance of QState
+        self : instance of QObject
 
         """
         self.operate_gate(kind=cfg.CONTROLLED_T, qid=[q0, q1], ctrl=ctrl)
@@ -452,7 +452,7 @@ class QObject:
 
         Returns
         -------
-        self : instance of QState
+        self : instance of QObject
 
         """
         self.operate_gate(kind=cfg.CONTROLLED_T_, qid=[q0, q1], ctrl=ctrl)
@@ -471,7 +471,7 @@ class QObject:
 
         Returns
         -------
-        self : instance of QState
+        self : instance of QObject
 
         """
         self.operate_gate(kind=cfg.SWAP_QUBITS, qid=[q0, q1], ctrl=ctrl)
@@ -490,7 +490,7 @@ class QObject:
 
         Returns
         -------
-        self : instance of QState
+        self : instance of QObject
 
         """
         self.operate_gate(kind=cfg.CONTROLLED_P, qid=[q0, q1], phase=phase, gphase=gphase, fac=fac, tag=tag, ctrl=ctrl)
@@ -511,7 +511,7 @@ class QObject:
 
         Returns
         -------
-        self : instance of QState
+        self : instance of QObject
 
         """
         self.operate_gate(kind=cfg.CONTROLLED_RX, qid=[q0, q1], phase=phase, gphase=gphase, fac=fac, tag=tag, ctrl=ctrl)
@@ -532,7 +532,7 @@ class QObject:
 
         Returns
         -------
-        self : instance of QState
+        self : instance of QObject
 
         """
         self.operate_gate(kind=cfg.CONTROLLED_RY, qid=[q0, q1], phase=phase, gphase=gphase, fac=fac, tag=tag, ctrl=ctrl)
@@ -553,7 +553,7 @@ class QObject:
 
         Returns
         -------
-        self : instance of QState
+        self : instance of QObject
 
         """
         self.operate_gate(kind=cfg.CONTROLLED_RZ, qid=[q0, q1], phase=phase, gphase=gphase, fac=fac, tag=tag, ctrl=ctrl)
@@ -574,7 +574,7 @@ class QObject:
 
         Returns
         -------
-        self : instance of QState
+        self : instance of QObject
 
         """
         self.operate_gate(kind=cfg.ROTATION_XX, qid=[q0, q1], phase=phase, gphase=gphase, fac=fac, tag=tag, ctrl=ctrl)
@@ -595,7 +595,7 @@ class QObject:
 
         Returns
         -------
-        self : instance of QState
+        self : instance of QObject
 
         """
         self.operate_gate(kind=cfg.ROTATION_YY, qid=[q0, q1], phase=phase, gphase=gphase, fac=fac, tag=tag, ctrl=ctrl)
@@ -616,7 +616,7 @@ class QObject:
 
         Returns
         -------
-        self : instance of QState
+        self : instance of QObject
 
         """
         self.operate_gate(kind=cfg.ROTATION_ZZ, qid=[q0, q1], phase=phase, gphase=gphase, fac=fac, tag=tag, ctrl=ctrl)
@@ -787,7 +787,7 @@ class QObject:
 
         Returns
         -------
-        self : instance of QState
+        self : instance of QObject
             quantum state.
 
         Notes

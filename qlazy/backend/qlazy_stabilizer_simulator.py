@@ -5,8 +5,9 @@ from qlazy.Stabilizer import Stabilizer
 from qlazy.CMem import CMem
 from qlazy.Result import Result
 from qlazy.lib.stabilizer_c import stabilizer_operate_qcirc
+from qlazy.util import is_clifford_gate
 
-def run(qcirc=None, shots=1, cid=None, backend=None, out_state=False):
+def run(qcirc=None, shots=1, cid=None, backend=None, out_state=False, init=None):
     """ run the quantum circuit """
 
     if qcirc is None:
@@ -14,8 +15,15 @@ def run(qcirc=None, shots=1, cid=None, backend=None, out_state=False):
 
     qubit_num = qcirc.qubit_num
     cmem_num = qcirc.cmem_num
-    stab = Stabilizer(qubit_num)
-    stab.set_all('Z')
+    
+    if init is None:
+        stab = Stabilizer(qubit_num)
+        stab.set_all('Z')
+    else:
+        if init.qubit_num != qcirc.qubit_num:
+            raise ValueError("initial state and quantum circuit have different qubit number.")
+        stab = init.clone()
+        
     if cmem_num > 0:
         cmem = CMem(cmem_num)
     else:

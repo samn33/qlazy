@@ -8,8 +8,9 @@ import random
 import pickle
 
 import qlazy.config as cfg
-from qlazy.util import (is_clifford_gate, is_non_clifford_gate, is_measurement_gate,
-                        is_reset_gate, get_qgate_qubit_num, get_qgate_param_num)
+from qlazy.util import (is_unitary_gate, is_clifford_gate, is_non_clifford_gate,
+                        is_measurement_gate, is_reset_gate,
+                        get_qgate_qubit_num, get_qgate_param_num)
 from qlazy.QObject import QObject
 
 def string_to_args(s):  # for from_qasm
@@ -784,6 +785,10 @@ class QCirc(ctypes.Structure, QObject):
         self: instance of QCirc
             circuit after adding gates
 
+        Notes
+        -----
+        This method changes original quantum circuit.
+
         """
         if gates is None:
             raise ValueError("gates must be specified.")
@@ -1156,6 +1161,10 @@ class QCirc(ctypes.Structure, QObject):
             - c ... classical register ID to store measured data (only for measurement gate)
             - ctrl ... classical register id to controll the gate
 
+        Notes
+        -----
+        This method changes original quantum circuit.
+
         """
         (kind, qid, para, c, ctrl, tag) = qcirc_pop_gate(self)
         return (kind, qid, para, c, ctrl, tag)
@@ -1239,6 +1248,48 @@ class QCirc(ctypes.Structure, QObject):
 
         qc_pair = (qc_unitary, qc_non_unitary)
         return qc_pair
+
+    def is_unitary(self):
+        """
+        the quantum circuit is unitary or not
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        ans : bool
+            True if the quantum circuit unitary, False if otherwise
+
+        """
+        ans = True
+        for kind in self.kind_list():
+            if is_unitary_gate(kind) is False:
+                ans = False
+                break
+        return ans
+
+    def is_clifford(self):
+        """
+        the quantum circuit is clifford or not
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        ans : bool
+            True if the quantum circuit unitary, False if otherwise
+
+        """
+        ans = True
+        for kind in self.kind_list():
+            if is_clifford_gate(kind) is False:
+                ans = False
+                break
+        return ans
 
     def all_gates_measurement(self):
         """

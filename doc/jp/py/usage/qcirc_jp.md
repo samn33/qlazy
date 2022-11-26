@@ -269,8 +269,6 @@ Pythonワンライナーで、以下のように結果データを見ること�
 
     $ python -c "from qlazy import Result; Result.load('hoge.res').show(verbose=True)"
 
-
-
 #### 行列積状態シミュレータでの測定に関する注意事項
 
 数十〜数百量子ビットの量子回路でもそれほど深くない回路でエンタングルが
@@ -285,7 +283,7 @@ MPStateのインスタンスを取得しておいてから、MPStateクラスの
 ドで期待値計算することをとりあえずおすすめします。
 
 
-#### 量子状態の取得(qlazyおよびqulacsのみ)
+#### 量子状態の取得(qlazyおよびqulacsのバックエンドのみ)
 
 qlazyの状態ベクトルシミュレータ(qstate_simulator)またはスタビライザー
 シミュレータ(stabilizer_simulator)または行列積状態シミュレータ
@@ -382,6 +380,41 @@ preciseオプションをTrueに設定します。
 ただし、これが実行できるのはバックエンドにシミュレータが指定されている
 場合、具体的にはqlazyのqstate_simulatorとqstate_gpu_simulatorと
 mps_simulator、およびqulacsのcpu_simulatorとgpu_simulatorのみです。
+
+#### 初期量子状態の設定(qlazyのバックエンドのみ)
+
+runメソッドで量子回路を実行したり、
+expectメソッドで量子回路実行後のオブザーバブルの期待値を求める場合、
+初期量子状態は|00...0>に設定されます。
+しかし、何か特別な量子状態を初期状態にしてrunまたはexpectを実行したい場合があります。
+そのような場合、initオプションを使うことができます。例えば、
+
+    >>> qs = QState(qubit_num=2).h(0).x(1)
+
+のような量子状態を初期状態にして、
+
+    >>> qc = QCirc().cx(0,1).measure(qid=[0,1], cid=[0,1])
+
+という量子回路を実行したい場合、
+
+    >>> bk = Backend()
+	>>> result = bk.run(init=qs, qcirc=qc, shots=100)
+
+のようにします。
+
+expectメソッドも同様に初期状態を設定することができます。
+
+    >>> ob = Z(0)*Z(1)
+	>>> exp_meas = bk.expect(init=qs, qcirc=qc, observable=ob, shots=1000)
+	>>> exp_prec = bk.expect(init=qs, qcirc=qc, observable=ob, presice=True)
+
+のようにします。
+
+runメソッドに初期量子状態を設定できるのは、qlazyのバックエンド
+(qstate_simulator, qstate_gpu_simulator, stabilzer_simulator,
+mps_simulator)の場合のみです。また、expectメソッドに初期量子状態を設定
+できるのは、qlazyのバックエンド(qstate_simulator,
+qstate_gpu_simulator, mps_simulator)の場合のみです。
 
 
 ### 対応している量子ゲート

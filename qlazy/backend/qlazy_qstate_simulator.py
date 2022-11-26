@@ -7,19 +7,20 @@ from qlazy.CMem import CMem
 from qlazy.Result import Result
 from qlazy.lib.qstate_c import qstate_operate_qcirc
 
-def run_cpu(qcirc=None, shots=1, cid=None, backend=None, out_state=False):
+def run_cpu(qcirc=None, shots=1, cid=None, backend=None, out_state=False, init=None):
     """ run the quantum circuit (with CPU) """
 
     return __run_all(qcirc=qcirc, shots=shots, cid=cid, backend=backend, use_gpu=False,
-                     out_state=out_state)
+                     out_state=out_state, init=init)
 
-def run_gpu(qcirc=None, shots=1, cid=None, backend=None, out_state=False):
+def run_gpu(qcirc=None, shots=1, cid=None, backend=None, out_state=False, init=None):
     """ run the quantum circuit (with GPU) """
 
     return __run_all(qcirc=qcirc, shots=shots, cid=cid, backend=backend, use_gpu=True,
-                     out_state=out_state)
+                     out_state=out_state, init=init)
 
-def __run_all(qcirc=None, shots=1, cid=None, backend=None, use_gpu=False, out_state=False):
+def __run_all(qcirc=None, shots=1, cid=None, backend=None, use_gpu=False, out_state=False,
+              init=None):
     """ run the quantum circuit """
 
     if qcirc is None:
@@ -39,7 +40,12 @@ def __run_all(qcirc=None, shots=1, cid=None, backend=None, use_gpu=False, out_st
     if cmem_num < len(cid):
         raise ValueError("length of cid must be less than classical resister size of qcirc")
 
-    qstate = QState(qubit_num=qubit_num, use_gpu=use_gpu)
+    if init is None:
+        qstate = QState(qubit_num=qubit_num, use_gpu=use_gpu)
+    else:
+        if init.qubit_num != qcirc.qubit_num:
+            raise ValueError("initial state and quantum circuit have different qubit number.")
+        qstate = init.clone()
 
     frequency = qstate_operate_qcirc(qstate, cmem, qcirc, shots, cid, out_state)
 

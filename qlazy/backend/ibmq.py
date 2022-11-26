@@ -11,11 +11,15 @@ from qiskit.circuit.library.standard_gates import SXdgGate
 import qlazy.config as cfg
 from qlazy.Result import Result
 
-def run(qcirc=None, shots=1, cid=None, backend=None, out_state=False):
+def run(qcirc=None, shots=1, cid=None, backend=None, out_state=False, init=None):
     """ run the quantum circuit """
 
     if qcirc is None:
         raise ValueError("quantum circuit must be specified.")
+    if out_state is True:
+        raise ValueError("output option is not supported.")
+    if init is not None:
+        raise ValueError("init option is not supported.")
 
     qcirc_tmp = qcirc.clone()
 

@@ -454,6 +454,28 @@ class TestBackend_reset_qlazy_stabilizer_simulator(unittest.TestCase):
         self.assertEqual(freq['10'], 10)
 
 #
+# init option
+#
+
+class TestBackend_init_option_qstate_simulator(unittest.TestCase):
+    """ test 'Backend' : init option
+    """
+
+    def test_init_option_run(self):
+        """test 'init'
+        """
+        bk = Backend(product='qlazy', device='stabilizer_simulator')
+        qc_A = QCirc().h(0).h(1)
+        qc_B = QCirc().cx(0,1)
+        qc = qc_A + qc_B
+        sb_expect = bk.run(qcirc=qc, out_state=True).stabilizer
+        sb_ini = bk.run(qcirc=qc_A, out_state=True).stabilizer
+        sb_actual = bk.run(init=sb_ini, qcirc=qc_B, out_state=True).stabilizer
+        expect = sb_expect.get_str()
+        actual = sb_actual.get_str()
+        self.assertEqual(actual, expect)
+
+#
 # inheritance
 #
 

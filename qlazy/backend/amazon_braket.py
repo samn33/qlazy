@@ -112,11 +112,15 @@ def __convert_to_braket_circuit(qc_qlazy, product):
 
     return qc_braket, measured_info
 
-def run(qcirc=None, shots=1, cid=None, backend=None, out_state=False):
+def run(qcirc=None, shots=1, cid=None, backend=None, out_state=False, init=None):
     """ run the quantum circuit on braket_sv """
 
     if qcirc is None:
         raise ValueError("quantum circuit must be specified.")
+    if out_state is True:
+        raise ValueError("output option is not supported.")
+    if init is not None:
+        raise ValueError("init option is not supported.")
 
     qubit_num = qcirc.qubit_num
     cmem_num = qcirc.cmem_num

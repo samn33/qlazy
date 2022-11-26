@@ -270,7 +270,7 @@ calculations, and optimization issues on NISC devices, so we recommend
 that you try it with the expectation value calculation instead of
 obtaining the measurement values in large number of shots.
 
-#### Getting quantum state (qlazy and qulacs only)
+#### Getting quantum state (only qlazy backend and qulacs backend)
 
 When you execute the 'run' method using qlazy's 'qstate_simulator',
 'stabilizer_simulator', or 'mps_simulator', by specifing 'out_state'
@@ -374,6 +374,40 @@ However, this can be executed when a simulator is specified in the
 backend, specifically, when only qlazy's 'qstate_simulator',
 'qstate_gpu_simulator', 'mps_simulator', and qulacs' 'cpu_simulator'
 and 'gpu_simulator' are specified.
+
+#### Setting of initial quantum state (only qlazy backend)
+
+If you execute a quantum circuit with the 'run' method or find the
+expectation value of the observable after the quantum circuit
+execution in the 'expect' method, the initial quantum state is set to |00...0>.
+However, you may want to execute 'run' or 'expect' withsome special
+quantum state in the initial state.  In such a case, you can use the
+'init' option.
+
+For example, suppose an initial quantum state as follows,
+
+    >>> qs = QState(qubit_num=2).h(0).x(1)
+
+execute the following quantum circuit,
+
+    >>> qc = QCirc().cx(0,1).measure(qid=[0,1], cid=[0,1])
+
+do as follows,
+
+    >>> bk = Backend()
+	>>> result = bk.run(init=qs, qcirc=qc, shots=100)
+
+The 'expect' method can also set the initial state in the same way as follows.
+
+    >>> ob = Z(0)*Z(1)
+	>>> exp_meas = bk.expect(init=qs, qcirc=qc, observable=ob, shots=1000)
+	>>> exp_prec = bk.expect(init=qs, qcirc=qc, observable=ob, presice=True)
+
+The initial quantum state can be set in the 'run' method only for
+qlazy backends (qstate_simulator, qstate_gpu_simulator,
+stabilzer_Simulator, and mps_simulator).  The initial quantum state
+can be set in the 'expect' method only for qlazy backends
+(qstate_simulator, qstate_gpu_simulator, and mps_simulator).
 
 
 ### Supported quantum gate

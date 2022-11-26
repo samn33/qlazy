@@ -233,7 +233,7 @@ class Backend:
         backend_dict = {'product': self.product, 'device': self.device}
         return str(backend_dict)
 
-    def run(self, qcirc=None, shots=1, cid=None, out_state=False, **kwargs):
+    def run(self, qcirc=None, shots=1, cid=None, out_state=False, init=None, **kwargs):
         """
         run the quantum circuit.
 
@@ -248,6 +248,8 @@ class Backend:
         out_state : bool, default False
             output classical and quantum information after execting circuit.
             (only for qlazy's qstate and stabilizer simulator)
+        init : instance of QState, Stabilizer, MPState
+            initial quantum state
 
         Returns
         -------
@@ -290,7 +292,7 @@ class Backend:
         
         start_time = datetime.datetime.now()
         result = self.__run(qcirc=qcirc, shots=shots, cid=cid, backend=self,
-                            out_state=out_state, **kwargs)
+                            out_state=out_state, init=init, **kwargs)
         end_time = datetime.datetime.now()
 
         result.start_time = start_time
@@ -299,11 +301,11 @@ class Backend:
 
         return result
 
-    def _get_expectation_value_by_calculation(self, qcirc, observable, state='qstate'):
+    def _get_expectation_value_by_calculation(self, qcirc, observable, state='qstate', init=None):
         """ estimate expectation value by calcu """
 
         if state == 'qstate' or state == 'mpstate':
-            result = self.run(qcirc=qcirc, out_state=True)
+            result = self.run(qcirc=qcirc, out_state=True, init=init)
         else:
             raise ValueError("state must be 'qstate' or 'mpstate'.")
 
@@ -313,7 +315,7 @@ class Backend:
             expval = result.mpstate.expect(observable=observable)
         return expval
 
-    def _get_expectation_value_by_measurement(self, qcirc, observable, shots):
+    def _get_expectation_value_by_measurement(self, qcirc, observable, shots, init=None):
         """ estimate expectation value by measurements """
 
         expval = 0.+0.j
@@ -335,7 +337,7 @@ class Backend:
             qc.measure(qid=qid, cid=cid)
             fac = wpp['weight'] * wpp['pp'].factor  # complex (imaginary is zero, maybe)
 
-            result = self.run(qcirc=qc, shots=shots, cid=cid)
+            result = self.run(qcirc=qc, shots=shots, cid=cid, init=init)
             freq = result.frequency
             
             n_even = 0
@@ -350,7 +352,7 @@ class Backend:
 
         return expval
 
-    def expect(self, qcirc=None, observable=None, shots=None, precise=False):
+    def expect(self, qcirc=None, observable=None, shots=None, precise=False, init=None):
         """
         run the quantum circuit.
 
@@ -364,6 +366,8 @@ class Backend:
             number of measurements for estimating the expectation value.
         precise : bool, default - False
             precise calculation (only qlazy and qulacs) or estimation by measurements.
+        init : instance of QState, MPState
+            initial quantum state
 
         Returns
         -------
@@ -395,20 +399,22 @@ class Backend:
         if precise is True:
             if self.product == 'qlazy':
                 if self.device == 'qstate_simulator':
-                    expval = self._get_expectation_value_by_calculation(qcirc, observable, state='qstate')
+                    expval = self._get_expectation_value_by_calculation(qcirc, observable, state='qstate', init=init)
                 elif self.device == 'qstate_gpu_simulator':
-                    expval = self._get_expectation_value_by_calculation(qcirc, observable, state='qstate')
+                    expval = self._get_expectation_value_by_calculation(qcirc, observable, state='qstate', init=init)
                 elif self.device == 'mps_simulator':
-                    expval = self._get_expectation_value_by_calculation(qcirc, observable, state='mpstate')
+                    expval = self._get_expectation_value_by_calculation(qcirc, observable, state='mpstate', init=init)
                 else:
                     raise ValueError("device must be 'qstate_simulator' or 'mps_simulator'.")
             elif self.product == 'qulacs':
+                if init is not None:
+                    raise ValueError("init option is not supported in qulacs backend.")
                 expval = self._get_expectation_value_by_calculation(qcirc, observable, state='qstate')
             else:
                 raise ValueError("product must be qlazy or qulacs.")
         else:
             if isinstance(shots, int):
-                expval = self._get_expectation_value_by_measurement(qcirc, observable, shots)
+                expval = self._get_expectation_value_by_measurement(qcirc, observable, shots, init=init)
             else:
                 raise ValueError("shots must be set as int.")
 
