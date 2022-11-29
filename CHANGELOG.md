@@ -3,7 +3,10 @@
 ## [0.3.4] - 2022-xx-xx
 ### Added
 - get_params method of QCirc class to get the parameters of parametric quantum circuit
-- init option of run/expect method of Backend class to set the inital quantum state
+- init option of run,expect method of qlazy's Backend class to set the inital quantum state
+- operate_qcirc method of QState,DensOp,Stabilizer,MPState,QCirc class to perform unitary quantum circuit
+### Changed
+- name of operate method to operate_pp method
 
 ## [0.3.3] - 2022-11-14
 ### Added

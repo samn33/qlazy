@@ -182,15 +182,43 @@ the 3-qubit stabilizer state 'sb', create the instance of
 
 	>>> pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
 
-then perform 'operate' method with 'pp' option.
+then perform 'operate_pp' method with 'pp' option.
 
-	>>> sb.operate(pp=pp)
+	>>> sb.operate_pp(pp=pp)
 
 Controlled pauli product can be operated by specifying the control
-qubit id in the 'qctrl' option of the 'operate' method as follows.
+qubit id in the 'qctrl' option of the 'operate_pp' method as follows.
 
 	>>> pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
-	>>> sb.operate(pp=pp, qctlr=3)
+	>>> sb.operate_pp(pp=pp, qctlr=3)
+
+
+### Quantum circuit operation
+
+You can operate a quantum circuit to the stabilizer state.
+The quantum circuit is prepared using the 'QCirc' class as follows.
+
+    >>> from qlazy import QCirc
+    >>> qc = QCirc().h(0).cx(0,1)
+	>>> qc.show()
+    q[0] -H-*-
+    q[1] ---X-
+
+To operate this into the stabilizer state, use the 'operate_qcirc' method
+
+    >>> sb = Stabilizer(qubit_num=2).set_all('Z')
+	>>> sb.operate_qcirc(qc)
+
+You can also add a control qubit just like 'operate_pp' method.
+
+	>>> sb.operate_qcirc(qc, qctrl=3)
+
+Here, you should note that the quantum circuit that can be operated is
+limited to clifford.  Those that contain non-clifford gates, such as t
+gate, rotation gate or the measurement gate, cannot be operated.
+Also, note that as a result of adding a control qubit, your circuit
+may no longer be clifford.
+
 
 ### Measurement
 

@@ -345,33 +345,6 @@ class Stabilizer(ctypes.Structure, QObject):
 
         return pauli_op_str
 
-    # operate gate
-
-    def operate_gate(self, kind=None, qid=None, **kwargs):
-
-        if kind == cfg.RESET:
-            if qid is not None:
-                raise ValueError("qid is not supported.")
-            for i in range(self.gene_num):
-                for j in range(self.qubit_num):
-                    self.set_pauli_op(i, j, 'I')
-                self.set_pauli_fac(i, '+1')
-        elif kind == cfg.CONTROLLED_Y:
-            q0, q1 = qid[0], qid[1]
-            self.cz(q0, q1).cx(q0, q1).s(q0)
-        elif is_clifford_gate(kind):
-            if get_qgate_qubit_num(kind) == 1:
-                q0 = qid[0]
-                stabilizer_operate_qgate(self, kind, q0, 0)
-            elif get_qgate_qubit_num(kind) == 2:
-                q0, q1 = qid[0], qid[1]
-                stabilizer_operate_qgate(self, kind, q0, q1)
-            else:
-                raise ValueError("length of qid must be 1 or 2.")
-        else:
-            raise ValueError("gate: {} is not supported.".format(cfg.GATE_STRING[kind]))
-        return self
-
     # measurement
 
     def measure(self, qid=None):
@@ -619,6 +592,84 @@ class Stabilizer(ctypes.Structure, QObject):
 
         return self
 
+    # operate gate
+
+    def operate_gate(self, kind=None, qid=None, **kwargs):
+        """
+        operate gate
+
+        Parameters
+        ----------
+        kind : int
+            kind of the gate
+        qid : list
+            quantum id list
+
+        Returns
+        -------
+        self : instance of QState
+            quantum state
+
+        """
+        if kind == cfg.RESET:
+            if qid is not None:
+                raise ValueError("qid is not supported.")
+            for i in range(self.gene_num):
+                for j in range(self.qubit_num):
+                    self.set_pauli_op(i, j, 'I')
+                self.set_pauli_fac(i, '+1')
+        elif kind == cfg.CONTROLLED_Y:
+            q0, q1 = qid[0], qid[1]
+            self.cz(q0, q1).cx(q0, q1).s(q0)
+        elif is_clifford_gate(kind):
+            if get_qgate_qubit_num(kind) == 1:
+                q0 = qid[0]
+                stabilizer_operate_qgate(self, kind, q0, 0)
+            elif get_qgate_qubit_num(kind) == 2:
+                q0, q1 = qid[0], qid[1]
+                stabilizer_operate_qgate(self, kind, q0, q1)
+            else:
+                raise ValueError("length of qid must be 1 or 2.")
+        else:
+            raise ValueError("gate: {} is not supported.".format(cfg.GATE_STRING[kind]))
+        return self
+
+    # operate quantum circuit
+
+    def operate_qcirc(self, qcirc, qctrl=None):
+        """
+        operate quantum circuit
+
+        Parameters
+        ----------
+        qcirc : instance of QCirc
+            quantum circuit
+        qctrl : int
+            control qubit id
+
+        Returns
+        -------
+        qs : instance of QState
+            quantum state after executing the quantum circuit
+
+        Notes
+        -----
+        The quantum circut must be clifford.
+
+        """
+        if qcirc.is_clifford() is False:
+            raise ValueError("qcirc must be clifford quantum circuit.")
+        if self.qubit_num < qcirc.qubit_num:
+            raise ValueError("qubit number of quantum state must be equal or larger than the quantum circuit size.")
+
+        if qctrl is None:
+            stabilizer_operate_qcirc(self, cmem=None, qcirc=qcirc, shots=1, cid=None)
+        else:
+            qc_qctrl = qcirc.add_control(qctrl=qctrl)
+            stabilizer_operate_qcirc(self, cmem=None, qcirc=qc_qctrl, shots=1, cid=None)
+
+        return self
+
     def __del__(self):
 
         stabilizer_free(self)
@@ -628,4 +679,5 @@ from qlazy.lib.stabilizer_c import (stabilizer_init, stabilizer_copy,
                                     stabilizer_set_pauli_fac, stabilizer_get_pauli_fac,
                                     stabilizer_set_pauli_op, stabilizer_get_pauli_op,
                                     stabilizer_operate_qgate, stabilizer_get_rank,
-                                    stabilizer_measure, stabilizer_free)
+                                    stabilizer_measure, stabilizer_operate_qcirc,
+                                    stabilizer_free)

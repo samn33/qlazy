@@ -87,15 +87,15 @@ follows,
 
 	>>> pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
 
-then perform 'operate' method with 'pp' option.
+then perform 'operate_pp' method with 'pp' option.
 
-	>>> qc.operate(pp=pp)
+	>>> qc.operate_pp(pp=pp)
 
 Controlled pauli product can be added by specifying the control
-qubit id in the 'qctrl' option of the 'operate' method as follows.
+qubit id in the 'qctrl' option of the 'operate_pp' method as follows.
 
 	>>> pp = PauliProduct(pauli_str="XYZ", qid=[0,1,2])
-	>>> qc.operate(pp=pp, qctlr=3)
+	>>> qc.operate_pp(pp=pp, qctlr=3)
 
 #### Measuring gate
 

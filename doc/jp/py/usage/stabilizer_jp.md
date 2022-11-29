@@ -157,14 +157,38 @@ Stabilizerを継承したMyStabilizerクラスに追加する例を示します�
 トのスタビライザー状態sbに対して、X2 Y0 Z1というパウリ積を演算したい場合、
 
 	>>> pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
-	>>> sb.operate(pp=pp)
+	>>> sb.operate_pp(pp=pp)
 	
-のようにoperateメソッドのppオプションにPauliProductのインスタンスを指
-定します。制御化されたパウリ積はoperateメソッドのqctrlオプションに制御
+のようにoperate_ppメソッドのppオプションにPauliProductのインスタンスを指
+定します。制御化されたパウリ積はoperate_ppメソッドのqctrlオプションに制御
 量子ビット番号を指定することで実現できます。以下のようにします。
 
 	>>> pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
-	>>> sb.operate(pp=pp, qctlr=3)
+	>>> sb.operate_pp(pp=pp, qctlr=3)
+
+### 量子回路の演算
+
+量子状態に量子回路を演算することができます。量子回路はQCircクラスを使って以下のように用意します。
+
+    >>> from qlazy import QCirc
+    >>> qc = QCirc().h(0).cx(0,1)
+	>>> qc.show()
+    q[0] -H-*-
+    q[1] ---X-
+
+これを量子状態に演算するために'operate_qcirc'メソッドを使います。
+
+    >>> sb = Stabilizer(qubit_num=2).set_all('Z')
+	>>> sb.operate_qcirc(qc)
+
+'operate_pp'と同様に制御ビットを追加することもできます。
+
+	>>> sb.operate_qcirc(qc, qctrl=3)
+
+ここで１点注意事項があります。演算できる量子回路はクリフォードゲートのみからなる回路に限ります。
+測定ゲートのような非ユニタリゲートを含むものは演算できません。
+また、制御ビットを加えた結果、クリフォード回路にならない場合エラーとなりますので、ご注意ください。
+
 
 ### 測定
 

@@ -1461,19 +1461,19 @@ class TestQCirc_add_control(unittest.TestCase):
         self.assertEqual(abs(fid_A - 1.0) < EPS , True)
         self.assertEqual(abs(fid_B - 1.0) < EPS , True)
     
-    # def test_add_control_parametric(self):
-    #     """test 'parametric'
-    #     """
-    #     qc_A = QCirc().h(0).h(1).cx(0,1).crx(0,1, tag='foo').rz(1, tag='bar')
-    #     qubit_num = qc_A.qubit_num
-    #     qc_cA = qc_A.add_control(qctrl=qubit_num)
-    #     qc_cA.set_params({'foo':0.7, 'bar':0.9})
-    # 
-    #     qc_B = QCirc().h(0).h(1).cx(0,1).crx(0,1, phase=0.7).rz(1, phase=0.9)
-    #     qubit_num = qc_B.qubit_num
-    #     qc_cB = qc_B.add_control(qctrl=qubit_num)
-    #    
-    #     self.assertEqual(qc_cA == qc_cB , True)
+    def test_add_control_parametric(self):
+        """test 'parametric'
+        """
+        qc_A = QCirc().h(0).h(1).cx(0,1).crx(0,1, tag='foo').rz(1, tag='bar')
+        qubit_num = qc_A.qubit_num
+        qc_cA = qc_A.add_control(qctrl=qubit_num)
+        qc_cA.set_params({'foo':0.7, 'bar':0.9})
+    
+        qc_B = QCirc().h(0).h(1).cx(0,1).crx(0,1, phase=0.7).rz(1, phase=0.9)
+        qubit_num = qc_B.qubit_num
+        qc_cB = qc_B.add_control(qctrl=qubit_num)
+       
+        self.assertEqual(qc_cA == qc_cB , True)
     
     def test_add_control_random(self):
         """test 'random'
@@ -1526,15 +1526,99 @@ class TestQCirc_remap(unittest.TestCase):
         qc_expect = QCirc().h(1).cx(2,1).crx(1,0, phase=0.7).measure(qid=[2,1], cid=[1,0])
         self.assertEqual(qc_remap, qc_expect)
 
-    # def test_remap_5(self):
-    #     """test 'remap_5'
-    #     """
-    #     qc = QCirc().h(2).cx(1,2).crx(2,3, tag='foo').measure(qid=[1,2], cid=[0,1])
-    #     qc.set_params({'foo':0.7})
-    #     qc_remap = qc.remap(qid=[3,2,1,0], cid=[1,0])
-    #     qc_expect = QCirc().h(1).cx(2,1).crx(1,0, phase=0.7).measure(qid=[2,1], cid=[1,0])
-    #     self.assertEqual(qc_remap, qc_expect)
+    def test_remap_5(self):
+        """test 'remap_5'
+        """
+        qc = QCirc().h(2).cx(1,2).crx(2,3, tag='foo').measure(qid=[1,2], cid=[0,1])
+        qc.set_params({'foo':0.7})
+        qc_remap = qc.remap(qid=[3,2,1,0], cid=[1,0])
+        qc_expect = QCirc().h(1).cx(2,1).crx(1,0, phase=0.7).measure(qid=[2,1], cid=[1,0])
+        self.assertEqual(qc_remap, qc_expect)
 
+#
+# operate pauli product
+#
+
+class TestQState_operate_pp(unittest.TestCase):
+    """ test 'QCirc' : 'operate_pp'
+    """
+
+    def test_operate_x(self):
+        """test 'operate_pp' (x)
+        """
+        qc_expect = QCirc()
+        qc_actual = QCirc()
+        pp = PauliProduct(pauli_str="X")
+        qc_expect.x(0)
+        qc_actual.operate_pp(pp=pp)
+        self.assertEqual(qc_expect == qc_actual,True)
+
+    def test_operate_h_x(self):
+        """test 'operate_pp' (x followed by h)
+        """
+        qc_expect = QCirc().h(0)
+        qc_actual = QCirc().h(0)
+        pp = PauliProduct(pauli_str="X")
+        qc_expect.x(0)
+        qc_actual.operate_pp(pp=pp)
+        self.assertEqual(qc_expect == qc_actual,True)
+        
+    def test_operate_h_y(self):
+        """test 'operate_pp' (y followed by h)
+        """
+        qc_expect = QCirc().h(0)
+        qc_actual = QCirc().h(0)
+        pp = PauliProduct(pauli_str="Y")
+        qc_expect.y(0)
+        qc_actual.operate_pp(pp=pp)
+        self.assertEqual(qc_expect == qc_actual,True)
+        
+    def test_operate_h_z(self):
+        """test 'operate_pp' (z followed by h)
+        """
+        qc_expect = QCirc().h(0)
+        qc_actual = QCirc().h(0)
+        pp = PauliProduct(pauli_str="Z")
+        qc_expect.z(0)
+        qc_actual.operate_pp(pp=pp)
+        self.assertEqual(qc_expect == qc_actual,True)
+        
+    def test_operate_xyz(self):
+        """test 'operate_pp' (xyz)
+        """
+        qc_expect = QCirc()
+        qc_actual = QCirc()
+        pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
+        qc_expect.x(2).y(0).z(1)
+        qc_actual.operate_pp(pp=pp)
+        (qc_expect.equivalent(qc_actual), True)
+        
+    def test_operate_controlled_xyz(self):
+        """test 'operate_pp' (controlled_xyz)
+        """
+        qc_expect = QCirc()
+        qc_actual = QCirc()
+        pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
+        qc_expect.cx(3,2).cy(3,0).cz(3,1)
+        qc_actual.operate_pp(pp=pp, qctrl=3)
+        (qc_expect.equivalent(qc_actual), True)
+
+#
+# operate quantum circuit
+#
+
+class TestQState_operate_qcirc(unittest.TestCase):
+    """ test 'QCirc' : operate_qcirc
+    """
+
+    def test_operate_qcirc(self):
+        """test 'operate_qcirc'
+        """
+        bk = Backend(product='qlazy', device='qstate_simulator')
+        qc_expect = QCirc.generate_random_gates(qubit_num=5, gate_num=20, phase=(0.1, 0.3, 0.7), prob={'h':7, 'cx':5, 'rx':3, 'crz':3})
+        qc_actual = QCirc().operate_qcirc(qc_expect)
+        self.assertEqual(qc_expect == qc_actual, True)
+    
 #
 # inheritance
 #

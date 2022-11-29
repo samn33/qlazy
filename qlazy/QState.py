@@ -710,18 +710,6 @@ class QState(ctypes.Structure, QObject):
         coef = self.__schmidt_decomp(qid_0=qid_0, qid_1=qid_1)[0]
         return coef
 
-    # operate gate
-
-    def operate_gate(self, kind=None, qid=None, phase=0.0, **kwargs):
-
-        if kind == cfg.RESET:
-            qstate_reset(self, qid=qid)
-        elif is_unitary_gate(kind):
-            qstate_operate_qgate(self, kind=kind, qid=qid, phase=phase)
-        else:
-            raise ValueError("gate: {} is not supported.".format(cfg.GATE_STRING[kind]))
-        return self
-
     # measurement
 
     def measure(self, qid=None):
@@ -876,6 +864,71 @@ class QState(ctypes.Structure, QObject):
         """ bell measurement """
         return qstate_measure_bell_stats(self, qid=qid, shots=shots)
 
+    # operate gate
+
+    def operate_gate(self, kind=None, qid=None, phase=0.0, **kwargs):
+        """
+        operate gate
+
+        Parameters
+        ----------
+        kind : int
+            kind of the gate
+        qid : list
+            quantum id list
+        phase : float
+            phase for rotation gate
+
+        Returns
+        -------
+        self : instance of QState
+            quantum state
+
+        """
+        if kind == cfg.RESET:
+            qstate_reset(self, qid=qid)
+        elif is_unitary_gate(kind):
+            qstate_operate_qgate(self, kind=kind, qid=qid, phase=phase)
+        else:
+            raise ValueError("gate: {} is not supported.".format(cfg.GATE_STRING[kind]))
+        return self
+
+    # operate quantum circuit
+
+    def operate_qcirc(self, qcirc, qctrl=None):
+        """
+        operate quantum circuit
+
+        Parameters
+        ----------
+        qcirc : instance of QCirc
+            quantum circuit
+        qctrl : int
+            control qubit id
+
+        Returns
+        -------
+        self : instance of QState
+            quantum state after executing the quantum circuit
+
+        Notes
+        -----
+        The quantum circut must be unintary.
+
+        """
+        if qcirc.is_unitary() is False:
+            raise ValueError("qcirc must be unitary quantum circuit.")
+        if self.qubit_num < qcirc.qubit_num:
+            raise ValueError("qubit number of quantum state must be equal or larger than the quantum circuit size.")
+
+        if qctrl is None:
+            qstate_operate_qcirc(self, cmem=None, qcirc=qcirc, shots=1, cid=None, out_state=True)
+        else:
+            qc_qctrl = qcirc.add_control(qctrl=qctrl)
+            qstate_operate_qcirc(self, cmem=None, qcirc=qc_qctrl, shots=1, cid=None, out_state=True)
+
+        return self
+
     def __del__(self):
 
         qstate_free(self)
@@ -886,4 +939,5 @@ from qlazy.lib.qstate_c import (qstate_init, qstate_init_with_vector, qstate_res
                                 qstate_inner_product, qstate_get_camp,
                                 qstate_tensor_product, qstate_evolve, qstate_expect_value,
                                 qstate_apply_matrix, qstate_operate_qgate, qstate_measure,
-                                qstate_measure_stats, qstate_measure_bell_stats, qstate_free)
+                                qstate_measure_stats, qstate_measure_bell_stats, qstate_operate_qcirc,
+                                qstate_free)

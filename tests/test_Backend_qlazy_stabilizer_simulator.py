@@ -4,7 +4,7 @@ import math
 import numpy as np
 import sys
 
-from qlazy import QState, QCirc, Backend, PauliProduct
+from qlazy import QState, QCirc, Backend, PauliProduct, Stabilizer
 
 EPS = 1.0e-6
 
@@ -461,8 +461,8 @@ class TestBackend_init_option_qstate_simulator(unittest.TestCase):
     """ test 'Backend' : init option
     """
 
-    def test_init_option_run(self):
-        """test 'init'
+    def test_init_option_run_1(self):
+        """test 'init run 1'
         """
         bk = Backend(product='qlazy', device='stabilizer_simulator')
         qc_A = QCirc().h(0).h(1)
@@ -473,6 +473,19 @@ class TestBackend_init_option_qstate_simulator(unittest.TestCase):
         sb_actual = bk.run(init=sb_ini, qcirc=qc_B, out_state=True).stabilizer
         expect = sb_expect.get_str()
         actual = sb_actual.get_str()
+        self.assertEqual(actual, expect)
+
+    def test_init_option_run_2(self):
+        """test 'init run 2'
+        """
+        bk = Backend(product='qlazy', device='stabilizer_simulator')
+        qc_A = QCirc().h(0).h(1)
+        qc_B = QCirc().cx(0,1)
+        qc = qc_A + qc_B
+        sb_ini = Stabilizer(qubit_num=3).set_all('Z').h(0).h(1)
+        sb_actual = bk.run(init=sb_ini, qcirc=qc_B, out_state=True).stabilizer
+        actual = sb_actual.get_str()
+        expect = "  XXI\n  IXI\n  IIZ\n"
         self.assertEqual(actual, expect)
 
 #

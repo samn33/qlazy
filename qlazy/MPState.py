@@ -12,6 +12,7 @@ from tensornetwork import FiniteMPS
 import qlazy.config as cfg
 from qlazy.util import is_unitary_gate, get_qgate_qubit_num
 from qlazy.QObject import QObject
+from qlazy.lib.mpstate_func import mps_operate_qcirc
 
 class MDataMPState:
     """ Measured Data for MPState
@@ -726,26 +727,6 @@ class MPState(FiniteMPS, QObject):
 
         return self
 
-    # operate gate
-
-    def operate_gate(self, kind=None, qid=None, phase=0.0, **kwargs):
-
-        gstr = cfg.GATE_STRING[kind]
-        if kind == cfg.RESET:
-            self.reset_qubits(qid)
-        elif is_unitary_gate(kind):
-            if get_qgate_qubit_num(kind) == 1:
-                q0 = qid[0]
-                self.operate_1qubit_gate(gstr, q0, para=phase)
-            elif get_qgate_qubit_num(kind) == 2:
-                q0, q1 = qid[0], qid[1]
-                self.operate_2qubit_gate(gstr, q0, q1, para=phase)
-            else:
-                raise ValueError("length of qid must be 1 or 2.")
-        else:
-            raise ValueError("gate: {} is not supported.".format(cfg.GATE_STRING[kind]))
-        return self
-
     def __probability(self, q):
 
         z_gate = self.__get_gate_array('z')
@@ -935,3 +916,76 @@ class MPState(FiniteMPS, QObject):
             expect_value += (weight * self.inpro(mps))
 
         return expect_value
+
+    # operate gate
+
+    def operate_gate(self, kind=None, qid=None, phase=0.0, **kwargs):
+        """
+        operate gate
+
+        Parameters
+        ----------
+        kind : int
+            kind of the gate
+        qid : list
+            quantum id list
+        phase : float
+            phase for rotation gate
+
+        Returns
+        -------
+        self : instance of MPState
+            quantum state
+
+        """
+        gstr = cfg.GATE_STRING[kind]
+        if kind == cfg.RESET:
+            self.reset_qubits(qid)
+        elif is_unitary_gate(kind):
+            if get_qgate_qubit_num(kind) == 1:
+                q0 = qid[0]
+                self.operate_1qubit_gate(gstr, q0, para=phase)
+            elif get_qgate_qubit_num(kind) == 2:
+                q0, q1 = qid[0], qid[1]
+                self.operate_2qubit_gate(gstr, q0, q1, para=phase)
+            else:
+                raise ValueError("length of qid must be 1 or 2.")
+        else:
+            raise ValueError("gate: {} is not supported.".format(cfg.GATE_STRING[kind]))
+        return self
+
+    # operate quantum circuit
+
+    def operate_qcirc(self, qcirc, qctrl=None):
+        """
+        operate quantum circuit
+
+        Parameters
+        ----------
+        qcirc : instance of QCirc
+            quantum circuit
+        qctrl : int
+            control qubit id
+
+        Returns
+        -------
+        self : instance of MPState
+            quantum state after executing the quantum circuit
+
+        Notes
+        -----
+        The quantum circut must be unintary.
+
+        """
+        if qcirc.is_unitary() is False:
+            raise ValueError("qcirc must be clifford quantum circuit.")
+        if self.qubit_num < qcirc.qubit_num:
+            raise ValueError("qubit number of quantum state must be equal or larger than the quantum circuit size.")
+
+        if qctrl is None:
+            mps_operate_qcirc(self, cmem=None, qcirc=qcirc, shots=1, cid=None)
+        else:
+            qc_qctrl = qcirc.add_control(qctrl=qctrl)
+            mps_operate_qcirc(self, cmem=None, qcirc=qc_qctrl, shots=1, cid=None)
+
+        return self

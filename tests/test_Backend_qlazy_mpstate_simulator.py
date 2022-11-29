@@ -4,7 +4,7 @@ import math
 import numpy as np
 import sys
 
-from qlazy import QCirc, Backend, PauliProduct
+from qlazy import QCirc, Backend, PauliProduct, MPState
 from qlazy.Observable import X,Y,Z
 
 EPS = 1.0e-6
@@ -37,9 +37,13 @@ def equal_vectors(vec_0, vec_1):
     else:
         return False
 
-def equal_mpstates(mps_0, mps_1):
+def equal_mpstates(mps_0, mps_1, qid=None):
 
-    fid = mps_0.fidelity(mps_1)
+    if qid is None:
+        fid = mps_0.fidelity(mps_1)
+    else:
+        fid = mps_0.fidelity(mps_1, qid=qid)
+        
     if abs(fid - 1.0) < EPS:
         return True
     else:
@@ -918,8 +922,8 @@ class TestBackend_init_option_qstate_simulator(unittest.TestCase):
     """ test 'Backend' : init option
     """
 
-    def test_init_option_run(self):
-        """test 'init'
+    def test_init_option_run_1(self):
+        """test 'init run 1'
         """
         bk = Backend(product='qlazy', device='mps_simulator')
         qc_A = QCirc().h(0).h(1).crx(0, 2, phase=0.7).crz(1,2, phase=0.3)
@@ -930,8 +934,20 @@ class TestBackend_init_option_qstate_simulator(unittest.TestCase):
         mps_actual = bk.run(init=mps_ini, qcirc=qc_B, out_state=True).mpstate
         self.assertEqual(equal_mpstates(mps_expect, mps_actual), True)
 
-    def test_init_option_expect(self):
-        """test 'init'
+    def test_init_option_run_2(self):
+        """test 'init run 2'
+        """
+        bk = Backend(product='qlazy', device='mps_simulator')
+        qc_A = QCirc().h(0).h(1).crx(0, 2, phase=0.7).crz(1,2, phase=0.3)
+        qc_B = QCirc().cx(0,1).crx(1,2).crz(2,0, phase=0.9).rx(2, phase=0.4)
+        qc = qc_A + qc_B
+        mps_expect = bk.run(qcirc=qc, out_state=True).mpstate
+        mps_ini = MPState(qubit_num=4).h(0).h(1).crx(0, 2, phase=0.7).crz(1,2, phase=0.3)
+        mps_actual = bk.run(init=mps_ini, qcirc=qc_B, out_state=True).mpstate
+        self.assertEqual(equal_mpstates(mps_expect, mps_actual, qid=[0,1,2]), True)
+
+    def test_init_option_expect_1(self):
+        """test 'init expect 1'
         """
         ob = X(0) * X(1) + Y(1) * Y(2) + Z(0) * Z(2)
         bk = Backend(product='qlazy', device='mps_simulator')
@@ -940,6 +956,19 @@ class TestBackend_init_option_qstate_simulator(unittest.TestCase):
         qc = qc_A + qc_B
         ev_expect = bk.expect(qcirc=qc, observable=ob, precise=True)
         mps_ini = bk.run(qcirc=qc_A, out_state=True).mpstate
+        ev_actual = bk.expect(init=mps_ini, qcirc=qc_B, observable=ob, precise=True)
+        self.assertEqual(abs(ev_expect - ev_actual) < EPS, True)
+        
+    def test_init_option_expect_2(self):
+        """test 'init expect 2'
+        """
+        ob = X(0) * X(1) + Y(1) * Y(2) + Z(0) * Z(2)
+        bk = Backend(product='qlazy', device='mps_simulator')
+        qc_A = QCirc().h(0).h(1).crx(0, 2, phase=0.7).crz(1,2, phase=0.3)
+        qc_B = QCirc().cx(0,1).crx(1,2).crz(2,0, phase=0.9).rx(2, phase=0.4)
+        qc = qc_A + qc_B
+        ev_expect = bk.expect(qcirc=qc, observable=ob, precise=True)
+        mps_ini = MPState(qubit_num=4).h(0).h(1).crx(0, 2, phase=0.7).crz(1,2, phase=0.3)
         ev_actual = bk.expect(init=mps_ini, qcirc=qc_B, observable=ob, precise=True)
         self.assertEqual(abs(ev_expect - ev_actual) < EPS, True)
         

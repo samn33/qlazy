@@ -86,15 +86,39 @@ the 3-qubit density operator 'de', create the instance of
 
 	>>> pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
 
-then perform 'operate' method with 'pp' option.
+then perform 'operate_pp' method with 'pp' option.
 
-	>>> de.operate(pp=pp)
+	>>> de.operate_pp(pp=pp)
 	
 Controlled pauli product can be operated by specifying the control
-qubit id in the 'qctrl' option of the 'operate' method as follows.
+qubit id in the 'qctrl' option of the 'operate_pp' method as follows.
 
 	>>> pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
-	>>> de.operate(pp=pp, qctlr=3)
+	>>> de.operate_pp(pp=pp, qctlr=3)
+
+### Quantum circuit operation
+
+You can operate a quantum circuit to the density operator.
+The quantum circuit is prepared using the 'QCirc' class as follows.
+
+    >>> from qlazy import QCirc
+    >>> qc = QCirc().h(0).cx(0,1)
+	>>> qc.show()
+    q[0] -H-*-
+    q[1] ---X-
+
+To operate this into the density operator, use the 'operate_qcirc' method
+
+    >>> de = DensOp(qubit_num=2)
+	>>> de.operate_qcirc(qc)
+
+You can also add a control qubit just like 'operate_pp' method.
+
+	>>> de.operate_qcirc(qc, qctrl=3)
+
+Here, you should note that the quantum circuit that can be operated is limited to unitary.
+Those that contain non-unitary gates, such as the measurement gate, cannot be operated.
+
 
 ### Quantum channel
 
@@ -143,7 +167,7 @@ those as follows.
 
 ### Copy
 
-If you want to copy the density operator, use the clone method.
+If you want to copy the density operator, use the 'clone' method.
 
     >>> de_clone = de.clone()
 

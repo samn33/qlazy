@@ -889,6 +889,64 @@ class TestBackend_expect_qstate_gpu_simulator(unittest.TestCase):
         self.assertEqual(abs(expval_1.real - expval_2.real) < 0.05, True)
 
 #
+# init option
+#
+
+class TestBackend_init_option_qstate_simulator(unittest.TestCase):
+    """ test 'Backend' : init option
+    """
+
+    def test_init_option_run_1(self):
+        """test 'init run 1'
+        """
+        bk = Backend(product='qlazy', device='qstate_gpu_simulator')
+        qc_A = QCirc().h(0).h(1).crx(0, 2, phase=0.7).crz(1,2, phase=0.3)
+        qc_B = QCirc().cx(0,1).crx(1,2).crz(2,0, phase=0.9).rx(2, phase=0.4)
+        qc = qc_A + qc_B
+        qs_expect = bk.run(qcirc=qc, out_state=True).qstate
+        qs_ini = bk.run(qcirc=qc_A, out_state=True).qstate
+        qs_actual = bk.run(init=qs_ini, qcirc=qc_B, out_state=True).qstate
+        self.assertEqual(equal_qstates(qs_expect, qs_actual), True)
+
+    def test_init_option_run_2(self):
+        """test 'init run 2'
+        """
+        bk = Backend(product='qlazy', device='qstate_gpu_simulator')
+        qc_A = QCirc().h(0).h(1).crx(0, 2, phase=0.7).crz(1,2, phase=0.3)
+        qc_B = QCirc().cx(0,1).crx(1,2).crz(2,0, phase=0.9).rx(2, phase=0.4)
+        qc = qc_A + qc_B
+        qs_expect = bk.run(qcirc=qc, out_state=True).qstate
+        qs_ini = QState(qubit_num=4).h(0).h(1).crx(0, 2, phase=0.7).crz(1,2, phase=0.3)
+        qs_actual = bk.run(init=qs_ini, qcirc=qc_B, out_state=True).qstate
+        self.assertEqual(equal_qstates(qs_expect, qs_actual, qid=[0,1,2]), True)
+
+    def test_init_option_expect_1(self):
+        """test 'init expect 1'
+        """
+        ob = X(0) * X(1) + Y(1) * Y(2) + Z(0) * Z(2)
+        bk = Backend(product='qlazy', device='qstate_gpu_simulator')
+        qc_A = QCirc().h(0).h(1).crx(0, 2, phase=0.7).crz(1,2, phase=0.3)
+        qc_B = QCirc().cx(0,1).crx(1,2).crz(2,0, phase=0.9).rx(2, phase=0.4)
+        qc = qc_A + qc_B
+        ev_expect = bk.expect(qcirc=qc, observable=ob, precise=True)
+        qs_ini = bk.run(qcirc=qc_A, out_state=True).qstate
+        ev_actual = bk.expect(init=qs_ini, qcirc=qc_B, observable=ob, precise=True)
+        self.assertEqual(abs(ev_expect - ev_actual) < EPS, True)
+        
+    def test_init_option_expect_2(self):
+        """test 'init expect 1'
+        """
+        ob = X(0) * X(1) + Y(1) * Y(2) + Z(0) * Z(2)
+        bk = Backend(product='qlazy', device='qstate_gpu_simulator')
+        qc_A = QCirc().h(0).h(1).crx(0, 2, phase=0.7).crz(1,2, phase=0.3)
+        qc_B = QCirc().cx(0,1).crx(1,2).crz(2,0, phase=0.9).rx(2, phase=0.4)
+        qc = qc_A + qc_B
+        ev_expect = bk.expect(qcirc=qc, observable=ob, precise=True)
+        qs_ini = QState(qubit_num=4).h(0).h(1).crx(0, 2, phase=0.7).crz(1,2, phase=0.3)
+        ev_actual = bk.expect(init=qs_ini, qcirc=qc_B, observable=ob, precise=True)
+        self.assertEqual(abs(ev_expect - ev_actual) < EPS, True)
+
+#
 # inheritance
 #
 

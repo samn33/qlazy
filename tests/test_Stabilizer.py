@@ -3,7 +3,7 @@ import sys
 import unittest
 import math
 import numpy as np
-from qlazy import Stabilizer, PauliProduct
+from qlazy import Stabilizer, PauliProduct, QCirc
 
 class MyStabilizer(Stabilizer):
 
@@ -1139,70 +1139,94 @@ class TestStabilizer_my(unittest.TestCase):
                 frq['100'] + frq['101'] + frq['110'] + frq['111'] == 10))
         self.assertEqual(ans, True)
 
-class TestStabilizer_operate(unittest.TestCase):
-    """ test 'Stabilizer' : 'operate'
+class TestStabilizer_operate_pp(unittest.TestCase):
+    """ test 'Stabilizer' : 'operate_pp'
     """
 
     def test_operate_x(self):
-        """test 'operate' (x)
+        """test 'operate_pp' (x)
         """
         sb_expect = Stabilizer(gene_num=1, qubit_num=1).set_pauli_op(0,0,'Z').x(0)
         expect = sb_expect.get_str()
         pp = PauliProduct(pauli_str="X")
-        sb_actual = Stabilizer(gene_num=1, qubit_num=1).set_pauli_op(0,0,'Z').operate(pp=pp)
+        sb_actual = Stabilizer(gene_num=1, qubit_num=1).set_pauli_op(0,0,'Z').operate_pp(pp=pp)
         actual = sb_actual.get_str()
         self.assertEqual(actual, expect)
         
     def test_operate_h_x(self):
-        """test 'operate' (x followed by h)
+        """test 'operate_pp' (x followed by h)
         """
         sb_expect = Stabilizer(gene_num=1, qubit_num=1).set_pauli_op(0,0,'Z').h(0).x(0)
         expect = sb_expect.get_str()
         pp = PauliProduct(pauli_str="X")
-        sb_actual = Stabilizer(gene_num=1, qubit_num=1).set_pauli_op(0,0,'Z').h(0).operate(pp=pp)
+        sb_actual = Stabilizer(gene_num=1, qubit_num=1).set_pauli_op(0,0,'Z').h(0).operate_pp(pp=pp)
         actual = sb_actual.get_str()
         self.assertEqual(actual, expect)
         
     def test_operate_h_y(self):
-        """test 'operate' (Y followed by h)
+        """test 'operate_pp' (Y followed by h)
         """
         sb_expect = Stabilizer(gene_num=1, qubit_num=1).set_pauli_op(0,0,'Z').h(0).y(0)
         expect = sb_expect.get_str()
         pp = PauliProduct(pauli_str="Y")
-        sb_actual = Stabilizer(gene_num=1, qubit_num=1).set_pauli_op(0,0,'Z').h(0).operate(pp=pp)
+        sb_actual = Stabilizer(gene_num=1, qubit_num=1).set_pauli_op(0,0,'Z').h(0).operate_pp(pp=pp)
         actual = sb_actual.get_str()
         self.assertEqual(actual, expect)
         
     def test_operate_h_z(self):
-        """test 'operate' (Z followed by h)
+        """test 'operate_pp' (Z followed by h)
         """
         sb_expect = Stabilizer(gene_num=1, qubit_num=1).set_pauli_op(0,0,'Z').h(0).z(0)
         expect = sb_expect.get_str()
         pp = PauliProduct(pauli_str="Z")
-        sb_actual = Stabilizer(gene_num=1, qubit_num=1).set_pauli_op(0,0,'Z').h(0).operate(pp=pp)
+        sb_actual = Stabilizer(gene_num=1, qubit_num=1).set_pauli_op(0,0,'Z').h(0).operate_pp(pp=pp)
         actual = sb_actual.get_str()
         self.assertEqual(actual, expect)
         
     def test_operate_xyz(self):
-        """test 'operate' (xyz)
+        """test 'operate_pp' (xyz)
         """
         sb_expect = Stabilizer(gene_num=3, qubit_num=3).set_all('Z').x(2).y(0).z(1)
         expect = sb_expect.get_str()
         pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
-        sb_actual = Stabilizer(gene_num=3, qubit_num=3).set_all('Z').operate(pp=pp)
+        sb_actual = Stabilizer(gene_num=3, qubit_num=3).set_all('Z').operate_pp(pp=pp)
         actual = sb_actual.get_str()
         self.assertEqual(actual, expect)
         
     def test_operate_controlled_xyz(self):
-        """test 'operate' (controlled_xyz)
+        """test 'operate_pp' (controlled_xyz)
         """
         sb_expect = Stabilizer(gene_num=4, qubit_num=4).set_all('Z').cx(3,2).cy(3,0).cz(3,1)
         expect = sb_expect.get_str()
         pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
-        sb_actual = Stabilizer(gene_num=4, qubit_num=4).set_all('Z').operate(pp=pp, qctrl=3)
+        sb_actual = Stabilizer(gene_num=4, qubit_num=4).set_all('Z').operate_pp(pp=pp, qctrl=3)
         actual = sb_actual.get_str()
         self.assertEqual(actual, expect)
         
+class TestQState_operate_qcirc(unittest.TestCase):
+    """ test 'Stabilizer' : operate_qcirc
+    """
+
+    def test_operate_qcirc(self):
+        """test 'operate_qcirc'
+        """
+        qc = QCirc().h(0).x(1).h(2).cx(0,1).cz(1,2)
+        sb_expect = Stabilizer(qubit_num=3).set_all('Z').h(0).x(1).h(2).cx(0,1).cz(1,2)
+        sb_actual = Stabilizer(qubit_num=3).set_all('Z').operate_qcirc(qc)
+        expect = sb_expect.get_str()
+        actual = sb_actual.get_str()
+        self.assertEqual(actual, expect)
+
+    def test_operate_qcirc_qctrl(self):
+        """test 'operate_qcirc qctrl'
+        """
+        qc = QCirc().x(0).y(1).z(2)
+        sb_expect = Stabilizer(qubit_num=4).set_all('Z').cx(3,0).cy(3,1).cz(3,2)
+        sb_actual = Stabilizer(qubit_num=4).set_all('Z').operate_qcirc(qc, qctrl=3)
+        expect = sb_expect.get_str()
+        actual = sb_actual.get_str()
+        self.assertEqual(actual, expect)
+
 class TestStabilizer_inheritance(unittest.TestCase):
     """ test 'Stabilizer' : inheritance
     """

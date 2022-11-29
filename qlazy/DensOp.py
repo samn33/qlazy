@@ -8,6 +8,7 @@ import qlazy.config as cfg
 from qlazy.util import is_unitary_gate
 from qlazy.QState import QState
 from qlazy.QObject import QObject
+from qlazy.lib.densop_func import densop_operate_qcirc
 
 class DensOp(ctypes.Structure, QObject):
     """ Density Operator
@@ -1115,13 +1116,66 @@ class DensOp(ctypes.Structure, QObject):
     # operate gate
 
     def operate_gate(self, kind=None, qid=None, phase=0.0, **kwargs):
+        """
+        operate gate
 
+        Parameters
+        ----------
+        kind : int
+            kind of the gate
+        qid : list
+            quantum id list
+        phase : float
+            phase for rotation gate
+
+        Returns
+        -------
+        self : instance of DensOp
+            quantum state
+
+        """
         if kind == cfg.RESET:
             densop_reset(self, qid=qid)
         elif is_unitary_gate(kind):
             densop_operate_qgate(self, kind=kind, qid=qid, phase=phase)
         else:
             raise ValueError("gate: {} is not supported.".format(cfg.GATE_STRING[kind]))
+        return self
+
+    # operate qcirc
+
+    def operate_qcirc(self, qcirc, qctrl=None):
+        """
+        operate quantum circuit
+
+        Parameters
+        ----------
+        qcirc : instance of QCirc
+            quantum circuit
+        qctrl : int
+            control qubit id
+
+        Returns
+        -------
+        self : instance of DensOp
+            quantum state after executing the quantum circuit
+
+        Notes
+        -----
+        The quantum circut must be unintary.
+
+        """
+        if qcirc.is_unitary() is False:
+            raise ValueError("qcirc must be clifford quantum circuit.")
+        if self.qubit_num < qcirc.qubit_num:
+            raise ValueError("qubit number of quantum state must be equal or larger than the quantum circuit size.")
+
+        if qctrl is None:
+            densop_operate_qcirc(self, qcirc=qcirc)
+        else:
+            qc_qctrl = qcirc.add_control(qctrl=qctrl)
+            densop_operate_qcirc(self, qcirc=qc_qctrl)
+
         return self
 
     def __del__(self):

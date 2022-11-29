@@ -714,9 +714,11 @@ class QObject:
 
         return self
 
-    def operate(self, pp=None, ctrl=None, qctrl=None):
+    # operate pauli product
+
+    def operate_pp(self, pp=None, ctrl=None, qctrl=None):
         """
-        add unitary operator.
+        operate pauli product.
 
         Parameters
         ----------
@@ -773,6 +775,11 @@ class QObject:
                 self.s_dg(ctrl)
 
         return self
+
+    def operate(self, pp=None, ctrl=None, qctrl=None):
+        """ operate pauli product. """
+
+        return self.operate_pp(pp=pp, ctrl=ctrl, qctrl=qctrl)
 
     # reset
 

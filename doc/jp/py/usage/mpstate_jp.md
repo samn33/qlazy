@@ -77,15 +77,37 @@ MPStateクラスを継承することで、自分専用の量子ゲートを簡�
 
     >>> mps = MPState(qubit_num=3)
 	>>> pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
-	>>> mps.operate(pp=pp)
+	>>> mps.operate_pp(pp=pp)
 	
-のようにoperateメソッドのppオプションにPauliProductのインスタンスを指
-定します。制御化されたパウリ積はoperateメソッドのqctrlオプションに制御
+のようにoperate_ppメソッドのppオプションにPauliProductのインスタンスを指
+定します。制御化されたパウリ積はoperate_ppメソッドのqctrlオプションに制御
 量子ビット番号を指定することで実現できます。以下のようにします。
 
     >>> mps = MPState(qubit_num=4)
 	>>> pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
-	>>> mps.operate(pp=pp, qctrl=3)
+	>>> mps.operate_pp(pp=pp, qctrl=3)
+
+### 量子回路の演算
+
+量子状態に量子回路を演算することができます。量子回路はQCircクラスを使って以下のように用意します。
+
+    >>> from qlazy import QCirc
+    >>> qc = QCirc().h(0).cx(0,1)
+	>>> qc.show()
+    q[0] -H-*-
+    q[1] ---X-
+
+これを行列積状態に演算するために'operate_qcirc'メソッドを使います。
+
+    >>> mps = MPState(qubit_num=2)
+	>>> mps.operate_qcirc(qc)
+
+'operate_pp'と同様に制御ビットを追加することもできます。
+
+	>>> mps.operate_qcirc(qc, qctrl=3)
+
+ここで１点注意事項があります。演算できる量子回路はユニタリに限ります。
+測定ゲートのような非ユニタリゲートを含むものは演算できません。
 
 ### メモリ解放
 

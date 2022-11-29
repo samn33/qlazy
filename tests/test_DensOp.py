@@ -2,7 +2,7 @@
 import unittest
 import math
 import numpy as np
-from qlazy import QState, DensOp, PauliProduct
+from qlazy import QState, DensOp, PauliProduct, QCirc
 
 EPS = 1.0e-6
 
@@ -1565,70 +1565,85 @@ class TestDensOp_n_qubit(unittest.TestCase):
         ans = equal_densops(actual, expect)
         self.assertEqual(ans,True)
 
-class TestDensOp_operate(unittest.TestCase):
-    """ test 'DensOp' : 'operate'
+class TestDensOp_operate_pp(unittest.TestCase):
+    """ test 'DensOp' : 'operate_pp'
     """
 
     def test_operate_x(self):
-        """test 'operate' (x)
+        """test 'operate_pp' (x)
         """
         mat = make_densop_matrix(VECTORS_2, PROBS_2)
         expect = DensOp(matrix=mat).x(0)
         pp = PauliProduct(pauli_str="X")
-        actual = DensOp(matrix=mat).operate(pp=pp)
+        actual = DensOp(matrix=mat).operate_pp(pp=pp)
         ans = equal_densops(expect, actual)
         self.assertEqual(ans,True)
         
     def test_operate_h_x(self):
-        """test 'operate' (x followed by h)
+        """test 'operate_pp' (x followed by h)
         """
         mat = make_densop_matrix(VECTORS_2, PROBS_2)
         expect = DensOp(matrix=mat).h(0).x(0)
         pp = PauliProduct(pauli_str="X")
-        actual = DensOp(matrix=mat).h(0).operate(pp=pp)
+        actual = DensOp(matrix=mat).h(0).operate_pp(pp=pp)
         ans = equal_densops(expect, actual)
         self.assertEqual(ans,True)
         
     def test_operate_h_y(self):
-        """test 'operate' (y followed by h)
+        """test 'operate_pp' (y followed by h)
         """
         mat = make_densop_matrix(VECTORS_2, PROBS_2)
         expect = DensOp(matrix=mat).h(0).y(0)
         pp = PauliProduct(pauli_str="Y")
-        actual = DensOp(matrix=mat).h(0).operate(pp=pp)
+        actual = DensOp(matrix=mat).h(0).operate_pp(pp=pp)
         ans = equal_densops(expect, actual)
         self.assertEqual(ans,True)
         
     def test_operate_h_z(self):
-        """test 'operate' (z followed by h)
+        """test 'operate_pp' (z followed by h)
         """
         mat = make_densop_matrix(VECTORS_2, PROBS_2)
         expect = DensOp(matrix=mat).h(0).z(0)
         pp = PauliProduct(pauli_str="Z")
-        actual = DensOp(matrix=mat).h(0).operate(pp=pp)
+        actual = DensOp(matrix=mat).h(0).operate_pp(pp=pp)
         ans = equal_densops(expect, actual)
         self.assertEqual(ans,True)
         
     def test_operate_xyz(self):
-        """test 'operate' (xyz)
+        """test 'operate_pp' (xyz)
         """
         mat = make_densop_matrix(VECTORS_8, PROBS_8)
         expect = DensOp(matrix=mat).x(2).y(0).z(1)
         pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
-        actual = DensOp(matrix=mat).operate(pp=pp)
+        actual = DensOp(matrix=mat).operate_pp(pp=pp)
         ans = equal_densops(expect, actual)
         self.assertEqual(ans,True)
         
     def test_operate_controlled_xz(self):
-        """test 'operate' (controlled_xz)
+        """test 'operate_pp' (controlled_xz)
         """
         mat = make_densop_matrix(VECTORS_8, PROBS_8)
         expect = DensOp(matrix=mat).cx(2,0).cz(2,1)
         pp = PauliProduct(pauli_str="XZ", qid=[0,1])
-        actual = DensOp(matrix=mat).operate(pp=pp, qctrl=2)
+        actual = DensOp(matrix=mat).operate_pp(pp=pp, qctrl=2)
         ans = equal_densops(expect, actual)
         self.assertEqual(ans,True)
         
+class TestQState_operate_qcirc(unittest.TestCase):
+    """ test 'DensOp' : operate_qcirc
+    """
+
+    def test_operate_qcirc(self):
+        """test 'operate_qcirc'
+        """
+        qc = QCirc().h(0).h(1).crx(0, 2, phase=0.7).crz(1,2, phase=0.3)
+        qc.cx(0,1).crx(1,2).crz(2,0, phase=0.9).rx(2, phase=0.4)
+        de_expect = DensOp(qubit_num=3).h(0).h(1).crx(0, 2, phase=0.7).crz(1,2, phase=0.3)
+        de_expect.cx(0,1).crx(1,2).crz(2,0, phase=0.9).rx(2, phase=0.4)
+        de_actual = DensOp(qubit_num=3).operate_qcirc(qc)
+        ans = equal_densops(de_expect, de_actual)
+        self.assertEqual(ans,True)
+    
 class TestDensOp_inheritance(unittest.TestCase):
     """ test 'DensOp' : inheritance
     """

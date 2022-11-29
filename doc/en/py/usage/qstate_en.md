@@ -223,15 +223,39 @@ the 3-qubit quantum state vector 'qs', create the instance of
 
 	>>> pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
 
-then perform 'operate' method with 'pp' option.
+then perform 'operate_pp' method with 'pp' option.
 
-    >>> qs.operate(pp=pp)
+    >>> qs.operate_pp(pp=pp)
 	
 Controlled pauli product can be operated by specifying the control
-qubit id in the 'qctrl' option of the 'operate' method as follows.
+qubit id in the 'qctrl' option of the 'operate_pp' method as follows.
 
 	>>> pp = PauliProduct(pauli_str="XYZ", qid=[0,1,2])
-	>>> qs.operate(pp=pp, qctlr=3)
+	>>> qs.operate_pp(pp=pp, qctlr=3)
+
+
+### Quantum circuit operation
+
+You can operate a quantum circuit to the quantum state.
+The quantum circuit is prepared using the 'QCirc' class as follows.
+
+    >>> from qlazy import QCirc
+    >>> qc = QCirc().h(0).cx(0,1)
+	>>> qc.show()
+    q[0] -H-*-
+    q[1] ---X-
+
+To operate this into the quantum state, use the 'operate_qcirc' method
+
+    >>> qs = QState(qubit_num=2)
+	>>> qs.operate_qcirc(qc)
+
+You can also add a control qubit just like 'operate_pp' method.
+
+	>>> qs.operate_qcirc(qc, qctrl=3)
+
+Here, you should note that the quantum circuit that can be operated is limited to unitary.
+Those that contain non-unitary gates, such as the measurement gate, cannot be operated.
 
 
 ## Display of quantum state vector

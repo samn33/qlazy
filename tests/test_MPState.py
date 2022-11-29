@@ -3,7 +3,7 @@ import unittest
 import random
 import math
 import numpy as np
-from qlazy import MPState, PauliProduct, QState, Observable
+from qlazy import MPState, PauliProduct, QState, Observable, QCirc, Backend
 from qlazy.Observable import X, Y, Z
 
 EPS = 1.0e-6
@@ -1020,73 +1020,100 @@ class TestMPState_measure(unittest.TestCase):
         self.assertEqual(md.frequency['01'], 0)
         self.assertEqual(md.frequency['10'], 0)
 
-class TestMPState_operate(unittest.TestCase):
-    """ test 'MPState' : 'operate'
+class TestMPState_operate_pp(unittest.TestCase):
+    """ test 'MPState' : 'operate_pp'
     """
 
     def test_operate_x(self):
-        """test 'operate' (x)
+        """test 'operate_pp' (x)
         """
         mps_expect = MPState(qubit_num=1)
         mps_actual = MPState(qubit_num=1)
         pp = PauliProduct(pauli_str="X")
         mps_expect.x(0)
-        mps_actual.operate(pp=pp)
+        mps_actual.operate_pp(pp=pp)
         ans = equal_mpstates(mps_expect, mps_actual)
         self.assertEqual(ans,True)
         
     def test_operate_h_x(self):
-        """test 'operate' (x followed by h)
+        """test 'operate_pp' (x followed by h)
         """
         mps_expect = MPState(qubit_num=1).h(0)
         mps_actual = MPState(qubit_num=1).h(0)
         pp = PauliProduct(pauli_str="X")
         mps_expect.x(0)
-        mps_actual.operate(pp=pp)
+        mps_actual.operate_pp(pp=pp)
         ans = equal_mpstates(mps_expect, mps_actual)
         self.assertEqual(ans,True)
         
     def test_operate_h_y(self):
-        """test 'operate' (y followed by h)
+        """test 'operate_pp' (y followed by h)
         """
         mps_expect = MPState(qubit_num=1).h(0)
         mps_actual = MPState(qubit_num=1).h(0)
         pp = PauliProduct(pauli_str="Y")
         mps_expect.y(0)
-        mps_actual.operate(pp=pp)
+        mps_actual.operate_pp(pp=pp)
         ans = equal_mpstates(mps_expect, mps_actual)
         self.assertEqual(ans,True)
         
     def test_operate_h_z(self):
-        """test 'operate' (z followed by h)
+        """test 'operate_pp' (z followed by h)
         """
         mps_expect = MPState(qubit_num=1).h(0)
         mps_actual = MPState(qubit_num=1).h(0)
         pp = PauliProduct(pauli_str="Z")
         mps_expect.z(0)
-        mps_actual.operate(pp=pp)
+        mps_actual.operate_pp(pp=pp)
         ans = equal_mpstates(mps_expect, mps_actual)
         self.assertEqual(ans,True)
         
     def test_operate_xyz(self):
-        """test 'operate' (xyz)
+        """test 'operate_pp' (xyz)
         """
         mps_expect = MPState(qubit_num=3)
         mps_actual = MPState(qubit_num=3)
         pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
         mps_expect.x(2).y(0).z(1)
-        mps_actual.operate(pp=pp)
+        mps_actual.operate_pp(pp=pp)
         ans = equal_mpstates(mps_expect, mps_actual)
         self.assertEqual(ans,True)
         
     def test_operate_controlled_xyz(self):
-        """test 'operate' (controlled_xyz)
+        """test 'operate_pp' (controlled_xyz)
         """
         mps_expect = MPState(qubit_num=4)
         mps_actual = MPState(qubit_num=4)
         pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
         mps_expect.cx(3,2).cy(3,0).cz(3,1)
-        mps_actual.operate(pp=pp, qctrl=3)
+        mps_actual.operate_pp(pp=pp, qctrl=3)
+        ans = equal_mpstates(mps_expect, mps_actual)
+        self.assertEqual(ans,True)
+
+class TestQState_operate_qcirc(unittest.TestCase):
+    """ test 'MPState' : operate_qcirc
+    """
+
+    def test_operate_qcirc(self):
+        """test 'operate_qcirc'
+        """
+        bk = Backend(product='qlazy', device='mps_simulator')
+        qc = QCirc.generate_random_gates(qubit_num=5, gate_num=20, phase=(0.1, 0.3, 0.7), prob={'h':7, 'cx':5, 'rx':3, 'crz':3})
+        mps_expect = bk.run(qcirc=qc, out_state=True).mpstate
+        mps_actual = MPState(qubit_num=5).operate_qcirc(qc)
+        fid = mps_expect.fidelity(mps_actual)
+        ans = equal_mpstates(mps_expect, mps_actual)
+        self.assertEqual(ans,True)
+    
+    def test_operate_qcirc_qctrl(self):
+        """test 'operate_qcirc qctrl'
+        """
+        bk = Backend(product='qlazy', device='mps_simulator')
+        qc = QCirc.generate_random_gates(qubit_num=5, gate_num=20, phase=(0.1, 0.3, 0.7), prob={'h':7, 'cx':5, 'rx':3, 'crz':3})
+        qc_qctrl = qc.add_control(5)
+        mps_expect = bk.run(qcirc=qc_qctrl, out_state=True).mpstate
+        mps_actual = MPState(qubit_num=6).operate_qcirc(qc, qctrl=5)
+        fid = mps_expect.fidelity(mps_actual)
         ans = equal_mpstates(mps_expect, mps_actual)
         self.assertEqual(ans,True)
 

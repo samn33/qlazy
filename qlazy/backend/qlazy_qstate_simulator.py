@@ -43,8 +43,8 @@ def __run_all(qcirc=None, shots=1, cid=None, backend=None, use_gpu=False, out_st
     if init is None:
         qstate = QState(qubit_num=qubit_num, use_gpu=use_gpu)
     else:
-        if init.qubit_num != qcirc.qubit_num:
-            raise ValueError("initial state and quantum circuit have different qubit number.")
+        if init.qubit_num < qcirc.qubit_num:
+            raise ValueError("qubit number of the quantum state must be equal or larger than the quantum circuit size.")
         qstate = init.clone()
 
     frequency = qstate_operate_qcirc(qstate, cmem, qcirc, shots, cid, out_state)

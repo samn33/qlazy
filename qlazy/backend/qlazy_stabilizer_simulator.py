@@ -20,8 +20,8 @@ def run(qcirc=None, shots=1, cid=None, backend=None, out_state=False, init=None)
         stab = Stabilizer(qubit_num)
         stab.set_all('Z')
     else:
-        if init.qubit_num != qcirc.qubit_num:
-            raise ValueError("initial state and quantum circuit have different qubit number.")
+        if init.qubit_num < qcirc.qubit_num:
+            raise ValueError("qubit number of the quantum state must be equal or larger than the quantum circuit size.")
         stab = init.clone()
         
     if cmem_num > 0:

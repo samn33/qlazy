@@ -2,7 +2,7 @@
 import unittest
 import math
 import numpy as np
-from qlazy import QState, Observable, PauliProduct
+from qlazy import QState, Observable, PauliProduct, QCirc, Backend
 from qlazy.Observable import X, Y, Z
 
 EPS = 1.0e-6
@@ -1201,76 +1201,103 @@ class TestQState_schmidt_decocmp(unittest.TestCase):
         ans = equal_vectors(actual, expect)
         self.assertEqual(ans, True)
 
-class TestQState_operate(unittest.TestCase):
-    """ test 'QState' : 'operate'
+class TestQState_operate_pp(unittest.TestCase):
+    """ test 'QState' : 'operate_pp'
     """
 
     def test_operate_x(self):
-        """test 'operate' (x)
+        """test 'operate_pp' (x)
         """
         qs_expect = QState(qubit_num=1)
         qs_actual = QState(qubit_num=1)
         pp = PauliProduct(pauli_str="X")
         qs_expect.x(0)
-        qs_actual.operate(pp=pp)
+        qs_actual.operate_pp(pp=pp)
         ans = equal_qstates(qs_expect, qs_actual)
         self.assertEqual(ans,True)
         
     def test_operate_h_x(self):
-        """test 'operate' (x followed by h)
+        """test 'operate_pp' (x followed by h)
         """
         qs_expect = QState(qubit_num=1).h(0)
         qs_actual = QState(qubit_num=1).h(0)
         pp = PauliProduct(pauli_str="X")
         qs_expect.x(0)
-        qs_actual.operate(pp=pp)
+        qs_actual.operate_pp(pp=pp)
         ans = equal_qstates(qs_expect, qs_actual)
         self.assertEqual(ans,True)
         
     def test_operate_h_y(self):
-        """test 'operate' (y followed by h)
+        """test 'operate_pp' (y followed by h)
         """
         qs_expect = QState(qubit_num=1).h(0)
         qs_actual = QState(qubit_num=1).h(0)
         pp = PauliProduct(pauli_str="Y")
         qs_expect.y(0)
-        qs_actual.operate(pp=pp)
+        qs_actual.operate_pp(pp=pp)
         ans = equal_qstates(qs_expect, qs_actual)
         self.assertEqual(ans,True)
         
     def test_operate_h_z(self):
-        """test 'operate' (z followed by h)
+        """test 'operate_pp' (z followed by h)
         """
         qs_expect = QState(qubit_num=1).h(0)
         qs_actual = QState(qubit_num=1).h(0)
         pp = PauliProduct(pauli_str="Z")
         qs_expect.z(0)
-        qs_actual.operate(pp=pp)
+        qs_actual.operate_pp(pp=pp)
         ans = equal_qstates(qs_expect, qs_actual)
         self.assertEqual(ans,True)
         
     def test_operate_xyz(self):
-        """test 'operate' (xyz)
+        """test 'operate_pp' (xyz)
         """
         qs_expect = QState(qubit_num=3)
         qs_actual = QState(qubit_num=3)
         pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
         qs_expect.x(2).y(0).z(1)
-        qs_actual.operate(pp=pp)
+        qs_actual.operate_pp(pp=pp)
         ans = equal_qstates(qs_expect, qs_actual)
         self.assertEqual(ans,True)
         
     def test_operate_controlled_xyz(self):
-        """test 'operate' (controlled_xyz)
+        """test 'operate_pp' (controlled_xyz)
         """
         qs_expect = QState(qubit_num=4)
         qs_actual = QState(qubit_num=4)
         pp = PauliProduct(pauli_str="XYZ", qid=[2,0,1])
         qs_expect.cx(3,2).cy(3,0).cz(3,1)
-        qs_actual.operate(pp=pp, qctrl=3)
+        qs_actual.operate_pp(pp=pp, qctrl=3)
         ans = equal_qstates(qs_expect, qs_actual)
         self.assertEqual(ans,True)
-        
+
+class TestQState_operate_qcirc(unittest.TestCase):
+    """ test 'QState' : operate_qcirc
+    """
+
+    def test_operate_qcirc(self):
+        """test 'operate_qcirc'
+        """
+        bk = Backend(product='qlazy', device='qstate_simulator')
+        qc = QCirc.generate_random_gates(qubit_num=5, gate_num=20, phase=(0.1, 0.3, 0.7), prob={'h':7, 'cx':5, 'rx':3, 'crz':3})
+        qs_expect = bk.run(qcirc=qc, out_state=True).qstate
+        qs_actual = QState(qubit_num=5).operate_qcirc(qc)
+        fid = qs_expect.fidelity(qs_actual)
+        ans = equal_qstates(qs_expect, qs_actual)
+        self.assertEqual(ans,True)
+    
+    def test_operate_qcirc_qctrl(self):
+        """test 'operate_qcirc qctrl'
+        """
+        bk = Backend(product='qlazy', device='qstate_simulator')
+        qc = QCirc.generate_random_gates(qubit_num=5, gate_num=20, phase=(0.1, 0.3, 0.7), prob={'h':7, 'cx':5, 'rx':3, 'crz':3})
+        qc_qctrl = qc.add_control(5)
+        qs_expect = bk.run(qcirc=qc_qctrl, out_state=True).qstate
+        qs_actual = QState(qubit_num=6).operate_qcirc(qc, qctrl=5)
+        fid = qs_expect.fidelity(qs_actual)
+        ans = equal_qstates(qs_expect, qs_actual)
+        self.assertEqual(ans,True)
+
 class TestQState_inheritance(unittest.TestCase):
     """ test 'QState' : inheritance
     """
