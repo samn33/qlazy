@@ -1620,6 +1620,36 @@ class TestQState_operate_qcirc(unittest.TestCase):
         self.assertEqual(qc_expect == qc_actual, True)
     
 #
+# QFT, IQFT
+#
+
+class TestQCirc_qft(unittest.TestCase):
+    """ test 'QCirc' : qft
+    """
+
+    def test_qft_1(self):
+        """test 'qft_1'
+        """
+        qubit_num = 3
+        qc_base = QCirc.generate_random_gates(qubit_num=qubit_num, gate_num=20,
+                                              phase=(0.125, 0.25, 0.5),
+                                              prob={'h':7, 'cx':5, 'rx':3, 'crz':3})
+        qc_qft = QCirc().qft(list(range(qubit_num)))
+        qc_iqft = QCirc().iqft(list(range(qubit_num)))
+
+        bk = Backend()
+        qc_actual = qc_base + qc_qft + qc_iqft
+        qc_expect = qc_base
+    
+        result = bk.run(qcirc=qc_actual, out_state=True)
+        qs_actual = result.qstate
+    
+        result = bk.run(qcirc=qc_expect, out_state=True)
+        qs_expect = result.qstate
+        ans = equal_or_not(qs_expect, qs_actual)
+        self.assertEqual(ans,True)
+
+#
 # inheritance
 #
 

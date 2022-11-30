@@ -5,6 +5,7 @@
 - get_params method of QCirc class to get the parameters of parametric quantum circuit
 - init option of run,expect method of qlazy's Backend class to set the inital quantum state
 - operate_qcirc method of QState,DensOp,Stabilizer,MPState,QCirc class to perform unitary quantum circuit
+- qft,iqft method of QState,DensOp,MPState,QCirc to execute Quantum Fourier transform and its inverse transform
 ### Changed
 - name of operate method to operate_pp method
 

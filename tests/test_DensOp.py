@@ -2,6 +2,7 @@
 import unittest
 import math
 import numpy as np
+from scipy.stats import unitary_group
 from qlazy import QState, DensOp, PauliProduct, QCirc
 
 EPS = 1.0e-6
@@ -459,6 +460,17 @@ def equal_densops(de_0, de_1):
         return True
     else:
         return False
+
+def random_densop(qubit_num):
+
+    dim = 2**qubit_num
+    vec = np.array([0.0]*dim)
+    vec[0] = 1.0
+    mat = unitary_group.rvs(dim)
+    vec = np.dot(mat, vec)
+    qs = QState(vector=vec)
+    de = DensOp(qstate=[qs])
+    return de
 
 class TestDensOp_init(unittest.TestCase):
     """ test 'DensOp' : '__new__'
@@ -1180,39 +1192,6 @@ class TestDensOp_1_qubit_gate(unittest.TestCase):
         ans = equal_densops(actual, expect)
         self.assertEqual(ans,True)
 
-#     def test_u1(self):
-#         """test 'u1' gate
-#         """
-#         mat = make_densop_matrix(VECTORS_2, PROBS_2)
-#         actual = DensOp(matrix=mat).u1(0, alpha=0.1)
-#         qstate = [QState(vector=vec) for vec in VECTORS_2]
-#         [qs.u1(0, alpha=0.1) for qs in qstate]
-#         expect = DensOp(qstate=qstate, prob=PROBS_2)
-#         ans = equal_densops(actual, expect)
-#         self.assertEqual(ans,True)
-# 
-#     def test_u2(self):
-#         """test 'u2' gate
-#         """
-#         mat = make_densop_matrix(VECTORS_2, PROBS_2)
-#         actual = DensOp(matrix=mat).u2(0, alpha=0.1, beta=0.2)
-#         qstate = [QState(vector=vec) for vec in VECTORS_2]
-#         [qs.u2(0, alpha=0.1, beta=0.2) for qs in qstate]
-#         expect = DensOp(qstate=qstate, prob=PROBS_2)
-#         ans = equal_densops(actual, expect)
-#         self.assertEqual(ans,True)
-# 
-#     def test_u3(self):
-#         """test 'u3' gate
-#         """
-#         mat = make_densop_matrix(VECTORS_2, PROBS_2)
-#         actual = DensOp(matrix=mat).u3(0, alpha=0.1, beta=0.2, gamma=0.3)
-#         qstate = [QState(vector=vec) for vec in VECTORS_2]
-#         [qs.u3(0, alpha=0.1, beta=0.2, gamma=0.3) for qs in qstate]
-#         expect = DensOp(qstate=qstate, prob=PROBS_2)
-#         ans = equal_densops(actual, expect)
-#         self.assertEqual(ans,True)
-
 class TestDensOp_1_qubit_gate_in_2_reg(unittest.TestCase):
     """ test 'DensOp' : 1-qubit gate in 2-register circuit
     """
@@ -1443,39 +1422,6 @@ class TestQState_2_qubit(unittest.TestCase):
         ans = equal_densops(actual, expect)
         self.assertEqual(ans,True)
 
-#     def test_cu1(self):
-#         """test 'cu1' gate
-#         """
-#         mat = make_densop_matrix(VECTORS_4, PROBS_4)
-#         actual = DensOp(matrix=mat).cu1(0,1, alpha=0.1)
-#         qstate = [QState(vector=vec) for vec in VECTORS_4]
-#         [qs.cu1(0,1, alpha=0.1) for qs in qstate]
-#         expect = DensOp(qstate=qstate, prob=PROBS_4)
-#         ans = equal_densops(actual, expect)
-#         self.assertEqual(ans,True)
-# 
-#     def test_cu2(self):
-#         """test 'cu2' gate
-#         """
-#         mat = make_densop_matrix(VECTORS_4, PROBS_4)
-#         actual = DensOp(matrix=mat).cu2(0,1, alpha=0.1, beta=0.2)
-#         qstate = [QState(vector=vec) for vec in VECTORS_4]
-#         [qs.cu2(0,1, alpha=0.1, beta=0.2) for qs in qstate]
-#         expect = DensOp(qstate=qstate, prob=PROBS_4)
-#         ans = equal_densops(actual, expect)
-#         self.assertEqual(ans,True)
-# 
-#     def test_cu3(self):
-#         """test 'cu3' gate
-#         """
-#         mat = make_densop_matrix(VECTORS_4, PROBS_4)
-#         actual = DensOp(matrix=mat).cu3(0,1, alpha=0.1, beta=0.2, gamma=0.3)
-#         qstate = [QState(vector=vec) for vec in VECTORS_4]
-#         [qs.cu3(0,1, alpha=0.1, beta=0.2, gamma=0.3) for qs in qstate]
-#         expect = DensOp(qstate=qstate, prob=PROBS_4)
-#         ans = equal_densops(actual, expect)
-#         self.assertEqual(ans,True)
-
 class TestDensOp_2_qubit_in_3_reg(unittest.TestCase):
     """ test 'DensOp' : 2-qubit gate in 3-register circuit
     """
@@ -1629,7 +1575,7 @@ class TestDensOp_operate_pp(unittest.TestCase):
         ans = equal_densops(expect, actual)
         self.assertEqual(ans,True)
         
-class TestQState_operate_qcirc(unittest.TestCase):
+class TestDensOp_operate_qcirc(unittest.TestCase):
     """ test 'DensOp' : operate_qcirc
     """
 
@@ -1643,7 +1589,41 @@ class TestQState_operate_qcirc(unittest.TestCase):
         de_actual = DensOp(qubit_num=3).operate_qcirc(qc)
         ans = equal_densops(de_expect, de_actual)
         self.assertEqual(ans,True)
-    
+
+class TestDensOp_qft(unittest.TestCase):
+    """ test 'DensOp' : qft
+    """
+
+    def test_qft_1(self):
+        """test 'qft_1'
+        """
+        qubit_num = 4
+        de_expect = random_densop(qubit_num)
+        de_actual = de_expect.clone()
+        de_actual.qft(list(range(qubit_num))).iqft(list(range(qubit_num)))
+        ans = equal_densops(de_expect, de_actual)
+        self.assertEqual(ans,True)
+
+    def test_qft_2(self):
+        """test 'qft_2'
+        """
+        qubit_num = 4
+        de_expect = DensOp(qubit_num=qubit_num).h(0).h(1).h(2).h(3)
+        de_actual = de_expect.clone()
+        de_actual.qft(list(range(qubit_num))).h(0).h(1).h(2).h(3)
+        ans = equal_densops(de_expect, de_actual)
+        self.assertEqual(ans,True)
+
+    def test_qft_3(self):
+        """test 'qft_3'
+        """
+        qubit_num = 4
+        de_expect = DensOp(qubit_num=qubit_num).h(0).h(1).h(2).h(3)
+        de_actual = de_expect.clone()
+        de_actual.iqft(list(range(qubit_num))).h(0).h(1).h(2).h(3)
+        ans = equal_densops(de_expect, de_actual)
+        self.assertEqual(ans,True)
+
 class TestDensOp_inheritance(unittest.TestCase):
     """ test 'DensOp' : inheritance
     """

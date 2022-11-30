@@ -191,6 +191,14 @@ qubits id.  Please note that the argument is the "list" of the qubit
 id.  In qlazy, if it is necessary to specify an indefinite number of
 qubit id, give a "list" of the qubit id to the method or function.
 
+#### Quantum Fourier transform
+
+Performing Quantum Fourier transform and its inverse transform are
+possible as follows.
+
+    >>> qs.qft(qid=[q0,q1,..])
+    >>> qs.iqft(qid=[q0,q1,..])
+
 #### Custom gate
 
 By inheriting the 'QState' class, you can easily create and add your

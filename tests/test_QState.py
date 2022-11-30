@@ -2,6 +2,7 @@
 import unittest
 import math
 import numpy as np
+from scipy.stats import unitary_group
 from qlazy import QState, Observable, PauliProduct, QCirc, Backend
 from qlazy.Observable import X, Y, Z
 
@@ -58,6 +59,17 @@ def equal_qstates(qs_0, qs_1):
         return True
     else:
         return False
+
+def random_qstate(qubit_num):
+
+    dim = 2**qubit_num
+    vec = np.array([0.0]*dim)
+    vec[0] = 1.0
+    mat = unitary_group.rvs(dim)
+    vec = np.dot(mat, vec)
+    qs = QState(vector=vec)
+
+    return qs
 
 class TestQState_init(unittest.TestCase):
     """ test 'QState' : '__new__'
@@ -1298,6 +1310,40 @@ class TestQState_operate_qcirc(unittest.TestCase):
         ans = equal_qstates(qs_expect, qs_actual)
         self.assertEqual(ans,True)
 
+class TestQState_qft(unittest.TestCase):
+    """ test 'QState' : qft
+    """
+
+    def test_qft_1(self):
+        """test 'qft_1'
+        """
+        qubit_num = 4
+        qs_expect = random_qstate(qubit_num)
+        qs_actual = qs_expect.clone()
+        qs_actual.qft(list(range(qubit_num))).iqft(list(range(qubit_num)))
+        ans = equal_qstates(qs_expect, qs_actual)
+        self.assertEqual(ans,True)
+
+    def test_qft_2(self):
+        """test 'qft_2'
+        """
+        qubit_num = 4
+        qs_expect = QState(qubit_num=qubit_num).h(0).h(1).h(2).h(3)
+        qs_actual = qs_expect.clone()
+        qs_actual.qft(list(range(qubit_num))).h(0).h(1).h(2).h(3)
+        ans = equal_qstates(qs_expect, qs_actual)
+        self.assertEqual(ans,True)
+
+    def test_qft_3(self):
+        """test 'qft_3'
+        """
+        qubit_num = 4
+        qs_expect = QState(qubit_num=qubit_num).h(0).h(1).h(2).h(3)
+        qs_actual = qs_expect.clone()
+        qs_actual.iqft(list(range(qubit_num))).h(0).h(1).h(2).h(3)
+        ans = equal_qstates(qs_expect, qs_actual)
+        self.assertEqual(ans,True)
+        
 class TestQState_inheritance(unittest.TestCase):
     """ test 'QState' : inheritance
     """

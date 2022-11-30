@@ -14,14 +14,6 @@ COS_PI_4 = math.cos(math.pi/4)
 SIN_PI_8 = math.sin(math.pi/8)
 SIN_PI_4 = math.sin(math.pi/4)
 
-def equal_values(val_0, val_1):
-
-    dif = abs(val_0 - val_1)
-    if dif < EPS:
-        return True
-    else:
-        return False
-
 class MyMPState(MPState):
 
     def __init__(self, qubit_num=0, tensors=None, name=None):
@@ -34,6 +26,14 @@ class MyMPState(MPState):
     def bell(self, q0, q1):
         self.h(q0).cx(q0,q1)
         return self
+
+# def equal_values(val_0, val_1):
+# 
+#     dif = abs(val_0 - val_1)
+#     if dif < EPS:
+#         return True
+#     else:
+#         return False
 
 def equal_values(val_0, val_1):
 
@@ -66,6 +66,17 @@ def equal_mpstates(mps_0, mps_1):
         return True
     else:
         return False
+
+def random_mpstate(qubit_num):
+
+    mps = MPState(qubit_num=qubit_num)
+    [mps.h(i) for i in range(qubit_num)]
+    for i in range(qubit_num):
+        mps.rx(i, phase=random.random())
+        mps.ry(i, phase=random.random())
+        mps.rz(i, phase=random.random())
+    [mps.cx(i,i+1) for i in range(qubit_num-1)]
+    return mps
 
 class TestMPState_init(unittest.TestCase):
     """ test 'MPState' : '__init__'
@@ -1090,7 +1101,7 @@ class TestMPState_operate_pp(unittest.TestCase):
         ans = equal_mpstates(mps_expect, mps_actual)
         self.assertEqual(ans,True)
 
-class TestQState_operate_qcirc(unittest.TestCase):
+class TestMPState_operate_qcirc(unittest.TestCase):
     """ test 'MPState' : operate_qcirc
     """
 
@@ -1117,6 +1128,40 @@ class TestQState_operate_qcirc(unittest.TestCase):
         ans = equal_mpstates(mps_expect, mps_actual)
         self.assertEqual(ans,True)
 
+class TestMPState_qft(unittest.TestCase):
+    """ test 'MPState' : qft
+    """
+
+    def test_qft_1(self):
+        """test 'qft_1'
+        """
+        qubit_num = 4
+        mps_expect = random_mpstate(qubit_num)
+        mps_actual = mps_expect.clone()
+        mps_actual.qft(list(range(qubit_num))).iqft(list(range(qubit_num)))
+        ans = equal_mpstates(mps_expect, mps_actual)
+        self.assertEqual(ans, True)
+
+    def test_qft_2(self):
+        """test 'qft_2'
+        """
+        qubit_num = 4
+        mps_expect = MPState(qubit_num=qubit_num).h(0).h(1).h(2).h(3)
+        mps_actual = mps_expect.clone()
+        mps_actual.qft(list(range(qubit_num))).h(0).h(1).h(2).h(3)
+        ans = equal_mpstates(mps_expect, mps_actual)
+        self.assertEqual(ans, True)
+
+    def test_qft_3(self):
+        """test 'qft_3'
+        """
+        qubit_num = 4
+        mps_expect = MPState(qubit_num=qubit_num).h(0).h(1).h(2).h(3)
+        mps_actual = mps_expect.clone()
+        mps_actual.iqft(list(range(qubit_num))).h(0).h(1).h(2).h(3)
+        ans = equal_mpstates(mps_expect, mps_actual)
+        self.assertEqual(ans, True)
+        
 class TestMPState_inheritance(unittest.TestCase):
     """ test 'MPState' : inheritance
     """

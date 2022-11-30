@@ -714,6 +714,54 @@ class QObject:
 
         return self
 
+    def qft(self, qid):
+        """
+        Quantum Fourier Transform
+    
+        Parameters
+        ----------
+        qid : list of int
+            qubit id list
+    
+        Returns
+        -------
+        self : instance of QObject
+    
+        """
+        qubit_num = len(qid)
+        for i in range(qubit_num):
+            self.h(qid[qubit_num-i-1])
+            phase = 1.0
+            for j in range(qubit_num-i-1):
+                phase /= 2.0
+                self.cp(qid[qubit_num-i-j-2], qid[qubit_num-i-1], phase=phase)
+
+        return self
+
+    def iqft(self, qid):
+        """
+        Inverse Quantum Fourier Transform
+    
+        Parameters
+        ----------
+        qid : list of int
+            qubit id list
+    
+        Returns
+        -------
+        self : instance of QObject
+    
+        """
+        qubit_num = len(qid)
+        for i in range(qubit_num):
+            phase = -1.0/2**i
+            for j in range(i):
+                self.cp(qid[j], qid[i], phase=phase)
+                phase *= 2.0
+            self.h(qid[i])
+
+        return self
+
     # operate pauli product
 
     def operate_pp(self, pp=None, ctrl=None, qctrl=None):
