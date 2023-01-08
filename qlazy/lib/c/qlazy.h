@@ -12,8 +12,13 @@
 #include <time.h>
 #include <string.h>
 #include <complex.h>
+
+#ifdef USE_LIBREADLINE
 #include <readline/readline.h>
 #include <readline/history.h>
+#else
+#include <ctype.h>
+#endif
 
 #ifdef USE_GPU
 #include <cuda.h>
@@ -473,15 +478,15 @@ typedef struct _Stabilizer {
 extern "C" {
 #endif
 
-#ifndef USE_GPU
-/* complex.h */
-double	 cabs(double _Complex);
-double	 carg(double _Complex);
-double	 creal(double _Complex);
-double	 cimag(double _Complex);
-double _Complex conj(double _Complex);
-double _Complex cexp(double _Complex);
-#endif
+//#ifndef USE_GPU
+///* complex.h */
+//double	 cabs(double _Complex);
+//double	 carg(double _Complex);
+//double	 creal(double _Complex);
+//double	 cimag(double _Complex);
+//double _Complex conj(double _Complex);
+//double _Complex cexp(double _Complex);
+//#endif
 
 /* misc.c */
 bool	 line_check_length(char* str);

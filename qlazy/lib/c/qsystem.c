@@ -4,6 +4,24 @@
 
 #include "qlazy.h"
 
+#ifndef USE_LIBREADLINE
+
+static char* _rdline(const char* prompt) {
+  char* buf = NULL;
+
+  if (!(buf = (char*)malloc(sizeof(char) * LINE_STRLEN)))
+    ERR_RETURN(ERROR_CANT_ALLOC_MEMORY, NULL);
+
+  printf("%s", prompt);
+
+  if (fgets(buf, LINE_STRLEN, stdin) == NULL)
+    ERR_RETURN(ERROR_CANT_READ_LINE, NULL);
+
+  return buf;
+}
+
+#endif
+
 bool qsystem_init(void** qsystem_out)
 {
   QSystem* qsystem = NULL;
@@ -66,8 +84,6 @@ static bool _operate_qgate(QState* qstate, QG* qgate)
   SUC_RETURN(true);
 }
 
-//static bool _qsystem_execute_one_line(QSystem* qsystem, char* line)
-//static bool _qsystem_execute_one_line(QSystem* qsystem, char* line, Proc proc)
 static bool _qsystem_execute_one_line(QSystem* qsystem, char* line, bool use_gpu)
 {
   char*		token[TOKEN_NUM];
@@ -424,8 +440,6 @@ static bool _qsystem_execute_one_line(QSystem* qsystem, char* line, bool use_gpu
   SUC_RETURN(true);
 }
 
-//bool qsystem_execute(QSystem* qsystem, char* fname)
-//bool qsystem_execute(QSystem* qsystem, char* fname, Proc proc)
 bool qsystem_execute(QSystem* qsystem, char* fname, bool use_gpu)
 {
   FILE*         fp = NULL;
@@ -444,8 +458,6 @@ bool qsystem_execute(QSystem* qsystem, char* fname, bool use_gpu)
   /* read lines and execute */
 
   while (fgets(line, LINE_STRLEN, fp) != NULL) {
-    //    if (!(_qsystem_execute_one_line(qsystem, line))) {
-    //    if (!(_qsystem_execute_one_line(qsystem, line, proc))) {
     if (!(_qsystem_execute_one_line(qsystem, line, use_gpu))) {
       ERR_RETURN(ERROR_CANT_READ_LINE, false);
     }
@@ -457,8 +469,6 @@ bool qsystem_execute(QSystem* qsystem, char* fname, bool use_gpu)
   SUC_RETURN(true);
 }
 
-//bool qsystem_intmode(QSystem* qsystem, char* fname_ini)
-//bool qsystem_intmode(QSystem* qsystem, char* fname_ini, Proc proc)
 bool qsystem_intmode(QSystem* qsystem, char* fname_ini, bool use_gpu)
 {
   char*		line	     = NULL;
@@ -466,23 +476,31 @@ bool qsystem_intmode(QSystem* qsystem, char* fname_ini, bool use_gpu)
   if (qsystem == NULL) ERR_RETURN(ERROR_INVALID_ARGUMENT,false);
 
   if (fname_ini != NULL) {
-    //    if (!(qsystem_execute(qsystem, fname_ini))) {
-    //    if (!(qsystem_execute(qsystem, fname_ini, proc))) {
     if (!(qsystem_execute(qsystem, fname_ini, use_gpu))) {
       ERR_RETURN(ERROR_QSYSTEM_EXECUTE, false);
     }
   }
 
+#ifdef USE_LIBREADLINE
+  
   while (1) {
     line = readline(">> ");
     add_history(line);
-    //    _qsystem_execute_one_line(qsystem, line);
-    //    _qsystem_execute_one_line(qsystem, line, proc);
     _qsystem_execute_one_line(qsystem, line, use_gpu);
+    free(line); line = NULL;
   }
 
-  free(line); line = NULL;
+#else
 
+  while (1) {
+    line = _rdline(">> ");
+    if (line == NULL) ERR_RETURN(ERROR_CANT_READ_LINE, false);
+    _qsystem_execute_one_line(qsystem, line, use_gpu);
+    free(line); line = NULL;
+  }
+
+#endif
+  
   SUC_RETURN(true);
 }
 

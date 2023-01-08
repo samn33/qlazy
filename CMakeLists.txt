@@ -7,7 +7,7 @@ if(NOT DEFINED USE_GPU)
   set(USE_GPU ${DEFAULT_USE_GPU})
 endif()
 
-set(LIB_SRC_BASE qlazy/lib/c/qsystem.c qlazy/lib/c/qg.c qlazy/lib/c/qc.c
+set(LIB_SRC_BASE qlazy/lib/c/qg.c qlazy/lib/c/qc.c
   qlazy/lib/c/qstate.c qlazy/lib/c/mdata.c qlazy/lib/c/gbank.c qlazy/lib/c/spro.c
   qlazy/lib/c/observable_base.c qlazy/lib/c/densop.c qlazy/lib/c/stabilizer.c
   qlazy/lib/c/misc.c qlazy/lib/c/message.c qlazy/lib/c/help.c
@@ -31,7 +31,7 @@ if(USE_GPU)
 
   add_definitions(-O2 -DUSE_GPU -I/usr/local/cuda/include/ -std=c++03)
   
-  add_executable(qlazy qlazy/lib/c/qlazy.c)
+  add_executable(qlazy qlazy/lib/c/qlazy.c qlazy/lib/c/qsystem.c)
   add_library(qlz SHARED ${LIB_SRC_BASE} ${LIB_SRC_GPU})
 
   set_target_properties(qlz PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
@@ -39,7 +39,8 @@ if(USE_GPU)
 
   include_directories(qlazy/lib/c/ /usr/local/include/cuda/)
 
-  target_link_libraries(qlz m readline gomp ${CUDA_curand_LIBRARY})
+  # target_link_libraries(qlz m readline gomp ${CUDA_curand_LIBRARY}) # link libreadline.so
+  target_link_libraries(qlz m gomp ${CUDA_curand_LIBRARY})
   target_link_libraries(qlazy qlz)
 
   list(APPEND CMAKE_CUDA_FLAGS "--default-stream per-thread")
@@ -63,11 +64,11 @@ else()
 
   message("!!! Not USE_GPU !!!")
   add_library(qlz SHARED ${LIB_SRC_BASE})
-  add_executable(qlazy qlazy/lib/c/qlazy.c)
-  target_link_libraries(qlz m readline)
+  add_executable(qlazy qlazy/lib/c/qlazy.c qlazy/lib/c/qsystem.c)
+  target_link_libraries(qlz m)
+  # target_link_libraries(qlazy readline tinfo qlz) # link libreadline.so
   target_link_libraries(qlazy qlz)
-  # set(CMAKE_C_FLAGS "-fPIC -Wall -O2 -DDEV")
-  # set(CMAKE_CXX_FLAGS "-fPIC -Wall -O2 -DDEV")
+
   set(CMAKE_C_FLAGS "-fPIC -Wall -O2")
   set(CMAKE_CXX_FLAGS "-fPIC -Wall -O2")
 
