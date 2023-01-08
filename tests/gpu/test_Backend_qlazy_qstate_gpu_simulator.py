@@ -4,7 +4,7 @@ import math
 import numpy as np
 import sys
 
-from qlazy import QCirc, Backend, PauliProduct
+from qlazy import QCirc, Backend, PauliProduct, QState
 from qlazy.Observable import X,Y,Z
 
 EPS = 1.0e-6
@@ -37,9 +37,13 @@ def equal_vectors(vec_0, vec_1):
     else:
         return False
 
-def equal_qstates(qs_0, qs_1):
+def equal_qstates(qs_0, qs_1, qid=None):
 
-    fid = qs_0.fidelity(qs_1)
+    if qid is None:
+        fid = qs_0.fidelity(qs_1)
+    else:
+        fid = qs_0.fidelity(qs_1, qid=qid)
+
     if abs(fid - 1.0) < EPS:
         return True
     else:

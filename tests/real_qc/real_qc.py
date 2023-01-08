@@ -14,10 +14,10 @@ def real_qc_run():
     # qc.measure(qid=[0,1], cid=[1,3]) # {'0000': 50, '0100': 25, '0101': 25}
     # qc.measure(qid=[0,1], cid=[3,1]) # {'0000': 50, '0001': 25, '0101': 25}
     
-    bk = Backend()  # OK
+    # bk = Backend()  # OK
 
     # bk = Backend(product='ibmq', device='aer_simulator') # OK
-    # bk = Backend(product='ibmq', device='qasm_simulator') # OK
+    # bk = Backend(product='ibmq', device='least_busy') # OK
     # bk = Backend(product='qulacs', device='cpu_simulator') # OK
 
     # bk = Backend(product='braket_local', device='braket_sv') # OK
@@ -38,7 +38,7 @@ def real_qc_expect():
     ob = 0.5*X(0)*X(1)
     qc = QCirc().h(0).h(1).h(2).h(3)
 
-    # bk = Backend()  # OK
+    bk = Backend()  # OK
 
     # bk = Backend(product='ibmq', device='aer_simulator') # OK
     # bk = Backend(product='ibmq', device='least_busy') # OK

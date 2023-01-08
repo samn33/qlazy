@@ -9,7 +9,6 @@ from qlazy.util import get_lib_ext
 from qlazy.QCirc import QCirc
 
 lib = ctypes.CDLL(str(pathlib.Path(__file__).with_name('libqlz.'+get_lib_ext())))
-libc = ctypes.CDLL(find_library("c"), mode=ctypes.RTLD_GLOBAL)
 
 def qcirc_init():
     """ initialize QCirc object """

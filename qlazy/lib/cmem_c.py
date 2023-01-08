@@ -74,7 +74,6 @@ def cmem_get_bits(cmem):
 def cmem_set_bits(cmem, bits):
     """ get bits of the classical memory """
 
-    # bool cmem_set_bits(CMem* cmem, BYTE* bits, int num)
     if cmem is None:
         raise Valueerror("cmem must be set.")
 

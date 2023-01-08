@@ -4,12 +4,8 @@ import pathlib
 from setuptools import setup, find_packages, Extension
 from setuptools.command.build_ext import build_ext as build_ext_orig
 
-with open("VERSION", "r") as fh:
-    _VERSION = fh.read().strip()
+_VERSION = '0.3.4'
 
-with open("qlazy/lib/c/version.h", "w") as fh:
-    fh.write("#define VERSION " + '"' + _VERSION + '"\n')
-    
 class CMakeExtension(Extension):
 
     def __init__(self, name):

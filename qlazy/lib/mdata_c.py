@@ -9,7 +9,6 @@ from qlazy.util import get_lib_ext
 from qlazy.MData import MData
 
 lib = ctypes.CDLL(str(pathlib.Path(__file__).with_name('libqlz.'+get_lib_ext())))
-libc = ctypes.CDLL(find_library("c"), mode=ctypes.RTLD_GLOBAL)
 
 def mdata_init(qubit_num=None, shots=1, angle=0.0, phase=0.0, qid=None):
     """ initialize MData object """

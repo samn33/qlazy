@@ -8,7 +8,6 @@ from qlazy.util import get_lib_ext
 from qlazy.ObservableBase import ObservableBase
 
 lib = ctypes.CDLL(str(pathlib.Path(__file__).with_name('libqlz.'+get_lib_ext())))
-libc = ctypes.CDLL(find_library("c"), mode=ctypes.RTLD_GLOBAL)
 
 def observable_base_init(ostr):
     """ initialize ObservableBase object """

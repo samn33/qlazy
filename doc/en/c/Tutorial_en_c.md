@@ -91,8 +91,6 @@ In the dialogue mode, when help,
 	>> help
     [commands]
     * initialize quantum state: %,init
-    * print quantum circuitt:   &,circ                                                       
-    * print quantum gates:      !,gates
     * print quantum state:      -,show
     * print bloch angles:       |,bloch
     * echo input string:        @,echo

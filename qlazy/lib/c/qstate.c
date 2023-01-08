@@ -583,7 +583,7 @@ static bool _qstate_operate_unitary2(COMPLEX* camp_out, COMPLEX* camp_in, COMPLE
   COMPLEX	u_10 = U2[IDX2(1,0)];
   COMPLEX	u_11 = U2[IDX2(1,1)];
 
-  # pragma omp parallel for
+# pragma omp parallel for shared(camp_out)
   for (i=0; i<state_num; i++) {
     if ((i >> nn) %2 == 0) {
       camp_out[i]
@@ -623,7 +623,7 @@ static bool _qstate_operate_unitary4(COMPLEX* camp_out, COMPLEX* camp_in, COMPLE
   COMPLEX	u_32 = U4[IDX4(3,2)];
   COMPLEX	u_33 = U4[IDX4(3,3)];
 
-  # pragma omp parallel for
+# pragma omp parallel for shared(camp_out)
   for (i=0; i<state_num; i++) {
     if (((i >> mm) % 2 == 0) && ((i >> nn) % 2 == 0)) {
       camp_out[i]
@@ -674,7 +674,7 @@ static bool _qstate_operate_unitary2(COMPLEX* camp_out, COMPLEX* camp_in, COMPLE
     else flg[i] = 1;
   }
   
-  # pragma omp parallel for
+# pragma omp parallel for shared(camp_out)
   for (int i=0; i<state_num; i++) {
     camp_out[i] = 0.0;
     if ((i >> nn) %2 == 0) {
@@ -765,7 +765,7 @@ static bool _qstate_operate_unitary2(COMPLEX* camp_out, COMPLEX* camp_in, COMPLE
 {
   int nn = qubit_num - n - 1;
 
-  # pragma omp parallel for
+# pragma omp parallel for shared(camp_out)
   for (int i=0; i<state_num; i++) {
     int p = (i >> nn) % 2;
     int pp = p ^ 1;
@@ -783,7 +783,7 @@ static bool _qstate_operate_unitary4(COMPLEX* camp_out, COMPLEX* camp_in, COMPLE
   int mm = qubit_num - m - 1;
   int nn = qubit_num - n - 1;
 
-  # pragma omp parallel for
+# pragma omp parallel for shared(camp_out)
   for (int i=0; i<state_num; i++) {
 
     int p = (i >> mm) % 2;
@@ -824,7 +824,7 @@ static bool _qstate_operate_controlled_gate_core(COMPLEX* camp_out, COMPLEX* cam
   COMPLEX	u_32 = U[IDX4(3,2)];
   COMPLEX	u_33 = U[IDX4(3,3)];
 
-  # pragma omp parallel for
+# pragma omp parallel for shared(camp_out)
   for (i=0; i<state_num; i++) {
     if (((i >> mm) % 2 == 0) && ((i >> nn) % 2 == 0)) {
       camp_out[i] = u_00 * camp_in[i];

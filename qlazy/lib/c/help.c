@@ -8,8 +8,6 @@ static void _help_print_outline() {
   printf("\
 [commands]\n\
 * initialize quantum state: %%,init \n\
-* print quantum circuitt:   &,circ \n\
-* print quantum gates:      !,gates \n\
 * print quantum state:      -,show \n\
 * print bloch angles:       |,bloch \n\
 * echo input string:        @,echo \n\
@@ -403,47 +401,6 @@ static void _help_print_rz() {
   >> rz(<phase>) <qubit_id>\n\
 ");
 }
-
-/*
-static void _help_print_u1() {
-  printf("\
-== U1 gate ==\n\
-[description] \n\
-  U1 gate is difined by IBM Q. (is equal to 'P gate')\n\
-  - matrix expression:\n\
-    | 1 0               | \n\
-    | 0 exp(i*alpha*PI) | \n\
-[usage] \n\
-  >> u1(<alpha>) <qubit_id>\n\
-");
-}
-
-static void _help_print_u2() {
-  printf("\
-== U2 gate ==\n\
-[description] \n\
-  U2 gate is difined by IBM Q.\n\
-  - matrix expression:\n\
-    | 1/sqrt(2)              -exp(i*alpha*PI)/sqrt(2)       | \n\
-    | exp(i*beta*PI)/sqrt(2) exp(i*(alpha+beta)*PI)/sqrt(2) | \n\
-[usage] \n\
-  >> u2(<alpha>,<beta>) <qubit_id>\n\
-");
-}
-
-static void _help_print_u3() {
-  printf("\
-== U3 gate ==\n\
-[description] \n\
-  U3 gate is difined by IBM Q.\n\
-  - matrix expression:\n\
-    | cos(gamma/2)                -exp(i*alpha*PI)*sin(gamma/2)       | \n\
-    | exp(i*beta*PI)*sin(gamma/2) exp(i*(alpha+beta)*PI)*cos(gamma/2) | \n\
-[usage] \n\
-  >> u3(<alpha>,<beta>,<gamma>) <qubit_id>\n\
-");
-}
-*/
 
 static void _help_print_cx() {
   printf("\

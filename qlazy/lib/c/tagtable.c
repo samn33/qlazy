@@ -151,7 +151,6 @@ bool tagtable_get_tags(TagTable* tt, void** tag_array_out, int* tag_num, int* ta
   for (i=0; i<tt->table_size; i++) {
     now = tt->table[i];
     while (now->active == true) {
-      //      printf("* tag_len = %d, tag = %s\n", (int)strlen(now->tag), now->tag); // debug
       strcpy(tag_array[counter], now->tag);
       now = now->next;
       counter++;

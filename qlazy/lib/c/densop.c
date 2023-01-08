@@ -479,7 +479,7 @@ static bool _densop_rapply_matrix(DensOp* densop, int qnum_part, int* qid,
   shift = qnum-qnum_part;
   N = 1<<(qnum-shift);
 
-  # pragma omp parallel for
+# pragma omp parallel for private(ii,iii,jj,jjj,k,kk,kkk,coef), shared(buffer_out)
   for (i=0; i<densop->row; i++) {
     ii = index[i]>>shift;
     iii = index[i]%(1<<shift);
@@ -551,7 +551,7 @@ static bool _densop_lapply_matrix(DensOp* densop, int qnum_part, int* qid,
   shift = qnum-qnum_part;
   N = 1<<(qnum-shift);
 
-  # pragma omp parallel for
+# pragma omp parallel for private(ii,iii,jj,jjj,k,kk,kkk,coef), shared(buffer_out)
   for (i=0; i<densop->row; i++) {
     ii = index[i]>>shift;
     iii = index[i]%(1<<shift);
