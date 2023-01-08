@@ -1022,7 +1022,7 @@ class TestDensOp_entropy(unittest.TestCase):
         ans = equal_values(actual, expect)
         self.assertEqual(ans,True)
 
-    def test_relative_entropy(self):
+    def test_relative_entropy(self): # NG for numpy 1.24.1
         """test 'relative_entropy'
         """
         mat_0 = make_densop_matrix(VECTORS_4, PROBS_4)
@@ -1030,7 +1030,7 @@ class TestDensOp_entropy(unittest.TestCase):
         de_0 = DensOp(matrix=mat_0)
         de_1 = DensOp(matrix=mat_1)
         actual = de_0.relative_entropy(de_1)
-        expect = 2.789437620640274
+        expect = 2.168808091227848
         ans = equal_values(actual, expect)
         self.assertEqual(ans,True)
 

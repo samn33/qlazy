@@ -1096,7 +1096,8 @@ class DensOp(ctypes.Structure, QObject):
         eigvals_A, eigvecs_A = DensOp.mat_spectrum(self.get_elm())
         eigvals_B, eigvecs_B = DensOp.mat_spectrum(densop.get_elm())
 
-        P = np.dot(np.conjugate(eigvecs_A.T), eigvecs_B)
+        # P = np.dot(np.conjugate(eigvecs_A.T), eigvecs_B)
+        P = np.dot(np.conjugate(eigvecs_A), eigvecs_B.T)
         P = np.conjugate(P)*P
 
         diag_A = [eigvals_A[i]*np.log2(eigvals_A[i]) for i in
