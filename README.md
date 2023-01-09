@@ -18,19 +18,19 @@ Quantum Computing Simulator
 
 ## Install
 
-### Quick install
+### Quick install (PyPI)
 
     $ pip install qlazy
 
-### Build from source code
+### Build from source code (PyPI)
+
+    $ pip install --no-binary :all:
+
+### Download and build
 
     $ git clone https://github.com/samn33/qlazy.git
     $ cd qlazy
     $ python setup.py install --user
-
-You may also need to install 'libreadline-dev'
-
-    $ sudo apt install libreadline-dev
 
 If you want to use GPU version
 

@@ -1,13 +1,17 @@
 # Change Log
 
-## [0.3.4] - 2022-xx-xx
+## [0.3.4] - 2023-01-09
 ### Added
-- get_params method of QCirc class to get the parameters of parametric quantum circuit
-- init option of run,expect method of qlazy's Backend class to set the inital quantum state
-- operate_qcirc method of QState,DensOp,Stabilizer,MPState,QCirc class to perform unitary quantum circuit
-- qft,iqft method of QState,DensOp,MPState,QCirc to execute Quantum Fourier transform and its inverse transform
+- 'get_params' method of QCirc class to get the parameters of parametric quantum circuit
+- 'init' option of 'run','expect' method of qlazy's Backend class to set the inital quantum state
+- 'operate_qcirc' method of QState,DensOp,Stabilizer,MPState,QCirc class to perform unitary quantum circuit
+- 'qft','iqft' method of QState,DensOp,MPState,QCirc to execute Quantum Fourier transform and its inverse transform
 ### Changed
-- name of operate method to operate_pp method
+- name of 'operate' method to 'operate_pp' method
+### Removed
+- dynamic link of libreadline.so
+### Fixed
+- 'relative_entropy' method of DensOp class
 
 ## [0.3.3] - 2022-11-14
 ### Added
